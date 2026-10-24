@@ -192,6 +192,7 @@ details summary{cursor:pointer}
 :root[data-style=trattoria][data-theme=dark] .item{border-top:1px solid color-mix(in srgb,var(--bd) 60%,transparent)}
 :root[data-style=trattoria][data-theme=dark] .item h3,:root[data-style=trattoria][data-theme=dark] .brand h1{color:var(--fg)}
 :root[data-style=trattoria][data-theme=dark] .nbox div{background:var(--bg2)}
+#chips2{padding-top:6px}#chips2 .chip{font-size:.82rem;padding:5px 11px}
 .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:.9rem;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:9;box-shadow:var(--sh2);max-width:calc(100% - 32px)}
 .toast.on{opacity:1;transform:translateX(-50%)}
 </style>
@@ -205,6 +206,7 @@ details summary{cursor:pointer}
   </div>
   <div class="searchbar" id="sbar"><div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Cerca titolo, ingrediente, etichetta…"></div><button id="fBtn" type="button" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filtri</button></div>
   <div class="chips" id="chips"></div>
+  <div class="chips" id="chips2" hidden></div>
   <div class="filters" hidden>
     <select id="fDiet"></select>
     <select id="fZone"></select>
@@ -590,7 +592,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=29; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=30; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -629,7 +631,7 @@ async function loadBook(){
     const country=cc=>{try{return new Intl.DisplayNames(['it'],{type:'region'}).of(cc)}catch{return cc}};
     for(const r of wo.recipes||[]){
       const c=classify({title:r.title,ingredients:r.ingredients});
-      book.push({...r,book:true,world:true,source:'UniTools',url:'https://theunitools.com/en/data',country:country(r.country),region:r.country==='IT'?c.region:'',
+      book.push({...r,book:true,world:true,cc:r.country,source:'UniTools',url:'https://theunitools.com/en/data',country:country(r.country),region:r.country==='IT'?c.region:'',
         diets:[...new Set([...(r.diets||[]),...c.diets])],tags:[],imgCredit:r.image?`Foto: ${r.imgAuthor||'Wikimedia Commons'}${r.imgLicense?' ('+r.imgLicense+')':''} via Wikimedia Commons`:'',
         _tm:{t:r.time||timing({...r,world:false,_tm:null}).t,w:0,d:r.diff||2}});
     }
@@ -653,7 +655,7 @@ function saveFromBook(i){
 }
 $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;view=t.dataset.v;cur='Tutte';
   $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
-  const bud=view==='budget';['#sbar','#chips','#list','#add'].forEach(x=>$(x).hidden=bud);if(bud)$('.filters').hidden=true;$('#budget').hidden=!bud;filtUI();
+  const bud=view==='budget';['#sbar','#chips','#list','#add'].forEach(x=>$(x).hidden=bud);if(bud)$('#chips2').hidden=true;if(bud)$('#chips2').hidden=true;if(bud)$('.filters').hidden=true;$('#budget').hidden=!bud;filtUI();
   $('#vTitle').textContent={mine:'Le mie ricette',book:'Ricettario',budget:'Budget e menu'}[view];$('#vSub').textContent={mine:'Aggregatore Ricette',book:'Ricette italiane da Wikibooks',budget:'Menu bilanciati per il tuo budget'}[view];window.scrollTo(0,0);
   if(bud){loadBook();loadPT();initBudget();return}
   $('#q').placeholder=view==='book'?'Cerca tra le ricette del ricettario…':'Cerca titolo, ingrediente, etichetta…';
@@ -691,6 +693,15 @@ const DIFF=['','Facile','Media','Impegnativa'];
 const fmtMin=m=>m>=60?`${Math.floor(m/60)} h${m%60?' '+m%60+' min':''}`:m+' min';
 const timeLabel=r=>{const x=timing(r);return `⏱ ${fmtMin(x.t)}${x.w>=30?` + ${fmtMin(x.w)} di attesa`:''} · ${DIFF[x.d]}`};
 
+/* ---------- Ricette internazionali per paese ---------- */
+let cur2='';
+const CC_NAME={};
+try{const dn=new Intl.DisplayNames(['it'],{type:'region'});'AD AE AF AL AM AO AR AT AU AZ BA BD BE BG BO BR BT BY CA CD CH CI CL CM CN CO CR CU CY CZ DE DK DO DZ EC EE EG ES ET FI FR GB GE GH GR GT HN HR HU ID IE IL IN IQ IR IS IT JM JO JP KE KG KH KR KW KZ LA LB LK LT LU LV MA MD ME MG MK ML MM MN MT MV MX MY MZ NG NI NL NO NP NZ OM PA PE PH PK PL PT PY RO RS RU SA SD SE SG SI SK SN SY TH TJ TM TN TR TT TW TZ UA UG US UY UZ VE VN XK YE ZA ZW'.split(' ').forEach(c=>{CC_NAME[dn.of(c).toLowerCase()]=c})}catch{}
+Object.assign(CC_NAME,{usa:'US','stati uniti':'US',corea:'KR','corea del sud':'KR',inghilterra:'GB','regno unito':'GB',olanda:'NL',russia:'RU',cina:'CN',persia:'IR',svizzera:'CH'});
+const ccOf=i=>i.cc||CC_NAME[String(i.country||'').toLowerCase()]||'';
+const flag=cc=>cc&&cc.length===2?String.fromCodePoint(...[...cc.toUpperCase()].map(c=>127397+c.charCodeAt(0))):'🌍';
+const isIntl=i=>i.country&&!/^italia$/i.test(i.country)&&!i.prod;
+
 /* ---------- Lista ---------- */
 // Ordinamenti: in evidenza (ricettario: prima con foto), veloci, facili, economiche, votate, A–Z
 function sorter(fs,searching){
@@ -716,7 +727,7 @@ function card(i){
       <span class="cat">${esc(i.cat||'Altro')}</span>${i.rating?`<span class="rt">★ ${i.rating}</span>`:''}${vid?'<span class="play">▶ video</span>':''}</div>
     <div class="b"><h3>${esc(i.title||i.url)}</h3>
       <div class="facts">${facts.map(f=>`<span>${f}</span>`).join('')}</div>
-      <div class="meta">${esc([i.region||i.country,i.source+(i.linked?' · collegata':'')].filter(Boolean).join(' · '))}</div>
+      <div class="meta">${isIntl(i)?flag(ccOf(i))+' ':''}${esc([i.region||i.country,i.source+(i.linked?' · collegata':'')].filter(Boolean).join(' · '))}</div>
       ${diets.length?`<div class="badges">${diets.map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}</div>`:''}</div></div>`;
 }
 const stars=n=>n?'<span class="stars">'+'★'.repeat(n)+'</span>':'';
@@ -731,11 +742,16 @@ function fillSelects(){
 }
 function render(){
   const q=$('#q').value.trim().toLowerCase(),fd=$('#fDiet').value,fz=$('#fZone').value,fr=+$('#fRate').value,ft=+$('#fTime').value,fdf=+$('#fDiff').value,fc=+$('#fCost').value,fs=$('#fSort').value;
-  const showProd=view==='book'&&cur==='Prodotti tipici';
-  const data=showProd?products:src();
-  const counts={};src().forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);if(view==='book'&&products.length)counts['Prodotti tipici']=products.length;
-  $('#chips').innerHTML=['Tutte',...cats,...(view==='book'&&products.length?['Prodotti tipici']:[])].filter(c=>c==='Tutte'||counts[c]).map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${esc(c)}<small>${c==='Tutte'?src().length:counts[c]}</small></button>`).join('');
-  const list=data.filter(i=>(cur==='Tutte'||i.cat===cur||showProd)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(!ft||timing(i).t<=ft)&&(!fdf||(fdf===3?timing(i).d===3:timing(i).d<=fdf))&&(!fc||((perPerson(i)?.eur??99)<=fc))
+  const showProd=view==='book'&&cur==='Prodotti tipici',showIntl=view==='book'&&cur==='Internazionali';
+  const data=showProd?products:showIntl?src().filter(isIntl):src();
+  const counts={};src().forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);if(view==='book'&&products.length)counts['Prodotti tipici']=products.length;if(view==='book'&&book)counts['Internazionali']=book.filter(isIntl).length;
+  $('#chips').innerHTML=['Tutte',...(view==='book'?['Internazionali']:[]),...cats,...(view==='book'&&products.length?['Prodotti tipici']:[])].filter(c=>c==='Tutte'||counts[c]).map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${c==='Internazionali'?'🌍 ':c==='Prodotti tipici'?'🧺 ':''}${esc(c)}<small>${c==='Tutte'?src().length:counts[c]}</small></button>`).join('');
+  // seconda riga: i paesi, con bandiera e numero di ricette
+  if(showIntl){const pc={};data.forEach(i=>{const k=i.country;pc[k]=(pc[k]||0)+1});
+    const ord=Object.entries(pc).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));if(cur2&&!pc[cur2])cur2='';
+    $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutti i paesi<small>${data.length}</small></button>`+ord.map(([k,n])=>{const it=data.find(i=>i.country===k);return `<button class="chip${k===cur2?' on':''}" data-p="${esc(k)}">${flag(ccOf(it))} ${esc(k)}<small>${n}</small></button>`}).join('');}
+  $('#chips2').hidden=!showIntl;
+  const list=data.filter(i=>(cur==='Tutte'||i.cat===cur||showProd||(showIntl&&(!cur2||i.country===cur2)))&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(!ft||timing(i).t<=ft)&&(!fdf||(fdf===3?timing(i).d===3:timing(i).d<=fdf))&&(!fc||((perPerson(i)?.eur??99)<=fc))
       &&(!q||[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q)))
     .sort(sorter(fs,!!q));
   const nGz=view==='book'&&book?book.filter(x=>x.linked).length:0;
@@ -1241,7 +1257,8 @@ $('#add').onclick=()=>openForm();
 // Filtri nascosti dietro un pulsante; il pulsante si colora se ce n'è qualcuno attivo
 const filtUI=()=>{const n=['#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate'].filter(x=>$(x).value&&$(x).value!=='0').length;$('#fBtn').classList.toggle('on',n>0||!$('.filters').hidden);$('#fBtn').lastChild.textContent=n?`Filtri · ${n}`:'Filtri'};
 $('#fBtn').onclick=()=>{const f=$('.filters');f.hidden=!f.hidden;$('#fBtn').setAttribute('aria-expanded',!f.hidden);filtUI()};
-$('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;render()}};
+$('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;cur2='';render()}};
+$('#chips2').onclick=e=>{const c=e.target.closest('.chip');if(c){cur2=c.dataset.p;render()}};
 $('#list').onclick=e=>{const it=e.target.closest('.item');if(it)openDetail([...src(),...products].find(i=>i.id===it.dataset.id))};
 const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${esc(c)}</span>`).join('')};
 // Tema: Automatico segue il sistema, Chiaro e Scuro restano fissi
