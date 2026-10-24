@@ -1,5 +1,6 @@
 # Tutto automatico, nessuna operazione manuale:
-# - ogni mese (giorno 3) scarica le ricette nuove da Wikibooks e ricalcola la base (grammi, calorie, nutrienti)
+# - ogni mese (giorno 3) scarica le ricette nuove da Wikibooks, ricalcola la base (grammi, calorie, nutrienti)
+#   e cerca le foto dei piatti nuovi su Wikipedia / Wikimedia Commons
 # - a ogni modifica, e dopo l'aggiornamento mensile, pubblica il sito e compila l'APK (release "apk")
 # I prezzi non passano da qui: li aggiorna ogni giorno il server Cloudflare con i dati MIMIT.
 name: Aggiorna e pubblica
@@ -33,6 +34,8 @@ jobs:
         run: python3 scripts/wikibooks.py
       - name: Base delle ricette (grammi, calorie, nutrienti)
         run: python3 scripts/base_ricette.py
+      - name: Foto dei piatti da Wikipedia / Wikimedia Commons (solo ricette nuove)
+        run: python3 scripts/immagini.py
       - name: Versione pubblicata
         run: |
           v=$(grep -oE 'const APP_VERSION=[0-9]+' www/index.html | grep -oE '[0-9]+$')
@@ -41,7 +44,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898900+github-actions[bot]@users.noreply.github.com"
-          git add www/ricettario.json www/version.json
+          git add www/ricettario.json www/version.json www/immagini.json
           git diff --cached --quiet || (git commit -m "Aggiornamento automatico ricettario e versione" && git push)
       - uses: actions/upload-artifact@v4
         with: { name: www, path: www }

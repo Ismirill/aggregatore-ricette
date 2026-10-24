@@ -470,7 +470,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=17; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=18; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -484,14 +484,15 @@ const src=()=>view==='book'?(book||[]):items;
 async function loadBook(){
   if(book)return;
   try{
-    const d=await fetchData('ricettario.json');
+    const [d,im]=await Promise.all([fetchData('ricettario.json'),fetchData('immagini.json').catch(()=>({items:{}}))]);
     const nut=load('bookNut',{});
     bookInfo=d;
     book=d.recipes.map(r=>{
       const c=classify({title:r.title,ingredients:r.ingredients,caption:[...r.tags,r.region].join(' '),keywords:r.tags.join(' ')});
       const key=x=>x.toLowerCase().replace(/[^a-z]/g,'');
       const reg=r.region&&(REGIONS.find(x=>key(x)===key(r.region)||key(r.region).startsWith(key(x).slice(0,7)))||r.region);
-      return {...r,book:true,source:'Wikibooks',cat:c.cat||'Altro',diets:c.diets,country:reg?'Italia':c.country,region:reg||c.region,nutrition:nut[r.id]};
+      const ph=im.items?.[r.id];
+      return {...r,...(ph?{image:ph.img,imgFile:ph.file}:{}),book:true,source:'Wikibooks',cat:c.cat||'Altro',diets:c.diets,country:reg?'Italia':c.country,region:reg||c.region,nutrition:nut[r.id]};
     });
   }catch{book=[];toast('Ricettario non disponibile offline')}
   fillSelects();render();
@@ -915,7 +916,9 @@ function openDetail(i){
     ${i.steps?.length?`<h3>Procedimento</h3><ol>${i.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
     ${i.note?`<h3>Note</h3><p class="cap">${esc(i.note)}</p>`:''}
     ${!i.ingredients?.length&&i.caption?`<h3>Descrizione</h3><p class="cap">${esc(i.caption)}</p>`:''}
-    <div class="row"><a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">Apri originale</a><span class="sp"></span>
+    ${i.imgFile?`<p class="lic">Foto: <a href="${esc(i.imgFile)}" target="_blank" rel="noopener">Wikimedia Commons</a> (licenza libera, autore e licenza nella pagina della foto)</p>`:''}
+    <div class="row"><a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">Apri originale</a>
+      <a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">▶ Cerca su YouTube</a><span class="sp"></span>
       ${i.book?'<button class="btn pri" id="dSave">Salva nelle mie</button>':'<button class="btn" id="dEdit">Modifica</button>'}<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button></div>`;
   $('#dRate').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n;i.rating=i.rating===n?0:n;save('items',items);render();
     $('#dRate').querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.n<=i.rating))};
