@@ -21,13 +21,14 @@ ROOT = Path(__file__).resolve().parent.parent
 BOOK = ROOT / 'www' / 'ricettario.json'
 OUT = ROOT / 'www' / 'categorie.json'
 UA = {'User-Agent': 'AggregatoreRicette/1.0 (https://ismirill.github.io/aggregatore-ricette/)'}
-TYPES = ['Antipasti', 'Primi', 'Secondi', 'Contorni', 'Piatti unici', 'Dolci', 'Altro']
+TYPES = ['Antipasti', 'Primi', 'Secondi', 'Contorni', 'Piatti unici', 'Lievitati', 'Dolci', 'Altro']
 
 # Testo (categoria o descrizione) -> tipo. L'ordine conta: le regole più specifiche prima.
 TEXT_RULES = [
-    (r'torte salate|torta salata|quiche|focacc|pizz|piadin|calzon|panin|street food|piatti unici|piatto unico|tramezzin|sandwich|burger|hamburger|tacos|burrito', 'Piatti unici'),
+    (r'pane e focacce|\bpizz[ae]\b|focacc|lievitat|impasti lievitati|\bpane\b|pagnott|brioche|panettone|pandoro|colomba|lievito madre|pasta madre|\bbread\b|bun\b|yeast', 'Lievitati'),
+    (r'torte salate|torta salata|quiche|piadin|panin|street food|piatti unici|piatto unico|tramezzin|sandwich|burger|hamburger|tacos|burrito', 'Piatti unici'),
     (r'\bdolc[ei]\b|dessert|torte dolci|biscott|pasticc|gelat|semifredd|budin|cremè|crema pasticc|dolci al cucchiaio|cioccolat(?!o fondente amaro)|cake|pastry|cookie|biscuit|sweet|pudding|confection|ice cream|frittell[ae] dolc|tiramis|crostat|ciambell|panettone|colomba', 'Dolci'),
-    (r'salse|salsa|sugo|sughi|condiment|ragù|pesto|brodo|fondo|bevand|liquor|cocktail|drink|tisan|conserv|marmellat|confettur|sottaceti|sottoli|impasti di base|pane\b|pane e|lievito madre|spezie|marinat|sauce|beverage|liqueur|jam|preserve|dressing|bread\b|condiment|stock\b|broth', 'Altro'),
+    (r'salse|salsa|sugo|sughi|condiment|ragù|pesto|brodo|fondo|bevand|liquor|cocktail|drink|tisan|conserv|marmellat|confettur|sottaceti|sottoli|spezie|marinat|sauce|beverage|liqueur|jam|preserve|dressing|condiment|stock\b|broth', 'Altro'),
     (r'contorn|side dish|insalat(?:a|e) (?:di|mista|verde)|verdure (?:al|in|ripien)|ortagg', 'Contorni'),
     (r'antipast|stuzzich|finger food|tapas|aperitiv|crostin|bruschett|appetizer|starter|hors', 'Antipasti'),
     (r'primi piatti|primo piatto|\bpasta\b|paste ripiene|risott|zupp|minestr|vellutat|gnocch|lasagn|first course|soup|noodle|pasta dish|risotto|polenta', 'Primi'),
@@ -37,9 +38,10 @@ TEXT_RX = [(re.compile(r, re.I), t) for r, t in TEXT_RULES]
 
 # Nome del piatto -> tipo (come nell'app, ma su tutte le ricette)
 TITLE_RULES = [
+    (r'\bpane\b|\bpan\b|pagnott|ciabatt|filone|panin[io] (al|di) latte|pizz[ae]\b|pizzett|focacc|grissin|taralli|friselle|brioche|cornett|croissant|panettone|pandoro|colomba|bab[aà]\b|krapfen|bomboloni|maritozz|pan brioche|lievito madre|pasta madre|bagel|pretzel|naan|pita|calzone|panzerott|sfincion|schiacciata|crescentina|tigelle', 'Lievitati'),
     (r'\btort[ae] (?!salat)|tiramis|biscott|cioccolat|crostat|cheese ?cake|gelat|muffin|dessert|panna cotta|ciambell|plumcake|brownie|pancake|cannol|semifredd|budin|crema (?!di (?:zucca|funghi|patate|porri|ceci|piselli|asparagi))|biscotti|frittell|zeppol|bign|sbrisolon|amaretti|cantucci|strudel|crêpe dolc|marmellata', 'Dolci'),
-    (r'salsa|sugo|pesto|ragù|besciamella|maionese|brodo|liquore|rosolio|sciroppo|grappa|limoncello|cocktail|sangria|tisana|confettura|marmellata|sottaceti|lievito|impasto|pane\b|pan di|pagnotta|grissini|crackers', 'Altro'),
-    (r'pizza|focaccia|piadina|calzone|panino|torta salata|quiche|burger|tacos|burrito|piatto unico|sformato di pasta|timballo', 'Piatti unici'),
+    (r'salsa|sugo|pesto|ragù|besciamella|maionese|brodo|liquore|rosolio|sciroppo|grappa|limoncello|cocktail|sangria|tisana|confettura|marmellata|sottaceti|crackers', 'Altro'),
+    (r'piadina|panino|torta salata|quiche|burger|tacos|burrito|piatto unico|sformato di pasta|timballo', 'Piatti unici'),
     (r'pasta|spaghett|risott|lasagn|gnocch|tortellin|tagliatell|penne|ravioli|zupp|minestr|vellutat|linguine|fusilli|orecchiette|rigatoni|paccheri|bucatini|tagliolini|cannelloni|pici|trofie|ramen|noodle|canederl|agnolott|cappellett|cous ?cous|cuscus|pappardelle|maltagliat|strozzapret|cavatell|culurgion|malloreddus|passatelli|polenta|farinata', 'Primi'),
     (r'insalata|contorno|patate|verdur|zucchin|melanzan|spinaci|funghi|peperon|carciof|broccol|caponata|cavol|fagiolin|piselli|finocch|cipoll|carote|asparag|bietol|cime di rapa|ratatouille|purè|purea', 'Contorni'),
     (r'antipast|bruschett|crostin|tartin|stuzzichin|olive|frisella|crocchett|carpaccio|vitello tonnato|caprese|hummus|baba gan', 'Antipasti'),
@@ -95,6 +97,10 @@ def descriptions(titles, known):
     return out
 
 
+UNLEAVENED = re.compile(r'farinata|panell|paniss|cecina|piadin|tozzett|cantucc|biscott|cracker|frittell|pettole', re.I)
+YEAST = re.compile(r"lievito (di birra|madre|secco|naturale|fresco)|pasta madre|lievito di pasta|lievito biologico", re.I)
+
+
 def from_ingredients(r):
     """Tipo suggerito dalla composizione (grammi a persona per gruppo di ingredienti)."""
     if not r.get('b'):
@@ -105,6 +111,9 @@ def from_ingredients(r):
         for name, group in (('starch', STARCH), ('protein', PROTEIN), ('veg', VEG), ('sweet', SWEET), ('bake', BAKE)):
             if k in group:
                 g[name] += x / s
+    flour = sum(x for k, x in r['b'] if k in ('farina', 'semola', 'farina di mais')) / s
+    if YEAST.search(' '.join(r.get('ingredients', []))) and flour >= 40:
+        return 'Lievitati'
     if g['sweet'] >= 25 and g['protein'] < 40:
         return 'Dolci'
     if g['starch'] >= 50 and g['protein'] < 120:
@@ -143,7 +152,12 @@ def main():
             score[t] += 1.5; by.append('nome del piatto')
         t = from_ingredients(r)
         if t:
-            score[t] += 1; by.append('ingredienti')
+            score[t] += 2.5 if t == 'Lievitati' else 1; by.append('ingredienti' + (' (lievito di birra o madre)' if t == 'Lievitati' else ''))
+        # impasti senza lievito che Wikibooks mette tra "pane e focacce": farinata, panelle, piadina, biscotti...
+        if score.get('Lievitati') and not YEAST.search(' '.join(r.get('ingredients', []))) and UNLEAVENED.search(r['title']):
+            score.pop('Lievitati'); by.append('senza lievito')
+            if not score:
+                score[first(TITLE_RX, r['title']) or 'Antipasti'] = 1
         cat = max(score, key=lambda k: (score[k], -TYPES.index(k))) if score else 'Altro'
         conf = 'alta' if score and score[cat] >= 4 else 'media' if score and score[cat] >= 2.5 else 'bassa'
         items[r['id']] = {'cat': cat, 'conf': conf, 'by': by}

@@ -296,15 +296,16 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200)};
 const lines=s=>String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);
 
-const DEFAULT_CATS=['Antipasti','Primi','Secondi','Contorni','Piatti unici','Dolci','Altro'];
+const DEFAULT_CATS=['Antipasti','Primi','Secondi','Contorni','Piatti unici','Lievitati','Dolci','Altro'];
 const MAIN_DIETS=['Vegano','Vegetariano','Senza glutine','Ipocalorico']; // mostrate nell'elenco; tutte nella scheda
 const DIETS=['Vegano','Vegetariano','Senza glutine','Senza lattosio','Senza uova','Senza frutta secca','Ipocalorico'];
 const REGIONS=['Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria',"Valle d'Aosta",'Veneto'];
 const COUNTRIES=['Italia','Francia','Spagna','Grecia','Giappone','Cina','Corea','Thailandia','India','Messico','USA','Medio Oriente','Nord Africa','Sud America'];
-let cats=load('cats',DEFAULT_CATS), items=load('items',[]), cur='Tutte', editing=null, formRating=0;
+let cats=(c=>c.includes('Lievitati')?c:[...c.slice(0,c.indexOf('Dolci')<0?c.length:c.indexOf('Dolci')),'Lievitati',...(c.indexOf('Dolci')<0?[]:c.slice(c.indexOf('Dolci')))])(load('cats',DEFAULT_CATS)), items=load('items',[]), cur='Tutte', editing=null, formRating=0;
 
 /* ---------- Classificazione automatica (regole sul testo e sugli ingredienti) ---------- */
 const GUESS={
+  'Lievitati':/\bpane\b|pagnott|ciabatt|pizz[ae]\b|pizzett|focacc|grissin|taralli|brioche|cornett|croissant|panettone|pandoro|colomba|bab[aà]\b|krapfen|bombolon|maritozz|lievito madre|pasta madre|calzone|panzerott|schiacciata|sfincion/,
   'Dolci':/\btort[ae] (?!salat)|^dolc[ei]\b|tiramis|biscott|cioccolat|crostata|cheesecake|gelato|muffin|dessert|panna cotta|ciambell|plumcake|brownie|pancake|cannol|semifreddo|budino|\bcake\b/,
   'Primi':/pasta|spaghett|risott|lasagn|gnocch|carbonara|tagliatell|penne|ravioli|tortellin|zupp|minestr|vellutat|amatriciana|linguine|fusilli|orecchiette|rigatoni|paccheri|bucatini|tagliolini|cannelloni|pici|trofie|ramen|noodle|canederl|agnolott|cappellett|anolini|cous ?cous|cuscus|pizzoccher|maltagliat|strozzapret|cavatell|culurgion|malloreddus|passatelli|pasta e |pasta con |risi e /,
   'Piatti unici':/pizza|focaccia|piatto unico|burger|panin|piadin|toast|quiche|torta salata|poke|bowl|calzon|tacos|burrito/,
@@ -312,7 +313,7 @@ const GUESS={
   'Contorni':/contorn|insalat|patat|verdur|zucchin|melanzan|spinaci|funghi|peperon|carciof|broccol|caponata|cavolfior/,
   'Antipasti':/antipast|bruschett|finger|tartin|aperitiv|crostin|stuzzichin|frisell|crocchett|olive ascolane|panzanella|caprese|vitello tonnato|carpaccio/
 };
-const CAT_SCHEMA=[[/primo|pasta|first course/,'Primi'],[/secondo|main course|main dish|entr/,'Secondi'],[/contorno|side/,'Contorni'],[/antipast|appetizer|starter/,'Antipasti'],[/dolc|dessert/,'Dolci'],[/piatto unico|lievitat|pizza/,'Piatti unici']];
+const CAT_SCHEMA=[[/lievitat|pane|pizza|focacc|bread/,'Lievitati'],[/primo|pasta|first course/,'Primi'],[/secondo|main course|main dish|entr/,'Secondi'],[/contorno|side/,'Contorni'],[/antipast|appetizer|starter/,'Antipasti'],[/dolc|dessert/,'Dolci'],[/piatto unico/,'Piatti unici']];
 const ZONES=[
   [/pad thai|tom yum|curry verde|green curry/,'Thailandia',''],
   [/carbonara|amatriciana|cacio e pepe|gricia|saltimbocca|alla romana|suppl[iì]|abbacchio|maritozz/,'Italia','Lazio'],
@@ -589,7 +590,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=26; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=27; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -677,7 +678,7 @@ function sorter(fs,searching){
 }
 // Segnaposto colorato per tipo di piatto quando manca la foto
 const CAT_LOOK={'Primi':['🍝','#f3c27a','#e07a4f'],'Secondi':['🍖','#e9a28a','#b94a3a'],'Contorni':['🥗','#b9d48a','#5f8a3a'],'Dolci':['🍰','#f4c6d0','#d0708a'],
-  'Antipasti':['🧀','#f6dd8f','#d9a440'],'Piatti unici':['🥘','#f0b98a','#c2602f'],'Altro':['🍽️','#d9cfc0','#9a8a76']};
+  'Antipasti':['🧀','#f6dd8f','#d9a440'],'Lievitati':['🍞','#f2d3a0','#c98b3c'],'Piatti unici':['🥘','#f0b98a','#c2602f'],'Altro':['🍽️','#d9cfc0','#9a8a76']};
 // Icona del segnaposto: per secondi e piatti unici dipende dall'ingrediente principale
 const PROT_EM={pesce:'🐟',legumi:'🫘',uova:'🍳',formaggi:'🧀',verdure:'🥦',bianca:'🍗',rossa:'🍖'};
 function look(i){const l=[...(CAT_LOOK[i.cat]||CAT_LOOK.Altro)];if(['Secondi','Piatti unici'].includes(i.cat)&&i.ingredients?.length){i._pr??=protein(i);if(PROT_EM[i._pr]&&i.cat==='Secondi'||['pesce','legumi'].includes(i._pr))l[0]=PROT_EM[i._pr]}return l}
@@ -882,7 +883,8 @@ function candidates(o){
   const role={'Primi':'primo','Secondi':'secondo','Contorni':'contorno','Piatti unici':'unico'};
   const out=[],seen=new Set();let noCost=0;
   for(const r of pool){
-    const ro=role[r.cat];if(!ro||!r.ingredients?.length||seen.has(r.title.toLowerCase()))continue;
+    const sweet=r.b?r.b.some(([k,g])=>k==='zucchero'&&g/baseS(r)>=15):/zucchero/i.test((r.ingredients||[]).join(' '));
+    const ro=role[r.cat]||(r.cat==='Lievitati'&&!sweet?'unico':null);if(!ro||!r.ingredients?.length||seen.has(r.title.toLowerCase()))continue;
     const pp=perPerson(r);if(!pp||pp.eur==null){if(!r.book)noCost++;continue}
     const lim=ro==='contorno'?[15,700]:[150,1400];
     if(pp.kcal<lim[0]||pp.kcal>lim[1]||pp.eur<=0||pp.eur>25)continue;
