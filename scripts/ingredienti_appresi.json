@@ -1,7 +1,23 @@
 {
+"ackee in scatola": {
+"as": null,
+"via": "non trovato"
+},
+"aji amarillo": {
+"as": "frutta",
+"via": "Wikipedia: cultivar di peperoncino"
+},
+"aji limo o rocoto": {
+"as": "limon",
+"via": "simile a \"limon\""
+},
 "albiccocche": {
 "as": "albicocche",
 "via": "simile a \"albicocche\""
+},
+"allspice in polvere": {
+"as": null,
+"via": "non trovato"
 },
 "animella": {
 "as": "animelle",
@@ -26,6 +42,14 @@
 "arselle": {
 "as": "vongole",
 "via": "sinonimo di vongole"
+},
+"asafetida": {
+"as": "erbe aromatiche",
+"via": "Wikidata: gum resin used in cooking and in various systems of herbal medicine"
+},
+"bacche pimento": {
+"as": null,
+"via": "non trovato"
 },
 "bacche rosa selvatiche": {
 "as": null,
@@ -54,6 +78,14 @@
 "batata": {
 "as": "patate",
 "via": "sinonimo di patate"
+},
+"berbere": {
+"as": "spezie",
+"via": "Wikidata: miscela di spezie"
+},
+"berberis": {
+"as": null,
+"via": "non trovato"
 },
 "biancostato": {
 "as": "manzo",
@@ -147,6 +179,10 @@
 "as": "zenzero",
 "via": "sinonimo di zenzero"
 },
+"cocco tostato": {
+"as": null,
+"via": "non trovato"
+},
 "confettini colorati": {
 "as": "zucchero",
 "via": "sinonimo di zucchero"
@@ -162,6 +198,10 @@
 "corn flakes": {
 "as": "cereali",
 "via": "sinonimo di cereali"
+},
+"crauti": {
+"as": "cavoli",
+"via": "Wikipedia: contorno tipico tedesco, ottenuto dalla fermentazione del cavolo cappuccio"
 },
 "crema da cucina": {
 "as": "panna",
@@ -183,6 +223,14 @@
 "as": "rape",
 "via": "sinonimo di rape"
 },
+"daikon q b": {
+"as": "rape",
+"via": "sinonimo di rape"
+},
+"dashi": {
+"as": "pesce",
+"via": "Wikipedia: brodo di pesce giapponese"
+},
 "dashi granulare": {
 "as": null,
 "via": "non trovato"
@@ -191,9 +239,21 @@
 "as": "zucchero",
 "via": "sinonimo di zucchero"
 },
+"dischi per empanadas": {
+"as": "pere",
+"via": "simile a \"pere\""
+},
 "divino bianco": {
 "as": "vino",
 "via": "sinonimo di vino"
+},
+"doubanjiang": {
+"as": "legumi",
+"via": "Wikidata: Chinese bean paste"
+},
+"dzavar": {
+"as": null,
+"via": "non trovato"
 },
 "e fioreta": {
 "as": "ricotta",
@@ -243,9 +303,21 @@
 "as": "fegato",
 "via": "sinonimo di fegato"
 },
+"fiocchi gochugaru": {
+"as": "finocch",
+"via": "simile a \"finocch\""
+},
+"fiocchi katsuobushi": {
+"as": "finocch",
+"via": "simile a \"finocch\""
+},
 "fiocchi mais": {
 "as": "mais dolce",
 "via": "sinonimo di mais dolce"
+},
+"fiocchi pul biber": {
+"as": "finocch",
+"via": "simile a \"finocch\""
 },
 "fiori arancio": {
 "as": "arancia",
@@ -254,6 +326,10 @@
 "fogli gelatina": {
 "as": null,
 "via": "non trovato"
+},
+"foglie fieno greco essiccate": {
+"as": "spezie",
+"via": "sinonimo di spezie"
 },
 "foglie lauro": {
 "as": "alloro",
@@ -279,9 +355,29 @@
 "as": "pesce",
 "via": "sinonimo di pesce"
 },
+"garam masala": {
+"as": "marsala",
+"via": "simile a \"marsala\""
+},
+"gelatina": {
+"as": "frutta",
+"via": "Wikidata: confettura ottenuta bollendo la frutta con lo zucchero, filtrandone il succo e lasciando che si rapprenda"
+},
+"ghee": {
+"as": "burro",
+"via": "Wikidata: clarified butter"
+},
+"ghee per l'impasto": {
+"as": "pere",
+"via": "simile a \"pere\""
+},
 "gianchetti freschissimi": {
 "as": "bianchetti",
 "via": "simile a \"bianchetti\""
+},
+"gochujang": {
+"as": "cereali",
+"via": "Wikipedia: La gochujang è una salsa fermentata salata, dolce e piccante"
 },
 "gomma arabica": {
 "as": "zucchero",
@@ -307,21 +403,53 @@
 "as": "gruyere",
 "via": "simile a \"gruyere\""
 },
+"guascas essiccate": {
+"as": null,
+"via": "non trovato"
+},
 "harissa": {
 "as": "salsa",
 "via": "sinonimo di salsa"
+},
+"hominy": {
+"as": null,
+"via": "non trovato"
 },
 "ingrediente": {
 "as": null,
 "via": "non trovato"
 },
+"jalapeno": {
+"as": "burro",
+"via": "Wikipedia: cultivar di peperoncino."
+},
 "k mosto cotto": {
 "as": "miele",
 "via": "sinonimo di miele"
 },
+"kasuri methi": {
+"as": "cereali",
+"via": "Open Food Facts: kasuri methi"
+},
+"katsuobushi e aonori q b": {
+"as": null,
+"via": "non trovato"
+},
+"kecap manis": {
+"as": "salsa",
+"via": "Wikidata: sweetened aromatic soy sauce, originating from Java island"
+},
+"kefir": {
+"as": "latte",
+"via": "Wikipedia: Bevanda ottenuta da latte fermentato"
+},
 "kimel": {
 "as": "liquore",
 "via": "sinonimo di liquore"
+},
+"kombu": {
+"as": "verdure",
+"via": "sinonimo di verdure"
 },
 "l ingrediente": {
 "as": null,
@@ -335,6 +463,14 @@
 "as": "arancia",
 "via": "simile a \"arancia\""
 },
+"latticello": {
+"as": "burro",
+"via": "Wikipedia: sottoprodotto della trasformazione in burro della panna"
+},
+"lavash sottile": {
+"as": null,
+"via": "non trovato"
+},
 "linome": {
 "as": null,
 "via": "non trovato"
@@ -346,6 +482,14 @@
 "mais": {
 "as": "mais dolce",
 "via": "sinonimo di mais dolce"
+},
+"mais in spiga": {
+"as": "mais dolce",
+"via": "sinonimo di mais dolce"
+},
+"maldive fish": {
+"as": "pesce",
+"via": "Open Food Facts: Thon équitable"
 },
 "malto liquido": {
 "as": "miele",
@@ -415,6 +559,10 @@
 "as": null,
 "via": "non trovato"
 },
+"paneer": {
+"as": "formaggio",
+"via": "Wikipedia: tipo di formaggio fresco"
+},
 "paparine": {
 "as": null,
 "via": "non trovato"
@@ -450,6 +598,10 @@
 "pipette": {
 "as": "pasta",
 "via": "Open Food Facts: pipette rigate n.86"
+},
+"platano": {
+"as": "frutta",
+"via": "Wikidata: frutto a forma di banana, meno dolce, da cuocere"
 },
 "pomidoro maturi": {
 "as": "pomodori",
@@ -511,9 +663,17 @@
 "as": null,
 "via": "non trovato"
 },
+"roti o paratha": {
+"as": "cereali",
+"via": "Open Food Facts: Crepe Blé Oignon Roti Paratha (5P. )"
+},
 "sake": {
 "as": "vino",
 "via": "Wikipedia: bevanda alcolica giapponese"
+},
+"salo stagionato": {
+"as": null,
+"via": "non trovato"
 },
 "sanguinaccio": {
 "as": "salame",
@@ -543,6 +703,10 @@
 "as": "formaggio",
 "via": "Wikipedia: nome commerciale di vari tipi di formaggio fuso"
 },
+"tenkasu": {
+"as": "frutta",
+"via": "Wikipedia: Il tenkasu  è una porzione della pastella, frutto della sola"
+},
 "terlaner weiβburgunder": {
 "as": null,
 "via": "non trovato"
@@ -554,6 +718,18 @@
 "tettina": {
 "as": "fegato",
 "via": "sinonimo di fegato"
+},
+"toor dal": {
+"as": "legumi",
+"via": "Open Food Facts: Unpolished Toor Dal"
+},
+"tortillas mais": {
+"as": "mais dolce",
+"via": "sinonimo di mais dolce"
+},
+"tostadas q b": {
+"as": null,
+"via": "non trovato"
 },
 "tracine": {
 "as": null,
@@ -598,6 +774,14 @@
 "vincotto q b": {
 "as": "salsa",
 "via": "Open Food Facts: Vincotto by gianni calogiuri original"
+},
+"wakame essiccata": {
+"as": null,
+"via": "non trovato"
+},
+"yam nagaimo": {
+"as": null,
+"via": "non trovato"
 },
 "zucchetta da pergola": {
 "as": null,
