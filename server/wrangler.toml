@@ -10,3 +10,12 @@ simple = { limit = 15, period = 60 }
 
 [ai]
 binding = "AI"
+
+# Prezzi ufficiali MIMIT salvati qui
+[[kv_namespaces]]
+binding = "PRICES_KV"
+id = "1f8f442ded57461287f282549cd2fab2"
+
+# Aggiornamento prezzi: ogni giorno alle 4:00 UTC un lotto di province (ognuna ogni ~15 giorni)
+[triggers]
+crons = ["0 4 * * *"]

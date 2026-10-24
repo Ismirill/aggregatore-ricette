@@ -6,7 +6,7 @@ const DIETS = ['Vegano', 'Vegetariano', 'Senza glutine', 'Senza lattosio', 'Senz
 
 const cors = origin => ({
   'Access-Control-Allow-Origin': ORIGINS.includes(origin) ? origin : ORIGINS[0],
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 });
 const reply = (origin, body, status = 200) =>
@@ -107,7 +107,98 @@ spinaci 4/kg; funghi champignon 6/kg; porcini secchi 80/kg; insalata 4/kg; zucca
 legumi secchi 4/kg; ceci in scatola 3/kg; fagioli in scatola 3/kg; lenticchie 4/kg; olio extravergine 9/l; olio di semi 2,50/l; aceto 2/l; vino bianco 4/l; zucchero 1,20/kg; miele 10/kg;
 cioccolato fondente 12/kg; cacao amaro 15/kg; caffè 12/kg; savoiardi 6/kg; lievito 0,40/bustina; frutta secca 20/kg; pinoli 60/kg; basilico 1,50/mazzetto; prezzemolo 1/mazzetto; spezie, sale e pepe: trascurabili`;
 
-async function nutrition(env, b) {
+// Prezzi ufficiali: Osservatorio Prezzi del MIMIT (rilevazioni mensili per 64 province).
+// Il cron giornaliero aggiorna a lotti le province con dati più vecchi di 14 giorni (o di un mese precedente),
+// così ogni provincia viene riaggiornata circa ogni 15 giorni restando nei limiti del piano gratuito.
+const MIMIT_URL = 'https://osservaprezzi.mise.gov.it/prezzi/livelli/beni-e-servizi-di-largo-consumo/archivio-rilevazioni-beni-e-servizi-di-largo-consumo';
+const MIMIT_CATS = ['altri_alim', 'orto', 'ittici'];
+const BATCH = 12; // 12 province x 3 categorie + 2 pagine = 38 richieste (limite gratuito: 50)
+const MESI = ['', 'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+// Coordinate approssimative dei capoluoghi rilevati dal MIMIT, per trovare la provincia più vicina
+const PROVINCES = {Alessandria:[44.91,8.61],Ancona:[43.62,13.52],Aosta:[45.74,7.32],Arezzo:[43.46,11.88],'Ascoli Piceno':[42.85,13.58],Avellino:[40.91,14.79],Bari:[41.12,16.87],Belluno:[46.14,12.22],Benevento:[41.13,14.78],Bergamo:[45.70,9.67],Biella:[45.57,8.05],Bologna:[44.49,11.34],Bolzano:[46.50,11.35],Brescia:[45.54,10.22],Cagliari:[39.22,9.12],Catanzaro:[38.91,16.59],Cosenza:[39.30,16.25],Cremona:[45.13,10.02],Cuneo:[44.39,7.55],Ferrara:[44.84,11.62],Firenze:[43.77,11.26],Forli:[44.22,12.04],Genova:[44.41,8.93],Gorizia:[45.94,13.62],Grosseto:[42.76,11.11],Lecco:[45.86,9.40],Livorno:[43.55,10.31],Lodi:[45.31,9.50],Lucca:[43.84,10.50],Macerata:[43.30,13.45],Mantova:[45.16,10.79],Messina:[38.19,15.55],Milano:[45.46,9.19],Modena:[44.65,10.93],Napoli:[40.85,14.27],Novara:[45.45,8.62],Padova:[45.41,11.88],Palermo:[38.12,13.36],Parma:[44.80,10.33],Perugia:[43.11,12.39],Pescara:[42.46,14.21],Piacenza:[45.05,9.69],Pistoia:[43.93,10.91],Pordenone:[45.96,12.66],Ravenna:[44.42,12.20],'Reggio Calabria':[38.11,15.65],'Reggio Emilia':[44.70,10.63],Rimini:[44.06,12.57],Roma:[41.90,12.50],Rovigo:[45.07,11.79],Sassari:[40.73,8.56],Siena:[43.32,11.33],Siracusa:[37.08,15.29],Terni:[42.56,12.65],Torino:[45.07,7.69],Trento:[46.07,11.12],Treviso:[45.67,12.24],Trieste:[45.65,13.78],Udine:[46.06,13.24],Varese:[45.82,8.83],Venezia:[45.44,12.32],Vercelli:[45.32,8.42],Verona:[45.44,10.99],Vicenza:[45.55,11.55]};
+function nearestProvince(lat, lon) {
+  if (!isFinite(lat) || !isFinite(lon)) return null;
+  let best = null, bd = Infinity;
+  for (const [name, [a, b]] of Object.entries(PROVINCES)) {
+    const d = (a - lat) ** 2 + ((b - lon) * Math.cos(lat * Math.PI / 180)) ** 2;
+    if (d < bd) { bd = d; best = name; }
+  }
+  return bd < 4 ? best : null; // oltre ~200 km (es. fuori dall'Italia) usa la media nazionale
+}
+const unescape = t => t.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#0?39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/&nbsp;/g, ' ').trim();
+
+async function mimitPage(params) {
+  const u = new URL(MIMIT_URL);
+  for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
+  const r = await fetch(u, { headers: { 'User-Agent': 'Mozilla/5.0 (AggregatoreRicette)' } });
+  if (!r.ok) throw new Error('MIMIT ' + r.status);
+  return r.text();
+}
+const options = (html, name) => {
+  const m = html.match(new RegExp(`<select[^>]*name="${name.replace(/[[\]]/g, '\\$&')}"[^>]*>([\\s\\S]*?)</select>`));
+  return m ? [...m[1].matchAll(/<option[^>]*value="([^"]*)"/g)].map(x => x[1]).filter(Boolean) : [];
+};
+function tableRows(html) {
+  const i = html.indexOf('id-table-results');
+  if (i < 0) return [];
+  const t = html.slice(i, html.indexOf('</table>', i));
+  return [...t.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)]
+    .map(r => [...r[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map(c => unescape(c[1])))
+    .filter(r => r.length >= 4 && !isNaN(parseFloat(r[3])));
+}
+
+async function loadPrices(env) {
+  try { return JSON.parse(await env.PRICES_KV.get('prices') || 'null') || { provinces: {} }; } catch { return { provinces: {} }; }
+}
+// Aggiorna un lotto di province; restituisce quante ne ha aggiornate e quante ne restano
+async function refreshBatch(env) {
+  const home = await mimitPage({});
+  const year = Math.max(...options(home, 'ANNO').map(Number));
+  const month = Math.max(...options(await mimitPage({ ANNO: year }), 'MESE').map(Number));
+  const period = `${MESI[month]} ${year}`;
+  const data = await loadPrices(env);
+  // Prima le città più popolose, poi le altre
+  const order = [...new Set(['Roma', 'Milano', 'Napoli', 'Torino', 'Palermo', 'Bari', 'Bologna', 'Firenze', 'Genova', 'Venezia', 'Verona', 'Cagliari', ...Object.keys(PROVINCES)])];
+  const stale = order.filter(p => {
+    const d = data.provinces[p];
+    return !d || d.period !== period || Date.now() - Date.parse(d.updated) > 14 * 864e5;
+  });
+  const done = [];
+  for (const prov of stale.slice(0, BATCH)) {
+    const items = {};
+    for (const cat of MIMIT_CATS) {
+      try { for (const r of tableRows(await mimitPage({ ANNO: year, MESE: month, 'f[PROVINCIA]': prov, 'f[TIPO_RECORD_MISE]': cat }))) items[r[0]] = parseFloat(r[3]); } catch {}
+    }
+    if (Object.keys(items).length) { data.provinces[prov] = { period, updated: new Date().toISOString(), items }; done.push(prov); }
+  }
+  // Media nazionale di ogni prodotto sulle province disponibili del mese più recente
+  const acc = {};
+  for (const d of Object.values(data.provinces)) if (d.period === period) for (const [k, v] of Object.entries(d.items)) (acc[k] ||= []).push(v);
+  data.period = period;
+  data.national = Object.fromEntries(Object.entries(acc).map(([k, v]) => [k, Math.round(v.reduce((a, b) => a + b, 0) / v.length * 100) / 100]));
+  data.updated = new Date().toISOString();
+  await env.PRICES_KV.put('prices', JSON.stringify(data));
+  _prices = null;
+  return { period, updated: done, remaining: stale.length - done.length };
+}
+let _prices;
+async function prices(env) {
+  if (!_prices || Date.now() - _prices.t > 3600e3) _prices = { t: Date.now(), d: await loadPrices(env) };
+  return _prices.d;
+}
+// Prezzi da usare: provincia richiesta o più vicina, altrimenti media nazionale
+async function pricesFor(env, b, req) {
+  const d = await prices(env);
+  const cf = req.cf || {};
+  const prov = PROVINCES[b.province] ? b.province : nearestProvince(+(b.lat ?? cf.latitude), +(b.lon ?? cf.longitude));
+  const local = prov && d.provinces[prov];
+  if (local && Object.keys(local.items).length) return { zone: prov, period: local.period, items: { ...d.national, ...local.items } };
+  if (d.national && Object.keys(d.national).length) return { zone: 'media nazionale', period: d.period, items: d.national };
+  return null;
+}
+
+async function nutrition(env, b, req) {
+  const official = await pricesFor(env, b, req);
   const ingredients = (Array.isArray(b.ingredients) ? b.ingredients : []).slice(0, 40).map(x => str(x, 150));
   if (!ingredients.length) throw Object.assign(new Error('Ingredienti mancanti'), { status: 400 });
   const servings = Math.min(50, Math.max(1, parseInt(b.servings) || 4));
@@ -118,27 +209,44 @@ ${ingredients.map(x => '- ' + x).join('\n')}
 Per ogni ingrediente stima, per la quantità indicata (se è "q.b." o manca, usa una quantità tipica per ${servings} persone):
 - grams: peso in grammi (o millilitri) usato nella ricetta;
 - kcal: calorie totali di quella quantità, con valori nutrizionali medi (crudo, come si compra);
-- eur: costo in euro di quella quantità con prezzi medi al supermercato in Italia. Usa come riferimento questi prezzi medi indicativi: ${PRICES}. Per ingredienti non in elenco stima un prezzo medio italiano realistico. Conta solo la quantità usata, non la confezione intera.
+- eur: costo in euro di quella quantità con prezzi medi al supermercato in Italia. ${official ? `Usa per primi questi prezzi medi ufficiali (Osservatorio Prezzi MIMIT, ${official.period}, ${official.zone}; prezzo per la quantità tra parentesi): ${Object.entries(official.items).map(([k, v]) => `${k} ${v} €`).join('; ')}. Per gli ingredienti che non compaiono lì usa ` : 'Usa '}questi prezzi medi indicativi: ${PRICES}. Per ingredienti non presenti in nessun elenco stima un prezzo medio italiano realistico. Conta solo la quantità usata, non la confezione intera.
 Ignora le voci che non sono ingredienti (es. note tra parentesi).
 Rispondi solo con JSON: {"items":[{"name":"","grams":0,"kcal":0,"eur":0}]}`);
   const items = (result?.items || []).map(x => ({ name: str(x.name, 80), grams: Math.max(0, +x.grams || 0), kcal: Math.max(0, +x.kcal || 0), eur: Math.max(0, +x.eur || 0) }));
-  return { result: { servings, items } };
+  return { result: { servings, items, prices: official ? `Osservatorio Prezzi MIMIT, ${official.period} · ${official.zone}` : 'prezzi medi indicativi', zone: official?.zone || null } };
 }
 
 export default {
-  async fetch(req, env) {
+  // Aggiornamento automatico dei prezzi: un lotto di province ogni giorno
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(refreshBatch(env).then(r => console.log('prezzi', r.period, 'aggiornate', r.updated.length, 'restano', r.remaining)));
+  },
+  async fetch(req, env, ctx) {
     const origin = req.headers.get('Origin') || '';
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors(origin) });
     const path = new URL(req.url).pathname;
     if (req.method === 'GET' && path === '/')
       return new Response('Server AI dell\'Aggregatore Ricette: attivo. Si usa dall\'app, non dal browser.\nApp: https://ismirill.github.io/aggregatore-ricette/\n',
         { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+    if (req.method === 'GET' && path === '/prices') {
+      const d = await prices(env), u = new URL(req.url);
+      const cf = req.cf || {};
+      const auto = nearestProvince(+cf.latitude, +cf.longitude);
+      const prov = u.searchParams.get('province');
+      return reply(origin, { period: d.period || null, updated: d.updated || null, provinces: Object.keys(PROVINCES), available: Object.keys(d.provinces), auto,
+        items: prov && d.provinces[prov] ? d.provinces[prov].items : undefined });
+    }
+    // Avvio manuale di un lotto (protetto da segreto): POST /refresh-prices con header X-Admin
+    if (req.method === 'POST' && path === '/refresh-prices') {
+      if (!env.ADMIN_TOKEN || req.headers.get('X-Admin') !== env.ADMIN_TOKEN) return reply(origin, { error: 'Non autorizzato' }, 403);
+      return reply(origin, await refreshBatch(env));
+    }
     if (req.method !== 'POST' || !['/analyze', '/photo', '/nutrition'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';
     if (env.LIMITER && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
     try {
       const body = await req.json();
-      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/nutrition' ? await nutrition(env, body) : await analyze(env, body));
+      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : await analyze(env, body));
     } catch (e) {
       // Quota giornaliera gratuita esaurita o errore del modello
       const limit = e.status === 429 || /neuron|quota|limit|4006/i.test(e.message);
