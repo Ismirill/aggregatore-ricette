@@ -1,7 +1,6 @@
-// Server dell'Aggregatore Ricette: tiene la chiave Gemini e fa le richieste AI per conto dell'app.
-// I prompt stanno qui, così l'endpoint non può essere usato come proxy generico.
-const MODEL_TEXT = 'gemini-2.5-flash-lite'; // analisi delle didascalie (economico, senza ricerca)
-const MODEL_SEARCH = 'gemini-2.5-flash';    // foto + ricerca Google (1.500 ricerche/giorno incluse)
+// Server dell'Aggregatore Ricette: fa le richieste AI per conto dell'app con Cloudflare Workers AI
+// (quota gratuita giornaliera, nessuna chiave per l'utente). I prompt stanno qui, così l'endpoint non è un proxy generico.
+const MODEL = '@cf/google/gemma-4-26b-a4b-it'; // visione + testo, licenza Gemma (utilizzabile in UE)
 const ORIGINS = ['https://ismirill.github.io', 'https://localhost', 'http://localhost', 'http://localhost:8080', 'capacitor://localhost'];
 const DIETS = ['Vegano', 'Vegetariano', 'Senza glutine', 'Senza lattosio', 'Senza uova', 'Senza frutta secca', 'Ipocalorico'];
 
@@ -13,24 +12,10 @@ const cors = origin => ({
 const reply = (origin, body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...cors(origin) } });
 
-async function gemini(env, model, parts, { search = false, json = false } = {}) {
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts }],
-      ...(search ? { tools: [{ google_search: {} }] } : {}),
-      ...(json ? { generationConfig: { responseMimeType: 'application/json' } } : {}),
-    }),
-  });
-  const d = await res.json().catch(() => ({}));
-  if (!res.ok) throw Object.assign(new Error(d.error?.message || res.statusText), { status: res.status });
-  const c = d.candidates?.[0];
-  if (!c?.content) throw new Error('Nessuna risposta');
-  return {
-    text: c.content.parts.map(x => x.text || '').join('\n'),
-    chunks: (c.groundingMetadata?.groundingChunks || []).map(x => x.web).filter(Boolean).map(w => ({ title: w.title, uri: w.uri })),
-  };
+async function ai(env, prompt, image) {
+  const content = [...(image ? [{ type: 'image_url', image_url: { url: image } }] : []), { type: 'text', text: prompt }];
+  const r = await env.AI.run(MODEL, { messages: [{ role: 'user', content }], max_tokens: 2000 });
+  return typeof r.response === 'string' ? r.response : r.choices?.[0]?.message?.content || JSON.stringify(r.response ?? '');
 }
 const lastJson = t => { const m = String(t).replace(/```json|```/g, '').match(/\{[\s\S]*\}/); return m ? JSON.parse(m[0]) : null; };
 const str = (v, n) => String(v ?? '').slice(0, n);
@@ -46,7 +31,7 @@ async function imagePart(url) {
     if (buf.byteLength > 4e6) return null;
     let bin = ''; const bytes = new Uint8Array(buf);
     for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-    return { inline_data: { mime_type: type.split(';')[0], data: btoa(bin) } };
+    return `data:${type.split(';')[0]};base64,${btoa(bin)}`;
   } catch { return null; }
 }
 
@@ -69,21 +54,35 @@ Estrai i dati in italiano:
 - is_recipe: false se il post non riguarda una ricetta.
 Rispondi solo con JSON: {"is_recipe":true,"title":"","cat":"","diets":[],"country":"","region":"","time":0,"ingredients":[],"steps":[]}`;
   const img = b.image ? await imagePart(str(b.image, 2000)) : null;
-  const { text } = await gemini(env, MODEL_TEXT, img ? [img, { text: prompt }] : [{ text: prompt }], { json: true });
-  return { result: lastJson(text) };
+  return { result: lastJson(await ai(env, prompt, img)) };
+}
+
+// Ricette di GialloZafferano per il piatto riconosciuto (titolo, link, foto)
+async function giallo(query) {
+  try {
+    const r = await fetch(`https://www.giallozafferano.it/ricerca-ricette/${encodeURIComponent(query).replace(/%20/g, '+')}/`, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    if (!r.ok) return [];
+    const html = await r.text(), out = [], seen = new Set();
+    const re = /<a href="(https:\/\/ricette\.giallozafferano\.it\/[^"]+\.html)" title="([^"]+)">\s*(?:<[^>]+>\s*)*?<img src="([^"]+)"/g;
+    let m;
+    while ((m = re.exec(html)) && out.length < 8) {
+      if (seen.has(m[1])) continue;
+      seen.add(m[1]);
+      out.push({ title: m[2].replace(/&#039;|&apos;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"'), url: m[1], image: m[3], site: 'GialloZafferano' });
+    }
+    return out;
+  } catch { return []; }
 }
 
 async function photo(env, b) {
   const data = str(b.image, 6e6);
   if (!data) throw Object.assign(new Error('Foto mancante'), { status: 400 });
-  const { text, chunks } = await gemini(env, MODEL_SEARCH, [
-    { inline_data: { mime_type: 'image/jpeg', data } },
-    { text: `Riconosci il piatto in questa foto. Poi cerca con Google da 5 a 8 ricette di questo piatto, preferendo siti di cucina italiani affidabili (es. GialloZafferano, Cookist, Fatto in casa da Benedetta, Cucchiaio d'Argento, Misya) e, se utili, video YouTube. Usa solo pagine trovate nella ricerca.
-Rispondi alla fine SOLO con un oggetto JSON, senza altro testo:
-{"dish":"nome del piatto in italiano","description":"una frase su cos'è","confidence":"alta|media|bassa","alternatives":["altri piatti possibili"],"keywords":["parole per cercarlo"],"recipes":[{"title":"...","url":"https://...","site":"...","note":"cosa la distingue, max 15 parole"}]}
-Se nella foto non c'è un piatto, restituisci dish vuoto e recipes vuoto.` },
-  ], { search: true });
-  return { result: lastJson(text), chunks };
+  const text = await ai(env, `Riconosci il piatto in questa foto. Rispondi SOLO con un oggetto JSON:
+{"dish":"nome del piatto in italiano, come lo cercheresti su un sito di ricette","description":"una frase su cos'è","confidence":"alta|media|bassa","alternatives":["altri piatti possibili, max 3"],"keywords":["2-4 parole chiave"]}
+Se nella foto non c'è un piatto o del cibo, restituisci dish vuoto.`, `data:image/jpeg;base64,${data}`);
+  const result = lastJson(text);
+  const recipes = result?.dish ? await giallo(result.dish) : [];
+  return { result: result && { ...result, recipes } };
 }
 
 export default {
@@ -98,9 +97,11 @@ export default {
       const body = await req.json();
       return reply(origin, path === '/photo' ? await photo(env, body) : await analyze(env, body));
     } catch (e) {
-      // Errori di Google: non esporre dettagli della chiave all'app
-      const status = e.status === 429 ? 429 : e.status === 400 && /foto/i.test(e.message) ? 400 : 502;
-      return reply(origin, { error: status === 429 ? 'Limite raggiunto' : 'Servizio AI non disponibile' }, status);
+      // Quota giornaliera gratuita esaurita o errore del modello
+      const limit = e.status === 429 || /neuron|quota|limit|4006/i.test(e.message);
+      const status = limit ? 429 : e.status === 400 ? 400 : 502;
+      console.log('errore AI', e.message);
+      return reply(origin, { error: limit ? 'Limite giornaliero raggiunto, riprova domani' : e.status === 400 ? e.message : 'Servizio AI non disponibile' }, status);
     }
   },
 };
