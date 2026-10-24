@@ -36,6 +36,8 @@ jobs:
         run: python3 scripts/base_ricette.py
       - name: Foto dei piatti da Wikipedia / Wikimedia Commons (solo ricette nuove)
         run: python3 scripts/immagini.py
+      - name: Tipo di piatto verificato incrociando Wikibooks, Wikipedia/Wikidata, nome e ingredienti
+        run: python3 scripts/categorie.py
       - name: Versione pubblicata
         run: |
           v=$(grep -oE 'const APP_VERSION=[0-9]+' www/index.html | grep -oE '[0-9]+$')
@@ -44,7 +46,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898900+github-actions[bot]@users.noreply.github.com"
-          git add www/ricettario.json www/version.json www/immagini.json
+          git add www/ricettario.json www/version.json www/immagini.json www/categorie.json
           git diff --cached --quiet || (git commit -m "Aggiornamento automatico ricettario e versione" && git push)
       - uses: actions/upload-artifact@v4
         with: { name: www, path: www }

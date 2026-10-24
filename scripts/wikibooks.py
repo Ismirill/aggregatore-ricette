@@ -76,6 +76,7 @@ def parse(title, text, categories):
         'url': 'https://it.wikibooks.org/wiki/' + urllib.parse.quote((PREFIX + title).replace(' ', '_')),
         'region': regions[0] if regions else '',
         'tags': [c for c in categories if not re.match(r'(Ricette regionali-|Moduli|Pagine|Libro|Stub|Ricette\b)', c)][:4],
+        'cats': [c for c in categories if not re.match(r'(Moduli|Pagine|Libro|Stub|Da unire|Da controllare)', c)],  # per la classificazione
         'servings': servings,
         'ingredients': ingredients[:40],
         'steps': steps[:30],

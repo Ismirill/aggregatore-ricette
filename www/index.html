@@ -53,7 +53,7 @@ header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88
 .chip{flex:none;border:1px solid var(--bd);background:var(--card);color:var(--fg);padding:7px 14px;border-radius:999px;font:inherit;font-size:.88rem;font-weight:500;cursor:pointer;transition:all .15s}
 .chip small{color:var(--mut);font-weight:500;margin-left:3px}
 .chip.on{background:var(--fg);border-color:var(--fg);color:var(--bg)}.chip.on small{color:color-mix(in srgb,var(--bg) 70%,transparent)}
-.filters{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:1100px;margin:10px auto 0}
+.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:1100px;margin:10px auto 0}
 .filters select{padding:9px 28px 9px 12px;font-size:16px;border-radius:12px}
 @media (max-width:620px){.filters{grid-template-columns:1fr 1fr}.filters select:first-child{grid-column:1/-1}}
 
@@ -188,9 +188,11 @@ details summary{cursor:pointer}
   <div class="filters" hidden>
     <select id="fDiet"></select>
     <select id="fZone"></select>
-    <select id="fTime"><option value="0">Ogni tempo</option><option value="15">⏱ Fino a 15 min</option><option value="30">⏱ Fino a 30 min</option><option value="60">⏱ Fino a 1 ora</option><option value="e">Solo facili</option></select>
+    <select id="fTime"><option value="0">Ogni tempo</option><option value="15">⏱ Fino a 15 min</option><option value="30">⏱ Fino a 30 min</option><option value="60">⏱ Fino a 1 ora</option></select>
+    <select id="fDiff"><option value="0">Ogni difficoltà</option><option value="1">Facili</option><option value="2">Facili o medie</option><option value="3">Impegnative</option></select>
+    <select id="fCost"><option value="0">Ogni costo</option><option value="1">€ Fino a 1 € a persona</option><option value="2">€ Fino a 2 € a persona</option><option value="4">€ Fino a 4 € a persona</option></select>
     <select id="fRate"><option value="0">Ogni voto</option><option value="3">★ 3+</option><option value="4">★ 4+</option><option value="5">★ 5</option></select>
-    <select id="fSort"><option value="new">Più recenti</option><option value="rate">Più votate</option><option value="az">A–Z</option></select>
+    <select id="fSort"><option value="new">In evidenza / più recenti</option><option value="fast">Più veloci</option><option value="easy">Più facili</option><option value="cheap">Più economiche</option><option value="rate">Più votate</option><option value="az">A–Z</option></select>
   </div>
 </header>
 <nav class="nav" id="tabs"><button class="tab on" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario</button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>Budget</button></nav>
@@ -554,7 +556,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=20; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=21; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -568,7 +570,7 @@ const src=()=>view==='book'?(book||[]):items;
 async function loadBook(){
   if(book)return;
   try{
-    const [d,im]=await Promise.all([fetchData('ricettario.json'),fetchData('immagini.json').catch(()=>({items:{}}))]);
+    const [d,im,ct]=await Promise.all([fetchData('ricettario.json'),fetchData('immagini.json').catch(()=>({items:{}})),fetchData('categorie.json').catch(()=>({items:{}}))]);
     const nut=load('bookNut',{});
     bookInfo=d;
     book=d.recipes.map(r=>{
@@ -577,7 +579,8 @@ async function loadBook(){
       const reg=r.region&&(REGIONS.find(x=>key(x)===key(r.region)||key(r.region).startsWith(key(x).slice(0,7)))||r.region);
       const ph=im.items?.[r.id];
       r.tags=(r.tags||[]).filter(t=>!/^(moduli|pagine|libro|stub|ricette|categoria|wikibooks|da (controllare|wikificare|aiutare))/i.test(t));
-      return {...r,...(ph?{image:ph.img,imgFile:ph.file}:{}),book:true,source:'Wikibooks',cat:c.cat||'Altro',diets:c.diets,country:reg?'Italia':c.country,region:reg||c.region,nutrition:nut[r.id]};
+      const vc=ct.items?.[r.id]; // tipo di piatto verificato incrociando Wikibooks, Wikipedia/Wikidata, nome e ingredienti
+      return {...r,...(ph?{image:ph.img,imgFile:ph.file}:{}),...(vc?{catBy:vc.by,catConf:vc.conf}:{}),book:true,source:'Wikibooks',cat:vc?.cat||c.cat||'Altro',diets:c.diets,country:reg?'Italia':c.country,region:reg||c.region,nutrition:nut[r.id]};
     });
   }catch{book=[];toast('Ricettario non disponibile offline')}
   fillSelects();render();
@@ -631,6 +634,14 @@ const fmtMin=m=>m>=60?`${Math.floor(m/60)} h${m%60?' '+m%60+' min':''}`:m+' min'
 const timeLabel=r=>{const x=timing(r);return `⏱ ${fmtMin(x.t)}${x.w>=30?` + ${fmtMin(x.w)} di attesa`:''} · ${DIFF[x.d]}`};
 
 /* ---------- Lista ---------- */
+// Ordinamenti: in evidenza (ricettario: prima con foto), veloci, facili, economiche, votate, A–Z
+function sorter(fs,searching){
+  // costi con molti ingredienti non riconosciuti (copertura < 85%) in fondo: sarebbero sottostimati
+  const az=(a,b)=>(a.title||'').localeCompare(b.title||''),eur=i=>(perPerson(i)?.eur??1e9)+(i.cov!=null&&i.cov<.85?1e6:0);
+  return {fast:(a,b)=>timing(a).t-timing(b).t||az(a,b),easy:(a,b)=>timing(a).d-timing(b).d||timing(a).t-timing(b).t||az(a,b),
+    cheap:(a,b)=>eur(a)-eur(b)||az(a,b),rate:(a,b)=>(b.rating||0)-(a.rating||0)||(b.created||0)-(a.created||0),az,
+    new:view==='book'?(a,b)=>(searching?0:(!!b.image-!!a.image))||az(a,b):(a,b)=>b.created-a.created}[fs]||az;
+}
 // Segnaposto colorato per tipo di piatto quando manca la foto
 const CAT_LOOK={'Primi':['🍝','#f3c27a','#e07a4f'],'Secondi':['🍖','#e9a28a','#b94a3a'],'Contorni':['🥗','#b9d48a','#5f8a3a'],'Dolci':['🍰','#f4c6d0','#d0708a'],
   'Antipasti':['🧀','#f6dd8f','#d9a440'],'Piatti unici':['🥘','#f0b98a','#c2602f'],'Altro':['🍽️','#d9cfc0','#9a8a76']};
@@ -639,7 +650,7 @@ const PROT_EM={pesce:'🐟',legumi:'🫘',uova:'🍳',formaggi:'🧀',verdure:'�
 function look(i){const l=[...(CAT_LOOK[i.cat]||CAT_LOOK.Altro)];if(['Secondi','Piatti unici'].includes(i.cat)&&i.ingredients?.length){i._pr??=protein(i);if(PROT_EM[i._pr]&&i.cat==='Secondi'||['pesce','legumi'].includes(i._pr))l[0]=PROT_EM[i._pr]}return l}
 function card(i){
   const [em,c1,c2]=look(i),pp=perPerson(i),tm=(i.ingredients?.length||i.steps?.length)?timing(i):null,vid=embedOf(i);
-  const facts=[tm&&`⏱ <b>${fmtMin(tm.t)}</b>`,tm&&DIFF[tm.d],pp&&`<b>${Math.round(pp.kcal)}</b> kcal`,pp?.eur!=null&&`<b>${euro(pp.eur)}</b>/pers.`].filter(Boolean);
+  const facts=[tm&&`⏱ <b>${fmtMin(tm.t)}</b>`,tm&&DIFF[tm.d],pp&&`<b>${Math.round(pp.kcal)}</b> kcal`,pp?.eur!=null&&`${i.cov!=null&&i.cov<.85?'circa ':''}<b>${euro(pp.eur)}</b>/pers.`].filter(Boolean);
   const diets=(i.diets||[]).filter(d=>MAIN_DIETS.includes(d));
   return `<div class="item" data-id="${i.id}">
     <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
@@ -660,13 +671,13 @@ function fillSelects(){
   $('#regions').innerHTML=REGIONS.map(c=>`<option value="${esc(c)}">`).join('');
 }
 function render(){
-  const q=$('#q').value.trim().toLowerCase(),fd=$('#fDiet').value,fz=$('#fZone').value,fr=+$('#fRate').value,ft=$('#fTime').value,fs=$('#fSort').value;
+  const q=$('#q').value.trim().toLowerCase(),fd=$('#fDiet').value,fz=$('#fZone').value,fr=+$('#fRate').value,ft=+$('#fTime').value,fdf=+$('#fDiff').value,fc=+$('#fCost').value,fs=$('#fSort').value;
   const data=src();
   const counts={};data.forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);
   $('#chips').innerHTML=['Tutte',...cats].filter(c=>c==='Tutte'||counts[c]).map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${esc(c)}<small>${c==='Tutte'?data.length:counts[c]}</small></button>`).join('');
-  const list=data.filter(i=>(cur==='Tutte'||i.cat===cur)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(ft==='0'||(ft==='e'?timing(i).d===1:timing(i).t<=+ft))
+  const list=data.filter(i=>(cur==='Tutte'||i.cat===cur)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(!ft||timing(i).t<=ft)&&(!fdf||(fdf===3?timing(i).d===3:timing(i).d<=fdf))&&(!fc||((perPerson(i)?.eur??99)<=fc))
       &&(!q||[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q)))
-    .sort(fs==='rate'?(a,b)=>(b.rating||0)-(a.rating||0)||b.created-a.created:fs==='az'||view==='book'?(a,b)=>(view==='book'&&fs!=='az'&&!q?(!!b.image-!!a.image):0)||(a.title||'').localeCompare(b.title||''):(a,b)=>b.created-a.created);
+    .sort(sorter(fs,!!q));
   const lic=view==='book'&&book?.length?`<p class="lic">${book.length} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a>, licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a></p>`:'';
   $('#list').innerHTML=lic+(list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
@@ -1013,6 +1024,7 @@ function openDetail(i){
     ${tm?`<div class="kv"><span>⏱ ${fmtMin(tm.t)}${tm.w>=30?` + ${fmtMin(tm.w)} attesa`:''}</span><span>${DIFF[tm.d]}</span>${i.cat?`<span>${esc(i.cat)}</span>`:''}</div>`:''}
     <div class="meta">${esc([i.cat,[i.region,i.country].filter(Boolean).join(', '),i.author,i.source].filter(Boolean).join(' · '))}</div>
     ${tm&&!(i.time&&!i.book)?'<div class="meta" style="margin-top:2px">Tempi e difficoltà stimati dal testo della ricetta</div>':''}
+    ${i.catBy?.length?`<details class="meta" style="margin-top:2px"><summary>Perché è tra i ${esc(i.cat)}</summary>${i.catBy.map(b=>esc(b)).join(' · ')} (affidabilità ${esc(i.catConf)})</details>`:''}
     <div class="badges">${(i.diets||[]).map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}${(i.tags||[]).map(t=>`<span class="bdg z">#${esc(t)}</span>`).join('')}</div>
     ${i.book?`<p class="lic" style="margin-top:8px">Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · autori nella <a href="${esc(i.url.replace('/wiki/','/w/index.php?action=history&title='))}" target="_blank" rel="noopener">cronologia</a></p>`:''}
     <div class="rate" id="dRate" style="margin-top:8px${i.book?';display:none':''}">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n<=(i.rating||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}</div>
@@ -1121,9 +1133,9 @@ $('#del').onclick=()=>{if(confirm('Eliminare questa ricetta?')){items=items.filt
 
 /* ---------- Eventi generali ---------- */
 $('#add').onclick=()=>openForm();
-['#q','#fDiet','#fZone','#fTime','#fRate','#fSort'].forEach(s=>$(s).addEventListener('input',()=>{render();filtUI()}));
+['#q','#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate','#fSort'].forEach(s=>$(s).addEventListener('input',()=>{render();filtUI()}));
 // Filtri nascosti dietro un pulsante; il pulsante si colora se ce n'è qualcuno attivo
-const filtUI=()=>{const n=['#fDiet','#fZone','#fTime','#fRate'].filter(x=>$(x).value&&$(x).value!=='0').length;$('#fBtn').classList.toggle('on',n>0||!$('.filters').hidden);$('#fBtn').lastChild.textContent=n?`Filtri · ${n}`:'Filtri'};
+const filtUI=()=>{const n=['#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate'].filter(x=>$(x).value&&$(x).value!=='0').length;$('#fBtn').classList.toggle('on',n>0||!$('.filters').hidden);$('#fBtn').lastChild.textContent=n?`Filtri · ${n}`:'Filtri'};
 $('#fBtn').onclick=()=>{const f=$('.filters');f.hidden=!f.hidden;$('#fBtn').setAttribute('aria-expanded',!f.hidden);filtUI()};
 $('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;render()}};
 $('#list').onclick=e=>{const it=e.target.closest('.item');if(it)openDetail(src().find(i=>i.id===it.dataset.id))};
