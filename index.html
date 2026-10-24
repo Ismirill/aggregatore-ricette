@@ -343,32 +343,32 @@ async function photoSearch(file){
   if(!aiOn()){toast('Ricerca da foto non ancora attiva');return}
   const dataUrl=await shrink(file);
   const ph=$('#phv');
-  ph.innerHTML=`<img class="shot" src="${dataUrl}" alt=""><h2 style="margin-top:12px">Riconosco il piatto e cerco ricette…</h2><p class="meta">Può richiedere fino a un minuto.</p><div class="row"><button class="btn" id="phClose">Chiudi</button></div>`;
+  ph.innerHTML=`<img class="shot" src="${dataUrl}" alt=""><h2 style="margin-top:12px">Riconosco il piatto e cerco ricette…</h2><p class="meta">Pochi secondi…</p><div class="row"><button class="btn" id="phClose">Chiudi</button></div>`;
   $('#phClose').onclick=()=>$('#photo').close();
   if(!$('#photo').open)$('#photo').showModal();
   try{
-    const {result,chunks}=await server('/photo',{image:dataUrl.split(',')[1]});
-    showPhotoResults(dataUrl,result,chunks||[]);
+    const {result}=await server('/photo',{image:dataUrl.split(',')[1]});
+    showPhotoResults(dataUrl,result);
   }catch(e){ph.querySelector('h2').textContent=aiErr(e);ph.querySelector('.meta').textContent=''}
 }
-function showPhotoResults(img,r,chunks=[]){
+function showPhotoResults(img,r){
   const ph=$('#phv');
   if(!r||!r.dish){ph.innerHTML=`<img class="shot" src="${img}" alt=""><h2 style="margin-top:12px">Non riconosco un piatto in questa foto</h2><div class="row"><button class="btn pri" id="phClose">Chiudi</button></div>`;$('#phClose').onclick=()=>$('#photo').close();return}
   const kw=[r.dish,...(r.keywords||[])].map(s=>s.toLowerCase()).filter(s=>s.length>2);
   const mine=items.filter(i=>{const t=(i.title||'').toLowerCase();return kw.some(k=>t.includes(k)||k.split(' ').filter(w=>w.length>3).every(w=>t.includes(w)))});
-  // Tiene i link il cui sito compare davvero tra le fonti della ricerca Google; aggiunge le altre fonti trovate
-  const host=u=>{try{return new URL(u).hostname.replace(/^www\./,'')}catch{return ''}};
-  const doms=chunks.map(c=>(c.title||'').replace(/^www\./,'').toLowerCase());
-  let recs=(r.recipes||[]).filter(x=>/^https?:\/\//.test(x.url)&&(!doms.length||doms.some(d=>d&&host(x.url).endsWith(d))));
-  const seen=new Set(recs.map(x=>host(x.url)));
-  recs=[...recs,...chunks.filter(c=>{const d=(c.title||'').replace(/^www\./,'');return c.uri&&![...seen].some(h=>h.endsWith(d))}).map(c=>({title:c.title,url:c.uri,site:c.title,note:'Fonte della ricerca Google'}))];
+  const recs=(r.recipes||[]).filter(x=>/^https:\/\//.test(x.url));
+  // Ricerca dello stesso piatto su altri siti e social
+  const q=encodeURIComponent(r.dish),qr=encodeURIComponent('ricetta '+r.dish);
+  const links=[['GialloZafferano',`https://www.giallozafferano.it/ricerca-ricette/${q.replace(/%20/g,'+')}/`],['Cookist',`https://www.cookist.it/?s=${q}`],
+    ['YouTube',`https://www.youtube.com/results?search_query=${qr}`],['TikTok',`https://www.tiktok.com/search?q=${qr}`],['Google',`https://www.google.com/search?q=${qr}`]];
   ph.innerHTML=`<img class="shot" src="${img}" alt="">
     <h2 style="margin-top:12px">${esc(r.dish)}</h2><p class="meta">${esc(r.description||'')}${r.confidence&&r.confidence!=='alta'?` · sicurezza ${esc(r.confidence)}`:''}</p>
     ${r.alternatives?.length?`<p class="meta">Potrebbe anche essere: ${r.alternatives.map(esc).join(', ')}</p>`:''}
     ${mine.length?`<h3>Già nelle tue ricette</h3>${mine.map(i=>`<div class="res"><div class="b"><b>${esc(i.title)}</b><div class="meta">${esc([i.cat,i.source].join(' · '))} ${stars(i.rating)}</div></div><button class="btn" data-open="${i.id}">Apri</button></div>`).join('')}`:''}
-    <h3>Ricette trovate sul web</h3>
-    ${recs.length?recs.map((x,k)=>`<div class="res"><div class="b"><b>${esc(x.title)}</b><div class="meta">${esc(x.site||sourceOf(x.url))}${x.note?' · '+esc(x.note):''}</div>
-      <a href="${esc(x.url)}" target="_blank" rel="noopener">Apri</a></div><button class="btn pri" data-save="${k}">Salva</button></div>`).join(''):'<p class="meta">Nessuna ricetta trovata.</p>'}
+    <h3>Ricette trovate</h3>
+    ${recs.length?recs.map((x,k)=>`<div class="res">${x.image?`<img src="${esc(x.image)}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px" referrerpolicy="no-referrer">`:''}<div class="b"><b>${esc(x.title)}</b><div class="meta">${esc(x.site||sourceOf(x.url))}</div>
+      <a href="${esc(x.url)}" target="_blank" rel="noopener">Apri</a></div><button class="btn pri" data-save="${k}">Salva</button></div>`).join(''):'<p class="meta">Nessuna ricetta trovata automaticamente: prova a cercare qui sotto.</p>'}
+    <h3>Cerca anche su</h3><div class="checks">${links.map(([n,u])=>`<a class="btn" href="${esc(u)}" target="_blank" rel="noopener">${n}</a>`).join('')}</div>
     <div class="row"><button class="btn" id="phClose">Chiudi</button></div>`;
   $('#phClose').onclick=()=>$('#photo').close();
   ph.onclick=e=>{
