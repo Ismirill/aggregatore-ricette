@@ -312,7 +312,7 @@ async function analyze(url){
 
 /* ---------- AI (tramite il server dell'app, nessuna chiave per l'utente) ---------- */
 // Indirizzo del server Cloudflare (cartella server/); vuoto = funzioni AI disattivate
-const AI_URL=(()=>{try{return localStorage.getItem('aiUrl')}catch{}})()||'';
+const AI_URL=(()=>{try{return localStorage.getItem('aiUrl')}catch{}})()||'https://ricette-ai.ricettedelcuore.workers.dev';
 const aiOn=()=>!!AI_URL;
 async function server(path,body){
   const ctl=new AbortController();setTimeout(()=>ctl.abort(),90000);
