@@ -1,0 +1,31 @@
+{
+  "_info": "Frutta e verdura di stagione in Italia (prodotto nazionale, piena stagione). Indice 1 = gennaio.",
+  "frutta": {
+    "1": ["arance","mandarini","clementine","pompelmi","limoni","kiwi","mele","pere","cachi"],
+    "2": ["arance","mandarini","clementine","pompelmi","limoni","kiwi","mele","pere"],
+    "3": ["arance","pompelmi","limoni","kiwi","mele","pere"],
+    "4": ["arance","limoni","kiwi","mele","pere","fragole","nespole"],
+    "5": ["fragole","ciliegie","nespole","limoni","mele","pere"],
+    "6": ["ciliegie","fragole","albicocche","pesche","nespole","more","lamponi","mirtilli","melone","anguria"],
+    "7": ["albicocche","pesche","nettarine","susine","melone","anguria","fichi","mirtilli","lamponi","more","ribes"],
+    "8": ["pesche","nettarine","susine","fichi","melone","anguria","uva","pere","more","mirtilli","lamponi"],
+    "9": ["uva","fichi","pere","mele","susine","pesche","melagrane","fichi d'india","more"],
+    "10": ["uva","mele","pere","cachi","melagrane","castagne","kiwi","fichi d'india"],
+    "11": ["mele","pere","cachi","kiwi","melagrane","castagne","mandarini","clementine","arance"],
+    "12": ["arance","mandarini","clementine","limoni","mele","pere","kiwi","cachi","pompelmi"]
+  },
+  "verdura": {
+    "1": ["broccoli","cavolfiori","cavolo nero","verza","cavoli","cime di rapa","carciofi","finocchi","porri","radicchio","cicoria","spinaci","bietole","sedano","carote","zucca","topinambur","cardi"],
+    "2": ["broccoli","cavolfiori","cavolo nero","verza","cime di rapa","carciofi","finocchi","porri","radicchio","cicoria","spinaci","bietole","sedano","carote","topinambur"],
+    "3": ["carciofi","asparagi","broccoli","cavolfiori","finocchi","porri","spinaci","bietole","cicoria","radicchio","lattuga","rucola","carote","cipollotti","ravanelli"],
+    "4": ["asparagi","carciofi","piselli","fave","spinaci","bietole","lattuga","rucola","ravanelli","cipollotti","carote","agretti","finocchi"],
+    "5": ["asparagi","piselli","fave","zucchine","fagiolini","lattuga","rucola","ravanelli","carote","cipollotti","agretti","bietole","cetrioli"],
+    "6": ["zucchine","fagiolini","pomodori","melanzane","peperoni","cetrioli","lattuga","rucola","carote","patate novelle","cipolle","fiori di zucca","basilico"],
+    "7": ["pomodori","melanzane","peperoni","zucchine","fagiolini","cetrioli","lattuga","rucola","carote","patate","cipolle","fiori di zucca","basilico","mais"],
+    "8": ["pomodori","melanzane","peperoni","zucchine","fagiolini","cetrioli","lattuga","rucola","carote","patate","cipolle","basilico","mais"],
+    "9": ["pomodori","melanzane","peperoni","zucchine","fagiolini","funghi","zucca","patate","cipolle","carote","lattuga","rucola","porri","radicchio"],
+    "10": ["zucca","funghi","broccoli","cavolfiori","cavoli","verza","finocchi","porri","radicchio","spinaci","bietole","patate","carote","sedano","topinambur","cardi"],
+    "11": ["zucca","broccoli","cavolfiori","cavolo nero","verza","cavoli","cime di rapa","finocchi","porri","radicchio","cicoria","spinaci","bietole","carciofi","carote","sedano","topinambur","cardi"],
+    "12": ["broccoli","cavolfiori","cavolo nero","verza","cavoli","cime di rapa","carciofi","finocchi","porri","radicchio","cicoria","spinaci","bietole","sedano","carote","zucca","topinambur","cardi"]
+  }
+}

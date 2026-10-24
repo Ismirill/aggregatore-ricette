@@ -81,15 +81,27 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
 .srv{display:flex;align-items:center;gap:8px;margin:0 0 8px;flex-wrap:wrap}.srv .btn{width:38px;height:38px;padding:0;font-size:1.2rem;line-height:1}.srv b{min-width:1.5em;text-align:center;font-size:1.1rem}.btn:disabled{opacity:.4}
 .nbox{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 8px}.nbox div{border:1px solid var(--bd);border-radius:10px;padding:8px;text-align:center}
 .nbox b{display:block;font-size:1rem}.nbox span{font-size:.72rem;color:var(--mut)}.nut details{margin-bottom:10px}.nut details ul{margin:6px 0}
-.tabs{display:flex;gap:4px;flex:1;min-width:0}.tab{border:none;background:none;color:var(--mut);font:inherit;font-weight:700;font-size:1.05rem;padding:6px 8px;border-radius:10px;cursor:pointer;white-space:nowrap}
+.tabs{display:flex;gap:4px;flex:1;min-width:0}.tab{border:none;background:none;color:var(--mut);font:inherit;font-weight:700;font-size:.95rem;padding:6px 6px;border-radius:10px;cursor:pointer;white-space:nowrap}
 .tab.on{color:var(--fg);background:var(--card)}.lic{font-size:.78rem;color:var(--mut);margin:0 0 4px}.lic a{color:var(--acc)}
+.bform{display:grid;gap:12px;margin-bottom:16px}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.seg label{display:block;color:var(--fg);font-size:.95rem}.seg input{display:none}.seg span{display:block;text-align:center;padding:10px;cursor:pointer}
+.seg input:checked+span{background:var(--acc);color:#fff}
+.day{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:10px}
+.day h3{margin:0 0 6px;font-size:1rem;display:flex;justify-content:space-between}.day h3 span{font-weight:400;color:var(--mut);font-size:.85rem}
+.meal{margin:8px 0 0}.meal b{font-size:.8rem;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.dish{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed var(--bd);cursor:pointer}.dish:last-child{border:none}
+.dish small{color:var(--mut);white-space:nowrap}.dish .r{color:var(--acc);font-size:.72rem;margin-right:4px}
+.okb{border-color:var(--ok);color:var(--ok)}.kob{border-color:var(--acc);color:var(--acc)}
+.warn{border:1px solid var(--acc);border-radius:12px;padding:10px;margin:8px 0;font-size:.9rem}
+[hidden]{display:none!important}
 .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.9rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9}
 .toast.on{opacity:1}
 </style>
 </head>
 <body>
 <header>
-  <div class="top"><div class="tabs" id="tabs"><button class="tab on" data-v="mine">🍝 Le mie</button><button class="tab" data-v="book">📖 Ricettario</button></div><button class="icon" id="camBtn" aria-label="Trova ricette da una foto">📷</button><input type="file" id="camIn" accept="image/*" capture="environment" hidden><button class="icon" id="setBtn" aria-label="Impostazioni">⚙︎</button></div>
+  <div class="top"><div class="tabs" id="tabs"><button class="tab on" data-v="mine">🍝 Le mie</button><button class="tab" data-v="book">📖 Ricettario</button><button class="tab" data-v="budget">💶 Budget</button></div><button class="icon" id="camBtn" aria-label="Trova ricette da una foto">📷</button><input type="file" id="camIn" accept="image/*" capture="environment" hidden><button class="icon" id="setBtn" aria-label="Impostazioni">⚙︎</button></div>
   <input id="q" type="search" placeholder="Cerca titolo, ingrediente, etichetta…">
   <div class="chips" id="chips"></div>
   <div class="filters">
@@ -99,7 +111,21 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
     <select id="fSort"><option value="new">Più recenti</option><option value="rate">Più votate</option><option value="az">A–Z</option></select>
   </div>
 </header>
-<main><div class="list" id="list"></div></main>
+<main><div class="list" id="list"></div>
+<section id="budget" hidden>
+  <form id="bForm" class="bform">
+    <div class="seg"><label><input type="radio" name="mode" value="week" checked><span>Settimana</span></label><label><input type="radio" name="mode" value="meal"><span>Pasto singolo</span></label></div>
+    <div class="two"><label><span id="bLbl">Budget settimanale (€)</span><input name="budget" type="number" min="1" step="0.5" inputmode="decimal" required placeholder="es. 60"></label>
+      <label>Persone<input name="people" type="number" min="1" max="20" value="2" inputmode="numeric" required></label></div>
+    <label id="bMealsL">Pasti da preparare<div class="checks"><label><input type="checkbox" name="lunch" checked>Pranzo</label><label><input type="checkbox" name="dinner" checked>Cena</label></div></label>
+    <label>Diete, intolleranze e allergie<div class="checks" id="bDiet"></div></label>
+    <label>Altri ingredienti da evitare (separati da virgola)<input name="avoid" placeholder="es. sedano, funghi, senape, kiwi"></label>
+    <div class="two"><label>Periodo<select name="month" id="bMonth"></select></label>
+      <label>Ricette da usare<select name="pool"><option value="all">Ricettario + le mie</option><option value="book">Solo ricettario</option><option value="mine">Solo le mie</option></select></label></div>
+    <button class="btn pri" style="width:100%">Crea menu</button>
+  </form>
+  <div id="bOut"></div>
+</section></main>
 <button class="fab" id="add" aria-label="Aggiungi link">+</button>
 
 <dialog id="det"><div class="dv" id="dv"></div></dialog>
@@ -146,7 +172,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
     <div class="grid2" style="margin-top:8px"><button class="btn" id="gpsBtn">📍 Usa la mia posizione</button><button class="btn" id="zoneReset">Automatica</button></div></section>
   <section class="sec"><h3>Backup</h3><p class="meta">Copia i dati e incollali su un altro dispositivo per trasferire le ricette.</p>
     <div class="grid2"><button class="btn" id="exp">Copia backup</button><button class="btn" id="imp">Incolla backup</button></div></section>
-  <p class="meta" style="text-align:center;margin:12px 0 0">Versione 14</p>
+  <p class="meta" style="text-align:center;margin:12px 0 0">Versione 15</p>
 </dialog>
 <div class="toast" id="toast"></div>
 
@@ -466,6 +492,8 @@ function saveFromBook(i){
 }
 $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;view=t.dataset.v;cur='Tutte';
   $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  const bud=view==='budget';['#q','#chips','.filters','#list','#add'].forEach(x=>$(x).hidden=bud);$('#budget').hidden=!bud;
+  if(bud){loadBook();loadPT();initBudget();return}
   $('#q').placeholder=view==='book'?'Cerca tra le ricette del ricettario…':'Cerca titolo, ingrediente, etichetta…';
   if(view==='book')loadBook();fillSelects();render()};
 
@@ -492,7 +520,7 @@ function render(){
   $('#list').innerHTML=lic+(list.length?list.slice(0,view==='book'?150:9999).map(i=>`<div class="item" data-id="${i.id}">
       ${i.image||embedOf(i)?`<div class="thumb">🍽️${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}${embedOf(i)?'<span class="play">▶ video</span>':''}</div>`:''}
       <div class="b"${i.image||embedOf(i)?'':' style="padding-left:14px"'}><h3>${esc(i.title||i.url)}</h3>
-        <div class="meta">${esc([i.cat,i.region||i.country,i.time&&i.time+' min',perPerson(i)&&Math.round(perPerson(i).kcal)+' kcal',i.source].filter(Boolean).join(' · '))} ${stars(i.rating)}</div>
+        <div class="meta">${esc([i.cat,i.region||i.country,i.time&&i.time+' min',perPerson(i)&&Math.round(perPerson(i).kcal)+' kcal',perPerson(i)?.eur!=null&&'≈'+euro(perPerson(i).eur)+'/pers.',i.source].filter(Boolean).join(' · '))} ${stars(i.rating)}</div>
         ${i.diets?.some(d=>MAIN_DIETS.includes(d))?`<div class="badges">${i.diets.filter(d=>MAIN_DIETS.includes(d)).map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}</div>`:''}</div></div>`).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
     :`<div class="empty">${view==='book'?(book?'Nessun risultato con questi filtri.':'Carico il ricettario…'):items.length?'Nessun risultato con questi filtri.':'Nessuna ricetta salvata.<br>Condividi un link da TikTok, Instagram o dal browser verso quest\'app, oppure tocca +.'}</div>`);
@@ -512,23 +540,44 @@ async function initZone(){
       (d.available.length<d.provinces.length?` Province già disponibili: ${d.available.length} su ${d.provinces.length}; per le altre si usa la media nazionale.`:'');
   }catch{}
 }
-$('#zoneSel').onchange=e=>{save('zone',e.target.value?{province:e.target.value}:{});initZone();toast('Zona prezzi: '+(e.target.value||'automatica'))};
-$('#zoneReset').onclick=()=>{save('zone',{});$('#zoneSel').value='';initZone();toast('Zona prezzi automatica')};
+$('#zoneSel').onchange=e=>{save('zone',e.target.value?{province:e.target.value}:{});initZone();loadPT(true).then(render);toast('Zona prezzi: '+(e.target.value||'automatica'))};
+$('#zoneReset').onclick=()=>{save('zone',{});$('#zoneSel').value='';initZone();loadPT(true).then(render);toast('Zona prezzi automatica')};
 $('#gpsBtn').onclick=()=>{
   if(!navigator.geolocation){toast('Posizione non disponibile su questo dispositivo');return}
-  navigator.geolocation.getCurrentPosition(p=>{save('zone',{lat:+p.coords.latitude.toFixed(2),lon:+p.coords.longitude.toFixed(2)});$('#zoneSel').value='';initZone();toast('Zona prezzi dalla tua posizione')},
+  navigator.geolocation.getCurrentPosition(p=>{save('zone',{lat:+p.coords.latitude.toFixed(2),lon:+p.coords.longitude.toFixed(2)});$('#zoneSel').value='';initZone();loadPT(true).then(render);toast('Zona prezzi dalla tua posizione')},
     ()=>toast('Permesso di posizione negato'),{timeout:10000,maximumAge:864e5});
 };
 
+/* ---------- Prezzi per zona (tabella del server, aggiornata ogni mese con i dati MIMIT) ---------- */
+let PT=load('pt',null);
+async function loadPT(force){
+  if(!aiOn()||(PT&&!force&&PT.t>Date.now()-6*36e5))return PT;
+  const z=getZone(),q=new URLSearchParams(z.province?{province:z.province}:z.lat?{lat:z.lat,lon:z.lon}:{});
+  try{PT={...await (await fetch(AI_URL+'/price-table?'+q)).json(),t:Date.now()};save('pt',PT)}catch{}
+  return PT;
+}
+const baseS=i=>i.servings||i.s||4;
+// Costo a persona dalla base (grammi per ingrediente) e dai prezzi €/kg della zona
+const costPP=i=>PT&&i.b?i.b.reduce((a,[k,g])=>a+g*(PT.eur[k]??0)/1000,0)/baseS(i):null;
+
 /* ---------- Calorie e costo a persona ---------- */
 const euro=v=>v.toLocaleString('it-IT',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2});
-const perPerson=i=>{const t=i.nutrition;if(!t?.items?.length)return null;const s=t.servings||i.servings||4;
+const perPerson=i=>{
+  if(i.b&&i.n)return {kcal:i.n.k,p:i.n.p,c:i.n.c,f:i.n.f,eur:costPP(i),base:true};
+  const t=i.nutrition;if(!t?.items?.length)return null;const s=t.servings||i.servings||4;
   return {kcal:t.items.reduce((a,x)=>a+x.kcal,0)/s,eur:t.items.reduce((a,x)=>a+x.eur,0)/s}};
 function drawNut(i,n){
   const el=$('#nut');if(!el)return;const p=perPerson(i);
   if(!p){el.innerHTML=aiOn()?`<button type="button" class="btn" id="nutBtn">Calcola calorie e costo</button>`:'';
     $('#nutBtn')&&($('#nutBtn').onclick=async()=>{el.innerHTML='<span class="meta">Calcolo calorie e costo…</span>';
       try{await computeNutrition(i);drawNut(i,n)}catch(e){el.innerHTML=`<span class="meta">${esc(aiErr(e))}</span>`}});return}
+  if(p.base){
+    el.innerHTML=`<div class="nbox"><div><b>${p.kcal} kcal</b><span>a persona</span></div><div><b>${p.eur==null?'…':euro(p.eur)}</b><span>a persona</span></div><div><b>${p.eur==null?'…':euro(p.eur*n)}</b><span>totale per ${n}</span></div></div>
+      <details class="meta"><summary>Dettaglio (proteine ${p.p} g · carboidrati ${p.c} g · grassi ${p.f} g a persona)</summary><ul>${i.b.map(([k,g])=>`<li>${esc(k)}: ${g} g${PT?` · ${euro(g*(PT.eur[k]??0)/1000)}${PT.src?.[k]==='m'?' (MIMIT)':''}`:''}</li>`).join('')}</ul>
+      <p>Quantità per la ricetta originale da ${baseS(i)} persone${i.s&&!i.servings?' (stimate)':''}. Prezzi: ${PT?`Osservatorio Prezzi MIMIT ${esc(PT.period||'')} · ${esc(PT.zone)}, dove disponibili; altrimenti prezzi medi indicativi`:'non ancora caricati'}. Valori nutrizionali medi, indicativi.</p></details>`;
+    if(p.eur==null)loadPT().then(()=>PT&&drawNut(i,n));
+    return;
+  }
   el.innerHTML=`<div class="nbox"><div><b>${Math.round(p.kcal)} kcal</b><span>a persona</span></div><div><b>${euro(p.eur)}</b><span>a persona</span></div><div><b>${euro(p.eur*n)}</b><span>totale per ${n}</span></div></div>
     <details class="meta"><summary>Stima per ingrediente (prezzi medi in Italia)</summary><ul>${i.nutrition.items.map(x=>`<li>${esc(x.name)}: ${Math.round(x.grams)} g · ${Math.round(x.kcal)} kcal · ${euro(x.eur)}</li>`).join('')}</ul>
     <p>Valori indicativi per la ricetta originale da ${i.nutrition.servings} persone. Prezzi: ${esc(i.nutrition.prices||'medi indicativi')}.</p>${aiOn()?'<button type="button" class="btn" id="nutRedo">Ricalcola con la mia zona</button>':''}</details>`;
@@ -543,6 +592,227 @@ async function computeNutrition(i){
   if(p.kcal<=450&&!i.diets?.includes('Ipocalorico'))i.diets=[...(i.diets||[]),'Ipocalorico'];
   if(i.book){const m=load('bookNut',{});m[i.id]=i.nutrition;save('bookNut',m)}else save('items',items);
   render();
+}
+
+/* ---------- Budget: menu bilanciato ---------- */
+// Struttura dei pasti e regole di equilibrio ispirate alle linee guida CREA per una sana alimentazione:
+// pesce e legumi almeno 2 volte a settimana, carne rossa/uova/formaggi al massimo 2, frutta e verdura di stagione a ogni pasto.
+const MESI=['','gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const GIORNI=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
+const B_DIETS=['Vegetariano','Vegano','Senza glutine','Senza lattosio','Senza uova','Senza frutta secca','Senza pesce','Senza crostacei e molluschi'];
+const SHELL=/gamber|scampi|aragost|astice|granch|mazzancoll|canocch|cozze|mitili|vongol|telline|ostriche|capesant|calamar|seppi|polp|totan|moscardin|lumach|surimi/;
+const LEGUMI=/fagiol|\bceci\b|lenticch|\bfave\b|cicerch|lupini|piselli|borlotti|cannellini|\bsoia\b|tofu|tempeh/;
+const KCAL={lunch:700,dinner:650}; // per persona, pasto completo
+let SEASON=null;
+async function loadSeason(){if(!SEASON)try{SEASON=await (await fetch('stagioni.json')).json()}catch{SEASON={frutta:{},verdura:{}}}return SEASON}
+const stem=w=>w.toLowerCase().replace(/[^a-zà-ù ]/g,'').split(' ').map(x=>x.slice(0,5)).join(' ');
+
+function initBudget(){
+  const f=$('#bForm');
+  if(!$('#bDiet').children.length){
+    $('#bDiet').innerHTML=B_DIETS.map(d=>`<label><input type="checkbox" value="${d}">${d}</label>`).join('');
+    $('#bMonth').innerHTML=MESI.slice(1).map((m,i)=>`<option value="${i+1}">${m[0].toUpperCase()+m.slice(1)}</option>`).join('');
+    $('#bMonth').value=new Date().getMonth()+1;
+    const last=load('budgetForm',null);
+    if(last){for(const [k,v] of Object.entries(last.f))if(f[k]&&f[k].type!=='radio'&&f[k].type!=='checkbox')f[k].value=v;
+      f.lunch.checked=last.f.lunch;f.dinner.checked=last.f.dinner;f.querySelector(`[name=mode][value=${last.f.mode}]`).checked=true;
+      $('#bDiet').querySelectorAll('input').forEach(x=>x.checked=last.diets.includes(x.value))}
+    f.querySelectorAll('[name=mode]').forEach(x=>x.onchange=modeUI);modeUI();
+    const plan=load('budgetPlan',null);if(plan)loadSeason().then(()=>showPlan(plan));
+  }
+}
+function modeUI(){const w=$('#bForm').mode.value==='week';$('#bLbl').textContent=w?'Budget settimanale (€)':'Budget per il pasto (€)';$('#bMealsL').hidden=!w}
+
+// Tipo di proteina prevalente, per le regole settimanali
+function protein(r){
+  if(r.b){const g={pesce:0,rossa:0,bianca:0,legumi:0,uova:0,formaggi:0};
+    for(const [k,x] of r.b){
+      if(/salmone|tonno|acciughe|baccal|pesce|cozze|crostacei|molluschi/.test(k))g.pesce+=x;
+      else if(/manzo|maiale|agnello|macinata|salumi|interiora|guanciale|prosciutto/.test(k))g.rossa+=x;
+      else if(/pollo|coniglio/.test(k))g.bianca+=x;
+      else if(/legumi|tofu/.test(k))g.legumi+=x*(k==='legumi secchi'?2.5:1);
+      else if(/^uova$|tuorli/.test(k))g.uova+=x;
+      else if(/formaggi|mozzarella|pecorino|ricotta|mascarpone/.test(k))g.formaggi+=x*.8;
+    }
+    const top=Object.entries(g).sort((a,b)=>b[1]-a[1])[0];return top[1]>=60*baseS(r)/4?top[0]:'verdure';}
+  const t=(r.ingredients||[]).join(' ').toLowerCase();
+  return ING.fish.test(t)?'pesce':/manzo|maiale|vitell|agnell|salsicc|salam|prosciutt|guancial|pancett|macinat/.test(t)?'rossa':/poll|tacchin|conigli/.test(t)?'bianca':LEGUMI.test(t)?'legumi':ING.egg.test(t)?'uova':ING.dairy.test(t)?'formaggi':'verdure';
+}
+// Punteggio di stagionalità: + prodotti di stagione nel mese, − prodotti fuori stagione
+function seasonScore(r,month){
+  const all=new Set([...Object.values(SEASON.verdura).flat(),...Object.values(SEASON.frutta).flat()].map(stem));
+  const now=new Set([...(SEASON.verdura[month]||[]),...(SEASON.frutta[month]||[])].map(stem));
+  const t=' '+stem((r.ingredients||[]).join(' ')+' '+r.title)+' ';let sc=0;
+  for(const w of all)if(t.includes(' '+w)){sc+=now.has(w)?1:-1.5}
+  return sc;
+}
+function allowed(r,diets,avoid){
+  const t=((r.ingredients||[]).join(' ')+' '+r.title).toLowerCase();
+  const has=k=>ING[k].test(t);
+  if((diets.includes('Vegetariano')||diets.includes('Vegano'))&&(has('meat')||has('fish')))return false;
+  if(diets.includes('Vegano')&&(has('dairy')||has('egg')||has('honey')))return false;
+  if(diets.includes('Senza glutine')&&has('gluten'))return false;
+  if(diets.includes('Senza lattosio')&&has('dairy'))return false;
+  if(diets.includes('Senza uova')&&has('egg'))return false;
+  if(diets.includes('Senza frutta secca')&&has('nuts'))return false;
+  if(diets.includes('Senza pesce')&&has('fish'))return false;
+  if(diets.includes('Senza crostacei e molluschi')&&SHELL.test(t))return false;
+  return !avoid.some(w=>t.includes(w));
+}
+function candidates(o){
+  const pool=[...(o.pool!=='mine'?(book||[]):[]),...(o.pool!=='book'?items:[])];
+  const role={'Primi':'primo','Secondi':'secondo','Contorni':'contorno','Piatti unici':'unico'};
+  const out=[],seen=new Set();let noCost=0;
+  for(const r of pool){
+    const ro=role[r.cat];if(!ro||!r.ingredients?.length||seen.has(r.title.toLowerCase()))continue;
+    const pp=perPerson(r);if(!pp||pp.eur==null){if(!r.book)noCost++;continue}
+    const lim=ro==='contorno'?[15,700]:[150,1400];
+    if(pp.kcal<lim[0]||pp.kcal>lim[1]||pp.eur<=0||pp.eur>25)continue;
+    if(!allowed(r,o.diets,o.avoid))continue;
+    seen.add(r.title.toLowerCase());
+    out.push({r,role:ro,eur:pp.eur,kcal:pp.kcal,p:pp.p??pp.kcal*.15/4,c:pp.c??pp.kcal*.5/4,f:pp.f??pp.kcal*.35/9,prot:protein(r),season:seasonScore(r,o.month)});
+  }
+  return {list:out,noCost};
+}
+// Frutta di stagione e pane come complementi del pasto
+function extras(o){
+  const fr=(SEASON.frutta[o.month]||[]).filter(x=>!o.avoid.some(w=>x.includes(w))&&!(o.diets.includes('Senza frutta secca')&&/castagn/.test(x)));
+  const fruitEur=PT?(PT.eur['mele e pere']+PT.eur['agrumi']+PT.eur['frutta'])/3:2.5;
+  return {fruits:fr.length?fr:['frutta di stagione'],fruit:{eur:.15*fruitEur,kcal:75,p:.8,c:18,f:.3},
+    bread:o.diets.includes('Senza glutine')?null:{eur:.05*(PT?.eur['pane']??3.8),kcal:135,p:4.5,c:27,f:.8}};
+}
+const pickRand=(a,n)=>{const r=[];for(let i=0;i<n&&a.length;i++)r.push(a[Math.floor(Math.random()*a.length)]);return r};
+
+function buildWeek(o,C,X){
+  const by=k=>C.list.filter(x=>x.role===k);
+  const prim=[...by('primo'),...by('unico')],sec=[...by('secondo'),...by('unico')],cont=by('contorno');
+  if(!prim.length||!sec.length)return null;
+  const slots=[];for(let d=0;d<7;d++){if(o.lunch)slots.push({d,m:'lunch'});if(o.dinner)slots.push({d,m:'dinner'})}
+  const perSlot=o.budget/o.people/slots.length;
+  let best=null;
+  for(let it=0;it<250;it++){
+    const used=new Set(),cnt={pesce:0,rossa:0,bianca:0,legumi:0,uova:0,formaggi:0,verdure:0};const plan=[];let cost=0;
+    for(const sl of slots){
+      const mains=sl.m==='lunch'?prim:sec;
+      const choose=(arr,role)=>{
+        const cand=pickRand(arr.filter(x=>!used.has(x.r.id)),14);if(!cand.length)return pickRand(arr,1)[0];
+        const target=KCAL[sl.m]*(role==='contorno'?.18:.62);
+        return cand.map(x=>{let sc=Math.abs(x.kcal-target)/target*3-x.season*.6+Math.max(0,x.eur-perSlot*(role==='contorno'?.25:.65))/perSlot*4;
+          if(role!=='contorno'){if(['rossa','uova','formaggi'].includes(x.prot)&&cnt[x.prot]>=2)sc+=6;
+            if(['pesce','legumi'].includes(x.prot)&&cnt[x.prot]<2)sc-=1.5;if(x.prot==='bianca'&&cnt.bianca>=3)sc+=3}
+          return [sc+Math.random()*.8,x]}).sort((a,b)=>a[0]-b[0])[0][1];
+      };
+      const main=choose(mains,'main');used.add(main.r.id);if(main.prot in cnt&&main.role!=='contorno')cnt[main.prot]++;
+      const side=cont.length?choose(cont,'contorno'):null;if(side)used.add(side.r.id);
+      const parts=[main,side].filter(Boolean),add=[X.fruit,...(sl.m==='dinner'&&X.bread?[X.bread]:[])];
+      const meal={...sl,dishes:parts,eur:[...parts,...add].reduce((a,x)=>a+x.eur,0),kcal:[...parts,...add].reduce((a,x)=>a+x.kcal,0),
+        p:[...parts,...add].reduce((a,x)=>a+x.p,0),c:[...parts,...add].reduce((a,x)=>a+x.c,0),f:[...parts,...add].reduce((a,x)=>a+x.f,0)};
+      plan.push(meal);cost+=meal.eur*o.people;
+    }
+    const kcalDev=plan.reduce((a,m)=>a+Math.abs(m.kcal-KCAL[m.m])/KCAL[m.m],0)/plan.length;
+    const rules=Math.max(0,2-cnt.pesce)*(o.diets.some(d=>/Vege|pesce/.test(d))?0:1)+Math.max(0,2-cnt.legumi)+Math.max(0,cnt.rossa-2)+Math.max(0,cnt.uova-2)+Math.max(0,cnt.formaggi-2);
+    const P=plan.reduce((a,m)=>a+m.p*4,0),Cb=plan.reduce((a,m)=>a+m.c*4,0),F=plan.reduce((a,m)=>a+m.f*9,0),T=P+Cb+F;
+    const macro=Math.max(0,P/T-.2)+Math.max(0,.12-P/T)+Math.max(0,.45-Cb/T)+Math.max(0,F/T-.35);
+    const score=(cost>o.budget?50+(cost-o.budget)/o.budget*100:0)+kcalDev*10+rules*4+macro*20+(o.budget-cost)/o.budget*1.5;
+    if(!best||score<best.score)best={score,plan,cost,cnt,macro:{p:P/T,c:Cb/T,f:F/T}};
+  }
+  return best;
+}
+// Se il menu sfora il budget, sostituisce i piatti più cari con alternative più economiche dello stesso tipo
+function repair(best,o,C,X){
+  if(!best||best.cost<=o.budget)return best;
+  const used=new Set(best.plan.flatMap(m=>m.dishes.map(x=>x.r.id)));
+  for(let guard=0;guard<60&&best.cost>o.budget;guard++){
+    // prova dal piatto più caro in giù finché trova un sostituto più economico
+    const dishes=best.plan.flatMap(m=>m.dishes.map((x,i)=>({m,i,x}))).sort((a,b)=>b.x.eur-a.x.eur);
+    let done=false;
+    for(const w of dishes){
+      const alt=C.list.filter(y=>y.role===w.x.role&&!used.has(y.r.id)&&y.eur<w.x.eur*.92&&(y.prot===w.x.prot||w.x.role==='contorno'||!['pesce','legumi'].includes(w.x.prot)))
+        .sort((a,b)=>Math.abs(a.kcal-w.x.kcal)/w.x.kcal+(a.eur-b.eur)/w.x.eur)[0];
+      if(!alt)continue;
+      const m=w.m,d=alt.eur-w.x.eur;used.add(alt.r.id);m.dishes[w.i]=alt;
+      m.eur+=d;m.kcal+=alt.kcal-w.x.kcal;m.p+=alt.p-w.x.p;m.c+=alt.c-w.x.c;m.f+=alt.f-w.x.f;best.cost+=d*o.people;done=true;break;
+    }
+    if(!done)break;
+  }
+  return best;
+}
+function buildMeal(o,C,X){
+  const by=k=>C.list.filter(x=>x.role===k);
+  const prim=by('primo'),sec=by('secondo'),cont=by('contorno'),uni=by('unico');
+  let best=null;
+  for(let it=0;it<600;it++){
+    const full=Math.random()<.65&&prim.length&&sec.length;
+    const parts=(full?[pickRand(prim,1)[0],pickRand(sec,1)[0]]:[pickRand(uni.length?uni:prim,1)[0]]).concat(cont.length?[pickRand(cont,1)[0]]:[]).filter(Boolean);
+    if(!parts.length)continue;
+    const all=[...parts,X.fruit,...(X.bread&&!full?[X.bread]:[])];
+    const pp=all.reduce((a,x)=>a+x.eur,0),cost=pp*o.people,kcal=all.reduce((a,x)=>a+x.kcal,0);
+    const score=(cost>o.budget?50+(cost-o.budget)/o.budget*100:0)+Math.abs(kcal-850)/850*8-parts.reduce((a,x)=>a+x.season,0)*.5-(full?1.5:0)+(o.budget-cost)/o.budget*1.5;
+    if(!best||score<best.score)best={score,plan:[{d:0,m:'meal',dishes:parts,eur:pp,kcal,p:all.reduce((a,x)=>a+x.p,0),c:all.reduce((a,x)=>a+x.c,0),f:all.reduce((a,x)=>a+x.f,0)}],cost,
+      macro:(()=>{const P=all.reduce((a,x)=>a+x.p*4,0),Cb=all.reduce((a,x)=>a+x.c*4,0),F=all.reduce((a,x)=>a+x.f*9,0),T=P+Cb+F;return {p:P/T,c:Cb/T,f:F/T}})()};
+  }
+  return best;
+}
+
+$('#bForm').onsubmit=async e=>{
+  e.preventDefault();const f=e.target;modeUI();
+  const o={mode:f.mode.value,budget:+f.budget.value,people:+f.people.value||1,lunch:f.lunch.checked,dinner:f.dinner.checked,month:+f.month.value,pool:f.pool.value,
+    diets:[...$('#bDiet').querySelectorAll('input:checked')].map(x=>x.value),avoid:f.avoid.value.toLowerCase().split(',').map(x=>x.trim()).filter(x=>x.length>2)};
+  if(o.mode==='week'&&!o.lunch&&!o.dinner){toast('Scegli almeno pranzo o cena');return}
+  save('budgetForm',{f:{mode:o.mode,budget:f.budget.value,people:f.people.value,lunch:o.lunch,dinner:o.dinner,month:f.month.value,pool:o.pool,avoid:f.avoid.value},diets:o.diets});
+  $('#bOut').innerHTML='<p class="meta">Preparo il menu…</p>';
+  await Promise.all([loadBook(),loadPT(),loadSeason()]);
+  if(!PT){$('#bOut').innerHTML='<div class="warn">Servono i prezzi aggiornati: controlla la connessione e riprova.</div>';return}
+  const C=candidates(o),X=extras(o);
+  const res=repair(o.mode==='week'?buildWeek(o,C,X):buildMeal(o,C,X),o,C,X);
+  if(!res){$('#bOut').innerHTML='<div class="warn">Non ci sono abbastanza ricette compatibili con queste scelte. Prova a togliere qualche filtro o a usare anche il ricettario.</div>';return}
+  const plan={o,res:{...res,plan:res.plan.map(m=>({...m,dishes:m.dishes.map(x=>({id:x.r.id,book:!!x.r.book,title:x.r.title,role:x.role,eur:x.eur,kcal:x.kcal,prot:x.prot}))}))},X,noCost:C.noCost,n:C.list.length,zone:PT.zone,period:PT.period};
+  save('budgetPlan',plan);showPlan(plan);
+};
+function showPlan(P){
+  const {o,res,X}=P,week=o.mode==='week',meals=res.plan.length;
+  const ROLE={primo:'Primo',secondo:'Secondo',contorno:'Contorno',unico:'Piatto unico'};
+  const kcalDay=week?res.plan.reduce((a,m)=>a+m.kcal,0)/7:res.plan[0].kcal;
+  const over=res.cost>o.budget;
+  const rule=(l,ok)=>`<span class="bdg ${ok?'okb':'kob'}">${ok?'✓':'!'} ${l}</span>`;
+  const veg=(SEASON?.verdura[o.month]||[]).filter(x=>!o.avoid.some(w=>x.includes(w)));
+  const days=week?GIORNI.map((g,d)=>({g,ms:res.plan.filter(m=>m.d===d)})):[{g:'Il tuo pasto',ms:res.plan}];
+  $('#bOut').innerHTML=`
+    ${over?(res.cost<=o.budget*1.04?`<div class="warn">Il menu supera di poco il budget (${euro(res.cost-o.budget)} in più): puoi rigenerarlo o sostituire un piatto.</div>`
+      :`<div class="warn">Con ${euro(o.budget)} non si riesce a coprire tutto: il menu più economico che ho trovato costa circa <b>${euro(res.cost)}</b>. Prova ad alzare il budget o a ridurre i pasti.</div>`):''}
+    <div class="nbox"><div><b>${euro(res.cost)}</b><span>costo stimato su ${euro(o.budget)}</span></div>
+      <div><b>${euro(res.cost/o.people/(week?7:1))}</b><span>a persona${week?' al giorno':''}</span></div>
+      <div><b>${Math.round(kcalDay)} kcal</b><span>a persona ${week?`al giorno (${o.lunch&&o.dinner?'pranzo+cena':o.lunch?'pranzo':'cena'})`:'per il pasto'}</span></div></div>
+    <div class="badges" style="margin-bottom:8px">${rule(`Proteine ${Math.round(res.macro.p*100)}%`,res.macro.p>=.12&&res.macro.p<=.22)}${rule(`Carboidrati ${Math.round(res.macro.c*100)}%`,res.macro.c>=.42&&res.macro.c<=.62)}${rule(`Grassi ${Math.round(res.macro.f*100)}%`,res.macro.f<=.36)}
+      ${week&&res.cnt?`${o.diets.some(d=>/Vege|pesce/.test(d))?'':rule(`Pesce ${res.cnt.pesce}×`,res.cnt.pesce>=2)}${rule(`Legumi ${res.cnt.legumi}×`,res.cnt.legumi>=2)}${o.diets.some(d=>/Vege/.test(d))?'':rule(`Carne rossa ${res.cnt.rossa}×`,res.cnt.rossa<=2)}`:''}</div>
+    <p class="meta">🍎 Di stagione a ${MESI[o.month]}: <b>${esc(X.fruits.join(', '))}</b><br>🥦 Verdura di stagione: ${esc(veg.join(', '))}</p>
+    ${days.map(({g,ms})=>`<div class="day"><h3>${g}<span>${euro(ms.reduce((a,m)=>a+m.eur,0)*o.people)}</span></h3>${ms.map(m=>`<div class="meal">${week?`<b>${m.m==='lunch'?'Pranzo':'Cena'}</b>`:''}
+      ${m.dishes.map(x=>`<div class="dish" data-id="${esc(x.id)}" data-book="${x.book?1:''}"><span><span class="r">${ROLE[x.role]}</span>${esc(x.title)}</span><small>${Math.round(x.kcal)} kcal · ${euro(x.eur)}</small></div>`).join('')}
+      <div class="dish" style="cursor:default"><span><span class="r">Frutta</span>${esc(X.fruits[(m.d*2+(m.m==='dinner'?1:0))%X.fruits.length])}${m.m!=='lunch'&&X.bread&&(week||m.dishes.length<3)?' <span class="r" style="margin-left:6px">Pane</span>50 g':''}</span><small></small></div>
+      <p class="meta" style="margin:4px 0 0;text-align:right">Totale pasto: ${Math.round(m.kcal)} kcal a persona</p></div>`).join('')}</div>`).join('')}
+    <details class="meta" id="shop"><summary><b>🛒 Lista della spesa per ${o.people} ${o.people>1?'persone':'persona'}</b></summary><div id="shopList"></div></details>
+    <p class="meta">Costi stimati con i prezzi medi${P.period?` dell'Osservatorio Prezzi MIMIT (${esc(P.period)}, ${esc(P.zone)})`:''} e prezzi indicativi; calorie e nutrienti medi, indicativi. Pasti scelti tra ${P.n} ricette compatibili${P.noCost?`; ${P.noCost} delle tue ricette sono escluse perché senza costo calcolato (aprile e tocca "Calcola calorie e costo")`:''}.</p>
+    <div class="row"><button class="btn pri" id="bAgain">🔄 Rigenera menu</button></div>`;
+  $('#bAgain').onclick=()=>$('#bForm').requestSubmit();
+  $('#bOut').querySelectorAll('.dish[data-id]').forEach(el=>el.onclick=async()=>{await loadBook();const r=(el.dataset.book?book:items).find(x=>x.id===el.dataset.id);if(r)openDetail(r)});
+  $('#shop').ontoggle=async()=>{if(!$('#shop').open)return;await loadBook();$('#shopList').innerHTML=shopping(P)};
+}
+// Lista della spesa: somma i grammi della base di ogni ricetta, scalati al numero di persone
+function shopping(P){
+  const {o,res,X}=P,acc={},extra=[];let fruitKg=0,breadKg=0;
+  for(const m of res.plan){
+    fruitKg+=.15*o.people;if(m.m!=='lunch'&&X.bread&&(o.mode==='week'||m.dishes.length<3))breadKg+=.05*o.people;
+    for(const d of m.dishes){
+      const r=(d.book?book:items).find(x=>x.id===d.id);if(!r)continue;const f=o.people/baseS(r);
+      if(r.b)for(const [k,g] of r.b)acc[k]=(acc[k]||0)+g*f;
+      else extra.push(`<li><b>${esc(r.title)}</b>: ${r.ingredients.map(x=>esc(scaleLine(x,o.people/(r.servings||4)))).join(', ')}</li>`);
+    }
+  }
+  if(breadKg){acc['pane']=(acc['pane']||0)+breadKg*1000;breadKg=0}
+  const fmt=g=>g>=1000?(g/1000).toFixed(1).replace('.',',')+' kg':Math.round(g)+' g';
+  const rows=Object.entries(acc).filter(([k])=>!['sale','acqua','pepe e spezie'].includes(k)).sort((a,b)=>b[1]-a[1])
+    .map(([k,g])=>`<li>${esc(k)}: ${fmt(g)}${PT?` · ≈${euro(g*(PT.eur[k]??0)/1000)}`:''}</li>`);
+  return `<ul>${rows.join('')}<li>frutta di stagione: ${fmt(fruitKg*1000)}</li>${breadKg?``:''}<li>sale, pepe e spezie: q.b.</li></ul>${extra.length?`<p>Dalle tue ricette:</p><ul>${extra.join('')}</ul>`:''}`;
 }
 
 /* ---------- Scheda ricetta ---------- */
@@ -564,11 +834,11 @@ function openDetail(i){
   $('#dRate').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n;i.rating=i.rating===n?0:n;save('items',items);render();
     $('#dRate').querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.n<=i.rating))};
   if(i.ingredients?.length){
-    const base=i.servings||4;let n=base;
+    const base=i.servings||i.s||4;let n=base;
     const draw=()=>{const f=n/base;
       $('#ingList').innerHTML=i.ingredients.map(x=>`<li>${esc(scaleLine(x,f))}</li>`).join('');
       $('#sN').textContent=n;$('#sLbl').textContent=n===1?'persona':'persone';
-      $('#sOrig').textContent=!i.servings?'(persone non indicate nella ricetta: supposte 4)':n!==base?`(ricetta originale per ${base})`:'';
+      $('#sOrig').textContent=!i.servings?`(persone non indicate nella ricetta: stimate ${base})`:n!==base?`(ricetta originale per ${base})`:'';
       $('#sMinus').disabled=n<=1;drawNut(i,n)};
     $('#sMinus').onclick=()=>{if(n>1){n--;draw()}};$('#sPlus').onclick=()=>{if(n<50){n++;draw()}};
     draw();
