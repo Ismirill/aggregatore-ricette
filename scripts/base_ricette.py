@@ -94,17 +94,31 @@ def grams(line, it, servings):
     return (n if n >= 10 else n * 50), True  # numero senza unità: grammi se grande, porzioni se piccolo
 
 
+# Ricerca ampliata per gli ingredienti non riconosciuti (sinonimi, somiglianza, Wikipedia/Wikidata, Open Food Facts)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from ricerca_ingredienti import Resolver  # noqa: E402
+VOCAB = sorted({w for it in TABLE for w in re.findall(r'[a-zàèéìòù]{4,}', re.sub(r'\\[bswd]|\(\?[!=<][^)]*\)', ' ', it['re'].lower()))})
+RES = Resolver(entry, VOCAB)
+
+
 def analyze(r):
     s = r.get('servings') or 4
-    acc, matched, total, unknown = Counter(), 0, 0, []
+    acc, matched, total, unknown, subs = Counter(), 0, 0, [], []
     for line in r['ingredients']:
         if re.match(r'^\s*(?:per |occorrente|ingredienti)\b.*:\s*$', line.lower()) or len(line) < 3:
             continue
-        total += 1
         it = entry(line)
         if not it:
-            unknown.append(line)
-            continue
+            found = RES.resolve(line)
+            if found and found[0] == 'skip':
+                continue  # attrezzo o istruzione, non un ingrediente
+            if not found:
+                total += 1
+                unknown.append(line)
+                continue
+            it = found[0]
+            subs.append([line, it['k'], found[1]])  # prodotto identificato o sostituito con un analogo
+        total += 1
         g, _ = grams(line, it, s)
         acc[it['k']] += min(g, 5000)
         matched += 1
@@ -118,6 +132,8 @@ def analyze(r):
     if not 20 <= n['k'] <= 3000:
         return None, unknown
     out = {'b': [[k, round(g)] for k, g in acc.items() if g >= 1], 'n': n, 'cov': round(matched / total, 2)}
+    if subs:
+        out['sub'] = subs
     if not r.get('servings'):
         out['s'] = s  # porzioni stimate
     return out, unknown
@@ -127,16 +143,18 @@ def main():
     data = json.loads(BOOK.read_text(encoding='utf-8'))
     unknown, ok = Counter(), 0
     for r in data['recipes']:
-        for f in ('b', 'n', 'cov', 's'):
+        for f in ('b', 'n', 'cov', 's', 'sub'):
             r.pop(f, None)
         res, unk = analyze(r) if r['ingredients'] else (None, [])
         unknown.update(re.sub(r'[\d½¼¾,./]+', '', u).strip().lower()[:40] for u in unk)
         if res:
             r.update(res)
             ok += 1
-    data['base'] = {'source': 'calcolo locale (server/ingredienti.json)'}
+    RES.save()
+    data['base'] = {'source': 'calcolo locale (server/ingredienti.json) + ricerca ampliata'}
     BOOK.write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
-    print(f"{ok} ricette su {len(data['recipes'])} con base calcolata")
+    nsub = sum(len(r.get('sub', [])) for r in data['recipes'])
+    print(f"{ok} ricette su {len(data['recipes'])} con base calcolata; {nsub} ingredienti identificati con la ricerca ampliata ({RES.online} cercati online); {sum(unknown.values())} ancora sconosciuti")
     if '--report' in sys.argv:
         print('Ingredienti non riconosciuti più frequenti:', unknown.most_common(40))
 

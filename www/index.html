@@ -557,7 +557,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=22; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=23; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -750,6 +750,7 @@ function drawNut(i,n){
   if(p.base){
     el.innerHTML=`<div class="nbox"><div><b>${p.kcal} kcal</b><span>a persona</span></div><div><b>${p.eur==null?'…':euro(p.eur)}</b><span>a persona</span></div><div><b>${p.eur==null?'…':euro(p.eur*n)}</b><span>totale per ${n}</span></div></div>
       <details class="meta"><summary>Dettaglio (proteine ${p.p} g · carboidrati ${p.c} g · grassi ${p.f} g a persona)</summary><ul>${i.b.map(([k,g])=>`<li>${esc(k)}: ${g} g${PT?` · ${euro(g*(PT.eur[k]??0)/1000)}${PT.src?.[k]==='m'?' (MIMIT)':''}`:''}</li>`).join('')}</ul>
+      ${i.sub?.length?`<p>Ingredienti identificati con la ricerca ampliata: ${i.sub.map(([l,k,v])=>`<b>${esc(String(l).replace(/^[\d\s.,½¼¾/]+(g|gr|kg|ml|l|dl)?\.?\s*(di\s)?/i,'').slice(0,40))}</b> → calcolato come ${esc(k)} (${esc(v)})`).join('; ')}.</p>`:''}
       <p>Quantità per la ricetta originale da ${baseS(i)} persone${i.s&&!i.servings?' (stimate)':''}. Prezzi: ${PT?`Osservatorio Prezzi MIMIT ${esc(PT.period||'')} · ${esc(PT.zone)}, dove disponibili; altrimenti prezzi medi indicativi`:'non ancora caricati'}. Valori nutrizionali medi, indicativi.</p></details>`;
     if(p.eur==null)loadPT().then(()=>PT&&drawNut(i,n));
     return;

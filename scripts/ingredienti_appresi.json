@@ -1,0 +1,538 @@
+{
+"albiccocche": {
+"as": "albicocche",
+"via": "simile a \"albicocche\""
+},
+"animella": {
+"as": "animelle",
+"via": "sinonimo di animelle"
+},
+"aringa affumicata": {
+"as": "pesce",
+"via": "sinonimo di pesce"
+},
+"aromi misti": {
+"as": "erbe aromatiche",
+"via": "sinonimo di erbe aromatiche"
+},
+"arselle": {
+"as": "vongole",
+"via": "sinonimo di vongole"
+},
+"bacche rosa selvatiche": {
+"as": null,
+"via": "non trovato"
+},
+"bagna": {
+"as": null,
+"via": "non trovato"
+},
+"baharat": {
+"as": "spezie",
+"via": "Wikipedia: Il Baharat è una miscela di spezie finemente tritate usata n"
+},
+"bambu in scatola scolato": {
+"as": null,
+"via": "non trovato"
+},
+"barattolo grano duro cotto": {
+"as": "farro",
+"via": "sinonimo di farro"
+},
+"barattolo grano gia cotto da": {
+"as": null,
+"via": "non trovato"
+},
+"batata": {
+"as": "patate",
+"via": "sinonimo di patate"
+},
+"biancostato": {
+"as": "manzo",
+"via": "sinonimo di manzo"
+},
+"buccia arancio": {
+"as": "arancia",
+"via": "simile a \"arancia\""
+},
+"busta gelatina da dolci": {
+"as": "gelatina in fogli",
+"via": "sinonimo di gelatina in fogli"
+},
+"bustine vanilina": {
+"as": "vanillina",
+"via": "simile a \"vanillina\""
+},
+"caglio": {
+"as": "lievito",
+"via": "sinonimo di lievito"
+},
+"canestrelli": {
+"as": "capesante",
+"via": "sinonimo di capesante"
+},
+"cappello da prete": {
+"as": "salame",
+"via": "Wikidata: insaccato cotto tipico della cucina piacentina e parmense"
+},
+"carosello": {
+"as": "cetrioli",
+"via": "sinonimo di cetrioli"
+},
+"cartina per impasto": {
+"as": "pere",
+"via": "simile a \"pere\""
+},
+"carvi": {
+"as": "cumino",
+"via": "sinonimo di cumino"
+},
+"casera valtellina": {
+"as": "formaggio",
+"via": "sinonimo di formaggio"
+},
+"castelmagno": {
+"as": "formaggio",
+"via": "sinonimo di formaggio"
+},
+"catalogne": {
+"as": "catalogna",
+"via": "simile a \"catalogna\""
+},
+"cefali": {
+"as": "pesce",
+"via": "sinonimo di pesce"
+},
+"cefali ed": {
+"as": "pesce",
+"via": "sinonimo di pesce"
+},
+"cerfoglio": {
+"as": null,
+"via": "non trovato"
+},
+"cervella": {
+"as": "fegato",
+"via": "sinonimo di fegato"
+},
+"chorizo": {
+"as": "salame",
+"via": "sinonimo di salame"
+},
+"cicale": {
+"as": "scampi",
+"via": "sinonimo di scampi"
+},
+"cicoli": {
+"as": "ciccioli",
+"via": "simile a \"ciccioli\""
+},
+"cm alga kombu": {
+"as": "verdure",
+"via": "sinonimo di verdure"
+},
+"cm galanga pelato e pestato": {
+"as": "zenzero",
+"via": "sinonimo di zenzero"
+},
+"confettini colorati": {
+"as": "zucchero",
+"via": "sinonimo di zucchero"
+},
+"confezione crakers per tartine": {
+"as": "crackers",
+"via": "simile a \"crackers\""
+},
+"confezione da pizzoccheri": {
+"as": "pasta",
+"via": "sinonimo di pasta"
+},
+"corn flakes": {
+"as": "cereali",
+"via": "sinonimo di cereali"
+},
+"crema da cucina": {
+"as": "panna",
+"via": "sinonimo di panna"
+},
+"crema pasticcera": {
+"as": "latte",
+"via": "sinonimo di latte"
+},
+"creme fraiche": {
+"as": "panna",
+"via": "sinonimo di panna"
+},
+"da a msemmen": {
+"as": null,
+"via": "non trovato"
+},
+"daikon": {
+"as": "rape",
+"via": "sinonimo di rape"
+},
+"dashi granulare": {
+"as": null,
+"via": "non trovato"
+},
+"diavoletti colorati": {
+"as": "zucchero",
+"via": "sinonimo di zucchero"
+},
+"divino bianco": {
+"as": "vino",
+"via": "sinonimo di vino"
+},
+"e fioreta": {
+"as": "ricotta",
+"via": "sinonimo di ricotta"
+},
+"emmenthal": {
+"as": "formaggio",
+"via": "sinonimo di formaggio"
+},
+"emmenthal a scaglie": {
+"as": "formaggio",
+"via": "sinonimo di formaggio"
+},
+"erbe aromatiche": {
+"as": "erbe aromatiche",
+"via": "Wikipedia: pianta utilizzata per aromatizzare prodotti quali cibi, bevande o cosmetici"
+},
+"farcia": {
+"as": null,
+"via": "non trovato"
+},
+"fedelini": {
+"as": "spaghetti",
+"via": "sinonimo di spaghetti"
+},
+"ferricelli": {
+"as": "pasta",
+"via": "sinonimo di pasta"
+},
+"fiala essenza fior arancio": {
+"as": "arancia",
+"via": "simile a \"arancia\""
+},
+"fiala fior arancio": {
+"as": "arancia",
+"via": "simile a \"arancia\""
+},
+"fieno greco": {
+"as": "spezie",
+"via": "sinonimo di spezie"
+},
+"fileja": {
+"as": "pasta",
+"via": "sinonimo di pasta"
+},
+"filone spinale": {
+"as": "fegato",
+"via": "sinonimo di fegato"
+},
+"fiocchi mais": {
+"as": "mais dolce",
+"via": "sinonimo di mais dolce"
+},
+"fiori arancio": {
+"as": "arancia",
+"via": "simile a \"arancia\""
+},
+"fogli gelatina": {
+"as": null,
+"via": "non trovato"
+},
+"foglie lauro": {
+"as": "alloro",
+"via": "sinonimo di alloro"
+},
+"foglio alga non spezzettato": {
+"as": null,
+"via": "non trovato"
+},
+"fumo liquido": {
+"as": "salsa",
+"via": "sinonimo di salsa"
+},
+"galanga": {
+"as": "zenzero",
+"via": "sinonimo di zenzero"
+},
+"gallinella": {
+"as": "pesce",
+"via": "sinonimo di pesce"
+},
+"gianchetti freschissimi": {
+"as": "bianchetti",
+"via": "simile a \"bianchetti\""
+},
+"gomma arabica": {
+"as": "zucchero",
+"via": "sinonimo di zucchero"
+},
+"grasso": {
+"as": null,
+"via": "non trovato"
+},
+"grasso vegetale": {
+"as": "margarina",
+"via": "sinonimo di margarina"
+},
+"grossa manciata cime fiorite cipresso argentato": {
+"as": null,
+"via": "non trovato"
+},
+"harissa": {
+"as": "salsa",
+"via": "sinonimo di salsa"
+},
+"ingrediente": {
+"as": null,
+"via": "non trovato"
+},
+"k mosto cotto": {
+"as": "miele",
+"via": "sinonimo di miele"
+},
+"kimel": {
+"as": "liquore",
+"via": "sinonimo di liquore"
+},
+"l ingrediente": {
+"as": null,
+"via": "non trovato"
+},
+"l mosto": {
+"as": "miele",
+"via": "sinonimo di miele"
+},
+"la buccia arancio": {
+"as": "arancia",
+"via": "simile a \"arancia\""
+},
+"linome": {
+"as": null,
+"via": "non trovato"
+},
+"lumache": {
+"as": "pasta",
+"via": "Wikidata: tipo di pasta"
+},
+"mais": {
+"as": "mais dolce",
+"via": "sinonimo di mais dolce"
+},
+"malto liquido": {
+"as": "miele",
+"via": "sinonimo di miele"
+},
+"mars": {
+"as": "pesce",
+"via": "Open Food Facts: Atun"
+},
+"martini dry": {
+"as": "liquore",
+"via": "sinonimo di liquore"
+},
+"mazzetto verde piantine papavero campo": {
+"as": null,
+"via": "non trovato"
+},
+"meringa dai bordi rialzati": {
+"as": "zucchero",
+"via": "sinonimo di zucchero"
+},
+"mirin": {
+"as": "liquore",
+"via": "Wikipedia: Il mirin è una sorta di sakè dolce giapponese da cucina. Le "
+},
+"missoltini lario": {
+"as": "pesce",
+"via": "sinonimo di pesce"
+},
+"mistra": {
+"as": "liquore",
+"via": "sinonimo di liquore"
+},
+"monacelle": {
+"as": "pesce",
+"via": "Wikidata: prodotto ittico tradizionale italiano (PAT)"
+},
+"mosto cotto q b": {
+"as": "miele",
+"via": "sinonimo di miele"
+},
+"murici": {
+"as": "cozze",
+"via": "sinonimo di cozze"
+},
+"muso": {
+"as": "fegato",
+"via": "sinonimo di fegato"
+},
+"nel pavese sono usate solo le puntine": {
+"as": "salsiccia",
+"via": "sinonimo di salsiccia"
+},
+"oio semi q b": {
+"as": "olio",
+"via": "simile a \"olio\""
+},
+"orecchia": {
+"as": "fegato",
+"via": "sinonimo di fegato"
+},
+"origanum": {
+"as": null,
+"via": "non trovato"
+},
+"ossi bestia": {
+"as": null,
+"via": "non trovato"
+},
+"pastello": {
+"as": null,
+"via": "non trovato"
+},
+"pesciolini": {
+"as": "pesce",
+"via": "sinonimo di pesce"
+},
+"petali rosa canina rossa coltivata possibilmente senza pesticidi": {
+"as": null,
+"via": "non trovato"
+},
+"petto vitrello da ciascuna": {
+"as": "vitell",
+"via": "simile a \"vitell\""
+},
+"pipette": {
+"as": "pasta",
+"via": "Open Food Facts: pipette rigate n.86"
+},
+"pomidoro maturi": {
+"as": "pomodori",
+"via": "sinonimo di pomodori"
+},
+"prescinsoea": {
+"as": "ricotta",
+"via": "sinonimo di ricotta"
+},
+"qualche fungo secco": {
+"as": null,
+"via": "non trovato"
+},
+"qualche goccia aroma fior d' arancio": {
+"as": "arancia",
+"via": "simile a \"arancia\""
+},
+"qualche seme fieno greco": {
+"as": "spezie",
+"via": "sinonimo di spezie"
+},
+"radice iris": {
+"as": null,
+"via": "non trovato"
+},
+"rane": {
+"as": "pollo",
+"via": "sinonimo di pollo"
+},
+"rapa": {
+"as": "rape",
+"via": "sinonimo di rape"
+},
+"ras al hanout": {
+"as": "spezie",
+"via": "Wikidata: food spice"
+},
+"raschera": {
+"as": "formaggio",
+"via": "sinonimo di formaggio"
+},
+"reale asino": {
+"as": null,
+"via": "non trovato"
+},
+"rhum": {
+"as": "rum",
+"via": "sinonimo di rum"
+},
+"ricopertura": {
+"as": "cioccolato",
+"via": "sinonimo di cioccolato"
+},
+"risoni": {
+"as": "pasta",
+"via": "Wikipedia: tipo di pasta che somiglia a un chicco d'orzo"
+},
+"sake": {
+"as": "vino",
+"via": "Wikipedia: bevanda alcolica giapponese"
+},
+"sanguinaccio": {
+"as": "salame",
+"via": "sinonimo di salame"
+},
+"sbrinz": {
+"as": "parmigiano",
+"via": "sinonimo di parmigiano"
+},
+"scannello serrato": {
+"as": "manzo",
+"via": "sinonimo di manzo"
+},
+"serpillo": {
+"as": "timo",
+"via": "sinonimo di timo"
+},
+"smen": {
+"as": "burro",
+"via": "sinonimo di burro"
+},
+"sottilette": {
+"as": "formaggio",
+"via": "Wikipedia: nome commerciale di vari tipi di formaggio fuso"
+},
+"terlaner weiβburgunder": {
+"as": null,
+"via": "non trovato"
+},
+"testone": {
+"as": "fegato",
+"via": "sinonimo di fegato"
+},
+"tettina": {
+"as": "fegato",
+"via": "sinonimo di fegato"
+},
+"trenette": {
+"as": "pasta",
+"via": "Wikipedia: tipo di pasta"
+},
+"triglia": {
+"as": "pesce",
+"via": "sinonimo di pesce"
+},
+"tufo": {
+"as": null,
+"via": "non trovato"
+},
+"vacherin fribourgeois": {
+"as": "formaggio",
+"via": "sinonimo di formaggio"
+},
+"ventresca": {
+"as": "tonno",
+"via": "sinonimo di tonno"
+},
+"verzini": {
+"as": "salsiccia",
+"via": "sinonimo di salsiccia"
+},
+"zucchetta da pergola": {
+"as": null,
+"via": "non trovato"
+}
+}

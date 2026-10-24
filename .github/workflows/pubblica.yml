@@ -46,8 +46,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898900+github-actions[bot]@users.noreply.github.com"
-          git add www/ricettario.json www/version.json www/immagini.json www/categorie.json
-          git diff --cached --quiet || (git commit -m "Aggiornamento automatico ricettario e versione" && git push)
+          git add www/ricettario.json www/version.json www/immagini.json www/categorie.json scripts/ingredienti_appresi.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Aggiornamento automatico ricettario e versione"
+          # se nel frattempo sono arrivate altre modifiche, si allinea e riprova (i dati generati qui hanno la precedenza)
+          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break; sleep 10; done
       - uses: actions/upload-artifact@v4
         with: { name: www, path: www }
 

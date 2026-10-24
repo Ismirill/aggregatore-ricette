@@ -83,7 +83,7 @@
     {"k":"peperoni","re":"peperon(?!cino)|friggitell","kcal":25,"p":0.9,"c":4.2,"f":0.3,"pz":200,"qb":600,"eur":3.3,"mimit":"peperoni"},
     {"k":"cetrioli","re":"cetriol","kcal":15,"p":0.7,"c":2,"f":0.1,"pz":250,"qb":300,"eur":2.6,"mimit":"cetrioli"},
     {"k":"finocchi","re":"finocch(?!iett)","kcal":15,"p":1.2,"c":1,"f":0,"pz":300,"qb":600,"eur":2.9,"mimit":"finocchi"},
-    {"k":"cavoli","re":"cavol|verza|broccol|cime di rapa|rape|cavoletti|cappuccio|cavolfior|romanesco","kcal":28,"p":3,"c":3,"f":0.3,"pz":800,"qb":800,"eur":2.8,"mimit":"cavolfiori"},
+    {"k":"cavoli","re":"cavol|verz[ae]|broccol|cime di rapa|rape|cavoletti|cappuccio|cavolfior|romanesco","kcal":28,"p":3,"c":3,"f":0.3,"pz":800,"qb":800,"eur":2.8,"mimit":"cavolfiori"},
     {"k":"insalata","re":"insalat|lattug|rucola|songino|valeriana|indivia|scarola|cicori|radicchi|puntarelle|spinac|bietol|biete|erbette|tarassaco|ortica|crescione|catalogna","kcal":20,"p":2,"c":2,"f":0.3,"pz":300,"qb":400,"eur":3.6,"mimit":"insalata|cicori|radicchio"},
     {"k":"funghi secchi","re":"funghi secchi|porcini secchi","kcal":300,"p":30,"c":30,"f":3,"qb":20,"eur":70},
     {"k":"funghi","re":"fungh|porcini|champignon|chiodini|finferli|pleurotus|tartufo","kcal":25,"p":3,"c":1,"f":0.3,"qb":400,"eur":8},
