@@ -172,7 +172,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
     <div class="grid2" style="margin-top:8px"><button class="btn" id="gpsBtn">📍 Usa la mia posizione</button><button class="btn" id="zoneReset">Automatica</button></div></section>
   <section class="sec"><h3>Backup</h3><p class="meta">Copia i dati e incollali su un altro dispositivo per trasferire le ricette.</p>
     <div class="grid2"><button class="btn" id="exp">Copia backup</button><button class="btn" id="imp">Incolla backup</button></div></section>
-  <p class="meta" style="text-align:center;margin:12px 0 0">Versione 15</p>
+  <p class="meta" style="text-align:center;margin:12px 0 0" id="verInfo"></p>
 </dialog>
 <div class="toast" id="toast"></div>
 
@@ -464,13 +464,23 @@ function embedOf(i){
   return null;
 }
 
+/* ---------- Dati aggiornati automaticamente sul sito ---------- */
+// Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
+const APP_VERSION=16; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const SITE='https://ismirill.github.io/aggregatore-ricette/';
+const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
+async function fetchData(name){
+  if(inApp)try{const r=await fetch(SITE+name+'?t='+Math.floor(Date.now()/36e5));if(r.ok)return await r.json()}catch{}
+  return (await fetch(name)).json();
+}
+
 /* ---------- Ricettario (Wikibooks, CC BY-SA 4.0) ---------- */
 let view='mine',book=null,bookInfo=null;
 const src=()=>view==='book'?(book||[]):items;
 async function loadBook(){
   if(book)return;
   try{
-    const d=await (await fetch('ricettario.json')).json();
+    const d=await fetchData('ricettario.json');
     const nut=load('bookNut',{});
     bookInfo=d;
     book=d.recipes.map(r=>{
@@ -550,12 +560,29 @@ $('#gpsBtn').onclick=()=>{
 
 /* ---------- Prezzi per zona (tabella del server, aggiornata ogni mese con i dati MIMIT) ---------- */
 let PT=load('pt',null);
+// Si aggiorna da sola: ogni 6 ore (o al cambio zona) chiede la tabella al server; se la versione dei prezzi
+// è cambiata, i costi di tutte le ricette vengono ricalcolati (sono sempre grammi × prezzo del mese).
 async function loadPT(force){
   if(!aiOn()||(PT&&!force&&PT.t>Date.now()-6*36e5))return PT;
   const z=getZone(),q=new URLSearchParams(z.province?{province:z.province}:z.lat?{lat:z.lat,lon:z.lon}:{});
-  try{PT={...await (await fetch(AI_URL+'/price-table?'+q)).json(),t:Date.now()};save('pt',PT)}catch{}
+  try{
+    const old=PT?.version,n={...await (await fetch(AI_URL+'/price-table?'+q)).json(),t:Date.now()};
+    PT=n;_rx=null;save('pt',PT);
+    if(old&&n.version&&old.split('|')[0]!==n.version.split('|')[0]){toast(`Prezzi aggiornati (${n.period}): costi delle ricette ricalcolati`);render();if(view==='budget'&&load('budgetPlan',null))showPlan(load('budgetPlan',null))}
+  }catch{}
   return PT;
 }
+// Collega il nome di un ingrediente alla voce della tabella prezzi (stessa regola del calcolo della base)
+let _rx=null;
+function keyOf(name){
+  if(!PT?.re)return null;
+  _rx||=Object.entries(PT.re).map(([k,r])=>[k,new RegExp(r,'i')]);
+  let best=null;const t=String(name).toLowerCase();
+  for(const [k,rx] of _rx){const m=t.match(rx);if(m&&(!best||m.index<best[1]||(m.index===best[1]&&m[0].length>best[2])))best=[k,m.index,m[0].length]}
+  return best?.[0]||null;
+}
+// Costo di un ingrediente analizzato dall'AI ricalcolato con i prezzi del mese (se riconosciuto)
+const itemEur=x=>{const k=keyOf(x.name);return k&&x.grams&&PT.eur[k]!=null?x.grams*PT.eur[k]/1000:x.eur};
 const baseS=i=>i.servings||i.s||4;
 // Costo a persona dalla base (grammi per ingrediente) e dai prezzi €/kg della zona
 const costPP=i=>PT&&i.b?i.b.reduce((a,[k,g])=>a+g*(PT.eur[k]??0)/1000,0)/baseS(i):null;
@@ -564,8 +591,8 @@ const costPP=i=>PT&&i.b?i.b.reduce((a,[k,g])=>a+g*(PT.eur[k]??0)/1000,0)/baseS(i
 const euro=v=>v.toLocaleString('it-IT',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2});
 const perPerson=i=>{
   if(i.b&&i.n)return {kcal:i.n.k,p:i.n.p,c:i.n.c,f:i.n.f,eur:costPP(i),base:true};
-  const t=i.nutrition;if(!t?.items?.length)return null;const s=t.servings||i.servings||4;
-  return {kcal:t.items.reduce((a,x)=>a+x.kcal,0)/s,eur:t.items.reduce((a,x)=>a+x.eur,0)/s}};
+  const t=i.nutrition;if(!t?.items?.length)return null;const s=t.servings||i.servings||4,sum=f=>t.items.reduce((a,x)=>a+(+f(x)||0),0)/s;
+  return {kcal:sum(x=>x.kcal),p:sum(x=>x.protein),c:sum(x=>x.carbs),f:sum(x=>x.fat),eur:PT?sum(itemEur):sum(x=>x.eur)}};
 function drawNut(i,n){
   const el=$('#nut');if(!el)return;const p=perPerson(i);
   if(!p){el.innerHTML=aiOn()?`<button type="button" class="btn" id="nutBtn">Calcola calorie e costo</button>`:'';
@@ -579,8 +606,8 @@ function drawNut(i,n){
     return;
   }
   el.innerHTML=`<div class="nbox"><div><b>${Math.round(p.kcal)} kcal</b><span>a persona</span></div><div><b>${euro(p.eur)}</b><span>a persona</span></div><div><b>${euro(p.eur*n)}</b><span>totale per ${n}</span></div></div>
-    <details class="meta"><summary>Stima per ingrediente (prezzi medi in Italia)</summary><ul>${i.nutrition.items.map(x=>`<li>${esc(x.name)}: ${Math.round(x.grams)} g · ${Math.round(x.kcal)} kcal · ${euro(x.eur)}</li>`).join('')}</ul>
-    <p>Valori indicativi per la ricetta originale da ${i.nutrition.servings} persone. Prezzi: ${esc(i.nutrition.prices||'medi indicativi')}.</p>${aiOn()?'<button type="button" class="btn" id="nutRedo">Ricalcola con la mia zona</button>':''}</details>`;
+    <details class="meta"><summary>Stima per ingrediente (prezzi medi in Italia)</summary><ul>${i.nutrition.items.map(x=>`<li>${esc(x.name)}: ${Math.round(x.grams)} g · ${Math.round(x.kcal)} kcal · ${euro(PT?itemEur(x):x.eur)}</li>`).join('')}</ul>
+    <p>Valori indicativi per la ricetta originale da ${i.nutrition.servings} persone. Prezzi: ${PT?`aggiornati a ${esc(PT.period||'')} (${esc(PT.zone)})`:esc(i.nutrition.prices||'medi indicativi')}.</p>${aiOn()?'<button type="button" class="btn" id="nutRedo">Ricalcola con la mia zona</button>':''}</details>`;
   $('#nutRedo')&&($('#nutRedo').onclick=async()=>{el.innerHTML='<span class="meta">Ricalcolo…</span>';try{await computeNutrition(i)}catch(e){toast(aiErr(e))}drawNut(i,n)});
 }
 // Chiede al server calorie e costo per ingrediente e li salva nella ricetta
@@ -604,7 +631,7 @@ const SHELL=/gamber|scampi|aragost|astice|granch|mazzancoll|canocch|cozze|mitili
 const LEGUMI=/fagiol|\bceci\b|lenticch|\bfave\b|cicerch|lupini|piselli|borlotti|cannellini|\bsoia\b|tofu|tempeh/;
 const KCAL={lunch:700,dinner:650}; // per persona, pasto completo
 let SEASON=null;
-async function loadSeason(){if(!SEASON)try{SEASON=await (await fetch('stagioni.json')).json()}catch{SEASON={frutta:{},verdura:{}}}return SEASON}
+async function loadSeason(){if(!SEASON)try{SEASON=await fetchData('stagioni.json')}catch{SEASON={frutta:{},verdura:{}}}return SEASON}
 const stem=w=>w.toLowerCase().replace(/[^a-zà-ù ]/g,'').split(' ').map(x=>x.slice(0,5)).join(' ');
 
 function initBudget(){
@@ -777,7 +804,9 @@ function showPlan(P){
   const rule=(l,ok)=>`<span class="bdg ${ok?'okb':'kob'}">${ok?'✓':'!'} ${l}</span>`;
   const veg=(SEASON?.verdura[o.month]||[]).filter(x=>!o.avoid.some(w=>x.includes(w)));
   const days=week?GIORNI.map((g,d)=>({g,ms:res.plan.filter(m=>m.d===d)})):[{g:'Il tuo pasto',ms:res.plan}];
+  const stale=PT?.period&&P.period&&PT.period!==P.period;
   $('#bOut').innerHTML=`
+    ${stale?`<div class="warn">I prezzi sono stati aggiornati a ${esc(PT.period)} dopo la creazione di questo menu (${esc(P.period)}). <button class="btn" id="bRefresh">Ricalcola menu</button></div>`:''}
     ${over?(res.cost<=o.budget*1.04?`<div class="warn">Il menu supera di poco il budget (${euro(res.cost-o.budget)} in più): puoi rigenerarlo o sostituire un piatto.</div>`
       :`<div class="warn">Con ${euro(o.budget)} non si riesce a coprire tutto: il menu più economico che ho trovato costa circa <b>${euro(res.cost)}</b>. Prova ad alzare il budget o a ridurre i pasti.</div>`):''}
     <div class="nbox"><div><b>${euro(res.cost)}</b><span>costo stimato su ${euro(o.budget)}</span></div>
@@ -794,6 +823,7 @@ function showPlan(P){
     <p class="meta">Costi stimati con i prezzi medi${P.period?` dell'Osservatorio Prezzi MIMIT (${esc(P.period)}, ${esc(P.zone)})`:''} e prezzi indicativi; calorie e nutrienti medi, indicativi. Pasti scelti tra ${P.n} ricette compatibili${P.noCost?`; ${P.noCost} delle tue ricette sono escluse perché senza costo calcolato (aprile e tocca "Calcola calorie e costo")`:''}.</p>
     <div class="row"><button class="btn pri" id="bAgain">🔄 Rigenera menu</button></div>`;
   $('#bAgain').onclick=()=>$('#bForm').requestSubmit();
+  if($('#bRefresh'))$('#bRefresh').onclick=()=>$('#bForm').requestSubmit();
   $('#bOut').querySelectorAll('.dish[data-id]').forEach(el=>el.onclick=async()=>{await loadBook();const r=(el.dataset.book?book:items).find(x=>x.id===el.dataset.id);if(r)openDetail(r)});
   $('#shop').ontoggle=async()=>{if(!$('#shop').open)return;await loadBook();$('#shopList').innerHTML=shopping(P)};
 }
@@ -959,6 +989,13 @@ if(p.has('url')||p.has('text')){receive({url:p.get('url'),text:p.get('text'),tit
 window.onShared();
 
 fillSelects();render();
+loadPT().then(()=>PT&&render());
+$('#verInfo').textContent='Versione '+APP_VERSION;
+// Nell'APK: avvisa se sul sito c'è una versione più recente da installare
+if(inApp)fetch(SITE+'version.json?t='+Date.now()).then(r=>r.json()).then(v=>{if(v.version>APP_VERSION){
+  const b=document.createElement('div');b.className='warn';b.style.margin='8px 16px';
+  b.innerHTML=`È disponibile una nuova versione dell'app. <a class="btn pri" href="${esc(v.apk)}" target="_blank" rel="noopener">Scarica e installa</a>`;
+  document.querySelector('main').prepend(b);$('#verInfo').textContent+=` · disponibile la ${v.version}`}}).catch(()=>{});
 if('serviceWorker' in navigator&&location.protocol==='https:'&&location.hostname!=='localhost')navigator.serviceWorker.register('sw.js');
 </script>
 </body>

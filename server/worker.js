@@ -216,7 +216,10 @@ async function priceTable(env, b, req) {
     eur[it.k] = v ?? it.eur;
     src[it.k] = v == null ? 'i' : 'm'; // i = indicativo, m = MIMIT
   }
-  return { zone: official?.zone || 'media nazionale', period: official?.period || null, eur, src };
+  // version cambia a ogni aggiornamento dei prezzi: l'app la confronta e ricalcola i costi delle ricette
+  const d = await prices(env);
+  const version = `${d.period || ''}|${(d.updated || '').slice(0, 10)}|${ING.items.length}`;
+  return { zone: official?.zone || 'media nazionale', period: official?.period || null, version, eur, src, re: Object.fromEntries(ING.items.map(x => [x.k, x.re])) };
 }
 
 async function nutrition(env, b, req) {

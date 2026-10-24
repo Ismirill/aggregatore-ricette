@@ -1,0 +1,83 @@
+# Tutto automatico, nessuna operazione manuale:
+# - ogni mese (giorno 3) scarica le ricette nuove da Wikibooks e ricalcola la base (grammi, calorie, nutrienti)
+# - a ogni modifica, e dopo l'aggiornamento mensile, pubblica il sito e compila l'APK (release "apk")
+# I prezzi non passano da qui: li aggiorna ogni giorno il server Cloudflare con i dati MIMIT.
+name: Aggiorna e pubblica
+
+on:
+  schedule:
+    - cron: '0 5 3 * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['www/**', 'android/**', 'scripts/**', 'server/ingredienti.json', 'package*.json', 'capacitor.config.json', '.github/workflows/**']
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pubblica
+  cancel-in-progress: false
+
+jobs:
+  ricettario:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Ricettario da Wikibooks (solo aggiornamento mensile o manuale)
+        if: github.event_name != 'push'
+        run: python3 scripts/wikibooks.py
+      - name: Base delle ricette (grammi, calorie, nutrienti)
+        run: python3 scripts/base_ricette.py
+      - name: Versione pubblicata
+        run: |
+          v=$(grep -oE 'const APP_VERSION=[0-9]+' www/index.html | grep -oE '[0-9]+$')
+          echo "{\"version\":$v,\"apk\":\"https://github.com/${{ github.repository }}/releases/download/apk/AggregatoreRicette.apk\"}" > www/version.json
+      - name: Salva i dati aggiornati
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898900+github-actions[bot]@users.noreply.github.com"
+          git add www/ricettario.json www/version.json
+          git diff --cached --quiet || (git commit -m "Aggiornamento automatico ricettario e versione" && git push)
+      - uses: actions/upload-artifact@v4
+        with: { name: www, path: www }
+
+  sito:
+    needs: ricettario
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: '${{ steps.deploy.outputs.page_url }}' }
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: www, path: www }
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: www }
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  apk:
+    needs: ricettario
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: www, path: www }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21' }
+      - name: Compila APK
+        env: { BUILD_NUMBER: '${{ github.run_number }}' }
+        run: |
+          npm ci
+          npx cap sync android
+          cd android && ./gradlew assembleDebug --no-daemon
+      - name: Pubblica APK nella release "apk"
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk AggregatoreRicette.apk
+          gh release view apk >/dev/null 2>&1 || gh release create apk --title "App Android" --notes "Ultima versione dell'app, aggiornata automaticamente."
+          gh release upload apk AggregatoreRicette.apk --clobber
