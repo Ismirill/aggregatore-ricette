@@ -581,6 +581,39 @@ function showPhotoResults(img,r){
   };
 }
 
+/* ---------- Copertine dei post social ---------- */
+// Le immagini di Instagram/Facebook/TikTok scadono e non si possono mostrare da altri siti: al salvataggio la copertina
+// arriva tramite il server, viene rimpicciolita e salvata dentro la ricetta (circa 20 KB), così resta anche offline.
+const SOCIAL_IMG=/(^|\.)(cdninstagram\.com|fbcdn\.net|tiktokcdn(-[a-z]+)?\.com|tiktokcdn-eu\.com|ibytedtos\.com)$/;
+const isSocialImg=u=>{try{return SOCIAL_IMG.test(new URL(u).hostname)}catch{return false}};
+async function keepThumb(url){
+  if(!url||String(url).startsWith('data:'))return url;
+  try{
+    const r=await fetch(isSocialImg(url)&&aiOn()?AI_URL+'/thumb?u='+encodeURIComponent(url):url);
+    if(!r.ok)throw 0;
+    const bmp=await createImageBitmap(await r.blob()),k=Math.min(1,480/Math.max(bmp.width,bmp.height));
+    const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
+    c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+    return c.toDataURL('image/jpeg',.72);
+  }catch{return url}
+}
+// Ricette già salvate con copertina social scaduta: riprende quella aggiornata del post e la conserva
+async function repairThumbs(){
+  if(!aiOn())return;
+  const todo=items.filter(i=>i.image&&isSocialImg(i.image)||(!i.image&&['Instagram','Facebook','TikTok'].includes(i.source))).slice(0,8);
+  let changed=false;
+  for(const i of todo){
+    let img=i.image;
+    try{
+      if(i.source==='TikTok'){const j=await (await fetch('https://www.tiktok.com/oembed?url='+encodeURIComponent(i.url))).json();img=j.thumbnail_url||img}
+      else{const p=await server('/preview',{url:i.url});img=parseHtml(p.html).image||img}
+    }catch{}
+    const kept=await keepThumb(img);
+    if(kept&&kept.startsWith('data:')){i.image=kept;changed=true}
+  }
+  if(changed){save('items',items);render()}
+}
+
 /* ---------- Video ---------- */
 function embedOf(i){
   const u=i.finalUrl||i.url;let m;
@@ -594,7 +627,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=31; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=32; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1251,6 +1284,7 @@ $('#f').onsubmit=e=>{
   items=editing?items.map(i=>i.id===rec.id?rec:i):[rec,...items];
   if(editing?.nutrition?.key===rec.ingredients.join('|')+'#'+(rec.servings||4))rec.nutrition=editing.nutrition;
   save('items',items);$('#dlg').close();fillSelects();render();toast('Salvata in '+rec.cat);
+  if(rec.image&&!String(rec.image).startsWith('data:'))keepThumb(rec.image).then(img=>{if(img!==rec.image){const it=items.find(x=>x.id===rec.id);if(it){it.image=img;save('items',items);render()}}});
   if(aiOn()&&rec.ingredients.length&&!rec.nutrition)computeNutrition(items.find(x=>x.id===rec.id)).catch(()=>{});
 };
 $('#cancel').onclick=()=>$('#dlg').close();
@@ -1300,6 +1334,7 @@ window.onShared();
 
 fillSelects();render();
 loadPT().then(()=>PT&&render());
+setTimeout(repairThumbs,1500);
 $('#verInfo').textContent='Versione '+APP_VERSION;
 // Nell'APK: avvisa se sul sito c'è una versione più recente da installare
 if(inApp)fetch(SITE+'version.json?t='+Date.now()).then(r=>r.json()).then(v=>{if(v.version>APP_VERSION){

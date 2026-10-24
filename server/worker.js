@@ -260,11 +260,13 @@ async function preview(b) {
     return null;
   };
   // Instagram: la pagina di incorporamento ufficiale (pensata per mostrare i post su altri siti) ha la didascalia completa
-  let embedCaption = '';
+  let embedCaption = '', embedImage = '';
   const ig = u.hostname.match(/instagram\.com$/) && u.pathname.match(/^\/(?:[\w.]+\/)?(p|reels?|tv)\/([\w-]+)/);
   if (ig) {
     const e = await get(`https://www.instagram.com/${ig[1] === 'reels' ? 'reel' : ig[1]}/${ig[2]}/embed/captioned/`);
     const m = e && e.html.match(/class="Caption"[^>]*>([\s\S]*?)<\/div>/);
+    const im = e && e.html.match(/class="EmbeddedMediaImage"[^>]*src="([^"]+)"/);
+    if (im) embedImage = im[1].replace(/&amp;/g, '&');
     if (m) embedCaption = unescape(m[1].replace(/<br\s*\/?>/gi, '\n').replace(/<a [^>]*class="CaptionUsername"[^>]*>[\s\S]*?<\/a>/i, '')).replace(/View all \d+ comments\s*$/i, '').trim();
   }
   const page = await get(u);
@@ -278,7 +280,7 @@ async function preview(b) {
   // si restituisce una pagina minima che l'app legge come se l'avesse scaricata lei
   const tag = (k, v) => v ? `<meta property="${k}" content="${v.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">` : '';
   const mini = `<html><head><title>${(unescape((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || '')).replace(/</g, '&lt;')}</title>`
-    + ['og:title', 'og:image', 'og:site_name', 'description'].map(k => tag(k, meta(k))).join('')
+    + ['og:title', 'og:site_name', 'description'].map(k => tag(k, meta(k))).join('') + tag('og:image', meta('og:image') || embedImage)
     + tag('og:description', embedCaption.length > meta('og:description').length ? embedCaption : meta('og:description'))
     + ld.map(x => `<script type="application/ld+json">${x}</script>`).join('') + '</head></html>';
   return { html: mini, url: r.url };
@@ -317,6 +319,19 @@ export default {
     if (req.method === 'GET' && path === '/')
       return new Response('Server AI dell\'Aggregatore Ricette: attivo. Si usa dall\'app, non dal browser.\nApp: https://ismirill.github.io/aggregatore-ricette/\n',
         { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+    // Copertina di un post social: i CDN di Instagram/Facebook/TikTok non permettono di mostrare le immagini su altri siti
+    // e i loro indirizzi scadono. Solo quei server di immagini, solo immagini, massimo 3 MB.
+    if (req.method === 'GET' && path === '/thumb') {
+      let t;
+      try { t = new URL(new URL(req.url).searchParams.get('u') || ''); } catch { return reply(origin, { error: 'Link non valido' }, 400); }
+      if (t.protocol !== 'https:' || !/(^|\.)(cdninstagram\.com|fbcdn\.net|tiktokcdn(-[a-z]+)?\.com|tiktokcdn-eu\.com|ibytedtos\.com)$/.test(t.hostname)) return reply(origin, { error: 'Immagine non consentita' }, 403);
+      const ip = req.headers.get('CF-Connecting-IP') || 'local';
+      if (env.LIMITER && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
+      const r = await fetch(t, { headers: { 'User-Agent': PREVIEW_UA, Accept: 'image/*' } }).catch(() => null);
+      const type = r?.headers.get('content-type') || '';
+      if (!r?.ok || !type.startsWith('image/') || +(r.headers.get('content-length') || 0) > 3e6) return reply(origin, { error: 'Immagine non disponibile' }, 502);
+      return new Response(r.body, { headers: { 'Content-Type': type, 'Cache-Control': 'public, max-age=86400', ...cors(origin) } });
+    }
     if (req.method === 'GET' && path === '/price-table') {
       const u = new URL(req.url);
       const b = { province: u.searchParams.get('province') || '', lat: u.searchParams.has('lat') ? +u.searchParams.get('lat') : undefined, lon: u.searchParams.has('lon') ? +u.searchParams.get('lon') : undefined };
