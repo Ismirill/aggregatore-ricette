@@ -1,8 +1,9 @@
-const C='ricette-v11',ASSETS=['./','./index.html','./manifest.webmanifest','./icon.svg'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(ASSETS))));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x))))));
-// App shell dalla cache, API/immagini dalla rete con fallback alla cache
+const C='ricette-v12',ASSETS=['./','./index.html','./manifest.webmanifest','./icon.svg'];
+self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>c.addAll(ASSETS)))});
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));
+// Sempre dalla rete (senza cache HTTP per le pagine dell'app), con la copia salvata come riserva offline
 self.addEventListener('fetch',e=>{
   if(e.request.method!=='GET')return;
-  e.respondWith(fetch(e.request).then(r=>{const cp=r.clone();caches.open(C).then(c=>c.put(e.request,cp));return r}).catch(()=>caches.match(e.request)));
+  const own=new URL(e.request.url).origin===location.origin;
+  e.respondWith(fetch(own?new Request(e.request.url,{cache:'no-cache'}):e.request).then(r=>{const cp=r.clone();caches.open(C).then(c=>c.put(e.request,cp));return r}).catch(()=>caches.match(e.request)));
 });
