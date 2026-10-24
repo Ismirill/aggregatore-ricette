@@ -468,8 +468,13 @@ async function analyze(url,pasted){
       out={title:j.title||'',image:j.thumbnail_url||'',author:j.author_name||''};
     }
     if(src!=='YouTube'&&src!=='TikTok'){
-      const res=await fetch(url,{signal:ctl.signal});out=parseHtml(await res.text());
-      if(res.url&&res.url!==url)out.finalUrl=res.url;
+      let html='',fin='';
+      // il browser legge la pagina se il sito lo permette (nell'APK quasi sempre); altrimenti l'anteprima arriva dal server
+      try{const res=await fetch(url,{signal:ctl.signal});html=await res.text();fin=res.url}catch{}
+      const got=html&&parseHtml(html);
+      if((!got||!(got.caption||got.ingredients?.length))&&aiOn())try{const p=await server('/preview',{url});html=p.html;fin=p.url}catch{}
+      out=parseHtml(html||'<html></html>');
+      if(fin&&fin!==url)out.finalUrl=fin;
     }
   }catch{}
   // testo incollato o arrivato dal Comando Rapido: ha la precedenza se è più completo di quello letto
@@ -565,7 +570,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=24; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=25; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){

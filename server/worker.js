@@ -243,6 +243,30 @@ Rispondi solo con JSON: {"items":[{"name":"","grams":0,"kcal":0,"protein":0,"car
   return { result: { servings, items, prices: official ? `Osservatorio Prezzi MIMIT, ${official.period} · ${official.zone}` : 'prezzi medi indicativi', zone: official?.zone || null } };
 }
 
+// Anteprima di una pagina per conto dell'app: i browser non possono leggere direttamente Facebook, Instagram e molti siti.
+// Il server si identifica in modo trasparente come "AggregatoreRicette" e usa solo i dati pubblici delle anteprime dei link
+// (titolo, descrizione, immagine) e i blocchi schema.org Recipe.
+const PREVIEW_UA = 'AggregatoreRicette/1.0 (+https://ismirill.github.io/aggregatore-ricette/)';
+async function preview(b) {
+  let u;
+  try { u = new URL(str(b.url, 2000)); } catch { throw Object.assign(new Error('Link non valido'), { status: 400 }); }
+  if (!/^https?:$/.test(u.protocol) || /^(localhost|127\.|10\.|192\.168\.|169\.254\.|0\.|\[)/.test(u.hostname)) throw Object.assign(new Error('Link non valido'), { status: 400 });
+  const r = await fetch(u, { headers: { 'User-Agent': PREVIEW_UA, 'Accept-Language': 'it-IT,it;q=0.9' }, redirect: 'follow' });
+  if (!r.ok) throw Object.assign(new Error('Pagina non disponibile'), { status: 502 });
+  const html = (await r.text()).slice(0, 2_000_000);
+  const meta = k => {
+    const m = html.match(new RegExp(`<meta[^>]+(?:property|name)=["']${k}["'][^>]*content=["']([^"']*)["']`, 'i')) || html.match(new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]*(?:property|name)=["']${k}["']`, 'i'));
+    return m ? unescape(m[1]) : '';
+  };
+  const ld = [...html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)].map(m => m[1]).filter(x => /recipe/i.test(x)).slice(0, 3);
+  // si restituisce una pagina minima che l'app legge come se l'avesse scaricata lei
+  const tag = (k, v) => v ? `<meta property="${k}" content="${v.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">` : '';
+  const mini = `<html><head><title>${(unescape((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || '')).replace(/</g, '&lt;')}</title>`
+    + ['og:title', 'og:description', 'og:image', 'og:site_name', 'description'].map(k => tag(k, meta(k))).join('')
+    + ld.map(x => `<script type="application/ld+json">${x}</script>`).join('') + '</head></html>';
+  return { html: mini, url: r.url };
+}
+
 export default {
   // Aggiornamento automatico dei prezzi: un lotto di province ogni giorno
   async scheduled(event, env, ctx) {
@@ -273,12 +297,12 @@ export default {
       if (!env.ADMIN_TOKEN || req.headers.get('X-Admin') !== env.ADMIN_TOKEN) return reply(origin, { error: 'Non autorizzato' }, 403);
       try { return reply(origin, await refreshBatch(env)); } catch (e) { return reply(origin, { error: e.message }, 503); }
     }
-    if (req.method !== 'POST' || !['/analyze', '/photo', '/nutrition'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
+    if (req.method !== 'POST' || !['/analyze', '/photo', '/nutrition', '/preview'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';
     if (env.LIMITER && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
     try {
       const body = await req.json();
-      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : await analyze(env, body));
+      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await preview(body) : await analyze(env, body));
     } catch (e) {
       // Quota giornaliera gratuita esaurita o errore del modello
       const limit = e.status === 429 || /neuron|quota|limit|4006/i.test(e.message);
