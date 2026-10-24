@@ -224,6 +224,8 @@ details summary{cursor:pointer}
   <h2 id="dlgT">Nuova ricetta</h2>
   <form id="f">
     <label>Link del video o della ricetta<span class="inl" style="margin:0"><input name="url" type="url" required placeholder="Incolla qui il link…"><button type="button" class="btn pri" id="analyzeBtn">Analizza</button></span></label>
+    <label id="capL" hidden>Descrizione del post <span class="meta" style="font-weight:400">— se l'app non la legge da sola: tieni premuto il testo del post, copialo e incollalo qui</span>
+      <span class="inl" style="margin:0;align-items:flex-start"><textarea name="caption" rows="3" placeholder="Ingredienti, dosi, procedimento…"></textarea><button type="button" class="btn" id="pasteCap">📋 Incolla</button></span></label>
     <div class="pv" id="pv"></div>
     <label>Titolo<input name="title" placeholder="Es. Carbonara cremosa"></label>
     <label>Tipo di piatto<select name="cat" id="catSel"></select></label>
@@ -422,7 +424,10 @@ function stepsOf(ins){
 function parseHtml(html){
   const d=new DOMParser().parseFromString(html,'text/html');
   const m=p=>d.querySelector(`meta[property="${p}"],meta[name="${p}"]`)?.content||'';
-  const out={title:m('og:title')||m('twitter:title')||d.title||'',image:m('og:image')||m('twitter:image')||'',author:m('og:site_name'),caption:m('og:description')||m('description')};
+  const clean=t=>String(t||'').replace(/^(?:[^|]{0,80}(?:visualizzazioni|views|reazioni|reactions|mi piace|likes|commenti|comments)[^|]{0,80}\|\s*)/i,'').trim();
+  // la didascalia più completa tra titolo e descrizione (Facebook mette quella intera nel titolo della pagina)
+  const caption=[clean(m('og:title')),clean(d.title),m('og:description'),m('description')].sort((a,b)=>b.length-a.length)[0]||'';
+  const out={title:clean(m('og:title'))||clean(m('twitter:title'))||clean(d.title)||'',image:m('og:image')||m('twitter:image')||'',author:m('og:site_name'),caption};
   let r=null;
   d.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{if(!r)try{r=findRecipe(JSON.parse(s.textContent))}catch{}});
   if(r){
@@ -451,7 +456,7 @@ function parseCaption(text){
   return res;
 }
 async function getJson(u,ctl){return (await fetch(u,{signal:ctl.signal})).json()}
-async function analyze(url){
+async function analyze(url,pasted){
   const ctl=new AbortController();setTimeout(()=>ctl.abort(),10000);
   const src=sourceOf(url);let out={};
   try{
@@ -466,7 +471,10 @@ async function analyze(url){
       const res=await fetch(url,{signal:ctl.signal});out=parseHtml(await res.text());
       if(res.url&&res.url!==url)out.finalUrl=res.url;
     }
-  }catch{if(!Object.keys(out).length)return null}
+  }catch{}
+  // testo incollato o arrivato dal Comando Rapido: ha la precedenza se è più completo di quello letto
+  if(pasted&&pasted.length>(out.caption||'').length)out={...out,caption:pasted,title:out.title&&out.title.length>8?out.title:pasted};
+  if(!out.caption&&!out.title&&!out.ingredients?.length)return null;
   if(!out.ingredients?.length&&out.caption){
     const pc=parseCaption(out.caption);
     out.ingredients=pc.ingredients;if(!out.steps?.length)out.steps=pc.steps;out.time=out.time||pc.time;out.servings=out.servings||pc.servings;
@@ -557,7 +565,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=23; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=24; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1078,7 +1086,7 @@ function openForm(data={}){
   editing=data.id?data:null;
   const f=$('#f');f.reset();
   $('#catSel').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('');
-  f.url.value=data.url||'';f.title.value=data.title||'';f.tags.value=(data.tags||[]).join(', ');f.note.value=data.note||'';
+  f.url.value=data.url||'';f.title.value=data.title||'';f.caption.value=data.desc||'';$('#capL').hidden=!(data.desc||['Facebook','Instagram'].includes(sourceOf(data.url||'')));f.tags.value=(data.tags||[]).join(', ');f.note.value=data.note||'';
   f.cat.value=data.cat||(cur!=='Tutte'?cur:'Altro');f.time.value=data.time||'';f.servings.value=data.servings||'';f.country.value=data.country||'';f.region.value=data.region||'';
   f.ingredients.value=(data.ingredients||[]).join('\n');f.steps.value=(data.steps||[]).join('\n');
   setDiets(data.diets||[]);setRating(data.rating||0);
@@ -1092,9 +1100,11 @@ function openForm(data={}){
 function showPv(msg){$('#pv').innerHTML=(extra.image?`<img src="${esc(extra.image)}" alt="" referrerpolicy="no-referrer">`:'')+`<span>${esc(msg||sourceOf($('#f').url.value))}</span>`}
 async function runAnalysis(url,overwrite){
   const f=$('#f');showPv('Analizzo la ricetta…');
-  const a=await analyze(url);
+  const social=['Facebook','Instagram'].includes(sourceOf(url));
+  $('#capL').hidden=!social&&!f.caption.value;
+  const a=await analyze(url,f.caption.value.trim());
   if(f.url.value!==url)return;
-  if(!a){showPv('Non riesco a leggere la pagina: compila tu i dati');return}
+  if(!a){$('#capL').hidden=false;showPv(social?'Non riesco a leggere il post: copia la sua descrizione e incollala qui sotto':'Non riesco a leggere la pagina: compila tu i dati');if(social)f.caption.focus();return}
   Object.assign(extra,{image:a.image||extra.image,author:a.author||extra.author,caption:a.caption||extra.caption,videoId:a.videoId||extra.videoId,videoEmbed:a.videoEmbed||extra.videoEmbed,finalUrl:a.finalUrl||extra.finalUrl});
   const put=(el,v)=>{if(v&&(overwrite||!el.value))el.value=v};
   put(f.title,a.title);put(f.time,a.time);put(f.servings,a.servings);
@@ -1124,7 +1134,9 @@ async function runAnalysis(url,overwrite){
     }catch(e){showPv(aiErr(e))}
   }
 }
-$('#f').url.addEventListener('change',e=>{const u=extractUrl(e.target.value);if(u){e.target.value=u;runAnalysis(u,false)}});
+$('#f').url.addEventListener('change',e=>{const u=extractUrl(e.target.value);if(u){e.target.value=u;$('#capL').hidden=!['Facebook','Instagram'].includes(sourceOf(u))&&!$('#f').caption.value;runAnalysis(u,false)}});
+$('#pasteCap').onclick=async()=>{try{const t=await navigator.clipboard.readText();if(t){$('#f').caption.value=t;const u=extractUrl($('#f').url.value);if(u)runAnalysis(u,true)}else toast('Gli appunti sono vuoti')}catch{toast('Tieni premuto nel campo e scegli Incolla')}};
+$('#f').caption.addEventListener('change',()=>{const u=extractUrl($('#f').url.value);if(u&&$('#f').caption.value.trim().length>20)runAnalysis(u,true)});
 $('#analyzeBtn').onclick=()=>{const u=extractUrl($('#f').url.value);if(!u){toast('Incolla prima un link');return}$('#f').url.value=u;runAnalysis(u,!!editing)};
 $('#reanalyze').onclick=()=>{const u=extractUrl($('#f').url.value);if(u)runAnalysis(u,true);else{
   const f=$('#f'),c=classify({title:f.title.value,ingredients:lines(f.ingredients.value),caption:extra.caption});if(c.cat)f.cat.value=c.cat;setDiets(c.diets);if(c.country)f.country.value=c.country;if(c.region)f.region.value=c.region}};
@@ -1176,11 +1188,11 @@ function receive(d){
   const ex=items.find(i=>i.url===url);
   if(ex){toast('Ricetta già salvata');openDetail(ex);return}
   const title=(d.title&&!extractUrl(d.title))?d.title:'';
-  openForm({url,title});
+  openForm({url,title,desc:d.desc||''});
 }
 window.onShared=()=>{const s=window.AndroidShare?.take();if(s)receive(JSON.parse(s))};
 const p=new URLSearchParams(location.search);
-if(p.has('url')||p.has('text')){receive({url:p.get('url'),text:p.get('text'),title:p.get('title')});history.replaceState(null,'',location.pathname)}
+if(p.has('url')||p.has('text')){receive({url:p.get('url'),text:p.get('text'),title:p.get('title'),desc:p.get('desc')});history.replaceState(null,'',location.pathname)}
 window.onShared();
 
 fillSelects();render();
