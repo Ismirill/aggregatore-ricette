@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aggregatore Ricette</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="theme-color" content="#c8553d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+:root{--bg:#faf7f2;--card:#fff;--fg:#2b2620;--mut:#7a7066;--acc:#c8553d;--bd:#e8e1d6}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1a17;--card:#26231f;--fg:#eee6db;--mut:#a39888;--acc:#e07a5f;--bd:#3a352e}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);padding-bottom:90px}
+header{position:sticky;top:0;z-index:2;background:var(--bg);padding:calc(12px + env(safe-area-inset-top)) 16px 8px;border-bottom:1px solid var(--bd)}
+.top{display:flex;align-items:center;gap:8px}
+h1{margin:0;font-size:1.25rem;flex:1}
+input,select,textarea{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--fg)}
+#q{margin:10px 0 8px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chip{flex:none;border:1px solid var(--bd);background:var(--card);color:var(--fg);padding:6px 12px;border-radius:999px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+main{max-width:900px;margin:0 auto;padding:12px 16px}
+.list{display:grid;gap:10px}
+.item{display:flex;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:14px;overflow:hidden;color:inherit;text-decoration:none}
+.item a{color:inherit;text-decoration:none}
+.item img,.item .ph{width:96px;min-height:96px;object-fit:cover;flex:none;background:var(--bd);display:flex;align-items:center;justify-content:center;font-size:2rem}
+.item .b{padding:10px 4px 10px 0;flex:1;min-width:0}
+.item h3{margin:0 0 4px;font-size:.98rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.meta{font-size:.78rem;color:var(--mut)}
+.tags{margin-top:4px;font-size:.78rem;color:var(--acc)}
+.ed{align-self:flex-start;background:none;border:none;color:var(--mut);font-size:1.2rem;padding:10px 12px;cursor:pointer}
+.empty{color:var(--mut);text-align:center;padding:40px 10px;line-height:1.5}
+.btn{border:1px solid var(--bd);background:var(--card);color:var(--fg);padding:10px 16px;border-radius:999px;font:inherit;cursor:pointer}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.icon{background:none;border:none;font-size:1.3rem;color:var(--fg);cursor:pointer;padding:6px}
+.fab{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;border:none;background:var(--acc);color:#fff;font-size:2rem;box-shadow:0 4px 14px #0004;cursor:pointer}
+dialog{border:none;border-radius:16px;max-width:560px;width:calc(100% - 24px);background:var(--card);color:var(--fg);padding:18px}
+dialog::backdrop{background:#0008}
+dialog h2{margin:0 0 12px;font-size:1.15rem}
+form{display:grid;gap:10px}
+label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
+.pv{display:flex;gap:10px;align-items:center;min-height:20px;font-size:.85rem;color:var(--mut)}
+.pv img{width:64px;height:64px;object-fit:cover;border-radius:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:6px}
+.row .sp{flex:1}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.9rem;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><h1>🍝 Le mie ricette</h1><button class="icon" id="setBtn" aria-label="Impostazioni">⚙︎</button></div>
+  <input id="q" type="search" placeholder="Cerca titolo, etichetta, nota…">
+  <div class="chips" id="chips"></div>
+</header>
+<main><div class="list" id="list"></div></main>
+<button class="fab" id="add" aria-label="Aggiungi link">+</button>
+
+<dialog id="dlg">
+  <h2 id="dlgT">Nuova ricetta</h2>
+  <form id="f">
+    <label>Link<input name="url" type="url" required placeholder="https://…"></label>
+    <div class="pv" id="pv"></div>
+    <label>Titolo<input name="title" placeholder="Es. Carbonara cremosa"></label>
+    <label>Categoria<select name="cat" id="catSel"></select></label>
+    <label>Etichette (separate da virgola)<input name="tags" placeholder="veloce, vegetariano"></label>
+    <label>Note<textarea name="note" rows="2"></textarea></label>
+    <div class="row">
+      <button type="button" class="btn" id="del" hidden>Elimina</button><span class="sp"></span>
+      <button type="button" class="btn" id="cancel">Annulla</button>
+      <button class="btn pri">Salva</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="set">
+  <h2>Impostazioni</h2>
+  <form id="catF"><label>Nuova categoria<input name="c" placeholder="Es. Lievitati"></label><div class="row"><button class="btn">Aggiungi</button></div></form>
+  <p class="meta">Backup: copia i dati e incollali su un altro dispositivo per trasferire le ricette.</p>
+  <div class="row"><button class="btn" id="exp">Copia backup</button><button class="btn" id="imp">Incolla backup</button><button class="btn pri" id="setClose">Chiudi</button></div>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200)};
+
+const DEFAULT_CATS=['Antipasti','Primi','Secondi','Contorni','Piatti unici','Dolci','Altro'];
+let cats=load('cats',DEFAULT_CATS), items=load('items',[]), cur='Tutte', editing=null;
+
+// Parole chiave per proporre la categoria dal titolo
+const GUESS={
+  'Primi':/pasta|spaghett|risott|lasagn|gnocch|carbonara|tagliatell|penne|ravioli|tortellin|zupp|minestr|vellutat|amatriciana|pesto|linguine|fusilli|orecchiette/,
+  'Secondi':/pollo|carne|manzo|maiale|pesce|salmone|tonno|polpett|arrosto|filetto|bistecca|scaloppin|cotolett|spezzatino|gamber|merluzzo|tacchino/,
+  'Contorni':/contorn|insalat|patat|verdur|zucchin|melanzan|spinaci|funghi|peperon|carciof|broccol/,
+  'Dolci':/torta|dolce|tiramis|biscott|cioccolat|crostata|cheesecake|gelato|muffin|dessert|crema|panna cotta|ciambell/,
+  'Antipasti':/antipast|bruschett|finger|tartin|aperitiv|crostin/,
+  'Piatti unici':/pizza|focaccia|piatto unico|burger|panin|piadin|tost|quiche|torta salata/
+};
+const guess=t=>{t=(t||'').toLowerCase();for(const c in GUESS)if(cats.includes(c)&&GUESS[c].test(t))return c;return null};
+
+function sourceOf(url){
+  try{const h=new URL(url).hostname.replace(/^www\.|^m\./,'');
+    if(/tiktok/.test(h))return 'TikTok';if(/instagram/.test(h))return 'Instagram';
+    if(/youtu/.test(h))return 'YouTube';if(/facebook|fb\.watch/.test(h))return 'Facebook';
+    if(/pinterest|pin\.it/.test(h))return 'Pinterest';return h}catch{return ''}
+}
+const extractUrl=t=>(String(t||'').match(/https?:\/\/[^\s]+/)||[])[0];
+
+// Recupera titolo e immagine di anteprima (oEmbed per TikTok/YouTube, tag og: per il resto)
+async function preview(url){
+  const ctl=new AbortController();setTimeout(()=>ctl.abort(),8000);
+  const src=sourceOf(url);
+  try{
+    if(src==='TikTok'||src==='YouTube'){
+      const ep=src==='TikTok'?'https://www.tiktok.com/oembed?url=':'https://www.youtube.com/oembed?format=json&url=';
+      const j=await (await fetch(ep+encodeURIComponent(url),{signal:ctl.signal})).json();
+      return {title:j.title||'',image:j.thumbnail_url||'',author:j.author_name||''};
+    }
+    const html=await (await fetch(url,{signal:ctl.signal})).text();
+    const d=new DOMParser().parseFromString(html,'text/html');
+    const m=p=>d.querySelector(`meta[property="${p}"],meta[name="${p}"]`)?.content||'';
+    return {title:m('og:title')||m('twitter:title')||d.title||'',image:m('og:image')||m('twitter:image')||'',author:m('og:site_name')};
+  }catch{return null}
+}
+
+function render(){
+  const q=$('#q').value.trim().toLowerCase();
+  const counts={};items.forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);
+  $('#chips').innerHTML=['Tutte',...cats].map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${esc(c)} ${c==='Tutte'?items.length:(counts[c]||0)}</button>`).join('');
+  const list=items.filter(i=>(cur==='Tutte'||i.cat===cur)&&(!q||[i.title,i.note,i.source,i.author,...(i.tags||[])].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>b.created-a.created);
+  $('#list').innerHTML=list.length?list.map(i=>`<div class="item">
+      <a href="${esc(i.url)}" target="_blank" rel="noopener" style="display:contents">
+        ${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=ph>🍽️</div>'">`:'<div class="ph">🍽️</div>'}
+        <div class="b"><h3>${esc(i.title||i.url)}</h3><div class="meta">${esc([i.cat,i.source,i.author].filter(Boolean).join(' · '))}</div>
+        ${i.tags?.length?`<div class="tags">${i.tags.map(t=>'#'+esc(t)).join(' ')}</div>`:''}</div></a>
+      <button class="ed" data-id="${i.id}" aria-label="Modifica">✎</button></div>`).join('')
+    :`<div class="empty">${items.length?'Nessun risultato.':'Nessuna ricetta salvata.<br>Condividi un link da TikTok, Instagram o dal browser verso quest\'app, oppure tocca +.'}</div>`;
+}
+
+function openForm(data={}){
+  editing=data.id?data:null;
+  const f=$('#f');f.reset();
+  $('#catSel').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('');
+  f.url.value=data.url||'';f.title.value=data.title||'';f.tags.value=(data.tags||[]).join(', ');f.note.value=data.note||'';
+  f.cat.value=data.cat||guess(data.title)||(cur!=='Tutte'?cur:'Altro');
+  f.dataset.image=data.image||'';f.dataset.author=data.author||'';
+  $('#dlgT').textContent=editing?'Modifica ricetta':'Nuova ricetta';
+  $('#del').hidden=!editing;
+  showPv();
+  if(!$('#dlg').open)$('#dlg').showModal();
+  if(!editing&&data.url&&!data.image)fillPreview(data.url);
+}
+function showPv(msg){const f=$('#f');$('#pv').innerHTML=(f.dataset.image?`<img src="${esc(f.dataset.image)}" alt="" referrerpolicy="no-referrer">`:'')+`<span>${esc(msg||sourceOf(f.url.value))}</span>`}
+async function fillPreview(url){
+  const f=$('#f');showPv('Recupero anteprima…');
+  const p=await preview(url);
+  if(f.url.value!==url)return;
+  if(p){f.dataset.image=p.image||'';f.dataset.author=p.author||'';
+    if(!f.title.value&&p.title){f.title.value=p.title.trim().slice(0,200);const g=guess(p.title);if(g&&!editing)f.cat.value=g}}
+  showPv(p?'':'Anteprima non disponibile: scrivi tu il titolo');
+}
+
+$('#f').url.addEventListener('change',e=>{const u=extractUrl(e.target.value);if(u){e.target.value=u;fillPreview(u)}});
+$('#f').title.addEventListener('input',e=>{if(!editing){const g=guess(e.target.value);if(g)$('#f').cat.value=g}});
+$('#f').onsubmit=e=>{
+  e.preventDefault();const f=e.target,url=extractUrl(f.url.value)||f.url.value;
+  const rec={id:editing?.id||Date.now().toString(36),created:editing?.created||Date.now(),url,
+    title:f.title.value.trim(),cat:f.cat.value,tags:f.tags.value.split(',').map(s=>s.trim()).filter(Boolean),
+    note:f.note.value.trim(),image:f.dataset.image,author:f.dataset.author,source:sourceOf(url)};
+  items=editing?items.map(i=>i.id===rec.id?rec:i):[rec,...items];
+  save('items',items);$('#dlg').close();render();toast('Salvata in '+rec.cat);
+};
+$('#cancel').onclick=()=>$('#dlg').close();
+$('#del').onclick=()=>{if(confirm('Eliminare questa ricetta?')){items=items.filter(i=>i.id!==editing.id);save('items',items);$('#dlg').close();render()}};
+$('#add').onclick=()=>openForm();
+$('#q').oninput=render;
+$('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;render()}};
+$('#list').onclick=e=>{const b=e.target.closest('.ed');if(b)openForm(items.find(i=>i.id===b.dataset.id))};
+
+$('#setBtn').onclick=()=>$('#set').showModal();
+$('#setClose').onclick=()=>$('#set').close();
+$('#catF').onsubmit=e=>{e.preventDefault();const c=e.target.c.value.trim();if(c&&!cats.includes(c)){cats.splice(cats.length-1,0,c);save('cats',cats);render();toast('Categoria aggiunta')}e.target.reset()};
+$('#exp').onclick=async()=>{try{await navigator.clipboard.writeText(JSON.stringify({cats,items}));toast('Backup copiato negli appunti')}catch{prompt('Copia questo testo:',JSON.stringify({cats,items}))}};
+$('#imp').onclick=async()=>{
+  let t;try{t=await navigator.clipboard.readText()}catch{}
+  if(!t)t=prompt('Incolla qui il backup:');if(!t)return;
+  try{const d=JSON.parse(t),ids=new Set(items.map(i=>i.id));
+    cats=[...new Set([...cats,...(d.cats||[])])];items=[...items,...(d.items||[]).filter(i=>!ids.has(i.id))];
+    save('cats',cats);save('items',items);render();toast('Backup importato')}catch{toast('Backup non valido')}
+};
+
+// Link in arrivo: da Android (condividi verso l'APK) o da URL ?url=/&text= (share target web, Comandi Rapidi iOS)
+function receive(d){
+  const url=extractUrl(d.url)||extractUrl(d.text)||extractUrl(d.title);
+  if(!url)return;
+  const ex=items.find(i=>i.url===url);
+  if(ex){toast('Link già salvato');openForm(ex);return}
+  const title=(d.title&&!extractUrl(d.title))?d.title:'';
+  openForm({url,title});
+}
+window.onShared=()=>{const s=window.AndroidShare?.take();if(s)receive(JSON.parse(s))};
+const p=new URLSearchParams(location.search);
+if(p.has('url')||p.has('text')){receive({url:p.get('url'),text:p.get('text'),title:p.get('title')});history.replaceState(null,'',location.pathname)}
+window.onShared();
+
+render();
+if('serviceWorker' in navigator&&location.protocol==='https:'&&location.hostname!=='localhost')navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
