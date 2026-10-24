@@ -1,0 +1,9 @@
+name = "ricette-ai"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+# Limite per dispositivo/IP: protegge la chiave da abusi
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "1001"
+simple = { limit = 15, period = 60 }

@@ -124,8 +124,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
 
 <dialog id="set">
   <h2>Impostazioni</h2>
-  <form id="aiF"><label>Chiave API Gemini, gratuita (per foto e analisi dei post social)<input name="k" type="password" autocomplete="off" placeholder="AIza…"></label>
-    <p class="meta" id="aiState"></p><div class="row"><button type="button" class="btn" id="aiDel">Rimuovi</button><button class="btn">Salva chiave</button></div></form>
+
   <form id="catF"><label>Nuovo tipo di piatto<input name="c" placeholder="Es. Lievitati"></label><div class="row"><button class="btn">Aggiungi</button></div></form>
   <p class="meta">Backup: copia i dati e incollali su un altro dispositivo per trasferire le ricette.</p>
   <div class="row"><button class="btn" id="exp">Copia backup</button><button class="btn" id="imp">Incolla backup</button><button class="btn pri" id="setClose">Chiudi</button></div>
@@ -311,52 +310,25 @@ async function analyze(url){
   return out;
 }
 
-/* ---------- AI (Google Gemini, piano gratuito) ---------- */
-const MODEL_TEXT='gemini-3.8-flash';   // analisi delle didascalie
-const MODEL_SEARCH='gemini-2.5-flash'; // foto + ricerca Google (gratuita fino a 500 richieste al giorno)
-const aiKey=()=>{try{return localStorage.getItem('aiKey')||''}catch{return ''}};
-async function gemini(model,parts,{search=false,json=false}={}){
-  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{method:'POST',
-    headers:{'Content-Type':'application/json','x-goog-api-key':aiKey()},
-    body:JSON.stringify({contents:[{role:'user',parts}],...(search?{tools:[{google_search:{}}]}:{}),
-      ...(json?{generationConfig:{responseMimeType:'application/json'}}:{})})});
+/* ---------- AI (tramite il server dell'app, nessuna chiave per l'utente) ---------- */
+// Indirizzo del server Cloudflare (cartella server/); vuoto = funzioni AI disattivate
+const AI_URL=(()=>{try{return localStorage.getItem('aiUrl')}catch{}})()||'';
+const aiOn=()=>!!AI_URL;
+async function server(path,body){
+  const ctl=new AbortController();setTimeout(()=>ctl.abort(),90000);
+  let res;
+  try{res=await fetch(AI_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ctl.signal})}
+  catch{throw Object.assign(new Error('Servizio AI non raggiungibile: controlla la connessione'),{status:0})}
   const d=await res.json().catch(()=>({}));
-  if(!res.ok){const e=new Error(d.error?.message||res.statusText);e.status=res.status;throw e}
-  const c=d.candidates?.[0];
-  if(!c?.content)throw new Error(d.promptFeedback?.blockReason?'Richiesta bloccata':'Nessuna risposta');
-  return {text:c.content.parts.map(x=>x.text||'').join('\n'),chunks:(c.groundingMetadata?.groundingChunks||[]).map(x=>x.web).filter(Boolean)};
+  if(!res.ok)throw Object.assign(new Error(d.error||res.statusText),{status:res.status});
+  return d;
 }
-const lastJson=t=>{const m=String(t).replace(/```json|```/g,'').match(/\{[\s\S]*\}/);return m?JSON.parse(m[0]):null};
-const aiErr=e=>[400,401,403].includes(e?.status)&&/key|API_KEY|permission/i.test(e.message)?'Chiave API non valida':e?.status===429?'Limite gratuito raggiunto, riprova più tardi':'Errore AI: '+(e?.message||e);
-// Scarica un'immagine come base64 (la copertina del post); null se il sito la blocca
-async function imgPart(url){
-  try{const r=await fetch(url);if(!r.ok)return null;const b=await r.blob();if(!/^image\//.test(b.type)||b.size>4e6)return null;
-    const data=await new Promise(ok=>{const f=new FileReader();f.onload=()=>ok(f.result.split(',')[1]);f.readAsDataURL(b)});
-    return {inline_data:{mime_type:b.type,data}}}catch{return null}
-}
+const aiErr=e=>e?.status===429?'Troppe richieste, riprova tra un minuto':e?.message||'Servizio AI non disponibile';
 
-// Estrae i dati di una ricetta da un post social (didascalia + copertina)
+// Estrae i dati di una ricetta da un post social (didascalia + copertina, analizzati dal server)
 async function aiAnalyze(d){
-  const prompt=`Questo è un post con una ricetta, salvato in un ricettario personale in italiano.
-Link: ${d.url}
-Fonte: ${sourceOf(d.url)}${d.author?' · autore: '+d.author:''}
-Titolo/didascalia:
-"""${(d.caption||d.title||'').slice(0,6000)}"""
-
-Estrai i dati in italiano:
-- title: nome breve del piatto (senza hashtag né emoji).
-- cat: uno tra ${cats.map(c=>`"${c}"`).join(', ')}.
-- ingredients: un ingrediente per voce, con quantità se indicate. Se la didascalia non li elenca ma il piatto è chiaramente riconoscibile, metti gli ingredienti tipici e aggiungi alla fine la voce "(ingredienti dedotti, verifica nel video)". Se non riconosci il piatto, lascia vuoto.
-- steps: passaggi del procedimento, solo se descritti o deducibili con certezza; altrimenti vuoto.
-- diets: solo tra quelle elencate e solo se sei ragionevolmente sicuro dagli ingredienti; nel dubbio non metterla.
-- country e region: zona d'origine del piatto (region solo per regioni italiane), stringa vuota se non chiaro.
-- time: minuti totali, 0 se non noto.
-- diets: array di valori scelti solo tra ${DIETS.map(x=>`"${x}"`).join(', ')}.
-- is_recipe: false se il post non riguarda una ricetta.
-Rispondi solo con JSON: {"is_recipe":true,"title":"","cat":"","diets":[],"country":"","region":"","time":0,"ingredients":[],"steps":[]}`;
-  const img=d.image?await imgPart(d.image):null;
-  const {text}=await gemini(MODEL_TEXT,img?[img,{text:prompt}]:[{text:prompt}],{json:true});
-  const r=lastJson(text)||{};
+  const {result:r}=await server('/analyze',{url:d.url,source:sourceOf(d.url),author:d.author,caption:d.caption||d.title,image:d.image,cats});
+  if(!r)throw new Error('Risposta AI non valida');
   return {is_recipe:r.is_recipe!==false,title:r.title||'',cat:r.cat||'',diets:(r.diets||[]).filter(x=>DIETS.includes(x)),country:r.country||'',region:r.region||'',
     time:+r.time||0,ingredients:(r.ingredients||[]).map(String),steps:(r.steps||[]).map(String)};
 }
@@ -368,19 +340,15 @@ function shrink(file){return new Promise((ok,ko)=>{
     ok(c.toDataURL('image/jpeg',.85))};img.onerror=ko;img.src=URL.createObjectURL(file)})}
 
 async function photoSearch(file){
-  if(!aiKey()){toast('Inserisci la chiave gratuita di Gemini nelle impostazioni');$('#set').showModal();return}
+  if(!aiOn()){toast('Ricerca da foto non ancora attiva');return}
   const dataUrl=await shrink(file);
   const ph=$('#phv');
   ph.innerHTML=`<img class="shot" src="${dataUrl}" alt=""><h2 style="margin-top:12px">Riconosco il piatto e cerco ricette…</h2><p class="meta">Può richiedere fino a un minuto.</p><div class="row"><button class="btn" id="phClose">Chiudi</button></div>`;
   $('#phClose').onclick=()=>$('#photo').close();
   if(!$('#photo').open)$('#photo').showModal();
   try{
-    const {text,chunks}=await gemini(MODEL_SEARCH,[{inline_data:{mime_type:'image/jpeg',data:dataUrl.split(',')[1]}},
-      {text:`Riconosci il piatto in questa foto. Poi cerca con Google da 5 a 8 ricette di questo piatto, preferendo siti di cucina italiani affidabili (es. GialloZafferano, Cookist, Fatto in casa da Benedetta, Cucchiaio d'Argento, Misya) e, se utili, video YouTube. Usa solo pagine trovate nella ricerca.
-Rispondi alla fine SOLO con un oggetto JSON, senza altro testo:
-{"dish":"nome del piatto in italiano","description":"una frase su cos'è","confidence":"alta|media|bassa","alternatives":["altri piatti possibili"],"keywords":["parole per cercarlo"],"recipes":[{"title":"...","url":"https://...","site":"...","note":"cosa la distingue, max 15 parole"}]}
-Se nella foto non c'è un piatto, restituisci dish vuoto e recipes vuoto.`}],{search:true});
-    showPhotoResults(dataUrl,lastJson(text),chunks);
+    const {result,chunks}=await server('/photo',{image:dataUrl.split(',')[1]});
+    showPhotoResults(dataUrl,result,chunks||[]);
   }catch(e){ph.querySelector('h2').textContent=aiErr(e);ph.querySelector('.meta').textContent=''}
 }
 function showPhotoResults(img,r,chunks=[]){
@@ -507,7 +475,7 @@ async function runAnalysis(url,overwrite){
   const n=(a.ingredients||[]).length;
   showPv(n?`Trovati ${n} ingredienti`:'Ingredienti non trovati: aggiungili tu se vuoi');
   // Post social o pagine senza dati strutturati: completa con l'AI se la chiave è configurata
-  if(aiKey()&&(['TikTok','Instagram','YouTube','Facebook','Pinterest'].includes(sourceOf(url))||n<3)){
+  if(aiOn()&&(['TikTok','Instagram','YouTube','Facebook','Pinterest'].includes(sourceOf(url))||n<3)){
     showPv('Analisi AI della ricetta…');
     try{
       const r=await aiAnalyze({url,title:f.title.value,caption:a.caption,image:a.image,author:a.author});
@@ -544,10 +512,7 @@ $('#add').onclick=()=>openForm();
 ['#q','#fDiet','#fZone','#fRate','#fSort'].forEach(s=>$(s).addEventListener('input',render));
 $('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;render()}};
 $('#list').onclick=e=>{const it=e.target.closest('.item');if(it)openDetail(items.find(i=>i.id===it.dataset.id))};
-const aiState=()=>{$('#aiState').textContent=aiKey()?'✓ AI attiva: foto dei piatti e analisi dei post social.':'Senza chiave l\'app funziona lo stesso, ma senza foto e analisi AI. La chiave gratuita si crea su aistudio.google.com/apikey e resta solo su questo dispositivo.'};
-$('#setBtn').onclick=()=>{aiState();$('#set').showModal()};
-$('#aiF').onsubmit=e=>{e.preventDefault();const k=e.target.k.value.trim();if(!k)return;try{localStorage.setItem('aiKey',k)}catch{}e.target.reset();aiState();toast('Chiave salvata')};
-$('#aiDel').onclick=()=>{try{localStorage.removeItem('aiKey')}catch{}aiState();toast('Chiave rimossa')};
+$('#setBtn').onclick=()=>$('#set').showModal();
 $('#camBtn').onclick=()=>$('#camIn').click();
 $('#camIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)photoSearch(f)};
 $('#setClose').onclick=()=>$('#set').close();
