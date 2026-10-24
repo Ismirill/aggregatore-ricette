@@ -446,9 +446,11 @@ function stepsOf(ins){
 function parseHtml(html){
   const d=new DOMParser().parseFromString(html,'text/html');
   const m=p=>d.querySelector(`meta[property="${p}"],meta[name="${p}"]`)?.content||'';
-  const clean=t=>String(t||'').replace(/^(?:[^|]{0,80}(?:visualizzazioni|views|reazioni|reactions|mi piace|likes|commenti|comments)[^|]{0,80}\|\s*)/i,'').trim();
+  // via i prefissi di Facebook/Instagram: "Visualizzazioni … |", "Nome su Instagram: \"…\"", "792 likes, 18 comments - nome su data: \"…\""
+  const clean=t=>String(t||'').replace(/^(?:[^|]{0,80}(?:visualizzazioni|views|reazioni|reactions|mi piace|likes|commenti|comments)[^|]{0,80}\|\s*)/i,'')
+    .replace(/^[^:\n]{0,90}\s(?:su|on) instagram\s*:\s*/i,'').replace(/^[\d.,]+\s*(?:likes|mi piace)[^:\n]{0,120}:\s*/i,'').replace(/^["“]|["”]\.?$/g,'').trim();
   // la didascalia più completa tra titolo e descrizione (Facebook mette quella intera nel titolo della pagina)
-  const caption=[clean(m('og:title')),clean(d.title),m('og:description'),m('description')].sort((a,b)=>b.length-a.length)[0]||'';
+  const caption=[clean(m('og:title')),clean(d.title),clean(m('og:description')),clean(m('description'))].sort((a,b)=>b.length-a.length)[0]||'';
   const out={title:clean(m('og:title'))||clean(m('twitter:title'))||clean(d.title)||'',image:m('og:image')||m('twitter:image')||'',author:m('og:site_name'),caption};
   let r=null;
   d.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{if(!r)try{r=findRecipe(JSON.parse(s.textContent))}catch{}});
@@ -592,7 +594,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=30; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=31; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1220,6 +1222,9 @@ async function runAnalysis(url,overwrite){
       if(!r.is_recipe){showPv('L\'AI non trova una ricetta in questo post');return}
       if(r.title&&(overwrite||!f.title.value||f.title.value.length>80))f.title.value=r.title;
       if(cats.includes(r.cat))f.cat.value=r.cat;
+      // se la didascalia non contiene dosi né un elenco di ingredienti, le quantità sono dedotte: lo si dice sempre
+      const cap=String(a.caption||'')+' '+f.caption.value;
+      if(r.ingredients.length&&!/\d+\s?(g|gr|kg|ml|cl|l|cucchia|tazz)\b|ingredient/i.test(cap)&&!r.ingredients.some(x=>/dedott|stimat/i.test(x)))r.ingredients.push('(ingredienti e dosi dedotti, verifica nel video)');
       if(r.ingredients.length>=n)f.ingredients.value=r.ingredients.join('\n');
       if(r.steps.length&&!(a.steps||[]).length)f.steps.value=r.steps.join('\n');
       if(r.time&&(overwrite||!f.time.value))f.time.value=r.time;
