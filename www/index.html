@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Aggregatore Ricette</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
@@ -13,6 +13,8 @@
 :root{--bg:#faf7f2;--card:#fff;--fg:#2b2620;--mut:#7a7066;--acc:#c8553d;--bd:#e8e1d6;--ok:#4a7c59;--star:#e0a526}
 @media (prefers-color-scheme:dark){:root{--bg:#1c1a17;--card:#26231f;--fg:#eee6db;--mut:#a39888;--acc:#e07a5f;--bd:#3a352e;--ok:#7fb28d}}
 *{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip}
+body{overflow-x:clip}
 body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);padding-bottom:90px}
 header{position:sticky;top:0;z-index:2;background:var(--bg);padding:calc(12px + env(safe-area-inset-top)) 16px 8px;border-bottom:1px solid var(--bd)}
 .top{display:flex;align-items:center;gap:8px}
@@ -47,6 +49,7 @@ main{max-width:900px;margin:0 auto;padding:12px 16px}
 .fab{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;border:none;background:var(--acc);color:#fff;font-size:2rem;box-shadow:0 4px 14px #0004;cursor:pointer}
 dialog{border:none;border-radius:16px;max-width:600px;width:calc(100% - 24px);max-height:calc(100dvh - 24px);margin:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:var(--card);color:var(--fg);padding:18px}
 dialog::backdrop{background:#0008}
+dialog *{overflow-wrap:anywhere}
 dialog h2{margin:0 0 10px;font-size:1.2rem}
 dialog h3{font-size:1rem;margin:16px 0 6px}
 form{display:grid;gap:10px}
