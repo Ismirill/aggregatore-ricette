@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="theme-color" content="#f7f2ea" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#15120e" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>try{const t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch{}</script>
+<script>try{const t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.style=localStorage.getItem("style")||"trattoria"}catch{document.documentElement.dataset.style="trattoria"}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -17,14 +17,18 @@
 :root{--bg:#f7f2ea;--bg2:#efe7da;--card:#fffdf9;--fg:#2a231d;--mut:#8a7e71;--acc:#c2502f;--acc2:#e9a23b;--ok:#5f7a35;--bd:#e8dfd1;--star:#e0a526;
   --sh:0 1px 2px #2a231d10,0 6px 20px #2a231d0d;--sh2:0 10px 30px #2a231d26;--r:18px;--serif:'Fraunces',Georgia,'Times New Roman',serif;
   --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color-scheme:light}
+/* Stile Trattoria (tovaglia a quadretti): solo in modalità chiara */
+:root[data-style=trattoria]{--bg:#fbf5f1;--bg2:#fbece9;--card:#ffffff;--fg:#2b1b18;--mut:#86706a;--acc:#b3261e;--acc2:#e9a23b;--ok:#4f7a2a;--bd:#f0dcd8;
+  --sh:0 1px 2px #5a1a1414,0 6px 18px #5a1a1412;--sh2:0 12px 30px #5a1a1426;
+  --pattern:repeating-linear-gradient(90deg,#b3261e1a 0 22px,transparent 22px 44px),repeating-linear-gradient(0deg,#b3261e1a 0 22px,transparent 22px 44px)}
 /* Tema scuro: automatico (sistema) salvo scelta Chiaro; oppure forzato con Scuro */
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#15120e;--bg2:#1d1914;--card:#221d17;--fg:#f2ebe1;--mut:#a89c8c;--acc:#e6734d;--acc2:#f0b24f;--ok:#a3bd6f;--bd:#352e25;
-  --sh:0 1px 2px #0006,0 6px 20px #0004;--sh2:0 10px 30px #0008;color-scheme:dark}}
+  --sh:0 1px 2px #0006,0 6px 20px #0004;--sh2:0 10px 30px #0008;--pattern:none;color-scheme:dark}}
 :root[data-theme=dark]{--bg:#15120e;--bg2:#1d1914;--card:#221d17;--fg:#f2ebe1;--mut:#a89c8c;--acc:#e6734d;--acc2:#f0b24f;--ok:#a3bd6f;--bd:#352e25;
-  --sh:0 1px 2px #0006,0 6px 20px #0004;--sh2:0 10px 30px #0008;color-scheme:dark}
+  --sh:0 1px 2px #0006,0 6px 20px #0004;--sh2:0 10px 30px #0008;--pattern:none;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip}
-body{margin:0;overflow-x:clip;font-family:var(--sans);background:var(--bg);color:var(--fg);padding-bottom:calc(84px + env(safe-area-inset-bottom));line-height:1.45}
+body{margin:0;overflow-x:clip;font-family:var(--sans);background:var(--bg);background-image:var(--pattern,none);background-attachment:fixed;color:var(--fg);padding-bottom:calc(84px + env(safe-area-inset-bottom));line-height:1.45}
 a{color:var(--acc)}
 h1,h2,h3,.ttl{font-family:var(--serif);letter-spacing:-.01em}
 button,input:not([type=checkbox]),select,textarea{-webkit-appearance:none;appearance:none}
@@ -173,6 +177,21 @@ details summary{cursor:pointer}
 .warn{border:1px solid color-mix(in srgb,var(--acc) 40%,transparent);background:color-mix(in srgb,var(--acc) 7%,var(--card));border-radius:14px;padding:12px 14px;margin:8px 0;font-size:.9rem}
 [hidden]{display:none!important}
 .shop li{margin:3px 0}.amz{font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:999px;border:1px solid var(--bd);text-decoration:none;margin-left:4px;white-space:nowrap}
+:root[data-style=trattoria] header{background:color-mix(in srgb,var(--card) 92%,transparent)}
+:root[data-style=trattoria] .item{border:1px solid var(--bd);border-top:4px solid var(--acc)}
+:root[data-style=trattoria] .chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+:root[data-style=trattoria] .chip.on small{color:#ffd9d4}
+:root[data-style=trattoria] .thumb .cat{background:var(--acc);color:#fff}
+:root[data-style=trattoria] .item h3,:root[data-style=trattoria] .brand h1{color:#5a1612}
+:root[data-style=trattoria] .day{border-top:4px solid var(--acc)}
+:root[data-style=trattoria] .bform{border:1px solid var(--bd)}
+:root[data-style=trattoria] .nbox div{background:#fbece9}
+@media (prefers-color-scheme:dark){:root[data-style=trattoria]:not([data-theme=light]) .item{border-top:1px solid color-mix(in srgb,var(--bd) 60%,transparent)}
+  :root[data-style=trattoria]:not([data-theme=light]) .item h3,:root[data-style=trattoria]:not([data-theme=light]) .brand h1{color:var(--fg)}
+  :root[data-style=trattoria]:not([data-theme=light]) .nbox div{background:var(--bg2)}}
+:root[data-style=trattoria][data-theme=dark] .item{border-top:1px solid color-mix(in srgb,var(--bd) 60%,transparent)}
+:root[data-style=trattoria][data-theme=dark] .item h3,:root[data-style=trattoria][data-theme=dark] .brand h1{color:var(--fg)}
+:root[data-style=trattoria][data-theme=dark] .nbox div{background:var(--bg2)}
 .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:.9rem;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:9;box-shadow:var(--sh2);max-width:calc(100% - 32px)}
 .toast.on{opacity:1;transform:translateX(-50%)}
 </style>
@@ -257,7 +276,7 @@ details summary{cursor:pointer}
 
 <dialog id="set">
   <div class="dhead"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi">✕</button></div>
-  <section class="sec"><h3>Aspetto</h3><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div></section>
+  <section class="sec"><h3>Aspetto</h3><div class="seg" id="styleSeg" style="margin-bottom:8px"><label><input type="radio" name="style" value="trattoria"><span>Trattoria</span></label><label><input type="radio" name="style" value="crema"><span>Crema</span></label></div><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div></section>
   <section class="sec"><h3>Tipi di piatto</h3><div class="badges" id="catList"></div>
     <form id="catF" class="inl"><input name="c" placeholder="Nuovo tipo, es. Lievitati" aria-label="Nuovo tipo di piatto"><button class="btn pri">Aggiungi</button></form></section>
   <section class="sec"><h3>Zona per i prezzi</h3><p class="meta" id="zoneInfo">Costi calcolati con i prezzi medi ufficiali (Osservatorio Prezzi del Ministero) della tua provincia.</p>
@@ -570,7 +589,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=25; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=26; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1172,7 +1191,8 @@ const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${e
 // Tema: Automatico segue il sistema, Chiaro e Scuro restano fissi
 const setTheme=t=>{try{t?localStorage.setItem('theme',t):localStorage.removeItem('theme')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme};
 $('#themeSeg').onchange=e=>setTheme(e.target.value);
-$('#setBtn').onclick=()=>{const cur=document.documentElement.dataset.theme||'';$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();if(aiOn())initZone();$('#set').showModal()};
+$('#styleSeg').onchange=e=>{try{localStorage.setItem('style',e.target.value)}catch{}document.documentElement.dataset.style=e.target.value};
+$('#setBtn').onclick=()=>{const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();if(aiOn())initZone();$('#set').showModal()};
 $('#camBtn').onclick=()=>$('#camIn').click();
 $('#camIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)photoSearch(f)};
 $('#setClose').onclick=()=>$('#set').close();
