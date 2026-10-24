@@ -139,9 +139,12 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
   <div class="dhead"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi">✕</button></div>
   <section class="sec"><h3>Tipi di piatto</h3><div class="badges" id="catList"></div>
     <form id="catF" class="inl"><input name="c" placeholder="Nuovo tipo, es. Lievitati" aria-label="Nuovo tipo di piatto"><button class="btn pri">Aggiungi</button></form></section>
+  <section class="sec"><h3>Zona per i prezzi</h3><p class="meta" id="zoneInfo">Costi calcolati con i prezzi medi ufficiali (Osservatorio Prezzi del Ministero) della tua provincia.</p>
+    <select id="zoneSel" aria-label="Provincia per i prezzi"><option value="">Automatica (posizione approssimativa)</option></select>
+    <div class="grid2" style="margin-top:8px"><button class="btn" id="gpsBtn">📍 Usa la mia posizione</button><button class="btn" id="zoneReset">Automatica</button></div></section>
   <section class="sec"><h3>Backup</h3><p class="meta">Copia i dati e incollali su un altro dispositivo per trasferire le ricette.</p>
     <div class="grid2"><button class="btn" id="exp">Copia backup</button><button class="btn" id="imp">Incolla backup</button></div></section>
-  <p class="meta" style="text-align:center;margin:12px 0 0">Versione 12</p>
+  <p class="meta" style="text-align:center;margin:12px 0 0">Versione 13</p>
 </dialog>
 <div class="toast" id="toast"></div>
 
@@ -458,6 +461,28 @@ function render(){
     :`<div class="empty">${items.length?'Nessun risultato con questi filtri.':'Nessuna ricetta salvata.<br>Condividi un link da TikTok, Instagram o dal browser verso quest\'app, oppure tocca +.'}</div>`;
 }
 
+/* ---------- Zona per i prezzi ---------- */
+// {province} scelta a mano, {lat,lon} dal GPS, oppure vuoto = il server stima la posizione dall'indirizzo IP
+const getZone=()=>load('zone',{});
+const zoneLabel=z=>z.province||(z.lat?'posizione GPS':'automatica');
+async function initZone(){
+  const z=getZone();
+  try{
+    const d=await (await fetch(AI_URL+'/prices')).json();
+    const sel=$('#zoneSel');
+    sel.innerHTML=`<option value="">Automatica${d.auto?` (ora: ${esc(d.auto)})`:''}</option>`+d.provinces.map(p=>`<option${p===z.province?' selected':''}>${esc(p)}</option>`).join('');
+    $('#zoneInfo').textContent=`Costi calcolati con i prezzi medi ufficiali dell'Osservatorio Prezzi del Ministero${d.period?` (${d.period})`:''}, per provincia. Zona attuale: ${zoneLabel(z)}.`+
+      (d.available.length<d.provinces.length?` Province già disponibili: ${d.available.length} su ${d.provinces.length}; per le altre si usa la media nazionale.`:'');
+  }catch{}
+}
+$('#zoneSel').onchange=e=>{save('zone',e.target.value?{province:e.target.value}:{});initZone();toast('Zona prezzi: '+(e.target.value||'automatica'))};
+$('#zoneReset').onclick=()=>{save('zone',{});$('#zoneSel').value='';initZone();toast('Zona prezzi automatica')};
+$('#gpsBtn').onclick=()=>{
+  if(!navigator.geolocation){toast('Posizione non disponibile su questo dispositivo');return}
+  navigator.geolocation.getCurrentPosition(p=>{save('zone',{lat:+p.coords.latitude.toFixed(2),lon:+p.coords.longitude.toFixed(2)});$('#zoneSel').value='';initZone();toast('Zona prezzi dalla tua posizione')},
+    ()=>toast('Permesso di posizione negato'),{timeout:10000,maximumAge:864e5});
+};
+
 /* ---------- Calorie e costo a persona ---------- */
 const euro=v=>v.toLocaleString('it-IT',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2});
 const perPerson=i=>{const t=i.nutrition;if(!t?.items?.length)return null;const s=t.servings||i.servings||4;
@@ -469,11 +494,12 @@ function drawNut(i,n){
       try{await computeNutrition(i);drawNut(i,n)}catch(e){el.innerHTML=`<span class="meta">${esc(aiErr(e))}</span>`}});return}
   el.innerHTML=`<div class="nbox"><div><b>${Math.round(p.kcal)} kcal</b><span>a persona</span></div><div><b>${euro(p.eur)}</b><span>a persona</span></div><div><b>${euro(p.eur*n)}</b><span>totale per ${n}</span></div></div>
     <details class="meta"><summary>Stima per ingrediente (prezzi medi in Italia)</summary><ul>${i.nutrition.items.map(x=>`<li>${esc(x.name)}: ${Math.round(x.grams)} g · ${Math.round(x.kcal)} kcal · ${euro(x.eur)}</li>`).join('')}</ul>
-    <p>Valori indicativi per la ricetta originale da ${i.nutrition.servings} persone, con prezzi medi al supermercato.</p></details>`;
+    <p>Valori indicativi per la ricetta originale da ${i.nutrition.servings} persone. Prezzi: ${esc(i.nutrition.prices||'medi indicativi')}.</p>${aiOn()?'<button type="button" class="btn" id="nutRedo">Ricalcola con la mia zona</button>':''}</details>`;
+  $('#nutRedo')&&($('#nutRedo').onclick=async()=>{el.innerHTML='<span class="meta">Ricalcolo…</span>';try{await computeNutrition(i)}catch(e){toast(aiErr(e))}drawNut(i,n)});
 }
 // Chiede al server calorie e costo per ingrediente e li salva nella ricetta
 async function computeNutrition(i){
-  const {result}=await server('/nutrition',{title:i.title,servings:i.servings||4,ingredients:i.ingredients});
+  const {result}=await server('/nutrition',{title:i.title,servings:i.servings||4,ingredients:i.ingredients,...getZone()});
   if(!result?.items?.length)throw new Error('Calcolo non riuscito');
   i.nutrition={...result,key:i.ingredients.join('|')+'#'+(i.servings||4)};
   const p=perPerson(i);
@@ -594,7 +620,7 @@ $('#add').onclick=()=>openForm();
 $('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;render()}};
 $('#list').onclick=e=>{const it=e.target.closest('.item');if(it)openDetail(items.find(i=>i.id===it.dataset.id))};
 const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${esc(c)}</span>`).join('')};
-$('#setBtn').onclick=()=>{showCats();$('#set').showModal()};
+$('#setBtn').onclick=()=>{showCats();if(aiOn())initZone();$('#set').showModal()};
 $('#camBtn').onclick=()=>$('#camIn').click();
 $('#camIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)photoSearch(f)};
 $('#setClose').onclick=()=>$('#set').close();
