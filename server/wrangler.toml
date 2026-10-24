@@ -16,6 +16,6 @@ binding = "AI"
 binding = "PRICES_KV"
 id = "1f8f442ded57461287f282549cd2fab2"
 
-# Aggiornamento prezzi: ogni giorno alle 4:00 UTC un lotto di province (ognuna ogni ~15 giorni)
+# Aggiornamento prezzi mensile: ogni giorno alle 4:00 UTC controlla se il MIMIT ha pubblicato un mese nuovo e aggiorna un lotto di province
 [triggers]
 crons = ["0 4 * * *"]

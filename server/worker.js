@@ -108,18 +108,19 @@ legumi secchi 4/kg; ceci in scatola 3/kg; fagioli in scatola 3/kg; lenticchie 4/
 cioccolato fondente 12/kg; cacao amaro 15/kg; caffè 12/kg; savoiardi 6/kg; lievito 0,40/bustina; frutta secca 20/kg; pinoli 60/kg; basilico 1,50/mazzetto; prezzemolo 1/mazzetto; spezie, sale e pepe: trascurabili`;
 
 // Prezzi ufficiali: Osservatorio Prezzi del MIMIT (rilevazioni mensili per 64 province).
-// Il cron giornaliero aggiorna a lotti le province con dati più vecchi di 14 giorni (o di un mese precedente),
-// così ogni provincia viene riaggiornata circa ogni 15 giorni restando nei limiti del piano gratuito.
+// Il MIMIT pubblica un mese alla volta: il cron giornaliero controlla se è uscito un mese nuovo e, in quel caso,
+// aggiorna le province a lotti (restando nei limiti del piano gratuito). Senza mese nuovo rinfresca solo i dati più vecchi di 30 giorni.
 const MIMIT_URL = 'https://osservaprezzi.mise.gov.it/prezzi/livelli/beni-e-servizi-di-largo-consumo/archivio-rilevazioni-beni-e-servizi-di-largo-consumo';
 const MIMIT_CATS = ['altri_alim', 'orto', 'ittici'];
 const BATCH = 12; // 12 province x 3 categorie + 2 pagine = 38 richieste (limite gratuito: 50)
 const MESI = ['', 'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
 // Coordinate approssimative dei capoluoghi rilevati dal MIMIT, per trovare la provincia più vicina
 const PROVINCES = {Alessandria:[44.91,8.61],Ancona:[43.62,13.52],Aosta:[45.74,7.32],Arezzo:[43.46,11.88],'Ascoli Piceno':[42.85,13.58],Avellino:[40.91,14.79],Bari:[41.12,16.87],Belluno:[46.14,12.22],Benevento:[41.13,14.78],Bergamo:[45.70,9.67],Biella:[45.57,8.05],Bologna:[44.49,11.34],Bolzano:[46.50,11.35],Brescia:[45.54,10.22],Cagliari:[39.22,9.12],Catanzaro:[38.91,16.59],Cosenza:[39.30,16.25],Cremona:[45.13,10.02],Cuneo:[44.39,7.55],Ferrara:[44.84,11.62],Firenze:[43.77,11.26],Forli:[44.22,12.04],Genova:[44.41,8.93],Gorizia:[45.94,13.62],Grosseto:[42.76,11.11],Lecco:[45.86,9.40],Livorno:[43.55,10.31],Lodi:[45.31,9.50],Lucca:[43.84,10.50],Macerata:[43.30,13.45],Mantova:[45.16,10.79],Messina:[38.19,15.55],Milano:[45.46,9.19],Modena:[44.65,10.93],Napoli:[40.85,14.27],Novara:[45.45,8.62],Padova:[45.41,11.88],Palermo:[38.12,13.36],Parma:[44.80,10.33],Perugia:[43.11,12.39],Pescara:[42.46,14.21],Piacenza:[45.05,9.69],Pistoia:[43.93,10.91],Pordenone:[45.96,12.66],Ravenna:[44.42,12.20],'Reggio Calabria':[38.11,15.65],'Reggio Emilia':[44.70,10.63],Rimini:[44.06,12.57],Roma:[41.90,12.50],Rovigo:[45.07,11.79],Sassari:[40.73,8.56],Siena:[43.32,11.33],Siracusa:[37.08,15.29],Terni:[42.56,12.65],Torino:[45.07,7.69],Trento:[46.07,11.12],Treviso:[45.67,12.24],Trieste:[45.65,13.78],Udine:[46.06,13.24],Varese:[45.82,8.83],Venezia:[45.44,12.32],Vercelli:[45.32,8.42],Verona:[45.44,10.99],Vicenza:[45.55,11.55]};
-function nearestProvince(lat, lon) {
+function nearestProvince(lat, lon, among = Object.keys(PROVINCES)) {
   if (!isFinite(lat) || !isFinite(lon)) return null;
   let best = null, bd = Infinity;
-  for (const [name, [a, b]] of Object.entries(PROVINCES)) {
+  for (const name of among) {
+    const [a, b] = PROVINCES[name];
     const d = (a - lat) ** 2 + ((b - lon) * Math.cos(lat * Math.PI / 180)) ** 2;
     if (d < bd) { bd = d; best = name; }
   }
@@ -130,9 +131,13 @@ const unescape = t => t.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/
 async function mimitPage(params) {
   const u = new URL(MIMIT_URL);
   for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
-  const r = await fetch(u, { headers: { 'User-Agent': 'Mozilla/5.0 (AggregatoreRicette)' } });
-  if (!r.ok) throw new Error('MIMIT ' + r.status);
-  return r.text();
+  // Il portale a volte non risponde (522): riprova con pause crescenti
+  for (let i = 0; ; i++) {
+    const r = await fetch(u, { headers: { 'User-Agent': 'Mozilla/5.0 (AggregatoreRicette)' } }).catch(() => null);
+    if (r?.ok) return r.text();
+    if (i >= 2) throw new Error('MIMIT ' + (r ? r.status : 'rete'));
+    await new Promise(ok => setTimeout(ok, 3000 * (i + 1)));
+  }
 }
 const options = (html, name) => {
   const m = html.match(new RegExp(`<select[^>]*name="${name.replace(/[[\]]/g, '\\$&')}"[^>]*>([\\s\\S]*?)</select>`));
@@ -161,14 +166,17 @@ async function refreshBatch(env) {
   const order = [...new Set(['Roma', 'Milano', 'Napoli', 'Torino', 'Palermo', 'Bari', 'Bologna', 'Firenze', 'Genova', 'Venezia', 'Verona', 'Cagliari', ...Object.keys(PROVINCES)])];
   const stale = order.filter(p => {
     const d = data.provinces[p];
-    return !d || d.period !== period || Date.now() - Date.parse(d.updated) > 14 * 864e5;
+    return !d || d.period !== period || Date.now() - Date.parse(d.updated) > 30 * 864e5;
   });
   const done = [];
   for (const prov of stale.slice(0, BATCH)) {
     const items = {};
+    let failed = false;
     for (const cat of MIMIT_CATS) {
-      try { for (const r of tableRows(await mimitPage({ ANNO: year, MESE: month, 'f[PROVINCIA]': prov, 'f[TIPO_RECORD_MISE]': cat }))) items[r[0]] = parseFloat(r[3]); } catch {}
+      try { for (const r of tableRows(await mimitPage({ ANNO: year, MESE: month, 'f[PROVINCIA]': prov, 'f[TIPO_RECORD_MISE]': cat }))) items[r[0]] = parseFloat(r[3]); }
+      catch { failed = true; break; }
     }
+    if (failed) break; // portale non disponibile: salva il lavoro fatto e riprende al prossimo giro
     if (Object.keys(items).length) { data.provinces[prov] = { period, updated: new Date().toISOString(), items }; done.push(prov); }
   }
   // Media nazionale di ogni prodotto sulle province disponibili del mese più recente
@@ -191,8 +199,10 @@ async function pricesFor(env, b, req) {
   const d = await prices(env);
   const cf = req.cf || {};
   const prov = PROVINCES[b.province] ? b.province : nearestProvince(+(b.lat ?? cf.latitude), +(b.lon ?? cf.longitude));
-  const local = prov && d.provinces[prov];
-  if (local && Object.keys(local.items).length) return { zone: prov, period: local.period, items: { ...d.national, ...local.items } };
+  let zone = prov, local = prov && d.provinces[prov];
+  // Provincia senza dati questo mese: usa la più vicina tra quelle disponibili
+  if (prov && !local) { zone = nearestProvince(...PROVINCES[prov], Object.keys(d.provinces).filter(p => p !== prov)); local = zone && d.provinces[zone]; }
+  if (local && Object.keys(local.items).length) return { zone: zone === prov ? prov : `${zone} (vicino a ${prov})`, period: local.period, items: { ...d.national, ...local.items } };
   if (d.national && Object.keys(d.national).length) return { zone: 'media nazionale', period: d.period, items: d.national };
   return null;
 }
@@ -219,7 +229,7 @@ Rispondi solo con JSON: {"items":[{"name":"","grams":0,"kcal":0,"eur":0}]}`);
 export default {
   // Aggiornamento automatico dei prezzi: un lotto di province ogni giorno
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(refreshBatch(env).then(r => console.log('prezzi', r.period, 'aggiornate', r.updated.length, 'restano', r.remaining)));
+    ctx.waitUntil(refreshBatch(env).then(r => console.log('prezzi', r.period, 'aggiornate', r.updated.length, 'restano', r.remaining), e => console.log('prezzi non aggiornati:', e.message)));
   },
   async fetch(req, env, ctx) {
     const origin = req.headers.get('Origin') || '';
@@ -239,7 +249,7 @@ export default {
     // Avvio manuale di un lotto (protetto da segreto): POST /refresh-prices con header X-Admin
     if (req.method === 'POST' && path === '/refresh-prices') {
       if (!env.ADMIN_TOKEN || req.headers.get('X-Admin') !== env.ADMIN_TOKEN) return reply(origin, { error: 'Non autorizzato' }, 403);
-      return reply(origin, await refreshBatch(env));
+      try { return reply(origin, await refreshBatch(env)); } catch (e) { return reply(origin, { error: e.message }, 503); }
     }
     if (req.method !== 'POST' || !['/analyze', '/photo', '/nutrition'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';
