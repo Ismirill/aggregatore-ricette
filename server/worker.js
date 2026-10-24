@@ -1,3 +1,4 @@
+import ING from './ingredienti.json';
 // Server dell'Aggregatore Ricette: fa le richieste AI per conto dell'app con Cloudflare Workers AI
 // (quota gratuita giornaliera, nessuna chiave per l'utente). I prompt stanno qui, così l'endpoint non è un proxy generico.
 const MODEL = '@cf/google/gemma-4-26b-a4b-it'; // visione + testo, licenza Gemma (utilizzabile in UE)
@@ -98,14 +99,8 @@ Se nella foto non c'è un piatto o del cibo, restituisci dish vuoto.`, `data:ima
 
 // Prezzi medi indicativi al consumo in Italia (€/kg, €/l o €/pezzo), riferimento per stime coerenti.
 // Da aggiornare periodicamente, ad es. con i dati dell'Osservatorio prezzi del MIMIT o dell'ISTAT.
-const PRICES = `pasta secca 2,00/kg; pasta fresca 7/kg; pasta all'uovo 5/kg; riso 3/kg; riso carnaroli 4,50/kg; farina 00 1,10/kg; pane 3,50/kg; pangrattato 3/kg;
-uova 0,35/pezzo; latte 1,60/l; burro 11/kg; panna 6/l; parmigiano reggiano 22/kg; grana padano 16/kg; pecorino romano 18/kg; mozzarella 9/kg; ricotta 6/kg; mascarpone 9/kg; yogurt 4/kg;
-guanciale 18/kg; pancetta 14/kg; prosciutto crudo 30/kg; prosciutto cotto 20/kg; salsiccia 10/kg; carne macinata 11/kg; petto di pollo 11/kg; pollo intero 6/kg; manzo 20/kg; vitello 22/kg; maiale lonza 10/kg;
-salmone 22/kg; tonno in scatola 14/kg; merluzzo 15/kg; gamberi 18/kg; cozze 5/kg; vongole 12/kg; calamari 14/kg; acciughe 12/kg;
-pomodori 2,50/kg; passata di pomodoro 2/kg; pelati 2/kg; pomodorini 4/kg; cipolla 1,80/kg; aglio 8/kg; carote 1,50/kg; sedano 2/kg; patate 1,60/kg; zucchine 2,50/kg; melanzane 2,50/kg; peperoni 3/kg;
-spinaci 4/kg; funghi champignon 6/kg; porcini secchi 80/kg; insalata 4/kg; zucca 2/kg; broccoli 3/kg; carciofi 1/pezzo; limone 2,50/kg; arance 2/kg; mele 2,20/kg; banane 2/kg; frutti di bosco 15/kg;
-legumi secchi 4/kg; ceci in scatola 3/kg; fagioli in scatola 3/kg; lenticchie 4/kg; olio extravergine 9/l; olio di semi 2,50/l; aceto 2/l; vino bianco 4/l; zucchero 1,20/kg; miele 10/kg;
-cioccolato fondente 12/kg; cacao amaro 15/kg; caffè 12/kg; savoiardi 6/kg; lievito 0,40/bustina; frutta secca 20/kg; pinoli 60/kg; basilico 1,50/mazzetto; prezzemolo 1/mazzetto; spezie, sale e pepe: trascurabili`;
+// Prezzi indicativi dalla tabella condivisa server/ingredienti.json (usati quando il MIMIT non rileva il prodotto)
+const PRICES = ING.items.filter(x => x.eur).map(x => `${x.k} ${String(x.eur).replace('.', ',')}/kg`).join('; ');
 
 // Prezzi ufficiali: Osservatorio Prezzi del MIMIT (rilevazioni mensili per 64 province).
 // Il MIMIT pubblica un mese alla volta: il cron giornaliero controlla se è uscito un mese nuovo e, in quel caso,
@@ -207,6 +202,23 @@ async function pricesFor(env, b, req) {
   return null;
 }
 
+// €/kg di ogni ingrediente della tabella per la zona: media dei prodotti MIMIT corrispondenti, altrimenti prezzo indicativo
+async function priceTable(env, b, req) {
+  const official = await pricesFor(env, b, req);
+  const eur = {}, src = {};
+  for (const it of ING.items) {
+    let v = null;
+    if (official && it.mimit) {
+      const rx = new RegExp(it.mimit, 'i');
+      const hits = Object.entries(official.items).filter(([k]) => rx.test(k)).map(([, x]) => x);
+      if (hits.length) v = Math.round(hits.reduce((a, x) => a + x, 0) / hits.length * 100) / 100;
+    }
+    eur[it.k] = v ?? it.eur;
+    src[it.k] = v == null ? 'i' : 'm'; // i = indicativo, m = MIMIT
+  }
+  return { zone: official?.zone || 'media nazionale', period: official?.period || null, eur, src };
+}
+
 async function nutrition(env, b, req) {
   const official = await pricesFor(env, b, req);
   const ingredients = (Array.isArray(b.ingredients) ? b.ingredients : []).slice(0, 40).map(x => str(x, 150));
@@ -219,10 +231,12 @@ ${ingredients.map(x => '- ' + x).join('\n')}
 Per ogni ingrediente stima, per la quantità indicata (se è "q.b." o manca, usa una quantità tipica per ${servings} persone):
 - grams: peso in grammi (o millilitri) usato nella ricetta;
 - kcal: calorie totali di quella quantità, con valori nutrizionali medi (crudo, come si compra);
+- protein, carbs, fat: grammi di proteine, carboidrati e grassi di quella quantità;
 - eur: costo in euro di quella quantità con prezzi medi al supermercato in Italia. ${official ? `Usa per primi questi prezzi medi ufficiali (Osservatorio Prezzi MIMIT, ${official.period}, ${official.zone}; prezzo per la quantità tra parentesi): ${Object.entries(official.items).map(([k, v]) => `${k} ${v} €`).join('; ')}. Per gli ingredienti che non compaiono lì usa ` : 'Usa '}questi prezzi medi indicativi: ${PRICES}. Per ingredienti non presenti in nessun elenco stima un prezzo medio italiano realistico. Conta solo la quantità usata, non la confezione intera.
 Ignora le voci che non sono ingredienti (es. note tra parentesi).
-Rispondi solo con JSON: {"items":[{"name":"","grams":0,"kcal":0,"eur":0}]}`);
-  const items = (result?.items || []).map(x => ({ name: str(x.name, 80), grams: Math.max(0, +x.grams || 0), kcal: Math.max(0, +x.kcal || 0), eur: Math.max(0, +x.eur || 0) }));
+Rispondi solo con JSON: {"items":[{"name":"","grams":0,"kcal":0,"protein":0,"carbs":0,"fat":0,"eur":0}]}`);
+  const num = v => Math.max(0, +v || 0);
+  const items = (result?.items || []).map(x => ({ name: str(x.name, 80), grams: num(x.grams), kcal: num(x.kcal), protein: num(x.protein), carbs: num(x.carbs), fat: num(x.fat), eur: num(x.eur) }));
   return { result: { servings, items, prices: official ? `Osservatorio Prezzi MIMIT, ${official.period} · ${official.zone}` : 'prezzi medi indicativi', zone: official?.zone || null } };
 }
 
@@ -238,6 +252,11 @@ export default {
     if (req.method === 'GET' && path === '/')
       return new Response('Server AI dell\'Aggregatore Ricette: attivo. Si usa dall\'app, non dal browser.\nApp: https://ismirill.github.io/aggregatore-ricette/\n',
         { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+    if (req.method === 'GET' && path === '/price-table') {
+      const u = new URL(req.url);
+      const b = { province: u.searchParams.get('province') || '', lat: u.searchParams.has('lat') ? +u.searchParams.get('lat') : undefined, lon: u.searchParams.has('lon') ? +u.searchParams.get('lon') : undefined };
+      return reply(origin, await priceTable(env, b, req));
+    }
     if (req.method === 'GET' && path === '/prices') {
       const d = await prices(env), u = new URL(req.url);
       const cf = req.cf || {};
