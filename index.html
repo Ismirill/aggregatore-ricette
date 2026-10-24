@@ -81,13 +81,15 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
 .srv{display:flex;align-items:center;gap:8px;margin:0 0 8px;flex-wrap:wrap}.srv .btn{width:38px;height:38px;padding:0;font-size:1.2rem;line-height:1}.srv b{min-width:1.5em;text-align:center;font-size:1.1rem}.btn:disabled{opacity:.4}
 .nbox{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 8px}.nbox div{border:1px solid var(--bd);border-radius:10px;padding:8px;text-align:center}
 .nbox b{display:block;font-size:1rem}.nbox span{font-size:.72rem;color:var(--mut)}.nut details{margin-bottom:10px}.nut details ul{margin:6px 0}
+.tabs{display:flex;gap:4px;flex:1;min-width:0}.tab{border:none;background:none;color:var(--mut);font:inherit;font-weight:700;font-size:1.05rem;padding:6px 8px;border-radius:10px;cursor:pointer;white-space:nowrap}
+.tab.on{color:var(--fg);background:var(--card)}.lic{font-size:.78rem;color:var(--mut);margin:0 0 4px}.lic a{color:var(--acc)}
 .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.9rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9}
 .toast.on{opacity:1}
 </style>
 </head>
 <body>
 <header>
-  <div class="top"><h1>🍝 Le mie ricette</h1><button class="icon" id="camBtn" aria-label="Trova ricette da una foto">📷</button><input type="file" id="camIn" accept="image/*" capture="environment" hidden><button class="icon" id="setBtn" aria-label="Impostazioni">⚙︎</button></div>
+  <div class="top"><div class="tabs" id="tabs"><button class="tab on" data-v="mine">🍝 Le mie</button><button class="tab" data-v="book">📖 Ricettario</button></div><button class="icon" id="camBtn" aria-label="Trova ricette da una foto">📷</button><input type="file" id="camIn" accept="image/*" capture="environment" hidden><button class="icon" id="setBtn" aria-label="Impostazioni">⚙︎</button></div>
   <input id="q" type="search" placeholder="Cerca titolo, ingrediente, etichetta…">
   <div class="chips" id="chips"></div>
   <div class="filters">
@@ -144,7 +146,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
     <div class="grid2" style="margin-top:8px"><button class="btn" id="gpsBtn">📍 Usa la mia posizione</button><button class="btn" id="zoneReset">Automatica</button></div></section>
   <section class="sec"><h3>Backup</h3><p class="meta">Copia i dati e incollali su un altro dispositivo per trasferire le ricette.</p>
     <div class="grid2"><button class="btn" id="exp">Copia backup</button><button class="btn" id="imp">Incolla backup</button></div></section>
-  <p class="meta" style="text-align:center;margin:12px 0 0">Versione 13</p>
+  <p class="meta" style="text-align:center;margin:12px 0 0">Versione 14</p>
 </dialog>
 <div class="toast" id="toast"></div>
 
@@ -157,6 +159,7 @@ const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');setTim
 const lines=s=>String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);
 
 const DEFAULT_CATS=['Antipasti','Primi','Secondi','Contorni','Piatti unici','Dolci','Altro'];
+const MAIN_DIETS=['Vegano','Vegetariano','Senza glutine','Ipocalorico']; // mostrate nell'elenco; tutte nella scheda
 const DIETS=['Vegano','Vegetariano','Senza glutine','Senza lattosio','Senza uova','Senza frutta secca','Ipocalorico'];
 const REGIONS=['Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria',"Valle d'Aosta",'Veneto'];
 const COUNTRIES=['Italia','Francia','Spagna','Grecia','Giappone','Cina','Corea','Thailandia','India','Messico','USA','Medio Oriente','Nord Africa','Sud America'];
@@ -165,11 +168,11 @@ let cats=load('cats',DEFAULT_CATS), items=load('items',[]), cur='Tutte', editing
 /* ---------- Classificazione automatica (regole sul testo e sugli ingredienti) ---------- */
 const GUESS={
   'Dolci':/\btort[ae] (?!salat)|^dolc[ei]\b|tiramis|biscott|cioccolat|crostata|cheesecake|gelato|muffin|dessert|panna cotta|ciambell|plumcake|brownie|pancake|cannol|semifreddo|budino|\bcake\b/,
-  'Primi':/pasta|spaghett|risott|lasagn|gnocch|carbonara|tagliatell|penne|ravioli|tortellin|zupp|minestr|vellutat|amatriciana|linguine|fusilli|orecchiette|rigatoni|paccheri|bucatini|tagliolini|cannelloni|pici|trofie|ramen|noodle/,
+  'Primi':/pasta|spaghett|risott|lasagn|gnocch|carbonara|tagliatell|penne|ravioli|tortellin|zupp|minestr|vellutat|amatriciana|linguine|fusilli|orecchiette|rigatoni|paccheri|bucatini|tagliolini|cannelloni|pici|trofie|ramen|noodle|canederl|agnolott|cappellett|anolini|cous ?cous|cuscus|pizzoccher|maltagliat|strozzapret|cavatell|culurgion|malloreddus|passatelli|pasta e |pasta con |risi e /,
   'Piatti unici':/pizza|focaccia|piatto unico|burger|panin|piadin|toast|quiche|torta salata|poke|bowl|calzon|tacos|burrito/,
-  'Secondi':/pollo|carne|manzo|maiale|\bpesce\b|salmone|tonno|polpett|arrosto|filetto|bistecca|scaloppin|cotolett|spezzatino|gamber|merluzzo|tacchino|frittata|vitello|orata|branzino|spigola|salsiccia|hamburger/,
+  'Secondi':/pollo|carne|manzo|maiale|\bpesce\b|salmone|tonno|polpett|arrosto|filetto|bistecca|scaloppin|cotolett|spezzatino|gamber|merluzzo|tacchino|frittata|vitello|orata|branzino|spigola|salsiccia|hamburger|abbacchio|agnell|capretto|costolett|coniglio|cinghiale|trippa|cassoeula|ossobuco|brasato|bollito|stinco|seppie|baccal|stoccafisso|polpo|calamar|cozze|vongole|involtin|spiedin|arrost|cotechino|zampone|fegato|scaloppa|anatra|faraona|quaglie/,
   'Contorni':/contorn|insalat|patat|verdur|zucchin|melanzan|spinaci|funghi|peperon|carciof|broccol|caponata|cavolfior/,
-  'Antipasti':/antipast|bruschett|finger|tartin|aperitiv|crostin|stuzzichin/
+  'Antipasti':/antipast|bruschett|finger|tartin|aperitiv|crostin|stuzzichin|frisell|crocchett|olive ascolane|panzanella|caprese|vitello tonnato|carpaccio/
 };
 const CAT_SCHEMA=[[/primo|pasta|first course/,'Primi'],[/secondo|main course|main dish|entr/,'Secondi'],[/contorno|side/,'Contorni'],[/antipast|appetizer|starter/,'Antipasti'],[/dolc|dessert/,'Dolci'],[/piatto unico|lievitat|pizza/,'Piatti unici']];
 const ZONES=[
@@ -192,7 +195,7 @@ const ZONES=[
   [/olive all'ascolana|vincisgrassi/,'Italia','Marche'],
   [/sushi|ramen|teriyaki|tempura|onigiri|\bmiso\b|gyoza|udon|katsu|okonomiyaki|mochi/,'Giappone',''],
   [/tacos|burrito|guacamole|enchilad|quesadill|nachos|fajitas/,'Messico',''],
-  [/curry|tikka|masala|\bnaan\b|\bdal\b|biryani|samosa|tandoori/,'India',''],
+  [/curry|tikka|masala|\bnaan\b|\bdahl?\b(?! (?:cuore|forno|sapore|gusto))|biryani|samosa|tandoori/,'India',''],
   [/paella|tortilla de patatas|gazpacho|churros|tapas|patatas bravas/,'Spagna',''],
   [/hummus|falafel|shawarma|tahin|baba ganoush|shakshuka/,'Medio Oriente',''],
   [/kimchi|bibimbap|bulgogi|tteok/,'Corea',''],
@@ -435,12 +438,43 @@ function embedOf(i){
   return null;
 }
 
+/* ---------- Ricettario (Wikibooks, CC BY-SA 4.0) ---------- */
+let view='mine',book=null,bookInfo=null;
+const src=()=>view==='book'?(book||[]):items;
+async function loadBook(){
+  if(book)return;
+  try{
+    const d=await (await fetch('ricettario.json')).json();
+    const nut=load('bookNut',{});
+    bookInfo=d;
+    book=d.recipes.map(r=>{
+      const c=classify({title:r.title,ingredients:r.ingredients,caption:[...r.tags,r.region].join(' '),keywords:r.tags.join(' ')});
+      const key=x=>x.toLowerCase().replace(/[^a-z]/g,'');
+      const reg=r.region&&(REGIONS.find(x=>key(x)===key(r.region)||key(r.region).startsWith(key(x).slice(0,7)))||r.region);
+      return {...r,book:true,source:'Wikibooks',cat:c.cat||'Altro',diets:c.diets,country:reg?'Italia':c.country,region:reg||c.region,nutrition:nut[r.id]};
+    });
+  }catch{book=[];toast('Ricettario non disponibile offline')}
+  fillSelects();render();
+}
+function saveFromBook(i){
+  const ex=items.find(x=>x.url===i.url);
+  if(ex){toast('Già nelle tue ricette');return ex}
+  const {book:_,...r}=i;
+  const rec={...r,id:Date.now().toString(36),created:Date.now(),rating:0,
+    note:`Ricetta da Wikibooks, Libro di cucina (${bookInfo?.license||'CC BY-SA 4.0'}). Autori: cronologia della pagina originale.`};
+  items=[rec,...items];save('items',items);toast('Salvata in Le mie ricette');return rec;
+}
+$('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;view=t.dataset.v;cur='Tutte';
+  $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  $('#q').placeholder=view==='book'?'Cerca tra le ricette del ricettario…':'Cerca titolo, ingrediente, etichetta…';
+  if(view==='book')loadBook();fillSelects();render()};
+
 /* ---------- Lista ---------- */
 const stars=n=>n?'<span class="stars">'+'★'.repeat(n)+'</span>':'';
 function fillSelects(){
   const dv=$('#fDiet').value,zv=$('#fZone').value;
   $('#fDiet').innerHTML='<option value="">Ogni dieta</option>'+DIETS.map(d=>`<option>${d}</option>`).join('');
-  const zones=[...new Set(items.flatMap(i=>[i.country,i.region&&`${i.country||'Italia'} · ${i.region}`]).filter(Boolean))].sort();
+  const zones=[...new Set(src().flatMap(i=>[i.country,i.region&&`${i.country||'Italia'} · ${i.region}`]).filter(Boolean))].sort();
   $('#fZone').innerHTML='<option value="">Ogni zona</option>'+zones.map(z=>`<option>${esc(z)}</option>`).join('');
   $('#fDiet').value=dv;$('#fZone').value=zones.includes(zv)?zv:'';
   $('#countries').innerHTML=COUNTRIES.map(c=>`<option value="${c}">`).join('');
@@ -448,17 +482,20 @@ function fillSelects(){
 }
 function render(){
   const q=$('#q').value.trim().toLowerCase(),fd=$('#fDiet').value,fz=$('#fZone').value,fr=+$('#fRate').value,fs=$('#fSort').value;
-  const counts={};items.forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);
-  $('#chips').innerHTML=['Tutte',...cats].map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${esc(c)} ${c==='Tutte'?items.length:(counts[c]||0)}</button>`).join('');
-  const list=items.filter(i=>(cur==='Tutte'||i.cat===cur)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr
+  const data=src();
+  const counts={};data.forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);
+  $('#chips').innerHTML=['Tutte',...cats].map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${esc(c)} ${c==='Tutte'?data.length:(counts[c]||0)}</button>`).join('');
+  const list=data.filter(i=>(cur==='Tutte'||i.cat===cur)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr
       &&(!q||[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q)))
-    .sort(fs==='rate'?(a,b)=>(b.rating||0)-(a.rating||0)||b.created-a.created:fs==='az'?(a,b)=>(a.title||'').localeCompare(b.title||''):(a,b)=>b.created-a.created);
-  $('#list').innerHTML=list.length?list.map(i=>`<div class="item" data-id="${i.id}">
-      <div class="thumb">🍽️${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}${embedOf(i)?'<span class="play">▶ video</span>':''}</div>
-      <div class="b"><h3>${esc(i.title||i.url)}</h3>
+    .sort(fs==='rate'?(a,b)=>(b.rating||0)-(a.rating||0)||b.created-a.created:fs==='az'||view==='book'?(a,b)=>(a.title||'').localeCompare(b.title||''):(a,b)=>b.created-a.created);
+  const lic=view==='book'&&book?.length?`<p class="lic">${book.length} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a>, licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a></p>`:'';
+  $('#list').innerHTML=lic+(list.length?list.slice(0,view==='book'?150:9999).map(i=>`<div class="item" data-id="${i.id}">
+      ${i.image||embedOf(i)?`<div class="thumb">🍽️${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}${embedOf(i)?'<span class="play">▶ video</span>':''}</div>`:''}
+      <div class="b"${i.image||embedOf(i)?'':' style="padding-left:14px"'}><h3>${esc(i.title||i.url)}</h3>
         <div class="meta">${esc([i.cat,i.region||i.country,i.time&&i.time+' min',perPerson(i)&&Math.round(perPerson(i).kcal)+' kcal',i.source].filter(Boolean).join(' · '))} ${stars(i.rating)}</div>
-        ${i.diets?.length?`<div class="badges">${i.diets.map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}</div>`:''}</div></div>`).join('')
-    :`<div class="empty">${items.length?'Nessun risultato con questi filtri.':'Nessuna ricetta salvata.<br>Condividi un link da TikTok, Instagram o dal browser verso quest\'app, oppure tocca +.'}</div>`;
+        ${i.diets?.some(d=>MAIN_DIETS.includes(d))?`<div class="badges">${i.diets.filter(d=>MAIN_DIETS.includes(d)).map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}</div>`:''}</div></div>`).join('')
+    +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
+    :`<div class="empty">${view==='book'?(book?'Nessun risultato con questi filtri.':'Carico il ricettario…'):items.length?'Nessun risultato con questi filtri.':'Nessuna ricetta salvata.<br>Condividi un link da TikTok, Instagram o dal browser verso quest\'app, oppure tocca +.'}</div>`);
 }
 
 /* ---------- Zona per i prezzi ---------- */
@@ -504,7 +541,8 @@ async function computeNutrition(i){
   i.nutrition={...result,key:i.ingredients.join('|')+'#'+(i.servings||4)};
   const p=perPerson(i);
   if(p.kcal<=450&&!i.diets?.includes('Ipocalorico'))i.diets=[...(i.diets||[]),'Ipocalorico'];
-  save('items',items);render();
+  if(i.book){const m=load('bookNut',{});m[i.id]=i.nutrition;save('bookNut',m)}else save('items',items);
+  render();
 }
 
 /* ---------- Scheda ricetta ---------- */
@@ -514,14 +552,15 @@ function openDetail(i){
     <h2 style="margin-top:12px">${esc(i.title||i.url)}</h2>
     <div class="meta">${esc([i.cat,[i.region,i.country].filter(Boolean).join(', '),i.time&&i.time+' min',i.author,i.source].filter(Boolean).join(' · '))}</div>
     <div class="badges">${(i.diets||[]).map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}${(i.tags||[]).map(t=>`<span class="bdg z">#${esc(t)}</span>`).join('')}</div>
-    <div class="rate" id="dRate" style="margin-top:8px">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n<=(i.rating||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}</div>
+    ${i.book?`<p class="lic" style="margin-top:8px">Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · autori nella <a href="${esc(i.url.replace('/wiki/','/w/index.php?action=history&title='))}" target="_blank" rel="noopener">cronologia</a></p>`:''}
+    <div class="rate" id="dRate" style="margin-top:8px${i.book?';display:none':''}">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n<=(i.rating||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}</div>
     ${i.ingredients?.length?`<h3>Ingredienti</h3><div class="srv">Per <button type="button" class="btn" id="sMinus" aria-label="Meno persone">−</button><b id="sN"></b><button type="button" class="btn" id="sPlus" aria-label="Più persone">+</button> <span id="sLbl">persone</span> <span class="meta" id="sOrig"></span></div>
       <div class="nut" id="nut"></div><ul id="ingList"></ul>`:''}
     ${i.steps?.length?`<h3>Procedimento</h3><ol>${i.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
     ${i.note?`<h3>Note</h3><p class="cap">${esc(i.note)}</p>`:''}
     ${!i.ingredients?.length&&i.caption?`<h3>Descrizione</h3><p class="cap">${esc(i.caption)}</p>`:''}
     <div class="row"><a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">Apri originale</a><span class="sp"></span>
-      <button class="btn" id="dEdit">Modifica</button><button class="btn pri" id="dClose">Chiudi</button></div>`;
+      ${i.book?'<button class="btn pri" id="dSave">Salva nelle mie</button>':'<button class="btn" id="dEdit">Modifica</button>'}<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button></div>`;
   $('#dRate').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n;i.rating=i.rating===n?0:n;save('items',items);render();
     $('#dRate').querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.n<=i.rating))};
   if(i.ingredients?.length){
@@ -535,7 +574,8 @@ function openDetail(i){
     draw();
   }
   $('#dClose').onclick=()=>$('#det').close();
-  $('#dEdit').onclick=()=>{$('#det').close();openForm(i)};
+  if($('#dEdit'))$('#dEdit').onclick=()=>{$('#det').close();openForm(i)};
+  if($('#dSave'))$('#dSave').onclick=()=>{saveFromBook(i);$('#det').close()};
   $('#det').showModal();
 }
 $('#det').addEventListener('close',()=>$('#dv').innerHTML=''); // ferma il video
@@ -618,7 +658,7 @@ $('#del').onclick=()=>{if(confirm('Eliminare questa ricetta?')){items=items.filt
 $('#add').onclick=()=>openForm();
 ['#q','#fDiet','#fZone','#fRate','#fSort'].forEach(s=>$(s).addEventListener('input',render));
 $('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;render()}};
-$('#list').onclick=e=>{const it=e.target.closest('.item');if(it)openDetail(items.find(i=>i.id===it.dataset.id))};
+$('#list').onclick=e=>{const it=e.target.closest('.item');if(it)openDetail(src().find(i=>i.id===it.dataset.id))};
 const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${esc(c)}</span>`).join('')};
 $('#setBtn').onclick=()=>{showCats();if(aiOn())initZone();$('#set').showModal()};
 $('#camBtn').onclick=()=>$('#camIn').click();
