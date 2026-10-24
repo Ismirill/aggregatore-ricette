@@ -66,13 +66,16 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
 .hero{width:100%;max-height:280px;object-fit:cover;border-radius:12px}
 .dv ul,.dv ol{padding-left:20px;line-height:1.5;margin:0}
 .cap{white-space:pre-line;font-size:.9rem;color:var(--mut);line-height:1.45}
+.res{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--bd)}
+.res .b{flex:1;min-width:0}.res a{color:var(--acc)}
+.shot{width:100%;max-height:220px;object-fit:cover;border-radius:12px}
 .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.9rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9}
 .toast.on{opacity:1}
 </style>
 </head>
 <body>
 <header>
-  <div class="top"><h1>🍝 Le mie ricette</h1><button class="icon" id="setBtn" aria-label="Impostazioni">⚙︎</button></div>
+  <div class="top"><h1>🍝 Le mie ricette</h1><button class="icon" id="camBtn" aria-label="Trova ricette da una foto">📷</button><input type="file" id="camIn" accept="image/*" capture="environment" hidden><button class="icon" id="setBtn" aria-label="Impostazioni">⚙︎</button></div>
   <input id="q" type="search" placeholder="Cerca titolo, ingrediente, etichetta…">
   <div class="chips" id="chips"></div>
   <div class="filters">
@@ -117,8 +120,12 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
 </dialog>
 <datalist id="countries"></datalist><datalist id="regions"></datalist>
 
+<dialog id="photo"><div id="phv"></div></dialog>
+
 <dialog id="set">
   <h2>Impostazioni</h2>
+  <form id="aiF"><label>Chiave API Claude (per foto e analisi dei post social)<input name="k" type="password" autocomplete="off" placeholder="sk-ant-…"></label>
+    <p class="meta" id="aiState"></p><div class="row"><button type="button" class="btn" id="aiDel">Rimuovi</button><button class="btn">Salva chiave</button></div></form>
   <form id="catF"><label>Nuovo tipo di piatto<input name="c" placeholder="Es. Lievitati"></label><div class="row"><button class="btn">Aggiungi</button></div></form>
   <p class="meta">Backup: copia i dati e incollali su un altro dispositivo per trasferire le ricette.</p>
   <div class="row"><button class="btn" id="exp">Copia backup</button><button class="btn" id="imp">Incolla backup</button><button class="btn pri" id="setClose">Chiudi</button></div>
@@ -304,6 +311,109 @@ async function analyze(url){
   return out;
 }
 
+/* ---------- AI (Claude) ---------- */
+const MODEL='claude-opus-5-5';
+const aiKey=()=>{try{return localStorage.getItem('aiKey')||''}catch{return ''}};
+let _client;
+async function claude(){
+  // La chiave resta solo su questo dispositivo; l'SDK viene caricato solo quando serve
+  if(!_client||_client.apiKey!==aiKey()){
+    const {default:Anthropic}=await import('https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk@0.133.0/+esm');
+    _client=new Anthropic({apiKey:aiKey(),dangerouslyAllowBrowser:true});
+  }
+  return _client;
+}
+async function ask(params){
+  const c=await claude();
+  let messages=params.messages,res;
+  const {output_config,...rest}=params;
+  for(let i=0;i<4;i++){
+    res=await c.beta.messages.create({model:MODEL,max_tokens:16000,betas:['server-side-fallback-2026-07-01'],fallbacks:'default',
+      ...rest,output_config:{effort:'medium',...output_config},messages});
+    if(res.stop_reason!=='pause_turn')break;
+    messages=[...messages,{role:'assistant',content:res.content}]; // la ricerca web può fermarsi a metà: riprende
+  }
+  if(res.stop_reason==='refusal')throw new Error('Richiesta rifiutata');
+  return res.content.filter(b=>b.type==='text').map(b=>b.text).join('\n');
+}
+const lastJson=t=>{const m=t.match(/\{[\s\S]*\}/);return m?JSON.parse(m[0]):null};
+const aiErr=e=>e?.status===401?'Chiave API non valida':e?.status===429?'Troppe richieste, riprova tra poco':'Errore AI: '+(e?.message||e);
+
+const RECIPE_SCHEMA={type:'object',additionalProperties:false,
+  required:['is_recipe','title','cat','diets','country','region','time','ingredients','steps'],
+  properties:{is_recipe:{type:'boolean'},title:{type:'string'},cat:{type:'string'},diets:{type:'array',items:{type:'string',enum:DIETS}},
+    country:{type:'string'},region:{type:'string'},time:{type:'integer'},ingredients:{type:'array',items:{type:'string'}},steps:{type:'array',items:{type:'string'}}}};
+
+// Estrae i dati di una ricetta da un post social (didascalia + copertina)
+async function aiAnalyze(d){
+  const prompt=`Questo è un post con una ricetta, salvato in un ricettario personale in italiano.
+Link: ${d.url}
+Fonte: ${sourceOf(d.url)}${d.author?' · autore: '+d.author:''}
+Titolo/didascalia:
+"""${(d.caption||d.title||'').slice(0,6000)}"""
+
+Estrai i dati in italiano:
+- title: nome breve del piatto (senza hashtag né emoji).
+- cat: uno tra ${cats.map(c=>`"${c}"`).join(', ')}.
+- ingredients: un ingrediente per voce, con quantità se indicate. Se la didascalia non li elenca ma il piatto è chiaramente riconoscibile, metti gli ingredienti tipici e aggiungi alla fine la voce "(ingredienti dedotti, verifica nel video)". Se non riconosci il piatto, lascia vuoto.
+- steps: passaggi del procedimento, solo se descritti o deducibili con certezza; altrimenti vuoto.
+- diets: solo tra quelle elencate e solo se sei ragionevolmente sicuro dagli ingredienti; nel dubbio non metterla.
+- country e region: zona d'origine del piatto (region solo per regioni italiane), stringa vuota se non chiaro.
+- time: minuti totali, 0 se non noto.
+- is_recipe: false se il post non riguarda una ricetta.`;
+  const content=[{type:'text',text:prompt}];
+  const body=img=>({messages:[{role:'user',content:img?[{type:'image',source:{type:'url',url:img}},...content]:content}],
+    output_config:{format:{type:'json_schema',schema:RECIPE_SCHEMA}}});
+  let t;
+  try{t=await ask(body(d.image))}catch(e){if(!d.image||e?.status===401)throw e;t=await ask(body(null))} // copertina non scaricabile: riprova senza
+  return JSON.parse(t);
+}
+
+// Riduce la foto per contenere costi e tempi di invio
+function shrink(file){return new Promise((ok,ko)=>{
+  const img=new Image();img.onload=()=>{const s=Math.min(1,1280/Math.max(img.width,img.height)),c=document.createElement('canvas');
+    c.width=img.width*s;c.height=img.height*s;c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(img.src);
+    ok(c.toDataURL('image/jpeg',.85))};img.onerror=ko;img.src=URL.createObjectURL(file)})}
+
+async function photoSearch(file){
+  if(!aiKey()){toast('Inserisci la chiave API Claude nelle impostazioni');$('#set').showModal();return}
+  const dataUrl=await shrink(file);
+  const ph=$('#phv');
+  ph.innerHTML=`<img class="shot" src="${dataUrl}" alt=""><h2 style="margin-top:12px">Riconosco il piatto e cerco ricette…</h2><p class="meta">Può richiedere fino a un minuto.</p><div class="row"><button class="btn" id="phClose">Chiudi</button></div>`;
+  $('#phClose').onclick=()=>$('#photo').close();
+  if(!$('#photo').open)$('#photo').showModal();
+  try{
+    const t=await ask({tools:[{type:'web_search_20260209',name:'web_search',max_uses:5}],
+      messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:dataUrl.split(',')[1]}},
+        {type:'text',text:`Riconosci il piatto in questa foto. Poi cerca sul web da 5 a 8 ricette di questo piatto, preferendo siti di cucina italiani affidabili (es. GialloZafferano, Cookist, Fatto in casa da Benedetta, Cucchiaio d'Argento, Misya) e, se utili, video YouTube. Usa solo link che hai trovato davvero nei risultati della ricerca.
+Rispondi alla fine SOLO con un oggetto JSON, senza altro testo:
+{"dish":"nome del piatto in italiano","description":"una frase su cos'è","confidence":"alta|media|bassa","alternatives":["altri piatti possibili"],"keywords":["parole per cercarlo"],"recipes":[{"title":"...","url":"https://...","site":"...","note":"cosa la distingue, max 15 parole"}]}
+Se nella foto non c'è un piatto, restituisci dish vuoto e recipes vuoto.`}]}]});
+    showPhotoResults(dataUrl,lastJson(t));
+  }catch(e){ph.querySelector('h2').textContent=aiErr(e);ph.querySelector('.meta').textContent=''}
+}
+function showPhotoResults(img,r){
+  const ph=$('#phv');
+  if(!r||!r.dish){ph.innerHTML=`<img class="shot" src="${img}" alt=""><h2 style="margin-top:12px">Non riconosco un piatto in questa foto</h2><div class="row"><button class="btn pri" id="phClose">Chiudi</button></div>`;$('#phClose').onclick=()=>$('#photo').close();return}
+  const kw=[r.dish,...(r.keywords||[])].map(s=>s.toLowerCase()).filter(s=>s.length>2);
+  const mine=items.filter(i=>{const t=(i.title||'').toLowerCase();return kw.some(k=>t.includes(k)||k.split(' ').filter(w=>w.length>3).every(w=>t.includes(w)))});
+  const recs=(r.recipes||[]).filter(x=>/^https?:\/\//.test(x.url));
+  ph.innerHTML=`<img class="shot" src="${img}" alt="">
+    <h2 style="margin-top:12px">${esc(r.dish)}</h2><p class="meta">${esc(r.description||'')}${r.confidence&&r.confidence!=='alta'?` · sicurezza ${esc(r.confidence)}`:''}</p>
+    ${r.alternatives?.length?`<p class="meta">Potrebbe anche essere: ${r.alternatives.map(esc).join(', ')}</p>`:''}
+    ${mine.length?`<h3>Già nelle tue ricette</h3>${mine.map(i=>`<div class="res"><div class="b"><b>${esc(i.title)}</b><div class="meta">${esc([i.cat,i.source].join(' · '))} ${stars(i.rating)}</div></div><button class="btn" data-open="${i.id}">Apri</button></div>`).join('')}`:''}
+    <h3>Ricette trovate sul web</h3>
+    ${recs.length?recs.map((x,k)=>`<div class="res"><div class="b"><b>${esc(x.title)}</b><div class="meta">${esc(x.site||sourceOf(x.url))}${x.note?' · '+esc(x.note):''}</div>
+      <a href="${esc(x.url)}" target="_blank" rel="noopener">Apri</a></div><button class="btn pri" data-save="${k}">Salva</button></div>`).join(''):'<p class="meta">Nessuna ricetta trovata.</p>'}
+    <div class="row"><button class="btn" id="phClose">Chiudi</button></div>`;
+  $('#phClose').onclick=()=>$('#photo').close();
+  ph.onclick=e=>{
+    const o=e.target.closest('[data-open]'),s=e.target.closest('[data-save]');
+    if(o){$('#photo').close();openDetail(items.find(i=>i.id===o.dataset.open))}
+    if(s){const x=recs[+s.dataset.save];$('#photo').close();receive({url:x.url,title:x.title})}
+  };
+}
+
 /* ---------- Video ---------- */
 function embedOf(i){
   const u=i.finalUrl||i.url;let m;
@@ -400,6 +510,23 @@ async function runAnalysis(url,overwrite){
   setDiets([...new Set([...(overwrite?[]:getDiets()),...c.diets])]);
   const n=(a.ingredients||[]).length;
   showPv(n?`Trovati ${n} ingredienti`:'Ingredienti non trovati: aggiungili tu se vuoi');
+  // Post social o pagine senza dati strutturati: completa con l'AI se la chiave è configurata
+  if(aiKey()&&(['TikTok','Instagram','YouTube','Facebook','Pinterest'].includes(sourceOf(url))||n<3)){
+    showPv('Analisi AI della ricetta…');
+    try{
+      const r=await aiAnalyze({url,title:f.title.value,caption:a.caption,image:a.image,author:a.author});
+      if(f.url.value!==url)return;
+      if(!r.is_recipe){showPv('L\'AI non trova una ricetta in questo post');return}
+      if(r.title&&(overwrite||!f.title.value||f.title.value.length>80))f.title.value=r.title;
+      if(cats.includes(r.cat))f.cat.value=r.cat;
+      if(r.ingredients.length>=n)f.ingredients.value=r.ingredients.join('\n');
+      if(r.steps.length&&!(a.steps||[]).length)f.steps.value=r.steps.join('\n');
+      if(r.time&&(overwrite||!f.time.value))f.time.value=r.time;
+      if(r.country){f.country.value=r.country;f.region.value=r.region}
+      setDiets(r.diets);
+      showPv(`Analisi AI completata · ${r.ingredients.length} ingredienti`);
+    }catch(e){showPv(aiErr(e))}
+  }
 }
 $('#f').url.addEventListener('change',e=>{const u=extractUrl(e.target.value);if(u){e.target.value=u;runAnalysis(u,false)}});
 $('#reanalyze').onclick=()=>{const u=extractUrl($('#f').url.value);if(u)runAnalysis(u,true);else{
@@ -421,7 +548,12 @@ $('#add').onclick=()=>openForm();
 ['#q','#fDiet','#fZone','#fRate','#fSort'].forEach(s=>$(s).addEventListener('input',render));
 $('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;render()}};
 $('#list').onclick=e=>{const it=e.target.closest('.item');if(it)openDetail(items.find(i=>i.id===it.dataset.id))};
-$('#setBtn').onclick=()=>$('#set').showModal();
+const aiState=()=>{$('#aiState').textContent=aiKey()?'✓ AI attiva: foto dei piatti e analisi dei post social.':'Senza chiave l\'app funziona lo stesso, ma senza foto e analisi AI. La chiave si crea su console.anthropic.com e resta solo su questo dispositivo.'};
+$('#setBtn').onclick=()=>{aiState();$('#set').showModal()};
+$('#aiF').onsubmit=e=>{e.preventDefault();const k=e.target.k.value.trim();if(!k)return;try{localStorage.setItem('aiKey',k)}catch{}e.target.reset();aiState();toast('Chiave salvata')};
+$('#aiDel').onclick=()=>{try{localStorage.removeItem('aiKey')}catch{}aiState();toast('Chiave rimossa')};
+$('#camBtn').onclick=()=>$('#camIn').click();
+$('#camIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)photoSearch(f)};
 $('#setClose').onclick=()=>$('#set').close();
 $('#catF').onsubmit=e=>{e.preventDefault();const c=e.target.c.value.trim();if(c&&!cats.includes(c)){cats.splice(cats.length-1,0,c);save('cats',cats);render();toast('Tipo aggiunto')}e.target.reset()};
 $('#exp').onclick=async()=>{try{await navigator.clipboard.writeText(JSON.stringify({cats,items}));toast('Backup copiato negli appunti')}catch{prompt('Copia questo testo:',JSON.stringify({cats,items}))}};
