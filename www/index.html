@@ -25,10 +25,10 @@ input,select,textarea{font:inherit;font-size:16px;width:100%;padding:10px 12px;b
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .chip{flex:none;border:1px solid var(--bd);background:var(--card);color:var(--fg);padding:6px 12px;border-radius:999px;font:inherit;font-size:.9rem;cursor:pointer}
 .chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
-.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.filters{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px}
 .filters select{padding:7px 26px 7px 10px;font-size:16px}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
-@media (max-width:520px){.filters{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.filters{grid-template-columns:1fr 1fr}.filters select:first-child{grid-column:1/-1}}
 main{max-width:900px;margin:0 auto;padding:12px 16px}
 .list{display:grid;gap:10px}
 .item{display:flex;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:14px;overflow:hidden;cursor:pointer}
@@ -107,6 +107,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
   <div class="filters">
     <select id="fDiet"></select>
     <select id="fZone"></select>
+    <select id="fTime"><option value="0">Ogni tempo</option><option value="15">⏱ Fino a 15 min</option><option value="30">⏱ Fino a 30 min</option><option value="60">⏱ Fino a 1 ora</option><option value="e">Solo facili</option></select>
     <select id="fRate"><option value="0">Ogni voto</option><option value="3">★ 3+</option><option value="4">★ 4+</option><option value="5">★ 5</option></select>
     <select id="fSort"><option value="new">Più recenti</option><option value="rate">Più votate</option><option value="az">A–Z</option></select>
   </div>
@@ -118,6 +119,9 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:4px}
     <div class="two"><label><span id="bLbl">Budget settimanale (€)</span><input name="budget" type="number" min="1" step="0.5" inputmode="decimal" required placeholder="es. 60"></label>
       <label>Persone<input name="people" type="number" min="1" max="20" value="2" inputmode="numeric" required></label></div>
     <label id="bMealsL">Pasti da preparare<div class="checks"><label><input type="checkbox" name="lunch" checked>Pranzo</label><label><input type="checkbox" name="dinner" checked>Cena</label></div></label>
+    <div class="two"><label><span id="bTimeL">Tempo per cucinare a pasto (lun–ven)</span><select name="tWeek"></select></label>
+      <label id="bTimeEndL">Tempo a pasto (sab–dom)<select name="tEnd"></select></label></div>
+    <div class="checks"><label><input type="checkbox" name="easy">Solo ricette facili</label><label><input type="checkbox" name="ahead">Posso preparare il giorno prima (lievitazioni, marinature, ammollo)</label></div>
     <label>Diete, intolleranze e allergie<div class="checks" id="bDiet"></div></label>
     <label>Altri ingredienti da evitare (separati da virgola)<input name="avoid" placeholder="es. sedano, funghi, senape, kiwi"></label>
     <div class="two"><label>Periodo<select name="month" id="bMonth"></select></label>
@@ -466,7 +470,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=16; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=17; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -507,6 +511,38 @@ $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;view=t.data
   $('#q').placeholder=view==='book'?'Cerca tra le ricette del ricettario…':'Cerca titolo, ingrediente, etichetta…';
   if(view==='book')loadBook();fillSelects();render()};
 
+/* ---------- Tempo e difficoltà di preparazione ---------- */
+// Stima dal testo: minuti/ore scritti nel procedimento (separando le attese passive: lievitazione, marinatura,
+// ammollo, riposo in frigo), altrimenti da numero di ingredienti e passaggi; difficoltà da passaggi e tecniche.
+const WAIT_RX=/lievit|riposa|riposo|marin|ammoll|frigo|raffredd|rassod|macer|insapor|notte|congelat|asciugare|sgocciol|aspett|attend|scolare|spurg|prima di servir/;
+const HARD_RX=[/impast|lavorare la pasta|stend|sfogli|frolla|pasta fresca|mattarello/,/ripien|farci|arrotol|chiud[ei]re i bordi/,/frigg|frittur|olio bollente/,/caramell|temperare|glass|montare a neve|bagnomaria|besciamell|cr[eè]ma pasticc/,/sfilett|squam|pulire (il|i|le) (pesce|calamar|seppi|polp|cozze|vongol|carciof)|eviscer|disoss/,/lievit/,/forno/];
+function timing(r){
+  if(r._tm)return r._tm;
+  const steps=(r.steps||[]).join(' ').toLowerCase(),nIng=(r.ingredients||[]).length,nSt=Math.max(1,(r.steps||[]).length);
+  let cook=0,wait=0,found=false,longest=0;
+  const add=(min,at)=>{found=true;const ctx=steps.slice(Math.max(0,at-60),at+25);if(WAIT_RX.test(ctx))wait+=min;else{cook+=min;longest=Math.max(longest,min)}};
+  for(const m of steps.matchAll(/(\d+(?:[.,]\d+)?)(?:\s*(?:-|–|a|o)\s*(\d+(?:[.,]\d+)?))?\s*(minut[io]|min\b|or[ae]\b|h\b)/g)){
+    const a=parseFloat(m[1].replace(',','.')),b=m[2]?parseFloat(m[2].replace(',','.')):a;let v=(a+b)/2*(/^or|^h/.test(m[3])?60:1);
+    if(v>0&&v<4000)add(v,m.index)}
+  for(const [rx,v] of [[/mezz'?\s?ora/g,30],[/un'ora e mezza/g,90],[/(?<!\d\s)un'ora(?! e mezza)/g,60],[/un paio d'ore/g,120],[/(?:tutta la|una) notte/g,720]])
+    for(const m of steps.matchAll(rx))add(v,m.index);
+  if(r.b?.some(([k])=>k==='legumi secchi')&&!/lessat|cotti|in scatola/.test(steps))wait+=720; // ammollo dei legumi secchi
+  cook=Math.min(cook,longest*1.6+20,240);wait=Math.min(wait,2880); // i passaggi in parte si sovrappongono
+  if(!found)cook=/forno/.test(steps)?35:/bollir|lessare|brodo|cuocere/.test(steps)?20:/frigg|padella|rosolare/.test(steps)?15:5;
+  const tech=HARD_RX.filter(rx=>rx.test(steps)).length;
+  const prep=Math.min(60,5+nIng*1.5+nSt*2+tech*5);
+  let t=Math.round((prep+cook)/5)*5;
+  const tot=steps.match(/(\d+)\s*(minut[io]|or[ae])\s*(?:in totale|totali)|(?:in totale|tempo totale|totale)\D{0,12}(\d+)\s*(minut[io]|or[ae])/);
+  if(tot){const v=+(tot[1]||tot[3]),u=tot[2]||tot[4];t=Math.round(v*(/^or/.test(u)?60:1)/5)*5||t} // tempo totale scritto nella ricetta
+  if(r.time&&!r.book)t=r.time; // tempo indicato dalla fonte o da te
+  const score=(nIng>12?2:nIng>7?1:0)+(nSt>8?2:nSt>4?1:0)+tech+(t>90?2:t>45?1:0);
+  const d=score<=2?1:score<=5?2:3;
+  return r._tm={t:Math.max(5,t),w:Math.round(wait),d};
+}
+const DIFF=['','Facile','Media','Impegnativa'];
+const fmtMin=m=>m>=60?`${Math.floor(m/60)} h${m%60?' '+m%60+' min':''}`:m+' min';
+const timeLabel=r=>{const x=timing(r);return `⏱ ${fmtMin(x.t)}${x.w>=30?` + ${fmtMin(x.w)} di attesa`:''} · ${DIFF[x.d]}`};
+
 /* ---------- Lista ---------- */
 const stars=n=>n?'<span class="stars">'+'★'.repeat(n)+'</span>':'';
 function fillSelects(){
@@ -519,18 +555,18 @@ function fillSelects(){
   $('#regions').innerHTML=REGIONS.map(c=>`<option value="${esc(c)}">`).join('');
 }
 function render(){
-  const q=$('#q').value.trim().toLowerCase(),fd=$('#fDiet').value,fz=$('#fZone').value,fr=+$('#fRate').value,fs=$('#fSort').value;
+  const q=$('#q').value.trim().toLowerCase(),fd=$('#fDiet').value,fz=$('#fZone').value,fr=+$('#fRate').value,ft=$('#fTime').value,fs=$('#fSort').value;
   const data=src();
   const counts={};data.forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);
   $('#chips').innerHTML=['Tutte',...cats].map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${esc(c)} ${c==='Tutte'?data.length:(counts[c]||0)}</button>`).join('');
-  const list=data.filter(i=>(cur==='Tutte'||i.cat===cur)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr
+  const list=data.filter(i=>(cur==='Tutte'||i.cat===cur)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(ft==='0'||(ft==='e'?timing(i).d===1:timing(i).t<=+ft))
       &&(!q||[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q)))
     .sort(fs==='rate'?(a,b)=>(b.rating||0)-(a.rating||0)||b.created-a.created:fs==='az'||view==='book'?(a,b)=>(a.title||'').localeCompare(b.title||''):(a,b)=>b.created-a.created);
   const lic=view==='book'&&book?.length?`<p class="lic">${book.length} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a>, licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a></p>`:'';
   $('#list').innerHTML=lic+(list.length?list.slice(0,view==='book'?150:9999).map(i=>`<div class="item" data-id="${i.id}">
       ${i.image||embedOf(i)?`<div class="thumb">🍽️${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}${embedOf(i)?'<span class="play">▶ video</span>':''}</div>`:''}
       <div class="b"${i.image||embedOf(i)?'':' style="padding-left:14px"'}><h3>${esc(i.title||i.url)}</h3>
-        <div class="meta">${esc([i.cat,i.region||i.country,i.time&&i.time+' min',perPerson(i)&&Math.round(perPerson(i).kcal)+' kcal',perPerson(i)?.eur!=null&&'≈'+euro(perPerson(i).eur)+'/pers.',i.source].filter(Boolean).join(' · '))} ${stars(i.rating)}</div>
+        <div class="meta">${esc([i.cat,i.region||i.country,(i.ingredients?.length||i.steps?.length)&&('⏱ '+fmtMin(timing(i).t)+' · '+DIFF[timing(i).d]),perPerson(i)&&Math.round(perPerson(i).kcal)+' kcal',perPerson(i)?.eur!=null&&'≈'+euro(perPerson(i).eur)+'/pers.',i.source].filter(Boolean).join(' · '))} ${stars(i.rating)}</div>
         ${i.diets?.some(d=>MAIN_DIETS.includes(d))?`<div class="badges">${i.diets.filter(d=>MAIN_DIETS.includes(d)).map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}</div>`:''}</div></div>`).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
     :`<div class="empty">${view==='book'?(book?'Nessun risultato con questi filtri.':'Carico il ricettario…'):items.length?'Nessun risultato con questi filtri.':'Nessuna ricetta salvata.<br>Condividi un link da TikTok, Instagram o dal browser verso quest\'app, oppure tocca +.'}</div>`);
@@ -626,7 +662,7 @@ async function computeNutrition(i){
 // pesce e legumi almeno 2 volte a settimana, carne rossa/uova/formaggi al massimo 2, frutta e verdura di stagione a ogni pasto.
 const MESI=['','gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
 const GIORNI=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
-const B_DIETS=['Vegetariano','Vegano','Senza glutine','Senza lattosio','Senza uova','Senza frutta secca','Senza pesce','Senza crostacei e molluschi'];
+const B_DIETS=['Vegetariano','Pescetariano','Vegano','Senza glutine','Senza lattosio','Senza uova','Senza frutta secca','Senza pesce','Senza crostacei e molluschi'];
 const SHELL=/gamber|scampi|aragost|astice|granch|mazzancoll|canocch|cozze|mitili|vongol|telline|ostriche|capesant|calamar|seppi|polp|totan|moscardin|lumach|surimi/;
 const LEGUMI=/fagiol|\bceci\b|lenticch|\bfave\b|cicerch|lupini|piselli|borlotti|cannellini|\bsoia\b|tofu|tempeh/;
 const KCAL={lunch:700,dinner:650}; // per persona, pasto completo
@@ -637,18 +673,22 @@ const stem=w=>w.toLowerCase().replace(/[^a-zà-ù ]/g,'').split(' ').map(x=>x.sl
 function initBudget(){
   const f=$('#bForm');
   if(!$('#bDiet').children.length){
-    $('#bDiet').innerHTML=B_DIETS.map(d=>`<label><input type="checkbox" value="${d}">${d}</label>`).join('');
+    const LBL={Vegetariano:'Vegetariano (niente carne né pesce)',Pescetariano:'Pescetariano (pesce sì, carne no)'};
+    $('#bDiet').innerHTML=B_DIETS.map(d=>`<label><input type="checkbox" value="${d}">${LBL[d]||d}</label>`).join('');
     $('#bMonth').innerHTML=MESI.slice(1).map((m,i)=>`<option value="${i+1}">${m[0].toUpperCase()+m.slice(1)}</option>`).join('');
     $('#bMonth').value=new Date().getMonth()+1;
+    const TOPT=[[15,'15 minuti'],[30,'30 minuti'],[45,'45 minuti'],[60,'1 ora'],[90,'1 ora e mezza'],[0,'Nessun limite']];
+    f.tWeek.innerHTML=f.tEnd.innerHTML=TOPT.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');f.tWeek.value=30;f.tEnd.value=60;
     const last=load('budgetForm',null);
     if(last){for(const [k,v] of Object.entries(last.f))if(f[k]&&f[k].type!=='radio'&&f[k].type!=='checkbox')f[k].value=v;
-      f.lunch.checked=last.f.lunch;f.dinner.checked=last.f.dinner;f.querySelector(`[name=mode][value=${last.f.mode}]`).checked=true;
+      f.lunch.checked=last.f.lunch;f.dinner.checked=last.f.dinner;f.easy.checked=!!last.f.easy;f.ahead.checked=!!last.f.ahead;f.querySelector(`[name=mode][value=${last.f.mode}]`).checked=true;
       $('#bDiet').querySelectorAll('input').forEach(x=>x.checked=last.diets.includes(x.value))}
     f.querySelectorAll('[name=mode]').forEach(x=>x.onchange=modeUI);modeUI();
     const plan=load('budgetPlan',null);if(plan)loadSeason().then(()=>showPlan(plan));
   }
 }
-function modeUI(){const w=$('#bForm').mode.value==='week';$('#bLbl').textContent=w?'Budget settimanale (€)':'Budget per il pasto (€)';$('#bMealsL').hidden=!w}
+function modeUI(){const w=$('#bForm').mode.value==='week';$('#bLbl').textContent=w?'Budget settimanale (€)':'Budget per il pasto (€)';$('#bMealsL').hidden=!w;
+  $('#bTimeEndL').hidden=!w;$('#bTimeL').textContent=w?'Tempo per cucinare a pasto (lun–ven)':'Tempo per cucinare'}
 
 // Tipo di proteina prevalente, per le regole settimanali
 function protein(r){
@@ -675,8 +715,13 @@ function seasonScore(r,month){
 }
 function allowed(r,diets,avoid){
   const t=((r.ingredients||[]).join(' ')+' '+r.title).toLowerCase();
-  const has=k=>ING[k].test(t);
+  // anche gli ingredienti già riconosciuti nella base (più affidabili del solo testo)
+  const keys=(r.b||[]).map(x=>x[0]).join('|');
+  const KEYS={fish:/salmone|tonno|acciughe|baccal|pesce|cozze|crostacei|molluschi/,meat:/manzo|maiale|agnello|macinata|salumi|interiora|guanciale|prosciutto|pollo|coniglio|strutto/,
+    dairy:/latte$|latte\||burro\b|panna|yogurt|mascarpone|ricotta|mozzarella|parmigiano|pecorino|formaggi/,egg:/uova|tuorli|albumi/,nuts:/frutta secca|farina di frutta secca/};
+  const has=k=>ING[k].test(t)||(KEYS[k]?.test(keys)??false);
   if((diets.includes('Vegetariano')||diets.includes('Vegano'))&&(has('meat')||has('fish')))return false;
+  if(diets.includes('Pescetariano')&&has('meat'))return false;
   if(diets.includes('Vegano')&&(has('dairy')||has('egg')||has('honey')))return false;
   if(diets.includes('Senza glutine')&&has('gluten'))return false;
   if(diets.includes('Senza lattosio')&&has('dairy'))return false;
@@ -696,11 +741,14 @@ function candidates(o){
     const lim=ro==='contorno'?[15,700]:[150,1400];
     if(pp.kcal<lim[0]||pp.kcal>lim[1]||pp.eur<=0||pp.eur>25)continue;
     if(!allowed(r,o.diets,o.avoid))continue;
+    const tm=timing(r);if(o.easy&&tm.d>1)continue;if(!o.ahead&&tm.w>=60)continue;
     seen.add(r.title.toLowerCase());
-    out.push({r,role:ro,eur:pp.eur,kcal:pp.kcal,p:pp.p??pp.kcal*.15/4,c:pp.c??pp.kcal*.5/4,f:pp.f??pp.kcal*.35/9,prot:protein(r),season:seasonScore(r,o.month)});
+    out.push({r,role:ro,t:tm.t,w:tm.w,d:tm.d,eur:pp.eur,kcal:pp.kcal,p:pp.p??pp.kcal*.15/4,c:pp.c??pp.kcal*.5/4,f:pp.f??pp.kcal*.35/9,prot:protein(r),season:seasonScore(r,o.month)});
   }
   return {list:out,noCost};
 }
+// Contorno di riserva quando il tempo non basta: verdura cruda o insalata di stagione (5 minuti)
+const rawSide=(o,X)=>({r:{id:'raw',title:`Insalata o verdura cruda di stagione`,book:false},role:'contorno',t:0,w:0,d:1,eur:.2*(PT?.eur['insalata']??3.5),kcal:45,p:1.5,c:4,f:2.5,prot:'verdure',season:2});
 // Frutta di stagione e pane come complementi del pasto
 function extras(o){
   const fr=(SEASON.frutta[o.month]||[]).filter(x=>!o.avoid.some(w=>x.includes(w))&&!(o.diets.includes('Senza frutta secca')&&/castagn/.test(x)));
@@ -720,7 +768,9 @@ function buildWeek(o,C,X){
   for(let it=0;it<250;it++){
     const used=new Set(),cnt={pesce:0,rossa:0,bianca:0,legumi:0,uova:0,formaggi:0,verdure:0};const plan=[];let cost=0;
     for(const sl of slots){
-      const mains=sl.m==='lunch'?prim:sec;
+      const lim=(sl.d>=5?o.tEnd:o.tWeek)||1e9;
+      const mains=(sl.m==='lunch'?prim:sec).filter(x=>x.t<=lim);
+      if(!mains.length)return null;
       const choose=(arr,role)=>{
         const cand=pickRand(arr.filter(x=>!used.has(x.r.id)),14);if(!cand.length)return pickRand(arr,1)[0];
         const target=KCAL[sl.m]*(role==='contorno'?.18:.62);
@@ -730,9 +780,10 @@ function buildWeek(o,C,X){
           return [sc+Math.random()*.8,x]}).sort((a,b)=>a[0]-b[0])[0][1];
       };
       const main=choose(mains,'main');used.add(main.r.id);if(main.prot in cnt&&main.role!=='contorno')cnt[main.prot]++;
-      const side=cont.length?choose(cont,'contorno'):null;if(side)used.add(side.r.id);
+      const fit=cont.filter(x=>main.t+x.t*.5<=lim);
+      const side=fit.length?choose(fit,'contorno'):rawSide(o,X);if(side.r.id!=='raw')used.add(side.r.id);
       const parts=[main,side].filter(Boolean),add=[X.fruit,...(sl.m==='dinner'&&X.bread?[X.bread]:[])];
-      const meal={...sl,dishes:parts,eur:[...parts,...add].reduce((a,x)=>a+x.eur,0),kcal:[...parts,...add].reduce((a,x)=>a+x.kcal,0),
+      const meal={...sl,t:Math.round((main.t+side.t*.5)/5)*5,dishes:parts,eur:[...parts,...add].reduce((a,x)=>a+x.eur,0),kcal:[...parts,...add].reduce((a,x)=>a+x.kcal,0),
         p:[...parts,...add].reduce((a,x)=>a+x.p,0),c:[...parts,...add].reduce((a,x)=>a+x.c,0),f:[...parts,...add].reduce((a,x)=>a+x.f,0)};
       plan.push(meal);cost+=meal.eur*o.people;
     }
@@ -754,7 +805,7 @@ function repair(best,o,C,X){
     const dishes=best.plan.flatMap(m=>m.dishes.map((x,i)=>({m,i,x}))).sort((a,b)=>b.x.eur-a.x.eur);
     let done=false;
     for(const w of dishes){
-      const alt=C.list.filter(y=>y.role===w.x.role&&!used.has(y.r.id)&&y.eur<w.x.eur*.92&&(y.prot===w.x.prot||w.x.role==='contorno'||!['pesce','legumi'].includes(w.x.prot)))
+      const alt=C.list.filter(y=>y.role===w.x.role&&!used.has(y.r.id)&&y.eur<w.x.eur*.92&&y.t<=(w.x.t||0)+5&&(y.prot===w.x.prot||w.x.role==='contorno'||!['pesce','legumi'].includes(w.x.prot)))
         .sort((a,b)=>Math.abs(a.kcal-w.x.kcal)/w.x.kcal+(a.eur-b.eur)/w.x.eur)[0];
       if(!alt)continue;
       const m=w.m,d=alt.eur-w.x.eur;used.add(alt.r.id);m.dishes[w.i]=alt;
@@ -766,16 +817,19 @@ function repair(best,o,C,X){
 }
 function buildMeal(o,C,X){
   const by=k=>C.list.filter(x=>x.role===k);
-  const prim=by('primo'),sec=by('secondo'),cont=by('contorno'),uni=by('unico');
+  const lim=o.tWeek||1e9,ok=x=>x.t<=lim;
+  const prim=by('primo').filter(ok),sec=by('secondo').filter(ok),cont=by('contorno').filter(ok),uni=by('unico').filter(ok);
   let best=null;
   for(let it=0;it<600;it++){
     const full=Math.random()<.65&&prim.length&&sec.length;
-    const parts=(full?[pickRand(prim,1)[0],pickRand(sec,1)[0]]:[pickRand(uni.length?uni:prim,1)[0]]).concat(cont.length?[pickRand(cont,1)[0]]:[]).filter(Boolean);
+    const parts=(full?[pickRand(prim,1)[0],pickRand(sec,1)[0]]:[pickRand(uni.length?uni:prim,1)[0]]).concat(cont.length&&Math.random()<.7?[pickRand(cont,1)[0]]:[rawSide(o,X)]).filter(Boolean);
     if(!parts.length)continue;
+    const tt=parts.map(x=>x.t),mt=Math.max(...tt)+(tt.reduce((a,x)=>a+x,0)-Math.max(...tt))*.5; // le preparazioni in parte si sovrappongono
+    if(mt>lim)continue;
     const all=[...parts,X.fruit,...(X.bread&&!full?[X.bread]:[])];
     const pp=all.reduce((a,x)=>a+x.eur,0),cost=pp*o.people,kcal=all.reduce((a,x)=>a+x.kcal,0);
     const score=(cost>o.budget?50+(cost-o.budget)/o.budget*100:0)+Math.abs(kcal-850)/850*8-parts.reduce((a,x)=>a+x.season,0)*.5-(full?1.5:0)+(o.budget-cost)/o.budget*1.5;
-    if(!best||score<best.score)best={score,plan:[{d:0,m:'meal',dishes:parts,eur:pp,kcal,p:all.reduce((a,x)=>a+x.p,0),c:all.reduce((a,x)=>a+x.c,0),f:all.reduce((a,x)=>a+x.f,0)}],cost,
+    if(!best||score<best.score)best={score,plan:[{d:0,m:'meal',t:Math.round(mt/5)*5,dishes:parts,eur:pp,kcal,p:all.reduce((a,x)=>a+x.p,0),c:all.reduce((a,x)=>a+x.c,0),f:all.reduce((a,x)=>a+x.f,0)}],cost,
       macro:(()=>{const P=all.reduce((a,x)=>a+x.p*4,0),Cb=all.reduce((a,x)=>a+x.c*4,0),F=all.reduce((a,x)=>a+x.f*9,0),T=P+Cb+F;return {p:P/T,c:Cb/T,f:F/T}})()};
   }
   return best;
@@ -783,17 +837,17 @@ function buildMeal(o,C,X){
 
 $('#bForm').onsubmit=async e=>{
   e.preventDefault();const f=e.target;modeUI();
-  const o={mode:f.mode.value,budget:+f.budget.value,people:+f.people.value||1,lunch:f.lunch.checked,dinner:f.dinner.checked,month:+f.month.value,pool:f.pool.value,
+  const o={tWeek:+f.tWeek.value,tEnd:+f.tEnd.value,easy:f.easy.checked,ahead:f.ahead.checked,mode:f.mode.value,budget:+f.budget.value,people:+f.people.value||1,lunch:f.lunch.checked,dinner:f.dinner.checked,month:+f.month.value,pool:f.pool.value,
     diets:[...$('#bDiet').querySelectorAll('input:checked')].map(x=>x.value),avoid:f.avoid.value.toLowerCase().split(',').map(x=>x.trim()).filter(x=>x.length>2)};
   if(o.mode==='week'&&!o.lunch&&!o.dinner){toast('Scegli almeno pranzo o cena');return}
-  save('budgetForm',{f:{mode:o.mode,budget:f.budget.value,people:f.people.value,lunch:o.lunch,dinner:o.dinner,month:f.month.value,pool:o.pool,avoid:f.avoid.value},diets:o.diets});
+  save('budgetForm',{f:{tWeek:f.tWeek.value,tEnd:f.tEnd.value,easy:o.easy,ahead:o.ahead,mode:o.mode,budget:f.budget.value,people:f.people.value,lunch:o.lunch,dinner:o.dinner,month:f.month.value,pool:o.pool,avoid:f.avoid.value},diets:o.diets});
   $('#bOut').innerHTML='<p class="meta">Preparo il menu…</p>';
   await Promise.all([loadBook(),loadPT(),loadSeason()]);
   if(!PT){$('#bOut').innerHTML='<div class="warn">Servono i prezzi aggiornati: controlla la connessione e riprova.</div>';return}
   const C=candidates(o),X=extras(o);
   const res=repair(o.mode==='week'?buildWeek(o,C,X):buildMeal(o,C,X),o,C,X);
-  if(!res){$('#bOut').innerHTML='<div class="warn">Non ci sono abbastanza ricette compatibili con queste scelte. Prova a togliere qualche filtro o a usare anche il ricettario.</div>';return}
-  const plan={o,res:{...res,plan:res.plan.map(m=>({...m,dishes:m.dishes.map(x=>({id:x.r.id,book:!!x.r.book,title:x.r.title,role:x.role,eur:x.eur,kcal:x.kcal,prot:x.prot}))}))},X,noCost:C.noCost,n:C.list.length,zone:PT.zone,period:PT.period};
+  if(!res){$('#bOut').innerHTML='<div class="warn">Non ci sono abbastanza ricette compatibili con queste scelte. Prova ad aumentare il tempo per cucinare, a togliere qualche filtro o a usare anche il ricettario.</div>';return}
+  const plan={o,res:{...res,plan:res.plan.map(m=>({...m,dishes:m.dishes.map(x=>({id:x.r.id,book:!!x.r.book,title:x.r.title,role:x.role,eur:x.eur,kcal:x.kcal,prot:x.prot,t:x.t,d:x.d}))}))},X,noCost:C.noCost,n:C.list.length,zone:PT.zone,period:PT.period};
   save('budgetPlan',plan);showPlan(plan);
 };
 function showPlan(P){
@@ -813,18 +867,18 @@ function showPlan(P){
       <div><b>${euro(res.cost/o.people/(week?7:1))}</b><span>a persona${week?' al giorno':''}</span></div>
       <div><b>${Math.round(kcalDay)} kcal</b><span>a persona ${week?`al giorno (${o.lunch&&o.dinner?'pranzo+cena':o.lunch?'pranzo':'cena'})`:'per il pasto'}</span></div></div>
     <div class="badges" style="margin-bottom:8px">${rule(`Proteine ${Math.round(res.macro.p*100)}%`,res.macro.p>=.12&&res.macro.p<=.22)}${rule(`Carboidrati ${Math.round(res.macro.c*100)}%`,res.macro.c>=.42&&res.macro.c<=.62)}${rule(`Grassi ${Math.round(res.macro.f*100)}%`,res.macro.f<=.36)}
-      ${week&&res.cnt?`${o.diets.some(d=>/Vege|pesce/.test(d))?'':rule(`Pesce ${res.cnt.pesce}×`,res.cnt.pesce>=2)}${rule(`Legumi ${res.cnt.legumi}×`,res.cnt.legumi>=2)}${o.diets.some(d=>/Vege/.test(d))?'':rule(`Carne rossa ${res.cnt.rossa}×`,res.cnt.rossa<=2)}`:''}</div>
+      ${week&&res.cnt?`${o.diets.some(d=>/Vege|pesce/.test(d))?'':rule(`Pesce ${res.cnt.pesce}×`,res.cnt.pesce>=2)}${rule(`Legumi ${res.cnt.legumi}×`,res.cnt.legumi>=2)}${o.diets.some(d=>/Vege|Pesce/.test(d))?'':rule(`Carne rossa ${res.cnt.rossa}×`,res.cnt.rossa<=2)}`:''}</div>
     <p class="meta">🍎 Di stagione a ${MESI[o.month]}: <b>${esc(X.fruits.join(', '))}</b><br>🥦 Verdura di stagione: ${esc(veg.join(', '))}</p>
     ${days.map(({g,ms})=>`<div class="day"><h3>${g}<span>${euro(ms.reduce((a,m)=>a+m.eur,0)*o.people)}</span></h3>${ms.map(m=>`<div class="meal">${week?`<b>${m.m==='lunch'?'Pranzo':'Cena'}</b>`:''}
-      ${m.dishes.map(x=>`<div class="dish" data-id="${esc(x.id)}" data-book="${x.book?1:''}"><span><span class="r">${ROLE[x.role]}</span>${esc(x.title)}</span><small>${Math.round(x.kcal)} kcal · ${euro(x.eur)}</small></div>`).join('')}
+      ${m.dishes.map(x=>`<div class="dish" data-id="${esc(x.id)}" data-book="${x.book?1:''}"><span><span class="r">${ROLE[x.role]}</span>${esc(x.title)}</span><small>⏱${x.t?x.t+'′':'pochi min'} · ${Math.round(x.kcal)} kcal · ${euro(x.eur)}</small></div>`).join('')}
       <div class="dish" style="cursor:default"><span><span class="r">Frutta</span>${esc(X.fruits[(m.d*2+(m.m==='dinner'?1:0))%X.fruits.length])}${m.m!=='lunch'&&X.bread&&(week||m.dishes.length<3)?' <span class="r" style="margin-left:6px">Pane</span>50 g':''}</span><small></small></div>
-      <p class="meta" style="margin:4px 0 0;text-align:right">Totale pasto: ${Math.round(m.kcal)} kcal a persona</p></div>`).join('')}</div>`).join('')}
+      <p class="meta" style="margin:4px 0 0;text-align:right">${m.t?`⏱ circa ${fmtMin(m.t)} in cucina · `:''}${Math.round(m.kcal)} kcal a persona</p></div>`).join('')}</div>`).join('')}
     <details class="meta" id="shop"><summary><b>🛒 Lista della spesa per ${o.people} ${o.people>1?'persone':'persona'}</b></summary><div id="shopList"></div></details>
     <p class="meta">Costi stimati con i prezzi medi${P.period?` dell'Osservatorio Prezzi MIMIT (${esc(P.period)}, ${esc(P.zone)})`:''} e prezzi indicativi; calorie e nutrienti medi, indicativi. Pasti scelti tra ${P.n} ricette compatibili${P.noCost?`; ${P.noCost} delle tue ricette sono escluse perché senza costo calcolato (aprile e tocca "Calcola calorie e costo")`:''}.</p>
     <div class="row"><button class="btn pri" id="bAgain">🔄 Rigenera menu</button></div>`;
   $('#bAgain').onclick=()=>$('#bForm').requestSubmit();
   if($('#bRefresh'))$('#bRefresh').onclick=()=>$('#bForm').requestSubmit();
-  $('#bOut').querySelectorAll('.dish[data-id]').forEach(el=>el.onclick=async()=>{await loadBook();const r=(el.dataset.book?book:items).find(x=>x.id===el.dataset.id);if(r)openDetail(r)});
+  $('#bOut').querySelectorAll('.dish[data-id]:not([data-id=raw])').forEach(el=>el.onclick=async()=>{await loadBook();const r=(el.dataset.book?book:items).find(x=>x.id===el.dataset.id);if(r)openDetail(r)});
   $('#shop').ontoggle=async()=>{if(!$('#shop').open)return;await loadBook();$('#shopList').innerHTML=shopping(P)};
 }
 // Lista della spesa: somma i grammi della base di ogni ricetta, scalati al numero di persone
@@ -833,6 +887,7 @@ function shopping(P){
   for(const m of res.plan){
     fruitKg+=.15*o.people;if(m.m!=='lunch'&&X.bread&&(o.mode==='week'||m.dishes.length<3))breadKg+=.05*o.people;
     for(const d of m.dishes){
+      if(d.id==='raw'){acc['insalata']=(acc['insalata']||0)+200*o.people;continue}
       const r=(d.book?book:items).find(x=>x.id===d.id);if(!r)continue;const f=o.people/baseS(r);
       if(r.b)for(const [k,g] of r.b)acc[k]=(acc[k]||0)+g*f;
       else extra.push(`<li><b>${esc(r.title)}</b>: ${r.ingredients.map(x=>esc(scaleLine(x,o.people/(r.servings||4)))).join(', ')}</li>`);
@@ -850,7 +905,8 @@ function openDetail(i){
   const e=embedOf(i);
   $('#dv').innerHTML=`${e?`<iframe class="video ${e.v?'v':'h'}" src="${esc(e.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`:i.image?`<img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer">`:''}
     <h2 style="margin-top:12px">${esc(i.title||i.url)}</h2>
-    <div class="meta">${esc([i.cat,[i.region,i.country].filter(Boolean).join(', '),i.time&&i.time+' min',i.author,i.source].filter(Boolean).join(' · '))}</div>
+    <div class="meta">${esc([i.cat,[i.region,i.country].filter(Boolean).join(', '),i.author,i.source].filter(Boolean).join(' · '))}</div>
+    ${i.ingredients?.length||i.steps?.length?`<div class="meta" style="margin-top:2px">${esc(timeLabel(i))}${i.time&&!i.book?'':' (stima)'}</div>`:''}
     <div class="badges">${(i.diets||[]).map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}${(i.tags||[]).map(t=>`<span class="bdg z">#${esc(t)}</span>`).join('')}</div>
     ${i.book?`<p class="lic" style="margin-top:8px">Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · autori nella <a href="${esc(i.url.replace('/wiki/','/w/index.php?action=history&title='))}" target="_blank" rel="noopener">cronologia</a></p>`:''}
     <div class="rate" id="dRate" style="margin-top:8px${i.book?';display:none':''}">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n<=(i.rating||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}</div>
@@ -946,6 +1002,7 @@ $('#f').onsubmit=e=>{
     title:f.title.value.trim(),cat:f.cat.value,time:+f.time.value||null,servings:+f.servings.value||null,diets:getDiets(),country:f.country.value.trim(),region:f.region.value.trim(),
     rating:formRating,ingredients:lines(f.ingredients.value),steps:lines(f.steps.value),
     tags:f.tags.value.split(',').map(s=>s.trim()).filter(Boolean),note:f.note.value.trim(),source:sourceOf(url)};
+  delete rec._tm;
   items=editing?items.map(i=>i.id===rec.id?rec:i):[rec,...items];
   if(editing?.nutrition?.key===rec.ingredients.join('|')+'#'+(rec.servings||4))rec.nutrition=editing.nutrition;
   save('items',items);$('#dlg').close();fillSelects();render();toast('Salvata in '+rec.cat);
@@ -956,7 +1013,7 @@ $('#del').onclick=()=>{if(confirm('Eliminare questa ricetta?')){items=items.filt
 
 /* ---------- Eventi generali ---------- */
 $('#add').onclick=()=>openForm();
-['#q','#fDiet','#fZone','#fRate','#fSort'].forEach(s=>$(s).addEventListener('input',render));
+['#q','#fDiet','#fZone','#fTime','#fRate','#fSort'].forEach(s=>$(s).addEventListener('input',render));
 $('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;render()}};
 $('#list').onclick=e=>{const it=e.target.closest('.item');if(it)openDetail(src().find(i=>i.id===it.dataset.id))};
 const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${esc(c)}</span>`).join('')};
