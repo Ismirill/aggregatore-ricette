@@ -7,6 +7,10 @@
 "as": "animelle",
 "via": "sinonimo di animelle"
 },
+"anisini q b": {
+"as": null,
+"via": "non trovato"
+},
 "aringa affumicata": {
 "as": "pesce",
 "via": "sinonimo di pesce"
@@ -14,6 +18,10 @@
 "aromi misti": {
 "as": "erbe aromatiche",
 "via": "sinonimo di erbe aromatiche"
+},
+"aromi naturali q b": {
+"as": "panna",
+"via": "Open Food Facts: Gran cucina"
 },
 "arselle": {
 "as": "vongole",
@@ -114,6 +122,10 @@
 "cervella": {
 "as": "fegato",
 "via": "sinonimo di fegato"
+},
+"chiocciole": {
+"as": "calamari",
+"via": "Wikipedia: mollusco"
 },
 "chorizo": {
 "as": "salame",
@@ -259,6 +271,10 @@
 "as": "zenzero",
 "via": "sinonimo di zenzero"
 },
+"galletto": {
+"as": "verdure varie",
+"via": "Open Food Facts: Tomates Entières Pelées Galletto"
+},
 "gallinella": {
 "as": "pesce",
 "via": "sinonimo di pesce"
@@ -271,6 +287,10 @@
 "as": "zucchero",
 "via": "sinonimo di zucchero"
 },
+"grano": {
+"as": "cereali",
+"via": "Wikidata: seme delle granaglie (frumento, avena, grano saraceno, orzo, etc.)"
+},
 "grasso": {
 "as": null,
 "via": "non trovato"
@@ -282,6 +302,10 @@
 "grossa manciata cime fiorite cipresso argentato": {
 "as": null,
 "via": "non trovato"
+},
+"gruyere": {
+"as": "gruyere",
+"via": "simile a \"gruyere\""
 },
 "harissa": {
 "as": "salsa",
@@ -391,7 +415,23 @@
 "as": null,
 "via": "non trovato"
 },
+"paparine": {
+"as": null,
+"via": "non trovato"
+},
 "pastello": {
+"as": null,
+"via": "non trovato"
+},
+"pesci bianchi": {
+"as": null,
+"via": "non trovato"
+},
+"pesci piccola taglia": {
+"as": null,
+"via": "non trovato"
+},
+"pesci prete": {
 "as": null,
 "via": "non trovato"
 },
@@ -467,6 +507,10 @@
 "as": "pasta",
 "via": "Wikipedia: tipo di pasta che somiglia a un chicco d'orzo"
 },
+"rosato salento": {
+"as": null,
+"via": "non trovato"
+},
 "sake": {
 "as": "vino",
 "via": "Wikipedia: bevanda alcolica giapponese"
@@ -482,6 +526,10 @@
 "scannello serrato": {
 "as": "manzo",
 "via": "sinonimo di manzo"
+},
+"scorfani": {
+"as": "scorfano",
+"via": "simile a \"scorfano\""
 },
 "serpillo": {
 "as": "timo",
@@ -507,6 +555,18 @@
 "as": "fegato",
 "via": "sinonimo di fegato"
 },
+"tracine": {
+"as": null,
+"via": "non trovato"
+},
+"tranci grongo": {
+"as": null,
+"via": "non trovato"
+},
+"tranci murena": {
+"as": null,
+"via": "non trovato"
+},
 "trenette": {
 "as": "pasta",
 "via": "Wikipedia: tipo di pasta"
@@ -530,6 +590,14 @@
 "verzini": {
 "as": "salsiccia",
 "via": "sinonimo di salsiccia"
+},
+"vincotto": {
+"as": "salsa",
+"via": "Open Food Facts: Vincotto by gianni calogiuri original"
+},
+"vincotto q b": {
+"as": "salsa",
+"via": "Open Food Facts: Vincotto by gianni calogiuri original"
 },
 "zucchetta da pergola": {
 "as": null,

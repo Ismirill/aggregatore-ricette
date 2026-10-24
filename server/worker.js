@@ -267,6 +267,27 @@ async function preview(b) {
   return { html: mini, url: r.url };
 }
 
+// Traduzione in italiano di una ricetta strutturata (dataset UniTools, CC BY-SA 4.0): solo titolo, descrizione,
+// nomi e note degli ingredienti, passaggi. Formato e dimensione limitati: non è un traduttore generico.
+async function translateRecipe(env, b) {
+  const r = b.recipe || {};
+  const src = {
+    name: str(r.name, 120), summary: str(r.summary, 600),
+    ingredients: (Array.isArray(r.ingredients) ? r.ingredients : []).slice(0, 40).map(x => ({ name: str(x.name, 80), note: str(x.note || '', 160) })),
+    steps: (Array.isArray(r.steps) ? r.steps : []).slice(0, 25).map(x => str(x, 700)),
+  };
+  if (!src.name || !src.ingredients.length) throw Object.assign(new Error('Ricetta non valida'), { status: 400 });
+  const out = await aiJson(env, `Traduci in italiano questa ricetta, in modo naturale e con i termini usati nelle cucine italiane
+(traduci anche le misure nel testo: "two tablespoons" = "due cucchiai", "a teaspoon" = "un cucchiaino", "a cup" = "una tazza"; "scallions" = "cipollotti", "heavy cream" = "panna fresca", "all-purpose flour" = "farina 00", "cilantro" = "coriandolo fresco").
+Il nome del piatto: se ha un nome tradizionale noto in Italia usalo (es. "Spaghetti carbonara" -> "Spaghetti alla carbonara"), altrimenti traducilo o lascia il nome originale.
+Mantieni esattamente la stessa struttura e lo stesso numero di ingredienti e di passaggi, nello stesso ordine.
+Rispondi solo con JSON nello stesso formato:
+${JSON.stringify(src)}`);
+  const ok = out && typeof out.name === 'string' && Array.isArray(out.ingredients) && out.ingredients.length === src.ingredients.length && Array.isArray(out.steps) && out.steps.length === src.steps.length;
+  if (!ok) throw Object.assign(new Error('Traduzione non valida'), { status: 502 });
+  return { result: { name: str(out.name, 120), summary: str(out.summary, 700), ingredients: out.ingredients.map(x => ({ name: str(x.name, 80), note: str(x.note || '', 200) })), steps: out.steps.map(x => str(x, 900)) } };
+}
+
 export default {
   // Aggiornamento automatico dei prezzi: un lotto di province ogni giorno
   async scheduled(event, env, ctx) {
@@ -297,12 +318,12 @@ export default {
       if (!env.ADMIN_TOKEN || req.headers.get('X-Admin') !== env.ADMIN_TOKEN) return reply(origin, { error: 'Non autorizzato' }, 403);
       try { return reply(origin, await refreshBatch(env)); } catch (e) { return reply(origin, { error: e.message }, 503); }
     }
-    if (req.method !== 'POST' || !['/analyze', '/photo', '/nutrition', '/preview'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
+    if (req.method !== 'POST' || !['/analyze', '/photo', '/nutrition', '/preview', '/translate-recipe'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';
     if (env.LIMITER && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
     try {
       const body = await req.json();
-      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await preview(body) : await analyze(env, body));
+      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await preview(body) : path === '/translate-recipe' ? await translateRecipe(env, body) : await analyze(env, body));
     } catch (e) {
       // Quota giornaliera gratuita esaurita o errore del modello
       const limit = e.status === 429 || /neuron|quota|limit|4006/i.test(e.message);
