@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: { ref: main }  # sempre l'ultima versione, anche se nel frattempo sono stati salvati dati nuovi
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
       - name: Ricettario da Wikibooks (solo aggiornamento mensile o manuale)
@@ -78,6 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: { ref: main }  # sempre l'ultima versione, anche se nel frattempo sono stati salvati dati nuovi
       - uses: actions/download-artifact@v4
         with: { name: www, path: www }
       - uses: actions/setup-node@v4
