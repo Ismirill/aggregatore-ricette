@@ -172,6 +172,7 @@ details summary{cursor:pointer}
 .okb{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}.kob{background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc)}
 .warn{border:1px solid color-mix(in srgb,var(--acc) 40%,transparent);background:color-mix(in srgb,var(--acc) 7%,var(--card));border-radius:14px;padding:12px 14px;margin:8px 0;font-size:.9rem}
 [hidden]{display:none!important}
+.shop li{margin:3px 0}.amz{font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:999px;border:1px solid var(--bd);text-decoration:none;margin-left:4px;white-space:nowrap}
 .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:.9rem;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:9;box-shadow:var(--sh2);max-width:calc(100% - 32px)}
 .toast.on{opacity:1;transform:translateX(-50%)}
 </style>
@@ -556,7 +557,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=21; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=22; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -860,7 +861,7 @@ function candidates(o){
   return {list:out,noCost};
 }
 // Contorno di riserva quando il tempo non basta: verdura cruda o insalata di stagione (5 minuti)
-const rawSide=(o,X)=>({r:{id:'raw',title:`Insalata o verdura cruda di stagione`,book:false},role:'contorno',t:0,w:0,d:1,eur:.2*(PT?.eur['insalata']??3.5),kcal:45,p:1.5,c:4,f:2.5,prot:'verdure',season:2});
+const rawSide=(o,X)=>({r:{id:'raw',title:`Insalata o verdura cruda di stagione`,book:false},role:'contorno',t:0,w:0,d:1,eur:.1*(PT?.eur['insalata']??3.5),kcal:25,p:1,c:2.5,f:1.5,prot:'verdure',season:2});
 // Frutta di stagione e pane come complementi del pasto
 function extras(o){
   const fr=(SEASON.frutta[o.month]||[]).filter(x=>!o.avoid.some(w=>x.includes(w))&&!(o.diets.includes('Senza frutta secca')&&/castagn/.test(x)));
@@ -991,15 +992,24 @@ function showPlan(P){
   $('#bAgain').onclick=()=>$('#bForm').requestSubmit();
   if($('#bRefresh'))$('#bRefresh').onclick=()=>$('#bForm').requestSubmit();
   $('#bOut').querySelectorAll('.dish[data-id]:not([data-id=raw])').forEach(el=>el.onclick=async()=>{await loadBook();const r=(el.dataset.book?book:items).find(x=>x.id===el.dataset.id);if(r)openDetail(r)});
-  $('#shop').ontoggle=async()=>{if(!$('#shop').open)return;await loadBook();$('#shopList').innerHTML=shopping(P)};
+  $('#shop').ontoggle=async()=>{if(!$('#shop').open)return;await loadBook();$('#shopList').innerHTML=shopping(P);
+    $('#shopCopy').onclick=async()=>{const t='Lista della spesa\n'+[...$('#shopList').querySelectorAll('li[data-t]')].map(x=>'• '+x.dataset.t).join('\n');
+      try{await navigator.clipboard.writeText(t);toast('Lista copiata')}catch{prompt('Copia la lista:',t)}}};
 }
+// Link di ricerca su Amazon per ogni prodotto. Con l'affiliazione Amazon basta inserire qui il codice (es. "nome-21")
+const AMAZON_TAG='';
+const SHOP_TERM={'guanciale e pancetta':'guanciale','olio extravergine':'olio extravergine di oliva','pepe e spezie':'pepe nero','erbe aromatiche':'erbe aromatiche',
+  'pollo e tacchino':'petto di pollo','manzo e vitello':'carne di manzo','tonno in scatola':'tonno','olive e capperi':'capperi','cozze e vongole':'cozze',
+  'mele e pere':'mele','tofu e seitan':'tofu','biscotti e dolci pronti':'savoiardi','pasta sfoglia e frolla':'pasta sfoglia','strutto e lardo':'strutto',
+  'farina di ceci e legumi':'farina di ceci','farina di frutta secca':'farina di mandorle','salse e condimenti':'salsa','verdure varie':'verdure fresche'};
+const amazon=k=>`https://www.amazon.it/s?k=${encodeURIComponent(SHOP_TERM[k]||k)}${AMAZON_TAG?'&tag='+encodeURIComponent(AMAZON_TAG):''}`;
 // Lista della spesa: somma i grammi della base di ogni ricetta, scalati al numero di persone
 function shopping(P){
   const {o,res,X}=P,acc={},extra=[];let fruitKg=0,breadKg=0;
   for(const m of res.plan){
     fruitKg+=.15*o.people;if(m.m!=='lunch'&&X.bread&&(o.mode==='week'||m.dishes.length<3))breadKg+=.05*o.people;
     for(const d of m.dishes){
-      if(d.id==='raw'){acc['insalata']=(acc['insalata']||0)+200*o.people;continue}
+      if(d.id==='raw'){acc['insalata']=(acc['insalata']||0)+100*o.people;continue} // 100 g a persona
       const r=(d.book?book:items).find(x=>x.id===d.id);if(!r)continue;const f=o.people/baseS(r);
       if(r.b)for(const [k,g] of r.b)acc[k]=(acc[k]||0)+g*f;
       else extra.push(`<li><b>${esc(r.title)}</b>: ${r.ingredients.map(x=>esc(scaleLine(x,o.people/(r.servings||4)))).join(', ')}</li>`);
@@ -1008,8 +1018,9 @@ function shopping(P){
   if(breadKg){acc['pane']=(acc['pane']||0)+breadKg*1000;breadKg=0}
   const fmt=g=>g>=1000?(g/1000).toFixed(1).replace('.',',')+' kg':Math.round(g)+' g';
   const rows=Object.entries(acc).filter(([k])=>!['sale','acqua','pepe e spezie'].includes(k)).sort((a,b)=>b[1]-a[1])
-    .map(([k,g])=>`<li>${esc(k)}: ${fmt(g)}${PT?` · ≈${euro(g*(PT.eur[k]??0)/1000)}`:''}</li>`);
-  return `<ul>${rows.join('')}<li>frutta di stagione: ${fmt(fruitKg*1000)}</li>${breadKg?``:''}<li>sale, pepe e spezie: q.b.</li></ul>${extra.length?`<p>Dalle tue ricette:</p><ul>${extra.join('')}</ul>`:''}`;
+    .map(([k,g])=>`<li data-t="${esc(k)}: ${fmt(g)}">${esc(k)}: ${fmt(g)}${PT?` · ≈${euro(g*(PT.eur[k]??0)/1000)}`:''} <a href="${amazon(k)}" target="_blank" rel="noopener sponsored" class="amz">Amazon</a></li>`);
+  return `<div class="row" style="justify-content:flex-start;margin:8px 0"><button type="button" class="btn" id="shopCopy">📋 Copia la lista</button></div>
+    <ul class="shop">${rows.join('')}<li data-t="frutta di stagione: ${fmt(fruitKg*1000)}">frutta di stagione: ${fmt(fruitKg*1000)}</li>${breadKg?``:''}<li>sale, pepe e spezie: q.b.</li></ul>${extra.length?`<p>Dalle tue ricette:</p><ul>${extra.join('')}</ul>`:''}`;
 }
 
 /* ---------- Scheda ricetta ---------- */
