@@ -590,7 +590,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=27; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=28; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -604,7 +604,7 @@ const src=()=>view==='book'?(book||[]):items;
 async function loadBook(){
   if(book)return;
   try{
-    const [d,im,ct]=await Promise.all([fetchData('ricettario.json'),fetchData('immagini.json').catch(()=>({items:{}})),fetchData('categorie.json').catch(()=>({items:{}}))]);
+    const [d,im,ct,gz]=await Promise.all([fetchData('ricettario.json'),fetchData('immagini.json').catch(()=>({items:{}})),fetchData('categorie.json').catch(()=>({items:{}})),fetchData('collegate.json').catch(()=>({recipes:[]}))]);
     const nut=load('bookNut',{});
     bookInfo=d;
     book=d.recipes.map(r=>{
@@ -616,6 +616,13 @@ async function loadBook(){
       const vc=ct.items?.[r.id]; // tipo di piatto verificato incrociando Wikibooks, Wikipedia/Wikidata, nome e ingredienti
       return {...r,...(ph?{image:ph.img,imgFile:ph.file}:{}),...(vc?{catBy:vc.by,catConf:vc.conf}:{}),book:true,source:'Wikibooks',cat:vc?.cat||c.cat||'Altro',diets:c.diets,country:reg?'Italia':c.country,region:reg||c.region,nutrition:nut[r.id]};
     });
+    // ricette collegate: solo dati descrittivi, dosi e procedimento restano su GialloZafferano
+    bookInfo.gz=gz;
+    for(const r of gz.recipes||[]){
+      const c=classify({title:r.title,ingredients:r.ingredients.length>=3?r.ingredients:[],caption:r.ingredients.join(' ')}),ph=im.items?.[r.id];
+      book.push({...r,...(ph?{image:ph.img,imgFile:ph.file}:{}),book:true,linked:true,source:'GialloZafferano',cat:r.cat||c.cat||'Altro',diets:c.diets,country:c.country||'Italia',region:c.region,
+        steps:[],tags:[],_tm:{t:r.time||timing({...r,steps:[]}).t,w:0,d:r.diff||2}});
+    }
   }catch{book=[];toast('Ricettario non disponibile offline')}
   fillSelects();render();
 }
@@ -684,14 +691,14 @@ const PROT_EM={pesce:'🐟',legumi:'🫘',uova:'🍳',formaggi:'🧀',verdure:'�
 function look(i){const l=[...(CAT_LOOK[i.cat]||CAT_LOOK.Altro)];if(['Secondi','Piatti unici'].includes(i.cat)&&i.ingredients?.length){i._pr??=protein(i);if(PROT_EM[i._pr]&&i.cat==='Secondi'||['pesce','legumi'].includes(i._pr))l[0]=PROT_EM[i._pr]}return l}
 function card(i){
   const [em,c1,c2]=look(i),pp=perPerson(i),tm=(i.ingredients?.length||i.steps?.length)?timing(i):null,vid=embedOf(i);
-  const facts=[tm&&`⏱ <b>${fmtMin(tm.t)}</b>`,tm&&DIFF[tm.d],pp&&`<b>${Math.round(pp.kcal)}</b> kcal`,pp?.eur!=null&&`${i.cov!=null&&i.cov<.85?'circa ':''}<b>${euro(pp.eur)}</b>/pers.`].filter(Boolean);
+  const facts=[tm&&`⏱ <b>${fmtMin(tm.t)}</b>`,tm&&DIFF[tm.d],pp&&`<b>${Math.round(pp.kcal)}</b> kcal`,pp?.eur!=null&&`${i.cov!=null&&i.cov<.85?'circa ':''}<b>${euro(pp.eur)}</b>/pers.`,i.linked&&i.cost&&`costo ${i.cost}`].filter(Boolean);
   const diets=(i.diets||[]).filter(d=>MAIN_DIETS.includes(d));
   return `<div class="item" data-id="${i.id}">
     <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
       <span class="cat">${esc(i.cat||'Altro')}</span>${i.rating?`<span class="rt">★ ${i.rating}</span>`:''}${vid?'<span class="play">▶ video</span>':''}</div>
     <div class="b"><h3>${esc(i.title||i.url)}</h3>
       <div class="facts">${facts.map(f=>`<span>${f}</span>`).join('')}</div>
-      <div class="meta">${esc([i.region||i.country,i.source].filter(Boolean).join(' · '))}</div>
+      <div class="meta">${esc([i.region||i.country,i.source+(i.linked?' · collegata':'')].filter(Boolean).join(' · '))}</div>
       ${diets.length?`<div class="badges">${diets.map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}</div>`:''}</div></div>`;
 }
 const stars=n=>n?'<span class="stars">'+'★'.repeat(n)+'</span>':'';
@@ -712,7 +719,8 @@ function render(){
   const list=data.filter(i=>(cur==='Tutte'||i.cat===cur)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(!ft||timing(i).t<=ft)&&(!fdf||(fdf===3?timing(i).d===3:timing(i).d<=fdf))&&(!fc||((perPerson(i)?.eur??99)<=fc))
       &&(!q||[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q)))
     .sort(sorter(fs,!!q));
-  const lic=view==='book'&&book?.length?`<p class="lic">${book.length} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a>, licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a></p>`:'';
+  const nGz=view==='book'&&book?book.filter(x=>x.linked).length:0;
+  const lic=view==='book'&&book?.length?`<p class="lic">${book.length-nGz} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}</p>`:'';
   $('#list').innerHTML=lic+(list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
     :`<div class="empty">${view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'<b>Il tuo ricettario è vuoto</b>Condividi un link da TikTok, Instagram o dal browser verso quest\'app, oppure tocca +.<br>Trovi idee pronte nella sezione Ricettario.'}</div>`);
@@ -1069,12 +1077,15 @@ function openDetail(i){
     <h2 style="margin-top:12px">${esc(i.title||i.url)}</h2>
     ${tm?`<div class="kv"><span>⏱ ${fmtMin(tm.t)}${tm.w>=30?` + ${fmtMin(tm.w)} attesa`:''}</span><span>${DIFF[tm.d]}</span>${i.cat?`<span>${esc(i.cat)}</span>`:''}</div>`:''}
     <div class="meta">${esc([i.cat,[i.region,i.country].filter(Boolean).join(', '),i.author,i.source].filter(Boolean).join(' · '))}</div>
-    ${tm&&!(i.time&&!i.book)?'<div class="meta" style="margin-top:2px">Tempi e difficoltà stimati dal testo della ricetta</div>':''}
+    ${tm&&!(i.time&&!i.book)&&!i.linked?'<div class="meta" style="margin-top:2px">Tempi e difficoltà stimati dal testo della ricetta</div>':''}${i.linked?'<div class="meta" style="margin-top:2px">Tempo, difficoltà e costo indicati da GialloZafferano</div>':''}
     ${i.catBy?.length?`<details class="meta" style="margin-top:2px"><summary>Perché è tra i ${esc(i.cat)}</summary>${i.catBy.map(b=>esc(b)).join(' · ')} (affidabilità ${esc(i.catConf)})</details>`:''}
     <div class="badges">${(i.diets||[]).map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}${(i.tags||[]).map(t=>`<span class="bdg z">#${esc(t)}</span>`).join('')}</div>
-    ${i.book?`<p class="lic" style="margin-top:8px">Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · autori nella <a href="${esc(i.url.replace('/wiki/','/w/index.php?action=history&title='))}" target="_blank" rel="noopener">cronologia</a></p>`:''}
+    ${i.book&&!i.linked?`<p class="lic" style="margin-top:8px">Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · autori nella <a href="${esc(i.url.replace('/wiki/','/w/index.php?action=history&title='))}" target="_blank" rel="noopener">cronologia</a></p>`:''}
     <div class="rate" id="dRate" style="margin-top:8px${i.book?';display:none':''}">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n<=(i.rating||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}</div>
-    ${i.ingredients?.length?`<h3>Ingredienti</h3><div class="srv">Per <button type="button" class="btn" id="sMinus" aria-label="Meno persone">−</button><b id="sN"></b><button type="button" class="btn" id="sPlus" aria-label="Più persone">+</button> <span id="sLbl">persone</span> <span class="meta" id="sOrig"></span></div>
+    ${i.linked?`<div class="kv"><span>Costo ${esc(i.cost||'n.d.')}</span></div><h3>Ingredienti principali</h3><ul>${i.ingredients.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+      <p class="meta">Dosi e procedimento sono sulla pagina originale. <a class="btn pri" style="margin-top:8px" href="${esc(i.url)}" target="_blank" rel="noopener">Apri su GialloZafferano</a></p>
+      <p class="lic">Dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a> (Fossemò, Mignosi, Raggioli, Spezialetti, D'Asaro, 2022), licenza CC BY 4.0 · ricetta di GialloZafferano</p>`
+    :i.ingredients?.length?`<h3>Ingredienti</h3><div class="srv">Per <button type="button" class="btn" id="sMinus" aria-label="Meno persone">−</button><b id="sN"></b><button type="button" class="btn" id="sPlus" aria-label="Più persone">+</button> <span id="sLbl">persone</span> <span class="meta" id="sOrig"></span></div>
       <div class="nut" id="nut"></div><ul id="ingList"></ul>`:''}
     ${i.steps?.length?`<h3>Procedimento</h3><ol>${i.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
     ${i.note?`<h3>Note</h3><p class="cap">${esc(i.note)}</p>`:''}
@@ -1085,7 +1096,7 @@ function openDetail(i){
       ${i.book?'<button class="btn pri" id="dSave">Salva nelle mie</button>':'<button class="btn" id="dEdit">Modifica</button>'}<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button></div>`;
   $('#dRate').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n;i.rating=i.rating===n?0:n;save('items',items);render();
     $('#dRate').querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.n<=i.rating))};
-  if(i.ingredients?.length){
+  if(i.ingredients?.length&&!i.linked){
     const base=i.servings||i.s||4;let n=base;
     const draw=()=>{const f=n/base;
       $('#ingList').innerHTML=i.ingredients.map(x=>`<li>${esc(scaleLine(x,f))}</li>`).join('');
