@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Aggregatore Ricette</string>
+    <string name="title_activity_main">Aggregatore Ricette</string>
+    <string name="package_name">it.ricette.aggregatore</string>
+    <string name="custom_url_scheme">it.ricette.aggregatore</string>
+</resources>
