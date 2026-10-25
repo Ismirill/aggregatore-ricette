@@ -646,7 +646,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=35; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=36; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1214,8 +1214,15 @@ function showPlan(P){
   if($('#bRefresh'))$('#bRefresh').onclick=()=>$('#bForm').requestSubmit();
   $('#bOut').querySelectorAll('.dish[data-id]:not([data-id=raw])').forEach(el=>el.onclick=async()=>{await loadBook();const r=findRec(el.dataset.id,el.dataset.book);if(r)openDetail(r)});
   $('#shop').ontoggle=async()=>{if(!$('#shop').open)return;await loadBook();$('#shopList').innerHTML=shopping(P);
-    $('#shopCopy').onclick=async()=>{const t='Lista della spesa\n'+[...$('#shopList').querySelectorAll('li[data-t]')].map(x=>'• '+x.dataset.t).join('\n');
-      try{await navigator.clipboard.writeText(t);toast('Lista copiata')}catch{prompt('Copia la lista:',t)}}};
+    $('#shopCopy').onclick=()=>copyText(SHOP_TXT,'Lista copiata');
+    $('#shopShare').onclick=()=>shareText('Lista della spesa',SHOP_TXT,$('#shopAlt'))};
+}
+async function copyText(t,msg){try{await navigator.clipboard.writeText(t);toast(msg)}catch{prompt('Copia il testo:',t)}}
+// Condivide un testo: app Android (menu di condivisione del sistema), browser con Web Share, altrimenti WhatsApp / e-mail / copia
+async function shareText(title,text,alt){
+  if(window.AndroidShare?.send){AndroidShare.send(title,text);return}
+  if(navigator.share){try{await navigator.share({title,text});return}catch(e){if(e.name==='AbortError')return}}
+  if(alt){alt.hidden=!alt.hidden;alt.querySelector('.wa').href='https://wa.me/?text='+encodeURIComponent(text);alt.querySelector('.ml').href=`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(text)}`}
 }
 // Link di ricerca su Amazon per ogni prodotto. Con l'affiliazione Amazon basta inserire qui il codice (es. "nome-21")
 const AMAZON_TAG='';
@@ -1233,16 +1240,25 @@ function shopping(P){
       if(d.id==='raw'){acc['insalata']=(acc['insalata']||0)+100*o.people;continue} // 100 g a persona
       const r=findRec(d.id,d.book);if(!r)continue;const f=o.people/baseS(r);
       if(r.b)for(const [k,g] of r.b)acc[k]=(acc[k]||0)+g*f;
-      else extra.push(`<li><b>${esc(r.title)}</b>: ${r.ingredients.map(x=>esc(scaleLine(x,o.people/(r.servings||4)))).join(', ')}</li>`);
+      else extra.push(`<b>${esc(r.title)}</b>: ${r.ingredients.map(x=>esc(scaleLine(x,o.people/(r.servings||4)))).join(', ')}`);
     }
   }
   if(breadKg){acc['pane']=(acc['pane']||0)+breadKg*1000;breadKg=0}
   const fmt=g=>g>=1000?(g/1000).toFixed(1).replace('.',',')+' kg':Math.round(g)+' g';
-  const rows=Object.entries(acc).filter(([k])=>!['sale','acqua','pepe e spezie'].includes(k)).sort((a,b)=>b[1]-a[1])
-    .map(([k,g])=>`<li data-t="${esc(k)}: ${fmt(g)}">${esc(k)}: ${fmt(g)}${PT?` · ≈${euro(g*eurKg(k)/1000)}`:''} <a href="${amazon(k)}" target="_blank" rel="noopener sponsored" class="amz">Amazon</a></li>`);
-  return `<div class="row" style="justify-content:flex-start;margin:8px 0"><button type="button" class="btn" id="shopCopy">📋 Copia la lista</button></div>
-    <ul class="shop">${rows.join('')}<li data-t="frutta di stagione: ${fmt(fruitKg*1000)}">frutta di stagione: ${fmt(fruitKg*1000)}</li>${breadKg?``:''}<li>sale, pepe e spezie: q.b.</li></ul>${extra.length?`<p>Dalle tue ricette:</p><ul>${extra.join('')}</ul>`:''}`;
+  const list=Object.entries(acc).filter(([k])=>!['sale','acqua','pepe e spezie'].includes(k)).sort((a,b)=>b[1]-a[1]).map(([k,g])=>({k,g,eur:PT?g*eurKg(k)/1000:null}));
+  list.push({k:'frutta di stagione',g:fruitKg*1000,eur:X.fruit.eur/.15*fruitKg});
+  const rows=list.map(x=>`<li>${esc(x.k)}: ${fmt(x.g)}${x.eur!=null?` · ≈${euro(x.eur)}`:''} <a href="${amazon(x.k)}" target="_blank" rel="noopener sponsored" class="amz">Amazon</a></li>`);
+  // testo da copiare o condividere (WhatsApp, e-mail, note…)
+  const when=o.mode==='week'?'per la settimana':'per un pasto',tot=list.reduce((a,x)=>a+(x.eur||0),0);
+  SHOP_TXT=[`🛒 Lista della spesa ${when} · ${o.people} ${o.people>1?'persone':'persona'}`,'',...list.map(x=>`☐ ${x.k}: ${fmt(x.g)}${x.eur!=null?` (≈${euro(x.eur)})`:''}`),'☐ sale, pepe e spezie: q.b.',
+    ...(extra.length?['','Dalle mie ricette:',...extra.map(e=>'☐ '+e.replace(/<[^>]+>/g,''))]:[]),'',
+    `Totale stimato ≈${euro(tot)}${P.period?` · prezzi medi ${P.period} (${P.zone})`:''}`,`Menu creato con Aggregatore Ricette · ${location.origin+location.pathname}`].join('\n');
+  return `<div class="row" style="justify-content:flex-start;margin:8px 0;gap:8px"><button type="button" class="btn pri" id="shopShare">📤 Condividi</button><button type="button" class="btn" id="shopCopy">📋 Copia</button></div>
+    <div class="row" id="shopAlt" hidden style="justify-content:flex-start;gap:8px;margin:0 0 8px"><a class="btn wa" href="#" target="_blank" rel="noopener">WhatsApp</a><a class="btn ml" href="#">E-mail</a><span class="meta">oppure copia e incolla dove vuoi</span></div>
+    <ul class="shop">${rows.join('')}<li>sale, pepe e spezie: q.b.</li></ul>${extra.length?`<p>Dalle tue ricette:</p><ul>${extra.map(e=>`<li>${e}</li>`).join('')}</ul>`:''}
+    <p class="meta">Totale stimato ≈${euro(tot)}. Con «Condividi» la lista arriva come testo con le caselle da spuntare su WhatsApp, e-mail o note.</p>`;
 }
+let SHOP_TXT='';
 
 /* ---------- Scheda ricetta ---------- */
 function openProduct(i){

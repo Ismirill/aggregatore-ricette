@@ -41,5 +41,15 @@ public class MainActivity extends BridgeActivity {
             pendingShare = null;
             return s;
         }
+
+        // Condivide un testo (es. la lista della spesa) con il menu di condivisione di Android
+        @JavascriptInterface
+        public void send(String title, String text) {
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.setType("text/plain");
+            i.putExtra(Intent.EXTRA_SUBJECT, title);
+            i.putExtra(Intent.EXTRA_TEXT, text);
+            runOnUiThread(() -> startActivity(Intent.createChooser(i, title)));
+        }
     }
 }
