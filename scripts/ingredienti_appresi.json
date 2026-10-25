@@ -1,4 +1,8 @@
 {
+"acido citrico": {
+"as": "spezie",
+"via": "Open Food Facts: Jengibre con mango"
+},
 "ackee in scatola": {
 "as": null,
 "via": "non trovato"
@@ -19,6 +23,10 @@
 "as": null,
 "via": "non trovato"
 },
+"anaci": {
+"as": null,
+"via": "non trovato"
+},
 "animella": {
 "as": "animelle",
 "via": "sinonimo di animelle"
@@ -26,6 +34,10 @@
 "anisini q b": {
 "as": null,
 "via": "non trovato"
+},
+"arancio candito": {
+"as": "arancia",
+"via": "simile a \"arancia\""
 },
 "aringa affumicata": {
 "as": "pesce",
@@ -91,6 +103,10 @@
 "as": "manzo",
 "via": "sinonimo di manzo"
 },
+"bouquet garni erbe aromatiche": {
+"as": null,
+"via": "non trovato"
+},
 "buccia arancio": {
 "as": "arancia",
 "via": "simile a \"arancia\""
@@ -103,9 +119,33 @@
 "as": "vanillina",
 "via": "simile a \"vanillina\""
 },
+"cacio gruiera": {
+"as": null,
+"via": "non trovato"
+},
 "caglio": {
 "as": "lievito",
 "via": "sinonimo di lievito"
+},
+"calce viva": {
+"as": null,
+"via": "non trovato"
+},
+"candito": {
+"as": "frutta",
+"via": "Wikipedia: frutta conservata nello zucchero"
+},
+"candito a pezzetti": {
+"as": null,
+"via": "non trovato"
+},
+"candito a pezzettini": {
+"as": null,
+"via": "non trovato"
+},
+"candito tagliato a filetti": {
+"as": "filetto",
+"via": "simile a \"filetto\""
 },
 "canestrelli": {
 "as": "capesante",
@@ -139,6 +179,10 @@
 "as": "catalogna",
 "via": "simile a \"catalogna\""
 },
+"caviale": {
+"as": "pesce",
+"via": "Wikipedia: alimento che si ottiene attraverso la lavorazione e salatura di uova delle diverse specie di storione"
+},
 "cefali": {
 "as": "pesce",
 "via": "sinonimo di pesce"
@@ -171,6 +215,10 @@
 "as": "ciccioli",
 "via": "simile a \"ciccioli\""
 },
+"ciliege marasche o visciole": {
+"as": "ciliegie",
+"via": "simile a \"ciliegie\""
+},
 "cm alga kombu": {
 "as": "verdure",
 "via": "sinonimo di verdure"
@@ -182,6 +230,10 @@
 "cocco tostato": {
 "as": null,
 "via": "non trovato"
+},
+"colorante per sughi": {
+"as": "pere",
+"via": "simile a \"pere\""
 },
 "confettini colorati": {
 "as": "zucchero",
@@ -215,6 +267,10 @@
 "as": "panna",
 "via": "sinonimo di panna"
 },
+"cremor tartaro": {
+"as": "vino",
+"via": "Wikidata: tartrates from wine reused as food ingredient"
+},
 "da a msemmen": {
 "as": null,
 "via": "non trovato"
@@ -232,6 +288,14 @@
 "via": "Wikipedia: brodo di pesce giapponese"
 },
 "dashi granulare": {
+"as": null,
+"via": "non trovato"
+},
+"detta grano": {
+"as": null,
+"via": "non trovato"
+},
+"detta passolina": {
 "as": null,
 "via": "non trovato"
 },
@@ -359,6 +423,10 @@
 "as": "marsala",
 "via": "simile a \"marsala\""
 },
+"garofani": {
+"as": null,
+"via": "non trovato"
+},
 "gelatina": {
 "as": "frutta",
 "via": "Wikidata: confettura ottenuta bollendo la frutta con lo zucchero, filtrandone il succo e lasciando che si rapprenda"
@@ -390,6 +458,14 @@
 "grasso": {
 "as": null,
 "via": "non trovato"
+},
+"grasso d’arnione castrato": {
+"as": null,
+"via": "non trovato"
+},
+"grasso presciutto": {
+"as": "prosciutto",
+"via": "simile a \"prosciutto\""
 },
 "grasso vegetale": {
 "as": "margarina",
@@ -462,6 +538,10 @@
 "la buccia arancio": {
 "as": "arancia",
 "via": "simile a \"arancia\""
+},
+"lardone": {
+"as": null,
+"via": "non trovato"
 },
 "latticello": {
 "as": "burro",
@@ -543,6 +623,14 @@
 "as": "salsiccia",
 "via": "sinonimo di salsiccia"
 },
+"nocciuole sbucciate": {
+"as": "nocciole",
+"via": "simile a \"nocciole\""
+},
+"nocciuole sgusciate": {
+"as": "nocciole",
+"via": "simile a \"nocciole\""
+},
 "oio semi q b": {
 "as": "olio",
 "via": "simile a \"olio\""
@@ -568,6 +656,10 @@
 "via": "non trovato"
 },
 "pastello": {
+"as": null,
+"via": "non trovato"
+},
+"perine poco mature": {
 "as": null,
 "via": "non trovato"
 },
@@ -610,6 +702,18 @@
 "prescinsoea": {
 "as": "ricotta",
 "via": "sinonimo di ricotta"
+},
+"presciutto grasso": {
+"as": "prosciutto",
+"via": "simile a \"prosciutto\""
+},
+"presciutto grasso e magro": {
+"as": "prosciutto",
+"via": "simile a \"prosciutto\""
+},
+"presciutto piuttosto magro": {
+"as": "prosciutto",
+"via": "simile a \"prosciutto\""
 },
 "qualche fungo secco": {
 "as": null,
@@ -691,9 +795,17 @@
 "as": "scorfano",
 "via": "simile a \"scorfano\""
 },
+"senepa bianca e in polvere": {
+"as": null,
+"via": "non trovato"
+},
 "serpillo": {
 "as": "timo",
 "via": "sinonimo di timo"
+},
+"siccioli": {
+"as": "ciccioli",
+"via": "simile a \"ciccioli\""
 },
 "smen": {
 "as": "burro",
@@ -702,6 +814,14 @@
 "sottilette": {
 "as": "formaggio",
 "via": "Wikipedia: nome commerciale di vari tipi di formaggio fuso"
+},
+"tartufi": {
+"as": "tartufo",
+"via": "simile a \"tartufo\""
+},
+"tartufi neri": {
+"as": "tartufo",
+"via": "simile a \"tartufo\""
 },
 "tenkasu": {
 "as": "frutta",
@@ -718,6 +838,10 @@
 "tettina": {
 "as": "fegato",
 "via": "sinonimo di fegato"
+},
+"the piu buono": {
+"as": null,
+"via": "non trovato"
 },
 "toor dal": {
 "as": "legumi",
@@ -782,6 +906,14 @@
 "yam nagaimo": {
 "as": null,
 "via": "non trovato"
+},
+"zampa senz’osso": {
+"as": null,
+"via": "non trovato"
+},
+"zibibbo": {
+"as": "vino",
+"via": "Wikipedia: varietà di uva italiana"
 },
 "zucchetta da pergola": {
 "as": null,

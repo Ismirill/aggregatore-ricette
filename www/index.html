@@ -161,6 +161,8 @@ details summary{cursor:pointer}
 .kv span{font-size:.8rem;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--bg2)}
 
 /* ---------- Budget ---------- */
+.wiz{display:flex;align-items:center;justify-content:space-between}.wdots{display:flex;gap:6px}.wdots i{width:10px;height:10px;border-radius:50%;background:var(--bd);display:block}.wdots i.on{background:var(--acc)}.wdots i.done{background:color-mix(in srgb,var(--acc) 45%,var(--bd))}
+.step h3{margin:0 0 10px;font-size:1.25rem}.step{display:grid;gap:12px}
 .bform{display:grid;gap:14px;margin-bottom:18px;background:var(--card);padding:16px;border-radius:var(--r);box-shadow:var(--sh)}
 .bhead{margin:4px 0 14px}.bhead h2{margin:0;font-size:1.6rem}.bhead p{margin:4px 0 0;color:var(--mut);font-size:.9rem}
 .seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));background:var(--bg2);border-radius:14px;padding:4px;gap:4px}
@@ -220,20 +222,29 @@ details summary{cursor:pointer}
 <nav class="nav" id="tabs"><button class="tab on" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario</button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>Budget</button></nav>
 <main><div class="list" id="list"></div>
 <section id="budget" hidden>
-  <div class="bhead"><h2>Il menu giusto per il tuo budget</h2><p>Dimmi quanto vuoi spendere, per quante persone e quanto tempo hai: preparo un menu bilanciato con frutta e verdura di stagione.</p></div>
+  <div class="bhead"><h2>Il menu giusto per il tuo budget</h2><p>Rispondi a cinque domande: preparo un menu con i piatti italiani di tutti i giorni, bilanciato e con frutta e verdura di stagione. Alla fine puoi variarlo quante volte vuoi.</p></div>
   <form id="bForm" class="bform">
-    <div class="seg"><label><input type="radio" name="mode" value="week" checked><span>Settimana</span></label><label><input type="radio" name="mode" value="meal"><span>Pasto singolo</span></label></div>
-    <div class="two"><label><span id="bLbl">Budget settimanale (€)</span><input name="budget" type="number" min="1" step="0.5" inputmode="decimal" required placeholder="es. 60"></label>
-      <label>Persone<input name="people" type="number" min="1" max="20" value="2" inputmode="numeric" required></label></div>
-    <label id="bMealsL">Pasti da preparare<div class="checks"><label><input type="checkbox" name="lunch" checked>Pranzo</label><label><input type="checkbox" name="dinner" checked>Cena</label></div></label>
-    <div class="two"><label><span id="bTimeL">Tempo per cucinare a pasto (lun–ven)</span><select name="tWeek"></select></label>
+    <div class="wiz"><div class="wdots" id="wDots"></div><div class="meta" id="wStep"></div></div>
+    <section class="step" data-s="0"><h3>Che menu vuoi?</h3>
+      <div class="seg"><label><input type="radio" name="mode" value="week" checked><span>Tutta la settimana</span></label><label><input type="radio" name="mode" value="meal"><span>Un solo pasto</span></label></div>
+      <p class="meta" id="wHint0">Settimana: pranzi e cene da lunedì a domenica, bilanciati tra loro. Un solo pasto: un menu completo per oggi.</p></section>
+    <section class="step" data-s="1" hidden><h3>Quanto vuoi spendere e per quante persone?</h3>
+      <div class="two"><label><span id="bLbl">Budget settimanale (€)</span><input name="budget" type="number" min="1" step="0.5" inputmode="decimal" placeholder="es. 60"></label>
+      <label>Persone<input name="people" type="number" min="1" max="20" value="2" inputmode="numeric"></label></div>
+      <p class="meta">Il costo è calcolato con i prezzi medi della tua zona; frutta, pane e contorni compresi.</p></section>
+    <section class="step" data-s="2" hidden><h3>Quando cucini e quanto tempo hai?</h3>
+      <label id="bMealsL">Pasti da preparare<div class="checks"><label><input type="checkbox" name="lunch" checked>Pranzo</label><label><input type="checkbox" name="dinner" checked>Cena</label></div></label>
+      <div class="two"><label><span id="bTimeL">Tempo per cucinare a pasto (lun–ven)</span><select name="tWeek"></select></label>
       <label id="bTimeEndL">Tempo a pasto (sab–dom)<select name="tEnd"></select></label></div>
-    <div class="checks"><label><input type="checkbox" name="easy">Solo ricette facili</label><label><input type="checkbox" name="ahead">Posso preparare il giorno prima (lievitazioni, marinature, ammollo)</label></div>
-    <label>Diete, intolleranze e allergie<div class="checks" id="bDiet"></div></label>
-    <label>Altri ingredienti da evitare (separati da virgola)<input name="avoid" placeholder="es. sedano, funghi, senape, kiwi"></label>
-    <div class="two"><label>Periodo<select name="month" id="bMonth"></select></label>
-      <label>Ricette da usare<select name="pool"><option value="all">Ricettario + le mie</option><option value="book">Solo ricettario</option><option value="mine">Solo le mie</option></select></label></div>
-    <button class="btn pri" style="width:100%">Crea menu</button>
+      <div class="checks"><label><input type="checkbox" name="easy">Solo ricette facili</label><label><input type="checkbox" name="ahead">Posso preparare il giorno prima (lievitazioni, marinature, ammollo)</label></div></section>
+    <section class="step" data-s="3" hidden><h3>Diete, intolleranze e allergie</h3>
+      <div class="checks" id="bDiet"></div>
+      <label>Altri ingredienti da evitare (separati da virgola)<input name="avoid" placeholder="es. sedano, funghi, senape, kiwi"></label></section>
+    <section class="step" data-s="4" hidden><h3>Che cucina e in che periodo?</h3>
+      <label>Cucina<select name="cuisine"><option value="quotidiana">Italiana di tutti i giorni (consigliata)</option><option value="italiana">Italiana, anche piatti regionali rari</option><option value="mondo">Anche ricette dal mondo</option></select></label>
+      <div class="two"><label>Periodo<select name="month" id="bMonth"></select></label>
+      <label>Ricette da usare<select name="pool"><option value="all">Ricettario + le mie</option><option value="book">Solo ricettario</option><option value="mine">Solo le mie</option></select></label></div></section>
+    <div class="row" style="justify-content:space-between"><button type="button" class="btn" id="wBack">← Indietro</button><button type="button" class="btn pri" id="wNext">Avanti →</button><button class="btn pri" id="wGo" hidden>✨ Crea il menu</button></div>
   </form>
   <div id="bOut"></div>
 </section></main>
@@ -350,7 +361,7 @@ const ZONES=[
 const CUISINE_MAP={italian:'Italia',italiana:'Italia',italia:'Italia',french:'Francia',francese:'Francia',spanish:'Spagna',spagnola:'Spagna',greek:'Grecia',greca:'Grecia',japanese:'Giappone',giapponese:'Giappone',chinese:'Cina',cinese:'Cina',korean:'Corea',thai:'Thailandia',indian:'India',indiana:'India',mexican:'Messico',messicana:'Messico',american:'USA',americana:'USA'};
 // Ingredienti che escludono una dieta
 const ING={
-  meat:/\bpoll|manzo|maial|vitell|agnell|tacchin|\bcarne|guancial|pancett|prosciutt|salam|salsicc|speck|bresaola|mortadell|w[uü]rstel|\brag[uù]|cotechin|lardo|\bnduja|chicken|beef|pork|bacon|\bham\b|coniglio|anatra|brodo di (carne|pollo)/,
+  meat:/\bpoll|cappon|gallin|faraon|anatr|\boca\b|quagli|piccion|manzo|maial|vitell|agnell|tacchin|\bcarne|guancial|pancett|prosciutt|salam|salsicc|speck|bresaola|mortadell|w[uü]rstel|\brag[uù]|cotechin|lardo|\bnduja|chicken|beef|pork|bacon|\bham\b|coniglio|anatra|brodo di (carne|pollo)/,
   fish:/\bpesce|tonno|salmon|acciug|alici|gamber|cozze|vongol|calamar|polpo|seppi|merluzz|baccal|branzin|orata|spigola|frutti di mare|scampi|sgombr|sardin|bottarga|fish|shrimp|tuna|salmon|colatura/,
   dairy:/latte(?! di (soia|mandorl|avena|riso|cocco)| vegetale)|burro(?! di (arachid|cacao|mandorl))|panna(?! vegetale)|formagg|parmigian|grana|pecorin|mozzarell|ricotta|mascarpone|stracchin|gorgonzol|yogurt(?! (di soia|vegetale))|besciamell|scamorz|provol|fontina|burrata|stracciatell|cheese|butter|\bmilk|\bcream\b|feta|emmental|asiago/,
   egg:/\buov[oa]|tuorl|album|\begg|maionese/,
@@ -361,6 +372,8 @@ const ING={
 const EXPLICIT={'Vegano':/\bvegan|\bvegana|\bvegano|plant.?based/,'Vegetariano':/vegetarian/,'Senza glutine':/senza glutine|gluten.?free|glutenfree|celiac/,'Senza lattosio':/senza lattosio|lactose.?free|senza latticini|dairy.?free/,'Senza uova':/senza uova|egg.?free/,'Ipocalorico':/ipocalor|light\b|poche calorie|low.?cal|\bfit\b|dietetic|proteic/};
 
 // Preparazioni di base (impasti, creme, salse, brodi): mai portate del menu, anche se il nome contiene "pasta"
+// Piatti italo-americani spacciati per italiani: nel ricettario vanno tra gli internazionali (USA), nel Budget fuori dalla cucina italiana
+const PSEUDO_RX=/alfredo|spaghetti (con|e) (le )?polpette|spaghetti and meatballs|pollo alla parmigiana|chicken parm|pasta (al|con) pollo|chicken (and )?pasta|caesar|garlic bread|pane all'aglio|hawai|pepperoni|baked ziti|pasta primavera|linguine primavera|zuppa toscana|italian dressing|penne alla vodka|shrimp scampi|carbonara (con|alla) panna|spaghetti alla bolognese|spaghetti bolognese/i;
 const BASE_RX=/^(pasta (frolla|sfoglia|bris[eé]e?|choux|matta|di mandorle|reale|di zucchero|madre|per pizza|di pane)|lievito madre|pasta madre|pan di spagna|crema (pasticcera|chantilly|inglese|al burro)|besciamella|maionese|brodo|fondo|sugo|salsa|ragù|pesto|glassa|meringa|caramello|ganache|impasto|marmellata|confettura|gelatina|sciroppo|liquore|rosolio)\b/i;
 function classify(d){
   const all=[d.title,d.caption,d.ingredients?.join('\n'),d.keywords,d.recipeCategory].join('\n').toLowerCase();
@@ -630,7 +643,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=33; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=34; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -639,12 +652,12 @@ async function fetchData(name){
 }
 
 /* ---------- Ricettario (Wikibooks, CC BY-SA 4.0) ---------- */
-let view='mine',book=null,bookInfo=null,products=[];
+let view='mine',book=null,bookInfo=null,products=[],QUOT=[];
 const src=()=>view==='book'?(book||[]):items;
 async function loadBook(){
   if(book)return;
   try{
-    const [d,im,ct,gz,pu,wo]=await Promise.all([fetchData('ricettario.json'),fetchData('immagini.json').catch(()=>({items:{}})),fetchData('categorie.json').catch(()=>({items:{}})),fetchData('collegate.json').catch(()=>({recipes:[]})),fetchData('puglia.json').catch(()=>({recipes:[],products:[]})),fetchData('mondo.json').catch(()=>({recipes:[]}))]);
+    const [d,im,ct,gz,pu,wo,ar,li,qu]=await Promise.all([fetchData('ricettario.json'),fetchData('immagini.json').catch(()=>({items:{}})),fetchData('categorie.json').catch(()=>({items:{}})),fetchData('collegate.json').catch(()=>({recipes:[]})),fetchData('puglia.json').catch(()=>({recipes:[],products:[]})),fetchData('mondo.json').catch(()=>({recipes:[]})),fetchData('artusi.json').catch(()=>({recipes:[]})),fetchData('libere.json').catch(()=>({recipes:[]})),fetchData('quotidiani.json').catch(()=>({piatti:[]}))]);
     const nut=load('bookNut',{});
     bookInfo=d;
     book=d.recipes.map(r=>{
@@ -673,6 +686,17 @@ async function loadBook(){
         diets:[...new Set([...(r.diets||[]),...c.diets])],tags:[],imgCredit:r.image?`Foto: ${r.imgAuthor||'Wikimedia Commons'}${r.imgLicense?' ('+r.imgLicense+')':''} via Wikimedia Commons`:'',
         _tm:{t:r.time||timing({...r,world:false,_tm:null}).t,w:0,d:r.diff||2}});
     }
+    // Artusi 1895 (pubblico dominio, trascrizione Wikisource): titolo moderno, dosi e passaggi ricavati con l'AI; testo originale conservato
+    for(const r of ar.recipes||[]){
+      const c=classify({title:r.title,ingredients:r.ingredients,caption:r.text});
+      book.push({...r,book:true,artusi:true,source:'Artusi 1895',url:ar.url,country:'Italia',region:r.region||c.region,diets:[...new Set([...(r.diets||[]),...c.diets])],tags:[]});
+    }
+    // Ricette singole con licenza libera (Wikipedia, Cookbook inglese) e ricette base dell'app
+    for(const r of li.recipes||[]){
+      const c=classify({title:r.title,ingredients:r.ingredients});
+      book.push({...r,book:true,libera:true,country:r.country||'Italia',region:r.region||c.region,diets:[...new Set([...(r.diets||[]),...c.diets])],tags:[]});
+    }
+    QUOT=qu.piatti||[];
     // ricette collegate: solo dati descrittivi, dosi e procedimento restano su GialloZafferano
     bookInfo.gz=gz;
     for(const r of gz.recipes||[]){
@@ -681,7 +705,8 @@ async function loadBook(){
         steps:[],tags:[],_tm:{t:r.time||timing({...r,steps:[]}).t,w:0,d:r.diff||2}});
     }
   }catch{book=[];toast('Ricettario non disponibile offline')}
-  for(const b of book)if(BASE_RX.test(b.title.trim()))b.cat='Altro'; // preparazioni di base, da qualunque fonte
+  for(const b of book){if(BASE_RX.test(b.title.trim()))b.cat='Altro'; // preparazioni di base, da qualunque fonte
+    if(PSEUDO_RX.test(b.title)){b.pseudo=true;b.country='Stati Uniti';b.cc='US';b.region=''}} // italo-americani
   fillSelects();render();
 }
 function saveFromBook(i){
@@ -689,7 +714,7 @@ function saveFromBook(i){
   if(ex){toast('Già nelle tue ricette');return ex}
   const {book:_,...r}=i;
   const rec={...r,id:Date.now().toString(36),created:Date.now(),rating:0,
-    note:i.world?'Ricetta da UniTools — theunitools.com (CC BY-SA 4.0), tradotta in italiano.':i.source==='Regione Puglia'?'Ricetta tipica dalla Regione Puglia – Pugliapromozione (CC BY 4.0).':`Ricetta da Wikibooks, Libro di cucina (${bookInfo?.license||'CC BY-SA 4.0'}). Autori: cronologia della pagina originale.`};
+    note:i.artusi?'Ricetta di Pellegrino Artusi, La scienza in cucina (1895), pubblico dominio.':i.libera?`Ricetta da ${i.source} (${i.license}).`:i.world?'Ricetta da UniTools — theunitools.com (CC BY-SA 4.0), tradotta in italiano.':i.source==='Regione Puglia'?'Ricetta tipica dalla Regione Puglia – Pugliapromozione (CC BY 4.0).':`Ricetta da Wikibooks, Libro di cucina (${bookInfo?.license||'CC BY-SA 4.0'}). Autori: cronologia della pagina originale.`};
   items=[rec,...items];save('items',items);toast('Salvata in Le mie ricette');return rec;
 }
 $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;view=t.dataset.v;cur='Tutte';
@@ -760,7 +785,7 @@ function card(i){
   if(i.prod)return `<div class="item" data-id="${i.id}"><div class="thumb" style="--ph:linear-gradient(135deg,#f6dd8f55,#d9a44066)">🧺${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}<span class="cat">Prodotto tipico</span></div><div class="b"><h3>${esc(i.title)}</h3><div class="meta">${esc(i.place||i.area||'Puglia')}</div></div></div>`;
   const [em,c1,c2]=look(i),pp=perPerson(i),tm=(i.ingredients?.length||i.steps?.length)?timing(i):null,vid=embedOf(i);
   const facts=[tm&&`⏱ <b>${fmtMin(tm.t)}</b>`,tm&&DIFF[tm.d],pp&&`<b>${Math.round(pp.kcal)}</b> kcal`,pp?.eur!=null&&`${i.cov!=null&&i.cov<.85?'circa ':''}<b>${euro(pp.eur)}</b>/pers.`,i.linked&&i.cost&&`costo ${i.cost}`].filter(Boolean);
-  const diets=(i.diets||[]).filter(d=>MAIN_DIETS.includes(d));
+  const diets=(i.diets||[]).filter(d=>MAIN_DIETS.includes(d));if(i.pseudo)diets.unshift('Italo-americano');
   return `<div class="item" data-id="${i.id}">
     <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
       <span class="cat">${esc(i.cat||'Altro')}</span>${i.rating?`<span class="rt">★ ${i.rating}</span>`:''}${vid?'<span class="play">▶ video</span>':''}</div>
@@ -794,9 +819,9 @@ function render(){
       &&(!q||[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q)))
     .sort(sorter(fs,!!q));
   const nGz=view==='book'&&book?book.filter(x=>x.linked).length:0;
-  const nPu=view==='book'&&book?book.filter(x=>x.source==='Regione Puglia').length:0,nWo=view==='book'&&book?book.filter(x=>x.world).length:0;
+  const nPu=view==='book'&&book?book.filter(x=>x.source==='Regione Puglia').length:0,nWo=view==='book'&&book?book.filter(x=>x.world).length:0,nAr=view==='book'&&book?book.filter(x=>x.artusi).length:0,nLi=view==='book'&&book?book.filter(x=>x.libera).length:0;
   const lic=showProd?`<p class="lic">${products.length} prodotti tipici pugliesi dalla <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia – Pugliapromozione</a> (CC BY 4.0)</p>`
-    :view==='book'&&book?.length?`<p class="lic">${book.length-nGz-nPu-nWo} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}${nPu?`, ${nPu} ricette tipiche della <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia</a> (CC BY 4.0)`:''}${nWo?`, ${nWo} ricette dal mondo di <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> (CC BY-SA 4.0, tradotte in italiano)`:''}</p>`:'';
+    :view==='book'&&book?.length?`<p class="lic">${book.length-nGz-nPu-nWo-nAr-nLi} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}${nPu?`, ${nPu} ricette tipiche della <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia</a> (CC BY 4.0)`:''}${nWo?`, ${nWo} ricette dal mondo di <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> (CC BY-SA 4.0, tradotte in italiano)`:''}${nAr?`, ${nAr} ricette dall'<a href="https://it.wikisource.org/wiki/La_scienza_in_cucina_e_l%27arte_di_mangiar_bene_(1895)" target="_blank" rel="noopener">Artusi (1895)</a>, pubblico dominio`:''}${nLi?`, ${nLi} da Wikipedia e dal Cookbook di Wikibooks (CC BY-SA 4.0) o ricette base`:''}</p>`:'';
   $('#list').innerHTML=lic+(list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
     :`<div class="empty">${view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'<b>Il tuo ricettario è vuoto</b>Condividi un link da TikTok, Instagram o dal browser verso quest\'app, oppure tocca +.<br>Trovi idee pronte nella sezione Ricettario.'}</div>`);
@@ -889,6 +914,25 @@ async function computeNutrition(i){
 }
 
 /* ---------- Budget: menu bilanciato ---------- */
+// Piatti della cucina italiana quotidiana (www/quotidiani.json): popolarità e area geografica di ogni ricetta
+const PROV_REG={Alessandria:'Piemonte',Ancona:'Marche',Aosta:"Valle d'Aosta",Arezzo:'Toscana','Ascoli Piceno':'Marche',Avellino:'Campania',Bari:'Puglia',Belluno:'Veneto',Benevento:'Campania',Bergamo:'Lombardia',Biella:'Piemonte',Bologna:'Emilia-Romagna',Bolzano:'Trentino-Alto Adige',Brescia:'Lombardia',Cagliari:'Sardegna',Catanzaro:'Calabria',Cosenza:'Calabria',Cremona:'Lombardia',Cuneo:'Piemonte',Ferrara:'Emilia-Romagna',Firenze:'Toscana',Forli:'Emilia-Romagna',Genova:'Liguria',Gorizia:'Friuli-Venezia Giulia',Grosseto:'Toscana',Lecco:'Lombardia',Livorno:'Toscana',Lodi:'Lombardia',Lucca:'Toscana',Macerata:'Marche',Mantova:'Lombardia',Messina:'Sicilia',Milano:'Lombardia',Modena:'Emilia-Romagna',Napoli:'Campania',Novara:'Piemonte',Padova:'Veneto',Palermo:'Sicilia',Parma:'Emilia-Romagna',Perugia:'Umbria',Pescara:'Abruzzo',Piacenza:'Emilia-Romagna',Pistoia:'Toscana',Pordenone:'Friuli-Venezia Giulia',Ravenna:'Emilia-Romagna','Reggio Calabria':'Calabria','Reggio Emilia':'Emilia-Romagna',Rimini:'Emilia-Romagna',Roma:'Lazio',Rovigo:'Veneto',Sassari:'Sardegna',Siena:'Toscana',Siracusa:'Sicilia',Terni:'Umbria',Torino:'Piemonte',Trento:'Trentino-Alto Adige',Treviso:'Veneto',Trieste:'Friuli-Venezia Giulia',Udine:'Friuli-Venezia Giulia',Varese:'Lombardia',Venezia:'Veneto',Vercelli:'Piemonte',Verona:'Veneto',Vicenza:'Veneto'};
+const REG_AREA={Piemonte:'nord',"Valle d'Aosta":'nord',Liguria:'nord',Lombardia:'nord','Trentino-Alto Adige':'nord',Veneto:'nord','Friuli-Venezia Giulia':'nord','Emilia-Romagna':'nord',Toscana:'centro',Umbria:'centro',Marche:'centro',Lazio:'centro',Abruzzo:'centro',Molise:'sud',Campania:'sud',Puglia:'sud',Basilicata:'sud',Calabria:'sud',Sicilia:'isole',Sardegna:'isole'};
+const userRegion=()=>{const z=PT?.zone||'';const p=z.replace(/\s*\(.*\)$/,'');return PROV_REG[p]||''};
+function quotOf(r){ // piatto quotidiano corrispondente alla ricetta, se c'è
+  if(r._q!==undefined)return r._q;const t=plainT(r.title);
+  r._q=QUOT.find(q=>q.cat===r.cat&&q.match.some(m=>t.includes(plainT(m))))||QUOT.find(q=>q.match.some(m=>t.includes(plainT(m))))||null;return r._q;
+}
+const plainT=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+// quanto un piatto "sta bene" nel menu di chi usa l'app: popolarità nazionale + vicinanza alla sua regione
+function fitScore(x,o){
+  const q=x.q;if(!q)return x.r.world?-3:-1.5;
+  let s=(q.pop-2)*1.4; // 0 … 4,2: i piatti più diffusi pesano molto di più
+  // sostituti vegani (seitan, tofu, soia) solo se la dieta li richiede; un contorno con carne o pesce non è un contorno
+  if(x.role==='contorno'&&['rossa','bianca','pesce'].includes(x.prot))s-=3;
+  const reg=o.region,area=REG_AREA[reg]||'';
+  if(q.reg&&q.reg===reg)s+=1.6;else if(q.area!=='tutta'&&q.area===area)s+=0.8;else if(q.area!=='tutta'&&area)s-=0.6;
+  return s;
+}
 // Struttura dei pasti e regole di equilibrio ispirate alle linee guida CREA per una sana alimentazione:
 // pesce e legumi almeno 2 volte a settimana, carne rossa/uova/formaggi al massimo 2, frutta e verdura di stagione a ogni pasto.
 const MESI=['','gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
@@ -914,10 +958,30 @@ function initBudget(){
     if(last){for(const [k,v] of Object.entries(last.f))if(f[k]&&f[k].type!=='radio'&&f[k].type!=='checkbox')f[k].value=v;
       f.lunch.checked=last.f.lunch;f.dinner.checked=last.f.dinner;f.easy.checked=!!last.f.easy;f.ahead.checked=!!last.f.ahead;f.querySelector(`[name=mode][value=${last.f.mode}]`).checked=true;
       $('#bDiet').querySelectorAll('input').forEach(x=>x.checked=last.diets.includes(x.value))}
-    f.querySelectorAll('[name=mode]').forEach(x=>x.onchange=modeUI);modeUI();
-    const plan=load('budgetPlan',null);if(plan)loadSeason().then(()=>showPlan(plan));
+    f.querySelectorAll('[name=mode]').forEach(x=>x.onchange=modeUI);
+    const plan=load('budgetPlan',null);if(plan){budgetView(false);loadSeason().then(()=>showPlan(plan))}else budgetView(true,0);
   }
 }
+let wStep=0;const W_N=5;
+function showStep(k){
+  wStep=Math.max(0,Math.min(W_N-1,k));const f=$('#bForm');
+  f.querySelectorAll('.step').forEach(st=>st.hidden=+st.dataset.s!==wStep);
+  $('#wDots').innerHTML=Array.from({length:W_N},(_,i)=>`<i class="${i===wStep?'on':i<wStep?'done':''}"></i>`).join('');
+  $('#wStep').textContent=`Passo ${wStep+1} di ${W_N}`;
+  $('#wBack').style.visibility=wStep?'visible':'hidden';$('#wNext').hidden=wStep===W_N-1;$('#wGo').hidden=wStep!==W_N-1;
+  modeUI();
+}
+function wizardValid(){
+  const f=$('#bForm');
+  if(wStep===1&&!(+f.budget.value>0)){toast('Indica il budget');f.budget.focus();return false}
+  if(wStep===1&&!(+f.people.value>0)){toast('Indica il numero di persone');return false}
+  if(wStep===2&&f.mode.value==='week'&&!f.lunch.checked&&!f.dinner.checked){toast('Scegli almeno pranzo o cena');return false}
+  return true;
+}
+$('#wNext').onclick=()=>{if(wizardValid())showStep(wStep+1)};
+$('#wBack').onclick=()=>showStep(wStep-1);
+// mostra il modulo (dal passo indicato) o il menu
+function budgetView(showForm,step=0){$('#bForm').hidden=!showForm;$('#bOut').hidden=showForm;if(showForm)showStep(step)}
 function modeUI(){const w=$('#bForm').mode.value==='week';$('#bLbl').textContent=w?'Budget settimanale (€)':'Budget per il pasto (€)';$('#bMealsL').hidden=!w;
   $('#bTimeEndL').hidden=!w;$('#bTimeL').textContent=w?'Tempo per cucinare a pasto (lun–ven)':'Tempo per cucinare'}
 
@@ -973,9 +1037,14 @@ function candidates(o){
     const lim=ro==='contorno'?[15,700]:[150,1400];
     if(pp.kcal<lim[0]||pp.kcal>lim[1]||pp.eur<=0||pp.eur>25)continue;
     if(!allowed(r,o.diets,o.avoid)||BASE_RX.test(r.title.trim()))continue;
+    if(o.cuisine!=='mondo'&&PSEUDO_RX.test(r.title))continue; // italo-americano
+    if(!o.diets.some(d=>/Vegan|Vegetariano/.test(d))&&/seitan|tofu|tempeh|\bsoia\b|vegan/i.test(r.title))continue; // sostituti vegani solo se richiesti
+    const q=quotOf(r);
+    if(o.cuisine==='quotidiana'&&!q)continue; // solo piatti della cucina italiana di tutti i giorni
+    if(o.cuisine!=='mondo'&&r.world&&r.country!=='Italia')continue;
     const tm=timing(r);if(o.easy&&tm.d>1)continue;if(!o.ahead&&tm.w>=60)continue;
     seen.add(r.title.toLowerCase());
-    out.push({r,role:ro,t:tm.t,w:tm.w,d:tm.d,eur:pp.eur,kcal:pp.kcal,p:pp.p??pp.kcal*.15/4,c:pp.c??pp.kcal*.5/4,f:pp.f??pp.kcal*.35/9,prot:protein(r),season:seasonScore(r,o.month)});
+    out.push({r,q,role:ro,t:tm.t,w:tm.w,d:tm.d,eur:pp.eur,kcal:pp.kcal,p:pp.p??pp.kcal*.15/4,c:pp.c??pp.kcal*.5/4,f:pp.f??pp.kcal*.35/9,prot:protein(r),season:seasonScore(r,o.month)});
   }
   return {list:out,noCost};
 }
@@ -998,22 +1067,24 @@ function buildWeek(o,C,X){
   const perSlot=o.budget/o.people/slots.length;
   let best=null;
   for(let it=0;it<250;it++){
-    const used=new Set(),cnt={pesce:0,rossa:0,bianca:0,legumi:0,uova:0,formaggi:0,verdure:0};const plan=[];let cost=0;
+    const used=new Set(),usedQ=new Set(),usedDay=new Map(),cnt={pesce:0,rossa:0,bianca:0,legumi:0,uova:0,formaggi:0,verdure:0};const plan=[];let cost=0;
     for(const sl of slots){
       const lim=(sl.d>=5?o.tEnd:o.tWeek)||1e9;
       const mains=(sl.m==='lunch'?prim:sec).filter(x=>x.t<=lim);
       if(!mains.length)return null;
       const choose=(arr,role)=>{
-        const cand=pickRand(arr.filter(x=>!used.has(x.r.id)),14);if(!cand.length)return pickRand(arr,1)[0];
+        let pool=arr.filter(x=>!used.has(x.r.id));
+        if(!pool.length&&role==='contorno')pool=arr.filter(x=>(sl.d-(usedDay.get(x.r.id)??-9))>=2); // un contorno può tornare dopo 2 giorni
+        const cand=pickRand(pool,14);if(!cand.length)return pickRand(arr,1)[0];
         const target=KCAL[sl.m]*(role==='contorno'?.18:.62);
-        return cand.map(x=>{let sc=Math.abs(x.kcal-target)/target*3-x.season*.6+Math.max(0,x.eur-perSlot*(role==='contorno'?.25:.65))/perSlot*4;
+        return cand.map(x=>{let sc=Math.abs(x.kcal-target)/target*3-x.season*.6+Math.max(0,x.eur-perSlot*(role==='contorno'?.25:.65))/perSlot*4-fitScore(x,o)*1.1+(x.q&&usedQ.has(x.q.n)?2.5:0);
           if(role!=='contorno'){if(['rossa','uova','formaggi'].includes(x.prot)&&cnt[x.prot]>=2)sc+=6;
             if(['pesce','legumi'].includes(x.prot)&&cnt[x.prot]<2)sc-=1.5;if(x.prot==='bianca'&&cnt.bianca>=3)sc+=3}
           return [sc+Math.random()*.8,x]}).sort((a,b)=>a[0]-b[0])[0][1];
       };
-      const main=choose(mains,'main');used.add(main.r.id);if(main.prot in cnt&&main.role!=='contorno')cnt[main.prot]++;
-      const fit=cont.filter(x=>main.t+x.t*.5<=lim);
-      const side=fit.length?choose(fit,'contorno'):rawSide(o,X);if(side.r.id!=='raw')used.add(side.r.id);
+      const main=choose(mains,'main');used.add(main.r.id);if(main.q)usedQ.add(main.q.n);if(main.prot in cnt&&main.role!=='contorno')cnt[main.prot]++;
+      const fit=cont.filter(x=>main.t+x.t*.35<=lim); // il contorno si prepara in gran parte mentre cuoce il piatto principale
+      const side=fit.length?choose(fit,'contorno'):rawSide(o,X);if(side.r.id!=='raw'){used.add(side.r.id);usedDay.set(side.r.id,sl.d)}
       const parts=[main,side].filter(Boolean),add=[X.fruit,...(sl.m==='dinner'&&X.bread?[X.bread]:[])];
       const meal={...sl,t:Math.round((main.t+side.t*.5)/5)*5,dishes:parts,eur:[...parts,...add].reduce((a,x)=>a+x.eur,0),kcal:[...parts,...add].reduce((a,x)=>a+x.kcal,0),
         p:[...parts,...add].reduce((a,x)=>a+x.p,0),c:[...parts,...add].reduce((a,x)=>a+x.c,0),f:[...parts,...add].reduce((a,x)=>a+x.f,0)};
@@ -1060,7 +1131,7 @@ function buildMeal(o,C,X){
     if(mt>lim)continue;
     const all=[...parts,X.fruit,...(X.bread&&!full?[X.bread]:[])];
     const pp=all.reduce((a,x)=>a+x.eur,0),cost=pp*o.people,kcal=all.reduce((a,x)=>a+x.kcal,0);
-    const score=(cost>o.budget?50+(cost-o.budget)/o.budget*100:0)+Math.abs(kcal-850)/850*8-parts.reduce((a,x)=>a+x.season,0)*.5-(full?1.5:0)+(o.budget-cost)/o.budget*1.5;
+    const score=(cost>o.budget?50+(cost-o.budget)/o.budget*100:0)+Math.abs(kcal-850)/850*8-parts.reduce((a,x)=>a+x.season,0)*.5-parts.reduce((a,x)=>a+fitScore(x,o),0)*1.1-(full?1.5:0)+(o.budget-cost)/o.budget*1.5;
     if(!best||score<best.score)best={score,plan:[{d:0,m:'meal',t:Math.round(mt/5)*5,dishes:parts,eur:pp,kcal,p:all.reduce((a,x)=>a+x.p,0),c:all.reduce((a,x)=>a+x.c,0),f:all.reduce((a,x)=>a+x.f,0)}],cost,
       macro:(()=>{const P=all.reduce((a,x)=>a+x.p*4,0),Cb=all.reduce((a,x)=>a+x.c*4,0),F=all.reduce((a,x)=>a+x.f*9,0),T=P+Cb+F;return {p:P/T,c:Cb/T,f:F/T}})()};
   }
@@ -1069,16 +1140,19 @@ function buildMeal(o,C,X){
 
 $('#bForm').onsubmit=async e=>{
   e.preventDefault();const f=e.target;modeUI();
-  const o={tWeek:+f.tWeek.value,tEnd:+f.tEnd.value,easy:f.easy.checked,ahead:f.ahead.checked,mode:f.mode.value,budget:+f.budget.value,people:+f.people.value||1,lunch:f.lunch.checked,dinner:f.dinner.checked,month:+f.month.value,pool:f.pool.value,
+  const o={cuisine:f.cuisine.value,tWeek:+f.tWeek.value,tEnd:+f.tEnd.value,easy:f.easy.checked,ahead:f.ahead.checked,mode:f.mode.value,budget:+f.budget.value,people:+f.people.value||1,lunch:f.lunch.checked,dinner:f.dinner.checked,month:+f.month.value,pool:f.pool.value,
     diets:[...$('#bDiet').querySelectorAll('input:checked')].map(x=>x.value),avoid:f.avoid.value.toLowerCase().split(',').map(x=>x.trim()).filter(x=>x.length>2)};
-  if(o.mode==='week'&&!o.lunch&&!o.dinner){toast('Scegli almeno pranzo o cena');return}
-  save('budgetForm',{f:{tWeek:f.tWeek.value,tEnd:f.tEnd.value,easy:o.easy,ahead:o.ahead,mode:o.mode,budget:f.budget.value,people:f.people.value,lunch:o.lunch,dinner:o.dinner,month:f.month.value,pool:o.pool,avoid:f.avoid.value},diets:o.diets});
+  if(o.mode==='week'&&!o.lunch&&!o.dinner){toast('Scegli almeno pranzo o cena');showStep(2);return}
+  if(!(o.budget>0)){showStep(1);toast('Indica il budget');return}
+  budgetView(false);
+  save('budgetForm',{f:{cuisine:f.cuisine.value,tWeek:f.tWeek.value,tEnd:f.tEnd.value,easy:o.easy,ahead:o.ahead,mode:o.mode,budget:f.budget.value,people:f.people.value,lunch:o.lunch,dinner:o.dinner,month:f.month.value,pool:o.pool,avoid:f.avoid.value},diets:o.diets});
   $('#bOut').innerHTML='<p class="meta">Preparo il menu…</p>';
   await Promise.all([loadBook(),loadPT(),loadSeason()]);
-  if(!PT){$('#bOut').innerHTML='<div class="warn">Servono i prezzi aggiornati: controlla la connessione e riprova.</div>';return}
+  o.region=userRegion();
+  if(!PT){$('#bOut').innerHTML='<div class="warn">Servono i prezzi aggiornati: controlla la connessione e riprova.</div><div class="row"><button class="btn" onclick="budgetView(true,0)">← Modifica scelte</button></div>';return}
   const C=candidates(o),X=extras(o);
   const res=repair(o.mode==='week'?buildWeek(o,C,X):buildMeal(o,C,X),o,C,X);
-  if(!res){$('#bOut').innerHTML='<div class="warn">Non ci sono abbastanza ricette compatibili con queste scelte. Prova ad aumentare il tempo per cucinare, a togliere qualche filtro o a usare anche il ricettario.</div>';return}
+  if(!res){$('#bOut').innerHTML='<div class="warn">Non ci sono abbastanza ricette compatibili con queste scelte. Prova ad aumentare il tempo per cucinare, a togliere qualche filtro o a usare anche il ricettario.</div><div class="row"><button class="btn" onclick="budgetView(true,2)">← Modifica scelte</button></div>';return}
   const plan={o,res:{...res,plan:res.plan.map(m=>({...m,dishes:m.dishes.map(x=>({id:x.r.id,book:!!x.r.book,title:x.r.title,role:x.role,eur:x.eur,kcal:x.kcal,prot:x.prot,t:x.t,d:x.d}))}))},X,noCost:C.noCost,n:C.list.length,zone:PT.zone,period:PT.period};
   save('budgetPlan',plan);showPlan(plan);
 };
@@ -1091,7 +1165,9 @@ function showPlan(P){
   const veg=(SEASON?.verdura[o.month]||[]).filter(x=>!o.avoid.some(w=>x.includes(w)));
   const days=week?GIORNI.map((g,d)=>({g,ms:res.plan.filter(m=>m.d===d)})):[{g:'Il tuo pasto',ms:res.plan}];
   const stale=PT?.period&&P.period&&PT.period!==P.period;
+  const sum=`${week?'Settimana':'Un pasto'} · ${euro(o.budget)} · ${o.people} ${o.people>1?'persone':'persona'}${o.diets.length?' · '+o.diets.join(', '):''}${o.cuisine==='mondo'?' · anche dal mondo':o.cuisine==='italiana'?' · anche regionali rari':''}`;
   $('#bOut').innerHTML=`
+    <div class="row" style="justify-content:space-between;align-items:center;margin:0 0 10px"><span class="meta">${esc(sum)}</span><span><button class="btn" id="bEdit">✎ Modifica</button> <button class="btn pri" id="bVary">🔀 Varia menu</button></span></div>
     ${stale?`<div class="warn">I prezzi sono stati aggiornati a ${esc(PT.period)} dopo la creazione di questo menu (${esc(P.period)}). <button class="btn" id="bRefresh">Ricalcola menu</button></div>`:''}
     ${over?(res.cost<=o.budget*1.04?`<div class="warn">Il menu supera di poco il budget (${euro(res.cost-o.budget)} in più): puoi rigenerarlo o sostituire un piatto.</div>`
       :`<div class="warn">Con ${euro(o.budget)} non si riesce a coprire tutto: il menu più economico che ho trovato costa circa <b>${euro(res.cost)}</b>. Prova ad alzare il budget o a ridurre i pasti.</div>`):''}
@@ -1108,9 +1184,11 @@ function showPlan(P){
       ${m.m!=='lunch'&&X.bread&&(week||m.dishes.length<3)?`<div class="dish" style="cursor:default"><span><span class="r">Pane</span>pane</span><small>50 g · ${Math.round(X.bread.kcal)} kcal · ${euro(X.bread.eur)}</small></div>`:''}
       <p class="meta" style="margin:4px 0 0;text-align:right">${m.t?`⏱ circa ${fmtMin(m.t)} in cucina · `:''}${Math.round(m.kcal)} kcal a persona</p></div>`).join('')}</div>`).join('')}
     <details class="meta" id="shop"><summary><b>🛒 Lista della spesa per ${o.people} ${o.people>1?'persone':'persona'}</b></summary><div id="shopList"></div></details>
+    <p class="meta">Menu composto con i piatti della cucina italiana di tutti i giorni${o.region?`, dando la precedenza a quelli di ${esc(REG_AREA[o.region]==='isole'?'Sicilia e Sardegna':o.region)} e della sua area`:''}${o.cuisine==='italiana'?', inclusi i piatti regionali meno comuni':o.cuisine==='mondo'?', incluse ricette dal mondo':''}.</p>
     <p class="meta">Costi stimati con i prezzi medi${P.period?` dell'Osservatorio Prezzi MIMIT (${esc(P.period)}, ${esc(P.zone)})`:''} e prezzi indicativi; calorie e nutrienti medi, indicativi. Pasti scelti tra ${P.n} ricette compatibili${P.noCost?`; ${P.noCost} delle tue ricette sono escluse perché senza costo calcolato (aprile e tocca "Calcola calorie e costo")`:''}.</p>
-    <div class="row"><button class="btn pri" id="bAgain">🔄 Rigenera menu</button></div>`;
-  $('#bAgain').onclick=()=>$('#bForm').requestSubmit();
+    <div class="row"><button class="btn" id="bEdit2">✎ Modifica scelte</button><button class="btn pri" id="bAgain">🔀 Varia menu</button></div>`;
+  $('#bAgain').onclick=$('#bVary').onclick=()=>{$('#bOut').innerHTML='<p class="meta">Preparo un altro menu con le stesse scelte…</p>';$('#bForm').requestSubmit()};
+  $('#bEdit').onclick=$('#bEdit2').onclick=()=>budgetView(true,0);
   if($('#bRefresh'))$('#bRefresh').onclick=()=>$('#bForm').requestSubmit();
   $('#bOut').querySelectorAll('.dish[data-id]:not([data-id=raw])').forEach(el=>el.onclick=async()=>{await loadBook();const r=(el.dataset.book?book:items).find(x=>x.id===el.dataset.id);if(r)openDetail(r)});
   $('#shop').ontoggle=async()=>{if(!$('#shop').open)return;await loadBook();$('#shopList').innerHTML=shopping(P);
@@ -1162,6 +1240,10 @@ function openProduct(i){
 // Riga della fonte nella scheda, secondo la provenienza della ricetta
 function sourceLine(i){
   if(i.source==='Regione Puglia')return `Fonte: <a href="${esc(i.url||'https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette')}" target="_blank" rel="noopener">Regione Puglia – Pugliapromozione</a> · licenza CC BY 4.0 · dosi e passaggi ricavati dal testo originale con l'AI`;
+  if(i.artusi)return `Fonte: Pellegrino Artusi, <a href="${esc(i.url)}" target="_blank" rel="noopener">La scienza in cucina e l'arte di mangiar bene</a> (1895, trascrizione di Wikisource) · pubblico dominio · ${i.analyzed?'titolo moderno, dosi e passaggi ricavati dal testo originale con l\'AI':'testo originale, non ancora analizzato'}`;
+  if(i.source==='Wikipedia')return `Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Wikipedia</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · autori nella <a href="${esc(String(i.url).replace('/wiki/','/w/index.php?action=history&title='))}" target="_blank" rel="noopener">cronologia</a> · dosi e passaggi ricavati con l'AI`;
+  if(i.source==='Wikibooks (Cookbook)')return `Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Cookbook di Wikibooks</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · tradotta in italiano con l'AI`;
+  if(i.source==='Aggregatore Ricette')return `Ricetta base dell'app (preparazione elementare)`;
   if(i.world)return `Fonte: <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · tradotta in italiano con l'AI`;
   return `Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · autori nella <a href="${esc(String(i.url).replace('/wiki/','/w/index.php?action=history&title='))}" target="_blank" rel="noopener">cronologia</a>`;
 }
@@ -1174,12 +1256,14 @@ function openDetail(i){
       :i.image?`<div class="heroWrap"><img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;hero&quot; style=&quot;display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)&quot;>${em}</div>'"></div>`
       :`<div class="heroWrap"><div class="hero" style="display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)">${em}</div></div>`}
     <h2 style="margin-top:12px">${esc(i.title||i.url)}</h2>
+    ${i.pseudo?`<div class="warn" style="margin:8px 0">Piatto <b>italo-americano</b>: nato all'estero e spesso presentato come italiano, non fa parte della cucina italiana di tutti i giorni.</div>`:''}
     ${tm?`<div class="kv"><span>⏱ ${fmtMin(tm.t)}${tm.w>=30?` + ${fmtMin(tm.w)} attesa`:''}</span><span>${DIFF[tm.d]}</span>${i.cat?`<span>${esc(i.cat)}</span>`:''}</div>`:''}
     <div class="meta">${esc([i.cat,[i.region,i.country].filter(Boolean).join(', '),i.author,i.source].filter(Boolean).join(' · '))}</div>
     ${tm&&!(i.time&&!i.book)&&!i.linked&&!i.world?'<div class="meta" style="margin-top:2px">Tempi e difficoltà stimati dal testo della ricetta</div>':''}${i.linked?'<div class="meta" style="margin-top:2px">Tempo, difficoltà e costo indicati da GialloZafferano</div>':''}
     ${i.catBy?.length?`<details class="meta" style="margin-top:2px"><summary>Perché è tra i ${esc(i.cat)}</summary>${i.catBy.map(b=>esc(b)).join(' · ')} (affidabilità ${esc(i.catConf)})</details>`:''}
     <div class="badges">${(i.diets||[]).map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}${(i.tags||[]).map(t=>`<span class="bdg z">#${esc(t)}</span>`).join('')}</div>
     ${i.summary?`<p class="cap" style="color:var(--fg);margin:6px 0 0">${esc(i.summary)}</p>`:''}
+    ${i.artusi?`<details class="meta" style="margin-top:6px"><summary>Testo originale di Artusi: «${esc(i.origTitle)}» (n. ${i.num}, ${esc(i.chapter)})</summary><p class="cap" style="margin-top:6px">${esc(i.text)}</p></details>`:''}
     ${i.book&&!i.linked?`<p class="lic" style="margin-top:8px">${sourceLine(i)}</p>`:''}
     <div class="rate" id="dRate" style="margin-top:8px${i.book?';display:none':''}">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n<=(i.rating||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}</div>
     ${i.linked?`<div class="kv"><span>Costo ${esc(i.cost||'n.d.')}</span></div><h3>Ingredienti principali</h3><ul>${i.ingredients.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>

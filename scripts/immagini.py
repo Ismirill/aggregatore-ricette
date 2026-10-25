@@ -134,9 +134,10 @@ def wikidata(title):
 
 def main():
     recipes = json.loads(BOOK.read_text(encoding='utf-8'))['recipes']
-    linked = BOOK.parent / 'collegate.json'  # anche le ricette collegate a GialloZafferano
-    if linked.exists():
-        recipes += json.loads(linked.read_text(encoding='utf-8'))['recipes']
+    for extra in ('collegate.json', 'puglia.json', 'mondo.json', 'artusi.json', 'libere.json'):  # tutte le fonti del ricettario
+        f = BOOK.parent / extra
+        if f.exists():
+            recipes += [r for r in json.loads(f.read_text(encoding='utf-8'))['recipes'] if not r.get('image')]
     data = json.loads(OUT.read_text(encoding='utf-8')) if OUT.exists() else {'source': 'Wikipedia / Wikimedia Commons', 'items': {}, 'missing': []}
     if data.get('strategy') != STRATEGY:  # nuove fonti: riprova le ricette rimaste senza foto
         data['missing'], data['strategy'] = [], STRATEGY

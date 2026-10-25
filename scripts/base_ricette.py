@@ -102,7 +102,11 @@ RES = Resolver(entry, VOCAB)
 
 
 def analyze(r):
-    s = r.get('servings') or 4
+    try:
+        s = int(float(str(r.get('servings') or 4).replace(',', '.'))) or 4
+    except (TypeError, ValueError):
+        s = 4
+    r['servings'] = s if r.get('servings') else r.get('servings')
     acc, matched, total, unknown, subs = Counter(), 0, 0, [], []
     for line in r['ingredients']:
         if re.match(r'^\s*(?:per |occorrente|ingredienti)\b.*:\s*$', line.lower()) or len(line) < 3:

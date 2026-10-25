@@ -1,0 +1,1012 @@
+{
+ "_info": "Piatti della cucina italiana quotidiana usati dal Budget per comporre menu realistici. pop = quanto è diffuso (5 = citato da più fonti nazionali come tra i più cucinati; 4 = in una classifica nazionale; 3 = piatto simbolo regionale; 2 = piatto di casa comune non classificato dalle fonti). area: tutta | nord | centro | sud | isole. match: parole che identificano le ricette corrispondenti nel ricettario.",
+ "fonti": [
+  "Doxa / Unione Italiana Food, 'Gli italiani e il consumo di pasta', maggio 2021 (1.000 persone): pasta cibo più cucinato per 4 italiani su 10, poi pizza e focacce 19%, secondi di carne 15%",
+  "Osservatorio Drink & Food Tilby su Google Trends: primi e secondi più cercati",
+  "Gruppo Sicilia's: i condimenti per la pasta più cucinati in casa",
+  "Preply 2024 (Semrush / Google Trends): piatto più cercato per ciascuna delle 20 regioni",
+  "Bennet 2025: piatti regionali più cercati (lasagna, carbonara, tortellini, amatriciana, cacio e pepe, ossobuco, arancini, arrosticini, pesto, canederli, vitello tonnato)",
+  "greenMe: secondi tipici regione per regione",
+  "Accademia Italiana della Cucina: struttura del pranzo (primo, secondo, contorno di patate o verdure); ISTAT: carni bianche settimanali per il 79%"
+ ],
+ "piatti": [
+  {
+   "n": "Pasta al pomodoro",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 5,
+   "match": [
+    "pasta al pomodoro",
+    "spaghetti al pomodoro",
+    "pasta con pomodoro",
+    "pasta al sugo",
+    "pomodoro e basilico"
+   ]
+  },
+  {
+   "n": "Pasta al tonno",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 5,
+   "match": [
+    "pasta al tonno",
+    "spaghetti al tonno",
+    "pasta con il tonno",
+    "pasta tonno"
+   ]
+  },
+  {
+   "n": "Pasta aglio, olio e peperoncino",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 5,
+   "match": [
+    "aglio, olio e peperoncino",
+    "aglio olio e peperoncino",
+    "aglio e olio"
+   ]
+  },
+  {
+   "n": "Spaghetti alla carbonara",
+   "cat": "Primi",
+   "area": "centro",
+   "reg": "Lazio",
+   "pop": 5,
+   "match": [
+    "carbonara"
+   ]
+  },
+  {
+   "n": "Pasta all'amatriciana",
+   "cat": "Primi",
+   "area": "centro",
+   "reg": "Lazio",
+   "pop": 5,
+   "match": [
+    "amatriciana",
+    "matriciana"
+   ]
+  },
+  {
+   "n": "Cacio e pepe",
+   "cat": "Primi",
+   "area": "centro",
+   "reg": "Lazio",
+   "pop": 4,
+   "match": [
+    "cacio e pepe"
+   ]
+  },
+  {
+   "n": "Pasta alla gricia",
+   "cat": "Primi",
+   "area": "centro",
+   "reg": "Lazio",
+   "pop": 3,
+   "match": [
+    "gricia"
+   ]
+  },
+  {
+   "n": "Pasta e fagioli",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 5,
+   "match": [
+    "pasta e fagioli",
+    "pasta fagioli",
+    "pasta coi fagioli"
+   ]
+  },
+  {
+   "n": "Pasta e ceci",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "pasta e ceci",
+    "pasta coi ceci",
+    "ciciri e tria",
+    "lagane e ceci"
+   ]
+  },
+  {
+   "n": "Pasta e lenticchie",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "pasta e lenticchie",
+    "pasta con lenticchie"
+   ]
+  },
+  {
+   "n": "Pasta e patate",
+   "cat": "Primi",
+   "area": "sud",
+   "reg": "Campania",
+   "pop": 4,
+   "match": [
+    "pasta e patate",
+    "pasta patate"
+   ]
+  },
+  {
+   "n": "Pasta al pesto",
+   "cat": "Primi",
+   "area": "nord",
+   "reg": "Liguria",
+   "pop": 5,
+   "match": [
+    "al pesto",
+    "col pesto",
+    "trofie al pesto",
+    "trenette al pesto",
+    "pasta al pesto"
+   ]
+  },
+  {
+   "n": "Pasta al ragù",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 5,
+   "match": [
+    "al ragù",
+    "tagliatelle al ragù",
+    "pasta al ragù",
+    "ragù alla bolognese"
+   ]
+  },
+  {
+   "n": "Lasagne al forno",
+   "cat": "Primi",
+   "area": "nord",
+   "reg": "Emilia-Romagna",
+   "pop": 5,
+   "match": [
+    "lasagne",
+    "lasagna"
+   ]
+  },
+  {
+   "n": "Penne all'arrabbiata",
+   "cat": "Primi",
+   "area": "centro",
+   "reg": "Lazio",
+   "pop": 4,
+   "match": [
+    "arrabbiata"
+   ]
+  },
+  {
+   "n": "Pasta alla Norma",
+   "cat": "Primi",
+   "area": "isole",
+   "reg": "Sicilia",
+   "pop": 4,
+   "match": [
+    "norma"
+   ]
+  },
+  {
+   "n": "Pasta con le zucchine",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "pasta e zucchine",
+    "pasta con zucchine",
+    "pasta zucchine",
+    "spaghetti alle zucchine",
+    "zucchine e gamberi",
+    "pasta con le zucchine"
+   ]
+  },
+  {
+   "n": "Pasta con broccoli o cime di rapa",
+   "cat": "Primi",
+   "area": "sud",
+   "reg": "Puglia",
+   "pop": 4,
+   "match": [
+    "cime di rapa",
+    "cime di rape",
+    "pasta e broccoli",
+    "pasta con i broccoli",
+    "broccoli e salsiccia"
+   ]
+  },
+  {
+   "n": "Spaghetti alle vongole",
+   "cat": "Primi",
+   "area": "sud",
+   "reg": "Campania",
+   "pop": 4,
+   "match": [
+    "vongole"
+   ]
+  },
+  {
+   "n": "Pasta allo scoglio o ai frutti di mare",
+   "cat": "Primi",
+   "area": "sud",
+   "pop": 3,
+   "match": [
+    "allo scoglio",
+    "frutti di mare",
+    "pasta alla marinara"
+   ]
+  },
+  {
+   "n": "Pasta alla puttanesca",
+   "cat": "Primi",
+   "area": "sud",
+   "reg": "Campania",
+   "pop": 3,
+   "match": [
+    "puttanesca"
+   ]
+  },
+  {
+   "n": "Gnocchi al pomodoro o alla sorrentina",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "gnocchi alla sorrentina",
+    "gnocchi al pomodoro",
+    "gnocchi di patate"
+   ]
+  },
+  {
+   "n": "Risotto allo zafferano (alla milanese)",
+   "cat": "Primi",
+   "area": "nord",
+   "reg": "Lombardia",
+   "pop": 4,
+   "match": [
+    "risotto alla milanese",
+    "risotto allo zafferano"
+   ]
+  },
+  {
+   "n": "Risotto ai funghi",
+   "cat": "Primi",
+   "area": "nord",
+   "pop": 4,
+   "match": [
+    "risotto ai funghi",
+    "risotto con i funghi",
+    "risotto porcini",
+    "risotto ai porcini"
+   ]
+  },
+  {
+   "n": "Risotto con la zucca",
+   "cat": "Primi",
+   "area": "nord",
+   "pop": 3,
+   "match": [
+    "risotto alla zucca",
+    "risotto con la zucca",
+    "risotto zucca"
+   ]
+  },
+  {
+   "n": "Risotto agli asparagi o alle verdure",
+   "cat": "Primi",
+   "area": "nord",
+   "pop": 3,
+   "match": [
+    "risotto agli asparagi",
+    "risotto con zucchine",
+    "risotto alle verdure",
+    "risotto primavera",
+    "risi e bisi"
+   ]
+  },
+  {
+   "n": "Minestrone di verdure",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "minestrone"
+   ]
+  },
+  {
+   "n": "Pasta in brodo o pastina",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "pastina in brodo",
+    "pasta in brodo",
+    "tortellini in brodo",
+    "passatelli in brodo",
+    "stracciatella"
+   ]
+  },
+  {
+   "n": "Vellutata o crema di verdure",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "vellutata",
+    "crema di zucca",
+    "crema di zucchine",
+    "crema di porri",
+    "zuppa di zucca"
+   ]
+  },
+  {
+   "n": "Polenta",
+   "cat": "Primi",
+   "area": "nord",
+   "pop": 3,
+   "match": [
+    "polenta"
+   ]
+  },
+  {
+   "n": "Pizzoccheri",
+   "cat": "Primi",
+   "area": "nord",
+   "reg": "Lombardia",
+   "pop": 3,
+   "match": [
+    "pizzoccheri"
+   ]
+  },
+  {
+   "n": "Canederli",
+   "cat": "Primi",
+   "area": "nord",
+   "reg": "Trentino-Alto Adige",
+   "pop": 3,
+   "match": [
+    "canederli",
+    "knödel"
+   ]
+  },
+  {
+   "n": "Tortellini o ravioli",
+   "cat": "Primi",
+   "area": "nord",
+   "reg": "Emilia-Romagna",
+   "pop": 4,
+   "match": [
+    "tortellini",
+    "ravioli",
+    "tortelli",
+    "agnolotti",
+    "cappelletti"
+   ]
+  },
+  {
+   "n": "Insalata di pasta o di riso",
+   "cat": "Primi",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "insalata di pasta",
+    "insalata di riso",
+    "pasta fredda",
+    "riso freddo"
+   ]
+  },
+  {
+   "n": "Orecchiette",
+   "cat": "Primi",
+   "area": "sud",
+   "reg": "Puglia",
+   "pop": 3,
+   "match": [
+    "orecchiette"
+   ]
+  },
+  {
+   "n": "Cotoletta (alla milanese o impanata)",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 5,
+   "match": [
+    "cotoletta",
+    "cotolette",
+    "fettine impanate",
+    "cotoletta alla milanese"
+   ]
+  },
+  {
+   "n": "Pollo al forno con patate",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 5,
+   "match": [
+    "pollo al forno",
+    "pollo arrosto",
+    "cosce di pollo",
+    "pollo e patate",
+    "ali di pollo"
+   ]
+  },
+  {
+   "n": "Petto di pollo in padella o ai ferri",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "petto di pollo",
+    "pollo in padella",
+    "pollo ai ferri",
+    "pollo al limone",
+    "straccetti di pollo"
+   ]
+  },
+  {
+   "n": "Scaloppine (al limone, al vino, ai funghi)",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "scaloppin",
+    "scaloppa"
+   ]
+  },
+  {
+   "n": "Polpette al sugo o al forno",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 5,
+   "match": [
+    "polpette al sugo",
+    "polpette di carne",
+    "polpette al forno",
+    "polpettone",
+    "polpette della nonna",
+    "polpette al pomodoro"
+   ]
+  },
+  {
+   "n": "Frittata",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "frittata",
+    "omelette"
+   ]
+  },
+  {
+   "n": "Spezzatino con patate",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "spezzatino"
+   ]
+  },
+  {
+   "n": "Arrosto",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "arrosto di",
+    "arista",
+    "lonza al latte",
+    "maiale al latte"
+   ]
+  },
+  {
+   "n": "Pesce al forno o in padella",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "orata",
+    "branzino",
+    "spigola",
+    "merluzzo al",
+    "filetti di",
+    "pesce al forno",
+    "sogliola",
+    "platessa",
+    "trota",
+    "nasello"
+   ]
+  },
+  {
+   "n": "Salmone",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "salmone"
+   ]
+  },
+  {
+   "n": "Baccalà",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "baccalà",
+    "baccala",
+    "stoccafisso"
+   ]
+  },
+  {
+   "n": "Pollo alla cacciatora",
+   "cat": "Secondi",
+   "area": "centro",
+   "pop": 3,
+   "match": [
+    "pollo alla cacciatora",
+    "cacciatora"
+   ]
+  },
+  {
+   "n": "Salsiccia e friarielli o con verdure",
+   "cat": "Secondi",
+   "area": "sud",
+   "reg": "Campania",
+   "pop": 3,
+   "match": [
+    "salsiccia e friarielli",
+    "salsicce e patate",
+    "salsiccia con",
+    "salsicce in umido",
+    "salsiccia e"
+   ]
+  },
+  {
+   "n": "Hamburger o svizzere",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "hamburger",
+    "svizzer",
+    "medaglioni"
+   ]
+  },
+  {
+   "n": "Carne alla pizzaiola",
+   "cat": "Secondi",
+   "area": "sud",
+   "reg": "Campania",
+   "pop": 3,
+   "match": [
+    "pizzaiola"
+   ]
+  },
+  {
+   "n": "Involtini",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "involtini",
+    "braciole",
+    "messicani"
+   ]
+  },
+  {
+   "n": "Saltimbocca alla romana",
+   "cat": "Secondi",
+   "area": "centro",
+   "reg": "Lazio",
+   "pop": 3,
+   "match": [
+    "saltimbocca"
+   ]
+  },
+  {
+   "n": "Vitello tonnato",
+   "cat": "Secondi",
+   "area": "nord",
+   "reg": "Piemonte",
+   "pop": 3,
+   "match": [
+    "vitello tonnato"
+   ]
+  },
+  {
+   "n": "Ossobuco",
+   "cat": "Secondi",
+   "area": "nord",
+   "reg": "Lombardia",
+   "pop": 3,
+   "match": [
+    "ossobuc",
+    "ossibuch"
+   ]
+  },
+  {
+   "n": "Parmigiana di melanzane",
+   "cat": "Secondi",
+   "area": "sud",
+   "reg": "Campania",
+   "pop": 4,
+   "match": [
+    "parmigiana"
+   ]
+  },
+  {
+   "n": "Peperoni ripieni",
+   "cat": "Secondi",
+   "area": "sud",
+   "pop": 3,
+   "match": [
+    "peperoni ripieni",
+    "melanzane ripiene",
+    "zucchine ripiene",
+    "pomodori ripieni"
+   ]
+  },
+  {
+   "n": "Uova (sode, al tegamino, in camicia)",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "uova al",
+    "uova in",
+    "uova sode",
+    "uova strapazzate",
+    "uova al pomodoro"
+   ]
+  },
+  {
+   "n": "Formaggi e affettati (piatto freddo)",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "caprese",
+    "prosciutto e melone",
+    "tagliere"
+   ]
+  },
+  {
+   "n": "Tonno e fagioli o insalata di tonno",
+   "cat": "Secondi",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "tonno e fagioli",
+    "insalata di tonno",
+    "insalata di polpo",
+    "insalata di mare"
+   ]
+  },
+  {
+   "n": "Calamari o seppie",
+   "cat": "Secondi",
+   "area": "sud",
+   "pop": 3,
+   "match": [
+    "calamari",
+    "seppie",
+    "totani",
+    "polpo",
+    "polipo"
+   ]
+  },
+  {
+   "n": "Cozze",
+   "cat": "Secondi",
+   "area": "sud",
+   "pop": 3,
+   "match": [
+    "cozze",
+    "impepata"
+   ]
+  },
+  {
+   "n": "Brasato o bollito",
+   "cat": "Secondi",
+   "area": "nord",
+   "reg": "Piemonte",
+   "pop": 3,
+   "match": [
+    "brasato",
+    "bollito",
+    "stracotto"
+   ]
+  },
+  {
+   "n": "Arrosticini",
+   "cat": "Secondi",
+   "area": "centro",
+   "reg": "Abruzzo",
+   "pop": 3,
+   "match": [
+    "arrosticini"
+   ]
+  },
+  {
+   "n": "Fegato alla veneziana",
+   "cat": "Secondi",
+   "area": "nord",
+   "reg": "Veneto",
+   "pop": 2,
+   "match": [
+    "fegato alla veneziana"
+   ]
+  },
+  {
+   "n": "Insalata mista o verde",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 5,
+   "match": [
+    "insalata mista",
+    "insalata verde",
+    "insalata di lattuga",
+    "insalata di pomodori",
+    "insalata di rucola",
+    "insalata di finocchi",
+    "insalata di cetrioli"
+   ]
+  },
+  {
+   "n": "Patate al forno",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 5,
+   "match": [
+    "patate al forno",
+    "patate arrosto",
+    "patate sabbiose",
+    "patate al rosmarino"
+   ]
+  },
+  {
+   "n": "Purè di patate",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "purè",
+    "pure di patate",
+    "purea di patate"
+   ]
+  },
+  {
+   "n": "Patate in padella o lesse",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "patate in padella",
+    "patate lesse",
+    "patate saltate",
+    "patate in umido",
+    "patate e cipolle",
+    "patate fritte"
+   ]
+  },
+  {
+   "n": "Verdure grigliate",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "verdure grigliate",
+    "zucchine grigliate",
+    "melanzane grigliate",
+    "verdure alla griglia",
+    "verdure alla piastra"
+   ]
+  },
+  {
+   "n": "Zucchine trifolate o in padella",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "zucchine trifolate",
+    "zucchine in padella",
+    "zucchine saltate",
+    "zucchine al forno",
+    "zucchine alla scapece"
+   ]
+  },
+  {
+   "n": "Spinaci o bietole saltati",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "spinaci",
+    "bietole",
+    "bieta",
+    "erbette",
+    "coste"
+   ]
+  },
+  {
+   "n": "Fagiolini",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "fagiolini"
+   ]
+  },
+  {
+   "n": "Broccoli o cavolfiore",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "broccoli",
+    "cavolfiore",
+    "broccoletti",
+    "cavolo",
+    "verza"
+   ]
+  },
+  {
+   "n": "Cicoria o friarielli ripassati",
+   "cat": "Contorni",
+   "area": "centro",
+   "reg": "Lazio",
+   "pop": 3,
+   "match": [
+    "cicoria",
+    "friarielli",
+    "catalogna",
+    "ripassat"
+   ]
+  },
+  {
+   "n": "Peperonata",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "peperonata",
+    "peperoni in padella",
+    "peperoni al forno",
+    "peperoni arrostiti"
+   ]
+  },
+  {
+   "n": "Caponata",
+   "cat": "Contorni",
+   "area": "isole",
+   "reg": "Sicilia",
+   "pop": 3,
+   "match": [
+    "caponata"
+   ]
+  },
+  {
+   "n": "Melanzane a funghetto o al forno",
+   "cat": "Contorni",
+   "area": "sud",
+   "pop": 3,
+   "match": [
+    "melanzane a funghetto",
+    "melanzane al forno",
+    "melanzane in padella",
+    "melanzane grigliate",
+    "melanzane trifolate"
+   ]
+  },
+  {
+   "n": "Carciofi",
+   "cat": "Contorni",
+   "area": "centro",
+   "reg": "Lazio",
+   "pop": 3,
+   "match": [
+    "carciofi"
+   ]
+  },
+  {
+   "n": "Funghi trifolati",
+   "cat": "Contorni",
+   "area": "nord",
+   "pop": 3,
+   "match": [
+    "funghi trifolati",
+    "funghi in padella",
+    "funghi al"
+   ]
+  },
+  {
+   "n": "Pomodori gratinati o al forno",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "pomodori gratinati",
+    "pomodori al forno",
+    "pomodori al gratin"
+   ]
+  },
+  {
+   "n": "Finocchi gratinati o al forno",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "finocchi gratinati",
+    "finocchi al forno",
+    "finocchi in padella"
+   ]
+  },
+  {
+   "n": "Piselli con cipolla",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "piselli",
+    "piselli in umido"
+   ]
+  },
+  {
+   "n": "Carote",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 2,
+   "match": [
+    "carote"
+   ]
+  },
+  {
+   "n": "Verdure al forno miste",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 3,
+   "match": [
+    "verdure al forno",
+    "verdure miste",
+    "verdure in padella",
+    "verdure saltate",
+    "ratatouille"
+   ]
+  },
+  {
+   "n": "Insalata di pomodori e cipolla",
+   "cat": "Contorni",
+   "area": "sud",
+   "pop": 3,
+   "match": [
+    "pomodori e cipolla",
+    "insalata pantesca",
+    "insalata di patate",
+    "insalata di fagioli"
+   ]
+  },
+  {
+   "n": "Legumi in umido",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 2,
+   "match": [
+    "fagioli all'uccelletto",
+    "fagioli in umido",
+    "lenticchie in umido",
+    "ceci in umido",
+    "fave e cicoria",
+    "fave e cicorie"
+   ]
+  },
+  {
+   "n": "Polenta come contorno",
+   "cat": "Contorni",
+   "area": "nord",
+   "pop": 2,
+   "match": [
+    "polenta"
+   ]
+  }
+ ]
+}
