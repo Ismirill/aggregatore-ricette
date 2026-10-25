@@ -1,139 +1,1482 @@
 {
-  "nota": "Cibi già pronti del supermercato (surgelati, freschi confezionati, in scatola, gastronomia) usati dal menu Budget solo se chi usa l'app li accetta. Prezzi medi indicativi al kg (prezzi) per i prodotti che non sono nell'Osservatorio Prezzi MIMIT; gli ingredienti freschi aggiunti (burro, olio, parmigiano…) usano i prezzi del mese. Calorie e nutrienti medi della categoria, per porzione: fa fede l'etichetta del prodotto.",
-  "updated": "2026-10-25",
-  "prezzi": {
-    "pizza margherita surgelata": 5.5, "pizza con verdure surgelata": 6.5, "lasagne alla bolognese pronte": 8, "lasagne vegetariane pronte": 8.5,
-    "cannelloni ricotta e spinaci pronti": 8.5, "gnocchi alla sorrentina surgelati": 7, "minestrone surgelato": 2.8, "zuppa di legumi e cereali pronta": 6,
-    "gnocchi di patate confezionati": 3, "risotto ai funghi surgelato": 7, "bastoncini di pesce surgelati": 9, "filetti di merluzzo surgelati": 12,
-    "anelli di calamari impanati surgelati": 11, "cotoletta di pollo impanata surgelata": 9, "nuggets di pollo surgelati": 9, "hamburger di manzo confezionato": 12,
-    "polpette pronte": 10, "würstel": 7, "burger vegetale di legumi": 11, "falafel surgelati": 10, "pollo arrosto di rosticceria": 12,
-    "mozzarella in carrozza surgelata": 10, "melanzane alla parmigiana pronte": 9, "spinaci surgelati": 2.5, "fagiolini surgelati": 2.8,
-    "verdure grigliate surgelate": 5, "patate al forno surgelate": 2.8, "purè di patate pronto": 5, "polenta pronta": 2.5, "insalata in busta": 8,
-    "carciofi surgelati": 6, "funghi trifolati surgelati": 5
+ "nota": "Cibi già pronti del supermercato (surgelati, freschi confezionati, in scatola, gastronomia) usati dal menu Budget solo se chi usa l'app li accetta. Prezzi medi indicativi al kg (prezzi) per i prodotti che non sono nell'Osservatorio Prezzi MIMIT; gli ingredienti freschi aggiunti (burro, olio, parmigiano…) usano i prezzi del mese. Calorie e nutrienti medi della categoria, per porzione: fa fede l'etichetta del prodotto. Le confezioni (conf) sono le misure più comuni in vendita, per la lista della spesa.",
+ "updated": "2026-10-25",
+ "prezzi": {
+  "pizza margherita surgelata": 5.5,
+  "pizza con verdure surgelata": 6.5,
+  "lasagne alla bolognese pronte": 8,
+  "lasagne vegetariane pronte": 8.5,
+  "cannelloni ricotta e spinaci pronti": 8.5,
+  "gnocchi alla sorrentina surgelati": 7,
+  "minestrone surgelato": 2.8,
+  "zuppa di legumi e cereali pronta": 6,
+  "gnocchi di patate confezionati": 3,
+  "risotto ai funghi surgelato": 7,
+  "bastoncini di pesce surgelati": 9,
+  "filetti di merluzzo surgelati": 12,
+  "anelli di calamari impanati surgelati": 11,
+  "cotoletta di pollo impanata surgelata": 9,
+  "nuggets di pollo surgelati": 9,
+  "hamburger di manzo confezionato": 12,
+  "polpette pronte": 10,
+  "würstel": 7,
+  "burger vegetale di legumi": 11,
+  "falafel surgelati": 10,
+  "pollo arrosto di rosticceria": 12,
+  "mozzarella in carrozza surgelata": 10,
+  "melanzane alla parmigiana pronte": 9,
+  "spinaci surgelati": 2.5,
+  "fagiolini surgelati": 2.8,
+  "verdure grigliate surgelate": 5,
+  "patate al forno surgelate": 2.8,
+  "purè di patate pronto": 5,
+  "polenta pronta": 2.5,
+  "insalata in busta": 8,
+  "carciofi surgelati": 6,
+  "funghi trifolati surgelati": 5
+ },
+ "items": [
+  {
+   "id": "pizza-margherita",
+   "title": "Pizza margherita surgelata",
+   "cat": "Piatti unici",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "formaggi",
+   "diets": [
+    "Vegetariano"
+   ],
+   "b": [
+    [
+     "pizza margherita surgelata",
+     330
+    ]
+   ],
+   "n": {
+    "k": 760,
+    "p": 30,
+    "c": 99,
+    "f": 26
+   },
+   "ing": [
+    "1 pizza margherita surgelata (330 g: farina di grano, pomodoro, mozzarella)"
+   ],
+   "prep": "Forno già caldo a 220 °C per 12–15 minuti, senza scongelare, finché il bordo è dorato."
   },
-  "items": [
-    {"id": "pizza-margherita", "title": "Pizza margherita surgelata", "cat": "Piatti unici", "kind": "surgelato", "t": 15, "prot": "formaggi", "diets": ["Vegetariano"],
-     "b": [["pizza margherita surgelata", 330]], "n": {"k": 760, "p": 30, "c": 99, "f": 26},
-     "ing": ["1 pizza margherita surgelata (330 g: farina di grano, pomodoro, mozzarella)"], "prep": "Forno già caldo a 220 °C per 12–15 minuti, senza scongelare, finché il bordo è dorato."},
-    {"id": "pizza-verdure", "title": "Pizza con verdure surgelata", "cat": "Piatti unici", "kind": "surgelato", "t": 15, "prot": "formaggi", "diets": ["Vegetariano"],
-     "b": [["pizza con verdure surgelata", 350]], "n": {"k": 735, "p": 28, "c": 98, "f": 25},
-     "ing": ["1 pizza con verdure grigliate surgelata (350 g: farina di grano, pomodoro, mozzarella, zucchine, peperoni, melanzane)"], "prep": "Forno già caldo a 220 °C per 12–15 minuti, senza scongelare."},
-    {"id": "lasagne-bolognese", "title": "Lasagne alla bolognese pronte", "cat": "Primi", "kind": "fresco confezionato", "t": 25, "prot": "rossa", "diets": [],
-     "b": [["lasagne alla bolognese pronte", 320]], "n": {"k": 510, "p": 26, "c": 42, "f": 26},
-     "ing": ["1 vaschetta di lasagne alla bolognese (320 g: pasta all'uovo con farina di grano, ragù di carne, besciamella con latte, parmigiano)"], "prep": "Forno a 180 °C per 20–25 minuti nella vaschetta (o microonde 6–8 minuti), finché la superficie è gratinata."},
-    {"id": "lasagne-vegetariane", "title": "Lasagne alle verdure pronte", "cat": "Primi", "kind": "fresco confezionato", "t": 25, "prot": "verdure", "diets": ["Vegetariano"],
-     "b": [["lasagne vegetariane pronte", 320]], "n": {"k": 450, "p": 19, "c": 45, "f": 19},
-     "ing": ["1 vaschetta di lasagne alle verdure (320 g: pasta all'uovo con farina di grano, zucchine, spinaci, besciamella con latte, formaggio)"], "prep": "Forno a 180 °C per 20–25 minuti nella vaschetta (o microonde 6–8 minuti)."},
-    {"id": "cannelloni", "title": "Cannelloni ricotta e spinaci pronti", "cat": "Primi", "kind": "fresco confezionato", "t": 25, "prot": "formaggi", "diets": ["Vegetariano"],
-     "b": [["cannelloni ricotta e spinaci pronti", 300]], "n": {"k": 495, "p": 24, "c": 42, "f": 24},
-     "ing": ["1 vaschetta di cannelloni ricotta e spinaci (300 g: pasta all'uovo con farina di grano, ricotta, spinaci, besciamella con latte)"], "prep": "Forno a 180 °C per 20–25 minuti, finché la besciamella è dorata."},
-    {"id": "gnocchi-sorrentina", "title": "Gnocchi alla sorrentina surgelati", "cat": "Primi", "kind": "surgelato", "t": 15, "prot": "formaggi", "diets": ["Vegetariano"],
-     "b": [["gnocchi alla sorrentina surgelati", 300]], "n": {"k": 450, "p": 18, "c": 66, "f": 12},
-     "ing": ["1 porzione di gnocchi alla sorrentina surgelati (300 g: gnocchi di patate con farina di grano, pomodoro, mozzarella, basilico)"], "prep": "In padella con il coperchio 10–12 minuti a fuoco medio, mescolando, oppure in forno a 200 °C per 15 minuti."},
-    {"id": "minestrone", "title": "Minestrone surgelato", "cat": "Primi", "kind": "surgelato", "t": 20, "prot": "verdure", "diets": ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio"],
-     "b": [["minestrone surgelato", 300], ["olio extravergine", 10]], "n": {"k": 195, "p": 6, "c": 15, "f": 11},
-     "ing": ["300 g misto di verdure per minestrone surgelato", "1 cucchiaio di olio extravergine", "sale q.b."], "prep": "In pentola con poca acqua salata, coperchio, 15–20 minuti dal bollore; condisci con l'olio a crudo. A piacere 40 g di pasta o riso per persona."},
-    {"id": "zuppa-legumi", "title": "Zuppa di legumi e cereali pronta", "cat": "Primi", "kind": "fresco confezionato", "t": 10, "prot": "legumi", "diets": ["Vegano", "Vegetariano", "Senza lattosio"],
-     "b": [["zuppa di legumi e cereali pronta", 300], ["olio extravergine", 8]], "n": {"k": 330, "p": 15, "c": 36, "f": 12},
-     "ing": ["1 vaschetta di zuppa di legumi e cereali (300 g: fagioli, lenticchie, ceci, farro, orzo, verdure)", "olio extravergine q.b."], "prep": "Scalda in pentola 5–8 minuti o nel microonde 3 minuti; completa con un filo d'olio."},
-    {"id": "gnocchi-pomodoro", "title": "Gnocchi confezionati al pomodoro", "cat": "Primi", "kind": "fresco confezionato", "t": 15, "prot": "verdure", "diets": ["Vegetariano"],
-     "b": [["gnocchi di patate confezionati", 200], ["passata di pomodoro", 100], ["parmigiano", 10], ["olio extravergine", 8]], "n": {"k": 410, "p": 11, "c": 68, "f": 11},
-     "ing": ["200 g gnocchi di patate confezionati (con farina di grano)", "100 g passata di pomodoro", "10 g parmigiano grattugiato", "olio extravergine, sale, basilico"], "prep": "Scalda la passata con olio e sale 5 minuti. Tuffa gli gnocchi in acqua bollente salata: appena vengono a galla scolali, condiscili col sugo e il parmigiano."},
-    {"id": "pasta-pesto", "title": "Pasta con pesto in vasetto", "cat": "Primi", "kind": "in vasetto", "t": 15, "prot": "verdure", "diets": ["Vegetariano"],
-     "b": [["pasta", 90], ["salse e condimenti", 30]], "n": {"k": 395, "p": 12, "c": 66, "f": 9},
-     "ing": ["90 g pasta (trofie o linguine)", "30 g pesto alla genovese in vasetto (basilico, formaggio, pinoli)", "sale q.b."], "prep": "Cuoci la pasta in acqua salata; scolala tenendo un po' d'acqua e mantecala con il pesto fuori dal fuoco."},
-    {"id": "pasta-sugo", "title": "Pasta con sugo pronto", "cat": "Primi", "kind": "in barattolo", "t": 15, "prot": "verdure", "diets": ["Vegetariano"],
-     "b": [["pasta", 90], ["salse e condimenti", 120], ["parmigiano", 10]], "n": {"k": 390, "p": 15, "c": 70, "f": 7},
-     "ing": ["90 g pasta", "120 g sugo pronto in barattolo (pomodoro e basilico o alle verdure)", "10 g parmigiano grattugiato"], "prep": "Scalda il sugo in padella mentre la pasta cuoce; scola, condisci e completa con il parmigiano."},
-    {"id": "ravioli-burro-salvia", "title": "Ravioli freschi burro e salvia", "cat": "Primi", "kind": "fresco confezionato", "t": 10, "prot": "formaggi", "diets": ["Vegetariano"],
-     "b": [["pasta fresca ripiena", 180], ["burro", 15], ["parmigiano", 10]], "n": {"k": 670, "p": 24, "c": 81, "f": 29},
-     "ing": ["180 g ravioli ricotta e spinaci freschi confezionati (pasta all'uovo con farina di grano)", "15 g burro", "10 g parmigiano grattugiato", "qualche foglia di salvia"], "prep": "Cuoci i ravioli 3–4 minuti in acqua salata; sciogli il burro con la salvia in padella, scola i ravioli, salta un minuto e completa con il parmigiano."},
-    {"id": "tortellini-brodo", "title": "Tortellini freschi in brodo", "cat": "Primi", "kind": "fresco confezionato", "t": 10, "prot": "rossa", "diets": [],
-     "b": [["pasta fresca ripiena", 150], ["brodo", 400], ["parmigiano", 10]], "n": {"k": 495, "p": 22, "c": 68, "f": 15},
-     "ing": ["150 g tortellini freschi confezionati (pasta all'uovo con farina di grano, ripieno di carne e prosciutto)", "400 ml brodo (anche di dado)", "10 g parmigiano grattugiato"], "prep": "Porta il brodo a bollore, cuoci i tortellini 3–4 minuti e servi con il parmigiano."},
-    {"id": "risotto-funghi", "title": "Risotto ai funghi surgelato", "cat": "Primi", "kind": "surgelato", "t": 15, "prot": "verdure", "diets": ["Vegetariano", "Senza glutine"],
-     "b": [["risotto ai funghi surgelato", 300]], "n": {"k": 390, "p": 9, "c": 66, "f": 9},
-     "ing": ["1 porzione di risotto ai funghi surgelato (300 g: riso, funghi, burro, formaggio)"], "prep": "In padella con mezzo bicchiere d'acqua, coperchio, 10–12 minuti mescolando ogni tanto."},
-    {"id": "bastoncini", "title": "Bastoncini di pesce surgelati", "cat": "Secondi", "kind": "surgelato", "t": 15, "prot": "pesce", "diets": [],
-     "b": [["bastoncini di pesce surgelati", 125]], "n": {"k": 262, "p": 15, "c": 22, "f": 11},
-     "ing": ["5 bastoncini di merluzzo impanati surgelati (125 g: pesce, pangrattato con farina di grano)"], "prep": "Forno a 220 °C per 12–15 minuti girandoli a metà, oppure in padella con un filo d'olio 8–10 minuti."},
-    {"id": "merluzzo", "title": "Filetti di merluzzo surgelati al limone", "cat": "Secondi", "kind": "surgelato", "t": 20, "prot": "pesce", "diets": ["Senza glutine", "Senza lattosio"],
-     "b": [["filetti di merluzzo surgelati", 150], ["olio extravergine", 8], ["limone", 20]], "n": {"k": 195, "p": 27, "c": 1, "f": 9},
-     "ing": ["150 g filetti di merluzzo surgelati al naturale", "1 cucchiaio di olio extravergine", "succo di limone, prezzemolo, sale e pepe"], "prep": "In padella antiaderente con olio, coperchio, 8–10 minuti per lato direttamente da surgelati; completa con limone e prezzemolo."},
-    {"id": "calamari-impanati", "title": "Anelli di calamari impanati surgelati", "cat": "Secondi", "kind": "surgelato", "t": 15, "prot": "pesce", "diets": [],
-     "b": [["anelli di calamari impanati surgelati", 150]], "n": {"k": 300, "p": 15, "c": 33, "f": 12},
-     "ing": ["150 g anelli di calamari impanati surgelati (calamari, pangrattato con farina di grano)"], "prep": "Forno a 220 °C per 12–14 minuti o friggitrice ad aria 10 minuti; un filo di limone."},
-    {"id": "cotoletta-pollo", "title": "Cotoletta di pollo impanata surgelata", "cat": "Secondi", "kind": "surgelato", "t": 15, "prot": "bianca", "diets": [],
-     "b": [["cotoletta di pollo impanata surgelata", 150]], "n": {"k": 345, "p": 21, "c": 27, "f": 16},
-     "ing": ["1 cotoletta di pollo impanata surgelata (150 g: pollo, pangrattato con farina di grano, uova)"], "prep": "In padella con poco olio 6–7 minuti per lato, o in forno a 200 °C per 15 minuti."},
-    {"id": "nuggets", "title": "Bocconcini di pollo impanati surgelati", "cat": "Secondi", "kind": "surgelato", "t": 15, "prot": "bianca", "diets": [],
-     "b": [["nuggets di pollo surgelati", 120]], "n": {"k": 312, "p": 17, "c": 22, "f": 17},
-     "ing": ["120 g bocconcini di pollo impanati surgelati (pollo, pangrattato con farina di grano)"], "prep": "Forno a 220 °C per 12 minuti o friggitrice ad aria 10 minuti."},
-    {"id": "hamburger", "title": "Hamburger di manzo confezionato", "cat": "Secondi", "kind": "fresco confezionato", "t": 10, "prot": "rossa", "diets": ["Senza glutine", "Senza lattosio"],
-     "b": [["hamburger di manzo confezionato", 120]], "n": {"k": 300, "p": 22, "c": 0, "f": 24},
-     "ing": ["1 hamburger di manzo confezionato (120 g)", "sale e pepe"], "prep": "Padella ben calda senza olio, 3–4 minuti per lato; sala solo alla fine."},
-    {"id": "polpette", "title": "Polpette pronte", "cat": "Secondi", "kind": "gastronomia", "t": 15, "prot": "rossa", "diets": [],
-     "b": [["polpette pronte", 150]], "n": {"k": 360, "p": 21, "c": 18, "f": 22},
-     "ing": ["150 g polpette di carne pronte (carne, pane, uova, formaggio)"], "prep": "Scalda in padella con un filo d'olio 8–10 minuti, oppure 10 minuti nel sugo pronto."},
-    {"id": "wurstel", "title": "Würstel in padella", "cat": "Secondi", "kind": "confezionato", "t": 5, "prot": "rossa", "diets": [],
-     "b": [["würstel", 100]], "n": {"k": 290, "p": 12, "c": 2, "f": 26},
-     "ing": ["2 würstel (100 g)"], "prep": "Incidi e cuoci in padella o griglia 5 minuti; buoni con senape o con un contorno di verdure."},
-    {"id": "burger-vegetale", "title": "Burger vegetale di legumi", "cat": "Secondi", "kind": "confezionato", "t": 10, "prot": "legumi", "diets": ["Vegano", "Vegetariano", "Senza lattosio"],
-     "b": [["burger vegetale di legumi", 100]], "n": {"k": 190, "p": 9, "c": 18, "f": 8},
-     "ing": ["1 burger di legumi e verdure confezionato (100 g: ceci o lenticchie, verdure, farina di grano)"], "prep": "Padella antiaderente con un filo d'olio, 4 minuti per lato."},
-    {"id": "falafel", "title": "Falafel surgelati", "cat": "Secondi", "kind": "surgelato", "t": 15, "prot": "legumi", "diets": ["Vegano", "Vegetariano", "Senza lattosio"],
-     "b": [["falafel surgelati", 120]], "n": {"k": 276, "p": 10, "c": 30, "f": 12},
-     "ing": ["120 g falafel di ceci surgelati (ceci, cipolla, spezie, farina di grano)"], "prep": "Forno a 200 °C per 12–15 minuti o friggitrice ad aria; servili con yogurt o insalata."},
-    {"id": "pollo-arrosto", "title": "Pollo arrosto di rosticceria", "cat": "Secondi", "kind": "gastronomia", "t": 5, "prot": "bianca", "diets": ["Senza glutine", "Senza lattosio"],
-     "b": [["pollo arrosto di rosticceria", 200]], "n": {"k": 440, "p": 54, "c": 0, "f": 24},
-     "ing": ["200 g pollo arrosto già cotto (gastronomia del supermercato)"], "prep": "Servi tiepido o scaldalo 5 minuti in forno; accompagna con un contorno di verdure."},
-    {"id": "prosciutto-mozzarella", "title": "Prosciutto crudo e mozzarella", "cat": "Secondi", "kind": "banco frigo", "t": 5, "prot": "rossa", "diets": ["Senza glutine"],
-     "b": [["prosciutto crudo", 60], ["mozzarella", 125]], "n": {"k": 470, "p": 40, "c": 1, "f": 35},
-     "ing": ["60 g prosciutto crudo affettato", "1 mozzarella (125 g)", "pepe o origano a piacere"], "prep": "Nessuna cottura: componi il piatto e servi con pane o insalata."},
-    {"id": "bresaola-grana", "title": "Bresaola, rucola e grana", "cat": "Secondi", "kind": "banco frigo", "t": 5, "prot": "rossa", "diets": ["Senza glutine"],
-     "b": [["salumi", 70], ["parmigiano", 20], ["insalata", 50], ["olio extravergine", 5], ["limone", 10]], "n": {"k": 380, "p": 32, "c": 2, "f": 27},
-     "ing": ["70 g bresaola affettata", "20 g grana a scaglie", "50 g rucola", "olio extravergine e limone"], "prep": "Nessuna cottura: disponi la bresaola, aggiungi rucola e scaglie di grana, condisci con olio e limone."},
-    {"id": "mozzarella-carrozza", "title": "Mozzarella in carrozza surgelata", "cat": "Secondi", "kind": "surgelato", "t": 15, "prot": "formaggi", "diets": ["Vegetariano"],
-     "b": [["mozzarella in carrozza surgelata", 150]], "n": {"k": 405, "p": 16, "c": 33, "f": 22},
-     "ing": ["150 g mozzarella in carrozza surgelata (pane con farina di grano, mozzarella, uova)"], "prep": "Forno a 220 °C per 12–15 minuti o friggitrice ad aria 10 minuti."},
-    {"id": "parmigiana-pronta", "title": "Melanzane alla parmigiana pronte", "cat": "Secondi", "kind": "fresco confezionato", "t": 15, "prot": "formaggi", "diets": ["Vegetariano", "Senza glutine"],
-     "b": [["melanzane alla parmigiana pronte", 300]], "n": {"k": 390, "p": 18, "c": 24, "f": 24},
-     "ing": ["1 vaschetta di melanzane alla parmigiana (300 g: melanzane, pomodoro, mozzarella, parmigiano)"], "prep": "Forno a 180 °C per 15 minuti o microonde 5 minuti."},
-    {"id": "spinaci", "title": "Spinaci surgelati al burro", "cat": "Contorni", "kind": "surgelato", "t": 10, "prot": "verdure", "diets": ["Vegetariano", "Senza glutine"],
-     "b": [["spinaci surgelati", 200], ["burro", 10]], "n": {"k": 125, "p": 6, "c": 2, "f": 9},
-     "ing": ["200 g spinaci surgelati (cubetti o foglie)", "10 g burro", "sale, noce moscata"], "prep": "In padella con il burro e il coperchio 8–10 minuti, finché sono scongelati e asciutti."},
-    {"id": "fagiolini", "title": "Fagiolini surgelati all'olio", "cat": "Contorni", "kind": "surgelato", "t": 15, "prot": "verdure", "diets": ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio"],
-     "b": [["fagiolini surgelati", 200], ["olio extravergine", 8]], "n": {"k": 132, "p": 4, "c": 8, "f": 8},
-     "ing": ["200 g fagiolini surgelati", "1 cucchiaio di olio extravergine", "sale, limone o aglio a piacere"], "prep": "8–10 minuti in acqua bollente salata, scola e condisci con olio e limone."},
-    {"id": "piselli", "title": "Piselli surgelati con cipolla", "cat": "Contorni", "kind": "surgelato", "t": 15, "prot": "verdure", "diets": ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio"],
-     "b": [["piselli", 150], ["cipolla", 20], ["olio extravergine", 8]], "n": {"k": 185, "p": 8, "c": 17, "f": 8},
-     "ing": ["150 g piselli surgelati", "20 g cipolla", "1 cucchiaio di olio extravergine", "sale"], "prep": "Soffriggi la cipolla nell'olio, unisci i piselli con mezzo bicchiere d'acqua e cuoci 10 minuti col coperchio."},
-    {"id": "verdure-grigliate", "title": "Verdure grigliate surgelate", "cat": "Contorni", "kind": "surgelato", "t": 10, "prot": "verdure", "diets": ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio"],
-     "b": [["verdure grigliate surgelate", 150]], "n": {"k": 90, "p": 3, "c": 8, "f": 5},
-     "ing": ["150 g misto di verdure grigliate surgelate (zucchine, melanzane, peperoni)"], "prep": "In padella 6–8 minuti senza aggiungere grassi, o in forno a 200 °C per 10 minuti."},
-    {"id": "patate-forno", "title": "Patate al forno surgelate", "cat": "Contorni", "kind": "surgelato", "t": 25, "prot": "verdure", "diets": ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio"],
-     "b": [["patate al forno surgelate", 200]], "n": {"k": 300, "p": 5, "c": 50, "f": 9},
-     "ing": ["200 g patate a spicchi surgelate (prefritte)", "rosmarino, sale"], "prep": "Forno a 220 °C per 20–25 minuti su carta forno, girando a metà."},
-    {"id": "pure", "title": "Purè di patate pronto", "cat": "Contorni", "kind": "fresco confezionato", "t": 5, "prot": "verdure", "diets": ["Vegetariano", "Senza glutine"],
-     "b": [["purè di patate pronto", 200]], "n": {"k": 200, "p": 4, "c": 28, "f": 8},
-     "ing": ["200 g purè di patate pronto in vaschetta (patate, latte, burro)"], "prep": "Scalda 3 minuti nel microonde o 5 in pentola mescolando."},
-    {"id": "polenta", "title": "Polenta pronta in padella", "cat": "Contorni", "kind": "confezionato", "t": 10, "prot": "verdure", "diets": ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio"],
-     "b": [["polenta pronta", 250], ["olio extravergine", 5]], "n": {"k": 245, "p": 5, "c": 42, "f": 5},
-     "ing": ["250 g polenta pronta in panetto (farina di mais)", "olio extravergine o burro per la padella"], "prep": "Taglia a fette da 1 cm e grigliale in padella 4–5 minuti per lato finché sono dorate."},
-    {"id": "insalata-busta", "title": "Insalata in busta pronta", "cat": "Contorni", "kind": "fresco confezionato", "t": 5, "prot": "verdure", "diets": ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio"],
-     "b": [["insalata in busta", 80], ["olio extravergine", 8]], "n": {"k": 88, "p": 2, "c": 2, "f": 8},
-     "ing": ["80 g insalata mista in busta, già lavata", "1 cucchiaio di olio extravergine", "aceto o limone, sale"], "prep": "Nessuna cottura: condisci solo al momento di servire."},
-    {"id": "carciofi", "title": "Carciofi surgelati trifolati", "cat": "Contorni", "kind": "surgelato", "t": 15, "prot": "verdure", "diets": ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio"],
-     "b": [["carciofi surgelati", 150], ["olio extravergine", 8], ["aglio", 3]], "n": {"k": 147, "p": 4, "c": 8, "f": 9},
-     "ing": ["150 g carciofi a spicchi surgelati", "1 cucchiaio di olio extravergine", "aglio, prezzemolo, sale"], "prep": "In padella con olio e aglio, coperchio, 12–15 minuti con poca acqua; prezzemolo alla fine."},
-    {"id": "funghi", "title": "Funghi trifolati surgelati", "cat": "Contorni", "kind": "surgelato", "t": 10, "prot": "verdure", "diets": ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio"],
-     "b": [["funghi trifolati surgelati", 150], ["olio extravergine", 8]], "n": {"k": 117, "p": 4, "c": 4, "f": 9},
-     "ing": ["150 g funghi misti surgelati", "1 cucchiaio di olio extravergine", "aglio, prezzemolo, sale"], "prep": "In padella a fuoco vivo con olio e aglio 8–10 minuti senza coperchio, finché l'acqua è evaporata."},
-    {"id": "ceci-scatola", "title": "Ceci in scatola all'olio e rosmarino", "cat": "Secondi", "kind": "in scatola", "t": 5, "prot": "legumi", "diets": ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio"],
-     "b": [["legumi", 200], ["olio extravergine", 10]], "n": {"k": 310, "p": 14, "c": 34, "f": 11},
-     "ing": ["200 g ceci in scatola, sgocciolati", "1 cucchiaio di olio extravergine", "rosmarino, limone, sale e pepe"], "prep": "Nessuna cottura: sciacqua i ceci, condisci con olio, rosmarino, limone e pepe. Buoni anche tiepidi, 3 minuti in padella."},
-    {"id": "fagioli-umido", "title": "Fagioli in scatola all'uccelletto veloci", "cat": "Secondi", "kind": "in scatola", "t": 10, "prot": "legumi", "diets": ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio"],
-     "b": [["legumi", 200], ["passata di pomodoro", 80], ["olio extravergine", 8], ["aglio", 3]], "n": {"k": 315, "p": 15, "c": 38, "f": 9},
-     "ing": ["200 g fagioli cannellini in scatola, sgocciolati", "80 g passata di pomodoro", "1 cucchiaio di olio extravergine", "aglio, salvia, sale"], "prep": "Scalda olio, aglio e salvia, unisci passata e fagioli e cuoci 8 minuti a fuoco basso."}
-  ]
+  {
+   "id": "pizza-verdure",
+   "title": "Pizza con verdure surgelata",
+   "cat": "Piatti unici",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "formaggi",
+   "diets": [
+    "Vegetariano"
+   ],
+   "b": [
+    [
+     "pizza con verdure surgelata",
+     350
+    ]
+   ],
+   "n": {
+    "k": 735,
+    "p": 28,
+    "c": 98,
+    "f": 25
+   },
+   "ing": [
+    "1 pizza con verdure grigliate surgelata (350 g: farina di grano, pomodoro, mozzarella, zucchine, peperoni, melanzane)"
+   ],
+   "prep": "Forno già caldo a 220 °C per 12–15 minuti, senza scongelare."
+  },
+  {
+   "id": "lasagne-bolognese",
+   "title": "Lasagne alla bolognese pronte",
+   "cat": "Primi",
+   "kind": "fresco confezionato",
+   "t": 25,
+   "prot": "rossa",
+   "diets": [],
+   "b": [
+    [
+     "lasagne alla bolognese pronte",
+     320
+    ]
+   ],
+   "n": {
+    "k": 510,
+    "p": 26,
+    "c": 42,
+    "f": 26
+   },
+   "ing": [
+    "1 vaschetta di lasagne alla bolognese (320 g: pasta all'uovo con farina di grano, ragù di carne, besciamella con latte, parmigiano)"
+   ],
+   "prep": "Forno a 180 °C per 20–25 minuti nella vaschetta (o microonde 6–8 minuti), finché la superficie è gratinata."
+  },
+  {
+   "id": "lasagne-vegetariane",
+   "title": "Lasagne alle verdure pronte",
+   "cat": "Primi",
+   "kind": "fresco confezionato",
+   "t": 25,
+   "prot": "verdure",
+   "diets": [
+    "Vegetariano"
+   ],
+   "b": [
+    [
+     "lasagne vegetariane pronte",
+     320
+    ]
+   ],
+   "n": {
+    "k": 450,
+    "p": 19,
+    "c": 45,
+    "f": 19
+   },
+   "ing": [
+    "1 vaschetta di lasagne alle verdure (320 g: pasta all'uovo con farina di grano, zucchine, spinaci, besciamella con latte, formaggio)"
+   ],
+   "prep": "Forno a 180 °C per 20–25 minuti nella vaschetta (o microonde 6–8 minuti)."
+  },
+  {
+   "id": "cannelloni",
+   "title": "Cannelloni ricotta e spinaci pronti",
+   "cat": "Primi",
+   "kind": "fresco confezionato",
+   "t": 25,
+   "prot": "formaggi",
+   "diets": [
+    "Vegetariano"
+   ],
+   "b": [
+    [
+     "cannelloni ricotta e spinaci pronti",
+     300
+    ]
+   ],
+   "n": {
+    "k": 495,
+    "p": 24,
+    "c": 42,
+    "f": 24
+   },
+   "ing": [
+    "1 vaschetta di cannelloni ricotta e spinaci (300 g: pasta all'uovo con farina di grano, ricotta, spinaci, besciamella con latte)"
+   ],
+   "prep": "Forno a 180 °C per 20–25 minuti, finché la besciamella è dorata."
+  },
+  {
+   "id": "gnocchi-sorrentina",
+   "title": "Gnocchi alla sorrentina surgelati",
+   "cat": "Primi",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "formaggi",
+   "diets": [
+    "Vegetariano"
+   ],
+   "b": [
+    [
+     "gnocchi alla sorrentina surgelati",
+     300
+    ]
+   ],
+   "n": {
+    "k": 450,
+    "p": 18,
+    "c": 66,
+    "f": 12
+   },
+   "ing": [
+    "1 porzione di gnocchi alla sorrentina surgelati (300 g: gnocchi di patate con farina di grano, pomodoro, mozzarella, basilico)"
+   ],
+   "prep": "In padella con il coperchio 10–12 minuti a fuoco medio, mescolando, oppure in forno a 200 °C per 15 minuti."
+  },
+  {
+   "id": "minestrone",
+   "title": "Minestrone surgelato",
+   "cat": "Primi",
+   "kind": "surgelato",
+   "t": 20,
+   "prot": "verdure",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "minestrone surgelato",
+     300
+    ],
+    [
+     "olio extravergine",
+     10
+    ]
+   ],
+   "n": {
+    "k": 195,
+    "p": 6,
+    "c": 15,
+    "f": 11
+   },
+   "ing": [
+    "300 g misto di verdure per minestrone surgelato",
+    "1 cucchiaio di olio extravergine",
+    "sale q.b."
+   ],
+   "prep": "In pentola con poca acqua salata, coperchio, 15–20 minuti dal bollore; condisci con l'olio a crudo. A piacere 40 g di pasta o riso per persona."
+  },
+  {
+   "id": "zuppa-legumi",
+   "title": "Zuppa di legumi e cereali pronta",
+   "cat": "Primi",
+   "kind": "fresco confezionato",
+   "t": 10,
+   "prot": "legumi",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "zuppa di legumi e cereali pronta",
+     300
+    ],
+    [
+     "olio extravergine",
+     8
+    ]
+   ],
+   "n": {
+    "k": 330,
+    "p": 15,
+    "c": 36,
+    "f": 12
+   },
+   "ing": [
+    "1 vaschetta di zuppa di legumi e cereali (300 g: fagioli, lenticchie, ceci, farro, orzo, verdure)",
+    "olio extravergine q.b."
+   ],
+   "prep": "Scalda in pentola 5–8 minuti o nel microonde 3 minuti; completa con un filo d'olio."
+  },
+  {
+   "id": "gnocchi-pomodoro",
+   "title": "Gnocchi confezionati al pomodoro",
+   "cat": "Primi",
+   "kind": "fresco confezionato",
+   "t": 15,
+   "prot": "verdure",
+   "diets": [
+    "Vegetariano"
+   ],
+   "b": [
+    [
+     "gnocchi di patate confezionati",
+     200
+    ],
+    [
+     "passata di pomodoro",
+     100
+    ],
+    [
+     "parmigiano",
+     10
+    ],
+    [
+     "olio extravergine",
+     8
+    ]
+   ],
+   "n": {
+    "k": 410,
+    "p": 11,
+    "c": 68,
+    "f": 11
+   },
+   "ing": [
+    "200 g gnocchi di patate confezionati (con farina di grano)",
+    "100 g passata di pomodoro",
+    "10 g parmigiano grattugiato",
+    "olio extravergine, sale, basilico"
+   ],
+   "prep": "Scalda la passata con olio e sale 5 minuti. Tuffa gli gnocchi in acqua bollente salata: appena vengono a galla scolali, condiscili col sugo e il parmigiano."
+  },
+  {
+   "id": "pasta-pesto",
+   "title": "Pasta con pesto in vasetto",
+   "cat": "Primi",
+   "kind": "in vasetto",
+   "t": 15,
+   "prot": "verdure",
+   "diets": [
+    "Vegetariano"
+   ],
+   "b": [
+    [
+     "pasta",
+     90
+    ],
+    [
+     "salse e condimenti",
+     30
+    ]
+   ],
+   "n": {
+    "k": 395,
+    "p": 12,
+    "c": 66,
+    "f": 9
+   },
+   "ing": [
+    "90 g pasta (trofie o linguine)",
+    "30 g pesto alla genovese in vasetto (basilico, formaggio, pinoli)",
+    "sale q.b."
+   ],
+   "prep": "Cuoci la pasta in acqua salata; scolala tenendo un po' d'acqua e mantecala con il pesto fuori dal fuoco."
+  },
+  {
+   "id": "pasta-sugo",
+   "title": "Pasta con sugo pronto",
+   "cat": "Primi",
+   "kind": "in barattolo",
+   "t": 15,
+   "prot": "verdure",
+   "diets": [
+    "Vegetariano"
+   ],
+   "b": [
+    [
+     "pasta",
+     90
+    ],
+    [
+     "salse e condimenti",
+     120
+    ],
+    [
+     "parmigiano",
+     10
+    ]
+   ],
+   "n": {
+    "k": 390,
+    "p": 15,
+    "c": 70,
+    "f": 7
+   },
+   "ing": [
+    "90 g pasta",
+    "120 g sugo pronto in barattolo (pomodoro e basilico o alle verdure)",
+    "10 g parmigiano grattugiato"
+   ],
+   "prep": "Scalda il sugo in padella mentre la pasta cuoce; scola, condisci e completa con il parmigiano."
+  },
+  {
+   "id": "ravioli-burro-salvia",
+   "title": "Ravioli freschi burro e salvia",
+   "cat": "Primi",
+   "kind": "fresco confezionato",
+   "t": 10,
+   "prot": "formaggi",
+   "diets": [
+    "Vegetariano"
+   ],
+   "b": [
+    [
+     "pasta fresca ripiena",
+     180
+    ],
+    [
+     "burro",
+     15
+    ],
+    [
+     "parmigiano",
+     10
+    ]
+   ],
+   "n": {
+    "k": 670,
+    "p": 24,
+    "c": 81,
+    "f": 29
+   },
+   "ing": [
+    "180 g ravioli ricotta e spinaci freschi confezionati (pasta all'uovo con farina di grano)",
+    "15 g burro",
+    "10 g parmigiano grattugiato",
+    "qualche foglia di salvia"
+   ],
+   "prep": "Cuoci i ravioli 3–4 minuti in acqua salata; sciogli il burro con la salvia in padella, scola i ravioli, salta un minuto e completa con il parmigiano."
+  },
+  {
+   "id": "tortellini-brodo",
+   "title": "Tortellini freschi in brodo",
+   "cat": "Primi",
+   "kind": "fresco confezionato",
+   "t": 10,
+   "prot": "rossa",
+   "diets": [],
+   "b": [
+    [
+     "pasta fresca ripiena",
+     150
+    ],
+    [
+     "brodo",
+     400
+    ],
+    [
+     "parmigiano",
+     10
+    ]
+   ],
+   "n": {
+    "k": 495,
+    "p": 22,
+    "c": 68,
+    "f": 15
+   },
+   "ing": [
+    "150 g tortellini freschi confezionati (pasta all'uovo con farina di grano, ripieno di carne e prosciutto)",
+    "400 ml brodo (anche di dado)",
+    "10 g parmigiano grattugiato"
+   ],
+   "prep": "Porta il brodo a bollore, cuoci i tortellini 3–4 minuti e servi con il parmigiano."
+  },
+  {
+   "id": "risotto-funghi",
+   "title": "Risotto ai funghi surgelato",
+   "cat": "Primi",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "verdure",
+   "diets": [
+    "Vegetariano",
+    "Senza glutine"
+   ],
+   "b": [
+    [
+     "risotto ai funghi surgelato",
+     300
+    ]
+   ],
+   "n": {
+    "k": 390,
+    "p": 9,
+    "c": 66,
+    "f": 9
+   },
+   "ing": [
+    "1 porzione di risotto ai funghi surgelato (300 g: riso, funghi, burro, formaggio)"
+   ],
+   "prep": "In padella con mezzo bicchiere d'acqua, coperchio, 10–12 minuti mescolando ogni tanto."
+  },
+  {
+   "id": "bastoncini",
+   "title": "Bastoncini di pesce surgelati",
+   "cat": "Secondi",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "pesce",
+   "diets": [],
+   "b": [
+    [
+     "bastoncini di pesce surgelati",
+     125
+    ]
+   ],
+   "n": {
+    "k": 262,
+    "p": 15,
+    "c": 22,
+    "f": 11
+   },
+   "ing": [
+    "5 bastoncini di merluzzo impanati surgelati (125 g: pesce, pangrattato con farina di grano)"
+   ],
+   "prep": "Forno a 220 °C per 12–15 minuti girandoli a metà, oppure in padella con un filo d'olio 8–10 minuti."
+  },
+  {
+   "id": "merluzzo",
+   "title": "Filetti di merluzzo surgelati al limone",
+   "cat": "Secondi",
+   "kind": "surgelato",
+   "t": 20,
+   "prot": "pesce",
+   "diets": [
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "filetti di merluzzo surgelati",
+     150
+    ],
+    [
+     "olio extravergine",
+     8
+    ],
+    [
+     "limone",
+     20
+    ]
+   ],
+   "n": {
+    "k": 195,
+    "p": 27,
+    "c": 1,
+    "f": 9
+   },
+   "ing": [
+    "150 g filetti di merluzzo surgelati al naturale",
+    "1 cucchiaio di olio extravergine",
+    "succo di limone, prezzemolo, sale e pepe"
+   ],
+   "prep": "In padella antiaderente con olio, coperchio, 8–10 minuti per lato direttamente da surgelati; completa con limone e prezzemolo."
+  },
+  {
+   "id": "calamari-impanati",
+   "title": "Anelli di calamari impanati surgelati",
+   "cat": "Secondi",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "pesce",
+   "diets": [],
+   "b": [
+    [
+     "anelli di calamari impanati surgelati",
+     150
+    ]
+   ],
+   "n": {
+    "k": 300,
+    "p": 15,
+    "c": 33,
+    "f": 12
+   },
+   "ing": [
+    "150 g anelli di calamari impanati surgelati (calamari, pangrattato con farina di grano)"
+   ],
+   "prep": "Forno a 220 °C per 12–14 minuti o friggitrice ad aria 10 minuti; un filo di limone."
+  },
+  {
+   "id": "cotoletta-pollo",
+   "title": "Cotoletta di pollo impanata surgelata",
+   "cat": "Secondi",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "bianca",
+   "diets": [],
+   "b": [
+    [
+     "cotoletta di pollo impanata surgelata",
+     150
+    ]
+   ],
+   "n": {
+    "k": 345,
+    "p": 21,
+    "c": 27,
+    "f": 16
+   },
+   "ing": [
+    "1 cotoletta di pollo impanata surgelata (150 g: pollo, pangrattato con farina di grano, uova)"
+   ],
+   "prep": "In padella con poco olio 6–7 minuti per lato, o in forno a 200 °C per 15 minuti."
+  },
+  {
+   "id": "nuggets",
+   "title": "Bocconcini di pollo impanati surgelati",
+   "cat": "Secondi",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "bianca",
+   "diets": [],
+   "b": [
+    [
+     "nuggets di pollo surgelati",
+     120
+    ]
+   ],
+   "n": {
+    "k": 312,
+    "p": 17,
+    "c": 22,
+    "f": 17
+   },
+   "ing": [
+    "120 g bocconcini di pollo impanati surgelati (pollo, pangrattato con farina di grano)"
+   ],
+   "prep": "Forno a 220 °C per 12 minuti o friggitrice ad aria 10 minuti."
+  },
+  {
+   "id": "hamburger",
+   "title": "Hamburger di manzo confezionato",
+   "cat": "Secondi",
+   "kind": "fresco confezionato",
+   "t": 10,
+   "prot": "rossa",
+   "diets": [
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "hamburger di manzo confezionato",
+     120
+    ]
+   ],
+   "n": {
+    "k": 300,
+    "p": 22,
+    "c": 0,
+    "f": 24
+   },
+   "ing": [
+    "1 hamburger di manzo confezionato (120 g)",
+    "sale e pepe"
+   ],
+   "prep": "Padella ben calda senza olio, 3–4 minuti per lato; sala solo alla fine."
+  },
+  {
+   "id": "polpette",
+   "title": "Polpette pronte",
+   "cat": "Secondi",
+   "kind": "gastronomia",
+   "t": 15,
+   "prot": "rossa",
+   "diets": [],
+   "b": [
+    [
+     "polpette pronte",
+     150
+    ]
+   ],
+   "n": {
+    "k": 360,
+    "p": 21,
+    "c": 18,
+    "f": 22
+   },
+   "ing": [
+    "150 g polpette di carne pronte (carne, pane, uova, formaggio)"
+   ],
+   "prep": "Scalda in padella con un filo d'olio 8–10 minuti, oppure 10 minuti nel sugo pronto."
+  },
+  {
+   "id": "wurstel",
+   "title": "Würstel in padella",
+   "cat": "Secondi",
+   "kind": "confezionato",
+   "t": 5,
+   "prot": "rossa",
+   "diets": [],
+   "b": [
+    [
+     "würstel",
+     100
+    ]
+   ],
+   "n": {
+    "k": 290,
+    "p": 12,
+    "c": 2,
+    "f": 26
+   },
+   "ing": [
+    "2 würstel (100 g)"
+   ],
+   "prep": "Incidi e cuoci in padella o griglia 5 minuti; buoni con senape o con un contorno di verdure."
+  },
+  {
+   "id": "burger-vegetale",
+   "title": "Burger vegetale di legumi",
+   "cat": "Secondi",
+   "kind": "confezionato",
+   "t": 10,
+   "prot": "legumi",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "burger vegetale di legumi",
+     100
+    ]
+   ],
+   "n": {
+    "k": 190,
+    "p": 9,
+    "c": 18,
+    "f": 8
+   },
+   "ing": [
+    "1 burger di legumi e verdure confezionato (100 g: ceci o lenticchie, verdure, farina di grano)"
+   ],
+   "prep": "Padella antiaderente con un filo d'olio, 4 minuti per lato."
+  },
+  {
+   "id": "falafel",
+   "title": "Falafel surgelati",
+   "cat": "Secondi",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "legumi",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "falafel surgelati",
+     120
+    ]
+   ],
+   "n": {
+    "k": 276,
+    "p": 10,
+    "c": 30,
+    "f": 12
+   },
+   "ing": [
+    "120 g falafel di ceci surgelati (ceci, cipolla, spezie, farina di grano)"
+   ],
+   "prep": "Forno a 200 °C per 12–15 minuti o friggitrice ad aria; servili con yogurt o insalata."
+  },
+  {
+   "id": "pollo-arrosto",
+   "title": "Pollo arrosto di rosticceria",
+   "cat": "Secondi",
+   "kind": "gastronomia",
+   "t": 5,
+   "prot": "bianca",
+   "diets": [
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "pollo arrosto di rosticceria",
+     200
+    ]
+   ],
+   "n": {
+    "k": 440,
+    "p": 54,
+    "c": 0,
+    "f": 24
+   },
+   "ing": [
+    "200 g pollo arrosto già cotto (gastronomia del supermercato)"
+   ],
+   "prep": "Servi tiepido o scaldalo 5 minuti in forno; accompagna con un contorno di verdure."
+  },
+  {
+   "id": "prosciutto-mozzarella",
+   "title": "Prosciutto crudo e mozzarella",
+   "cat": "Secondi",
+   "kind": "banco frigo",
+   "t": 5,
+   "prot": "rossa",
+   "diets": [
+    "Senza glutine"
+   ],
+   "b": [
+    [
+     "prosciutto crudo",
+     60
+    ],
+    [
+     "mozzarella",
+     125
+    ]
+   ],
+   "n": {
+    "k": 470,
+    "p": 40,
+    "c": 1,
+    "f": 35
+   },
+   "ing": [
+    "60 g prosciutto crudo affettato",
+    "1 mozzarella (125 g)",
+    "pepe o origano a piacere"
+   ],
+   "prep": "Nessuna cottura: componi il piatto e servi con pane o insalata."
+  },
+  {
+   "id": "bresaola-grana",
+   "title": "Bresaola, rucola e grana",
+   "cat": "Secondi",
+   "kind": "banco frigo",
+   "t": 5,
+   "prot": "rossa",
+   "diets": [
+    "Senza glutine"
+   ],
+   "b": [
+    [
+     "salumi",
+     70
+    ],
+    [
+     "parmigiano",
+     20
+    ],
+    [
+     "insalata",
+     50
+    ],
+    [
+     "olio extravergine",
+     5
+    ],
+    [
+     "limone",
+     10
+    ]
+   ],
+   "n": {
+    "k": 380,
+    "p": 32,
+    "c": 2,
+    "f": 27
+   },
+   "ing": [
+    "70 g bresaola affettata",
+    "20 g grana a scaglie",
+    "50 g rucola",
+    "olio extravergine e limone"
+   ],
+   "prep": "Nessuna cottura: disponi la bresaola, aggiungi rucola e scaglie di grana, condisci con olio e limone."
+  },
+  {
+   "id": "mozzarella-carrozza",
+   "title": "Mozzarella in carrozza surgelata",
+   "cat": "Secondi",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "formaggi",
+   "diets": [
+    "Vegetariano"
+   ],
+   "b": [
+    [
+     "mozzarella in carrozza surgelata",
+     150
+    ]
+   ],
+   "n": {
+    "k": 405,
+    "p": 16,
+    "c": 33,
+    "f": 22
+   },
+   "ing": [
+    "150 g mozzarella in carrozza surgelata (pane con farina di grano, mozzarella, uova)"
+   ],
+   "prep": "Forno a 220 °C per 12–15 minuti o friggitrice ad aria 10 minuti."
+  },
+  {
+   "id": "parmigiana-pronta",
+   "title": "Melanzane alla parmigiana pronte",
+   "cat": "Secondi",
+   "kind": "fresco confezionato",
+   "t": 15,
+   "prot": "formaggi",
+   "diets": [
+    "Vegetariano",
+    "Senza glutine"
+   ],
+   "b": [
+    [
+     "melanzane alla parmigiana pronte",
+     300
+    ]
+   ],
+   "n": {
+    "k": 390,
+    "p": 18,
+    "c": 24,
+    "f": 24
+   },
+   "ing": [
+    "1 vaschetta di melanzane alla parmigiana (300 g: melanzane, pomodoro, mozzarella, parmigiano)"
+   ],
+   "prep": "Forno a 180 °C per 15 minuti o microonde 5 minuti."
+  },
+  {
+   "id": "spinaci",
+   "title": "Spinaci surgelati al burro",
+   "cat": "Contorni",
+   "kind": "surgelato",
+   "t": 10,
+   "prot": "verdure",
+   "diets": [
+    "Vegetariano",
+    "Senza glutine"
+   ],
+   "b": [
+    [
+     "spinaci surgelati",
+     200
+    ],
+    [
+     "burro",
+     10
+    ]
+   ],
+   "n": {
+    "k": 125,
+    "p": 6,
+    "c": 2,
+    "f": 9
+   },
+   "ing": [
+    "200 g spinaci surgelati (cubetti o foglie)",
+    "10 g burro",
+    "sale, noce moscata"
+   ],
+   "prep": "In padella con il burro e il coperchio 8–10 minuti, finché sono scongelati e asciutti."
+  },
+  {
+   "id": "fagiolini",
+   "title": "Fagiolini surgelati all'olio",
+   "cat": "Contorni",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "verdure",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "fagiolini surgelati",
+     200
+    ],
+    [
+     "olio extravergine",
+     8
+    ]
+   ],
+   "n": {
+    "k": 132,
+    "p": 4,
+    "c": 8,
+    "f": 8
+   },
+   "ing": [
+    "200 g fagiolini surgelati",
+    "1 cucchiaio di olio extravergine",
+    "sale, limone o aglio a piacere"
+   ],
+   "prep": "8–10 minuti in acqua bollente salata, scola e condisci con olio e limone."
+  },
+  {
+   "id": "piselli",
+   "title": "Piselli surgelati con cipolla",
+   "cat": "Contorni",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "verdure",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "piselli",
+     150
+    ],
+    [
+     "cipolla",
+     20
+    ],
+    [
+     "olio extravergine",
+     8
+    ]
+   ],
+   "n": {
+    "k": 185,
+    "p": 8,
+    "c": 17,
+    "f": 8
+   },
+   "ing": [
+    "150 g piselli surgelati",
+    "20 g cipolla",
+    "1 cucchiaio di olio extravergine",
+    "sale"
+   ],
+   "prep": "Soffriggi la cipolla nell'olio, unisci i piselli con mezzo bicchiere d'acqua e cuoci 10 minuti col coperchio."
+  },
+  {
+   "id": "verdure-grigliate",
+   "title": "Verdure grigliate surgelate",
+   "cat": "Contorni",
+   "kind": "surgelato",
+   "t": 10,
+   "prot": "verdure",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "verdure grigliate surgelate",
+     150
+    ]
+   ],
+   "n": {
+    "k": 90,
+    "p": 3,
+    "c": 8,
+    "f": 5
+   },
+   "ing": [
+    "150 g misto di verdure grigliate surgelate (zucchine, melanzane, peperoni)"
+   ],
+   "prep": "In padella 6–8 minuti senza aggiungere grassi, o in forno a 200 °C per 10 minuti."
+  },
+  {
+   "id": "patate-forno",
+   "title": "Patate al forno surgelate",
+   "cat": "Contorni",
+   "kind": "surgelato",
+   "t": 25,
+   "prot": "verdure",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "patate al forno surgelate",
+     200
+    ]
+   ],
+   "n": {
+    "k": 300,
+    "p": 5,
+    "c": 50,
+    "f": 9
+   },
+   "ing": [
+    "200 g patate a spicchi surgelate (prefritte)",
+    "rosmarino, sale"
+   ],
+   "prep": "Forno a 220 °C per 20–25 minuti su carta forno, girando a metà."
+  },
+  {
+   "id": "pure",
+   "title": "Purè di patate pronto",
+   "cat": "Contorni",
+   "kind": "fresco confezionato",
+   "t": 5,
+   "prot": "verdure",
+   "diets": [
+    "Vegetariano",
+    "Senza glutine"
+   ],
+   "b": [
+    [
+     "purè di patate pronto",
+     200
+    ]
+   ],
+   "n": {
+    "k": 200,
+    "p": 4,
+    "c": 28,
+    "f": 8
+   },
+   "ing": [
+    "200 g purè di patate pronto in vaschetta (patate, latte, burro)"
+   ],
+   "prep": "Scalda 3 minuti nel microonde o 5 in pentola mescolando."
+  },
+  {
+   "id": "polenta",
+   "title": "Polenta pronta in padella",
+   "cat": "Contorni",
+   "kind": "confezionato",
+   "t": 10,
+   "prot": "verdure",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "polenta pronta",
+     250
+    ],
+    [
+     "olio extravergine",
+     5
+    ]
+   ],
+   "n": {
+    "k": 245,
+    "p": 5,
+    "c": 42,
+    "f": 5
+   },
+   "ing": [
+    "250 g polenta pronta in panetto (farina di mais)",
+    "olio extravergine o burro per la padella"
+   ],
+   "prep": "Taglia a fette da 1 cm e grigliale in padella 4–5 minuti per lato finché sono dorate."
+  },
+  {
+   "id": "insalata-busta",
+   "title": "Insalata in busta pronta",
+   "cat": "Contorni",
+   "kind": "fresco confezionato",
+   "t": 5,
+   "prot": "verdure",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "insalata in busta",
+     80
+    ],
+    [
+     "olio extravergine",
+     8
+    ]
+   ],
+   "n": {
+    "k": 88,
+    "p": 2,
+    "c": 2,
+    "f": 8
+   },
+   "ing": [
+    "80 g insalata mista in busta, già lavata",
+    "1 cucchiaio di olio extravergine",
+    "aceto o limone, sale"
+   ],
+   "prep": "Nessuna cottura: condisci solo al momento di servire."
+  },
+  {
+   "id": "carciofi",
+   "title": "Carciofi surgelati trifolati",
+   "cat": "Contorni",
+   "kind": "surgelato",
+   "t": 15,
+   "prot": "verdure",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "carciofi surgelati",
+     150
+    ],
+    [
+     "olio extravergine",
+     8
+    ],
+    [
+     "aglio",
+     3
+    ]
+   ],
+   "n": {
+    "k": 147,
+    "p": 4,
+    "c": 8,
+    "f": 9
+   },
+   "ing": [
+    "150 g carciofi a spicchi surgelati",
+    "1 cucchiaio di olio extravergine",
+    "aglio, prezzemolo, sale"
+   ],
+   "prep": "In padella con olio e aglio, coperchio, 12–15 minuti con poca acqua; prezzemolo alla fine."
+  },
+  {
+   "id": "funghi",
+   "title": "Funghi trifolati surgelati",
+   "cat": "Contorni",
+   "kind": "surgelato",
+   "t": 10,
+   "prot": "verdure",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "funghi trifolati surgelati",
+     150
+    ],
+    [
+     "olio extravergine",
+     8
+    ]
+   ],
+   "n": {
+    "k": 117,
+    "p": 4,
+    "c": 4,
+    "f": 9
+   },
+   "ing": [
+    "150 g funghi misti surgelati",
+    "1 cucchiaio di olio extravergine",
+    "aglio, prezzemolo, sale"
+   ],
+   "prep": "In padella a fuoco vivo con olio e aglio 8–10 minuti senza coperchio, finché l'acqua è evaporata."
+  },
+  {
+   "id": "ceci-scatola",
+   "title": "Ceci in scatola all'olio e rosmarino",
+   "cat": "Secondi",
+   "kind": "in scatola",
+   "t": 5,
+   "prot": "legumi",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "legumi",
+     200
+    ],
+    [
+     "olio extravergine",
+     10
+    ]
+   ],
+   "n": {
+    "k": 310,
+    "p": 14,
+    "c": 34,
+    "f": 11
+   },
+   "ing": [
+    "200 g ceci in scatola, sgocciolati",
+    "1 cucchiaio di olio extravergine",
+    "rosmarino, limone, sale e pepe"
+   ],
+   "prep": "Nessuna cottura: sciacqua i ceci, condisci con olio, rosmarino, limone e pepe. Buoni anche tiepidi, 3 minuti in padella."
+  },
+  {
+   "id": "fagioli-umido",
+   "title": "Fagioli in scatola all'uccelletto veloci",
+   "cat": "Secondi",
+   "kind": "in scatola",
+   "t": 10,
+   "prot": "legumi",
+   "diets": [
+    "Vegano",
+    "Vegetariano",
+    "Senza glutine",
+    "Senza lattosio"
+   ],
+   "b": [
+    [
+     "legumi",
+     200
+    ],
+    [
+     "passata di pomodoro",
+     80
+    ],
+    [
+     "olio extravergine",
+     8
+    ],
+    [
+     "aglio",
+     3
+    ]
+   ],
+   "n": {
+    "k": 315,
+    "p": 15,
+    "c": 38,
+    "f": 9
+   },
+   "ing": [
+    "200 g fagioli cannellini in scatola, sgocciolati",
+    "80 g passata di pomodoro",
+    "1 cucchiaio di olio extravergine",
+    "aglio, salvia, sale"
+   ],
+   "prep": "Scalda olio, aglio e salvia, unisci passata e fagioli e cuoci 8 minuti a fuoco basso."
+  }
+ ],
+ "conf": {
+  "pizza margherita surgelata": {
+   "u": 330,
+   "n": "pizza",
+   "pz": 1
+  },
+  "pizza con verdure surgelata": {
+   "u": 350,
+   "n": "pizza",
+   "pz": 1
+  },
+  "lasagne alla bolognese pronte": {
+   "u": 640,
+   "n": "vaschetta"
+  },
+  "lasagne vegetariane pronte": {
+   "u": 640,
+   "n": "vaschetta"
+  },
+  "cannelloni ricotta e spinaci pronti": {
+   "u": 600,
+   "n": "vaschetta"
+  },
+  "gnocchi alla sorrentina surgelati": {
+   "u": 600,
+   "n": "busta"
+  },
+  "minestrone surgelato": {
+   "u": 1000,
+   "n": "busta"
+  },
+  "zuppa di legumi e cereali pronta": {
+   "u": 620,
+   "n": "vaschetta"
+  },
+  "gnocchi di patate confezionati": {
+   "u": 500,
+   "n": "pacco"
+  },
+  "risotto ai funghi surgelato": {
+   "u": 600,
+   "n": "busta"
+  },
+  "bastoncini di pesce surgelati": {
+   "u": 300,
+   "n": "confezione"
+  },
+  "filetti di merluzzo surgelati": {
+   "u": 400,
+   "n": "confezione"
+  },
+  "anelli di calamari impanati surgelati": {
+   "u": 300,
+   "n": "confezione"
+  },
+  "cotoletta di pollo impanata surgelata": {
+   "u": 300,
+   "n": "confezione"
+  },
+  "nuggets di pollo surgelati": {
+   "u": 300,
+   "n": "confezione"
+  },
+  "hamburger di manzo confezionato": {
+   "u": 120,
+   "n": "hamburger",
+   "pz": 1
+  },
+  "polpette pronte": {
+   "u": 300,
+   "n": "vaschetta"
+  },
+  "würstel": {
+   "u": 250,
+   "n": "confezione"
+  },
+  "burger vegetale di legumi": {
+   "u": 100,
+   "n": "burger",
+   "pz": 1
+  },
+  "falafel surgelati": {
+   "u": 300,
+   "n": "busta"
+  },
+  "pollo arrosto di rosticceria": {
+   "u": 0,
+   "s": 100
+  },
+  "mozzarella in carrozza surgelata": {
+   "u": 300,
+   "n": "confezione"
+  },
+  "melanzane alla parmigiana pronte": {
+   "u": 600,
+   "n": "vaschetta"
+  },
+  "spinaci surgelati": {
+   "u": 450,
+   "n": "busta"
+  },
+  "fagiolini surgelati": {
+   "u": 450,
+   "n": "busta"
+  },
+  "verdure grigliate surgelate": {
+   "u": 450,
+   "n": "busta"
+  },
+  "patate al forno surgelate": {
+   "u": 750,
+   "n": "busta"
+  },
+  "purè di patate pronto": {
+   "u": 400,
+   "n": "vaschetta"
+  },
+  "polenta pronta": {
+   "u": 500,
+   "n": "panetto"
+  },
+  "insalata in busta": {
+   "u": 150,
+   "n": "busta"
+  },
+  "carciofi surgelati": {
+   "u": 450,
+   "n": "busta"
+  },
+  "funghi trifolati surgelati": {
+   "u": 450,
+   "n": "busta"
+  }
+ }
 }
