@@ -354,7 +354,7 @@ const ZONES=[
   [/canederl|strudel|speck/,'Italia','Trentino-Alto Adige'],
   [/frico|cjarsons/,'Italia','Friuli-Venezia Giulia'],
   [/olive all'ascolana|vincisgrassi/,'Italia','Marche'],
-  [/sushi|ramen|teriyaki|tempura|onigiri|\bmiso\b|gyoza|udon|katsu|okonomiyaki|mochi/,'Giappone',''],
+  [/sushi|sashimi|nigiri|ramen|teriyaki|tempura|onigiri|\bmiso\b|gyoza|udon|katsu|okonomiyaki|mochi|poke\b/,'Giappone',''],
   [/tacos|burrito|guacamole|enchilad|quesadill|nachos|fajitas/,'Messico',''],
   [/curry|tikka|masala|\bnaan\b|\bdahl?\b(?! (?:cuore|forno|sapore|gusto))|biryani|samosa|tandoori/,'India',''],
   [/paella|tortilla de patatas|gazpacho|churros|tapas|patatas bravas/,'Spagna',''],
@@ -383,7 +383,7 @@ const EXPLICIT={'Vegano':/\bvegan|\bvegana|\bvegano|plant.?based/,'Vegetariano':
 // Preparazioni di base (impasti, creme, salse, brodi): mai portate del menu, anche se il nome contiene "pasta"
 // Piatti italo-americani spacciati per italiani: nel ricettario vanno tra gli internazionali (USA), nel Budget fuori dalla cucina italiana
 const PSEUDO_RX=/alfredo|spaghetti (con|e) (le )?polpette|spaghetti and meatballs|pollo alla parmigiana|chicken parm|pasta (al|con) pollo|chicken (and )?pasta|caesar|garlic bread|pane all'aglio|hawai|pepperoni|baked ziti|pasta primavera|linguine primavera|zuppa toscana|italian dressing|penne alla vodka|shrimp scampi|carbonara (con|alla) panna|spaghetti alla bolognese|spaghetti bolognese/i;
-const BASE_RX=/^(pasta (frolla|sfoglia|bris[eé]e?|choux|matta|di mandorle|reale|di zucchero|madre|per pizza|di pane)|lievito madre|pasta madre|pan di spagna|crema (pasticcera|chantilly|inglese|al burro)|besciamella|maionese|brodo|fondo|sugo|salsa|ragù|pesto|glassa|meringa|caramello|ganache|impasto|marmellata|confettura|gelatina|sciroppo|liquore|rosolio)\b/i;
+const BASE_RX=/^(pasta (frolla|sfoglia|bris[eé]e?|choux|matta|di mandorle|reale|di zucchero|madre|per pizza|di pane|all'uovo|fresca|per )|sfoglia\b|lievito madre|pasta madre|pan di spagna|crema (pasticcera|chantilly|inglese|al burro)|besciamella|maionese|brodo|fondo|sugo|salsa|ragù|pesto|glassa|meringa|caramello|ganache|impasto|marmellata|confettura|gelatina|sciroppo|liquore|rosolio)\b/i;
 function classify(d){
   const all=[d.title,d.caption,d.ingredients?.join('\n'),d.keywords,d.recipeCategory].join('\n').toLowerCase();
   const ingText=(d.ingredients||[]).join('\n').toLowerCase();
@@ -652,7 +652,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=37; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=38; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -720,9 +720,23 @@ async function loadBook(){
         steps:[],tags:[],_tm:{t:r.time||timing({...r,steps:[]}).t,w:0,d:r.diff||2}});
     }
   }catch{book=[];toast('Ricettario non disponibile offline')}
-  for(const b of book){if(BASE_RX.test(b.title.trim()))b.cat='Altro'; // preparazioni di base, da qualunque fonte
+  for(const b of book){b.cat=fixCat(b); // preparazioni di base, basi da sole e verdure/legumi conditi, da qualunque fonte
     if(PSEUDO_RX.test(b.title)){b.pseudo=true;b.country='Stati Uniti';b.cc='US';b.region=''}} // italo-americani
   fillSelects();render();
+}
+// Tipo di piatto corretto dal nome: una base da sola (polenta, purè, cuscus, gnocchi senza condimento) non è un primo né un
+// piatto unico ma un contorno; verdure o legumi solo conditi (ceci all'olio, fagiolini, peperonata) sono contorni, non primi o secondi
+const PLAIN_RX=/^(polenta|pur[eè]a? di (patate|fave)|riso (bollito|in bianco|lesso)|pasta in bianco|patate (lesse|bollite|al forno|arrosto|fritte)|cuscus|couscous|gnocchi)\s*$/i;
+const VEG_RX=/^(ceci|fagioli|fave|lenticchie|piselli|cicerchi\w*|lupini|fagiolini|spinaci|bietol\w*|cicoria|cime di rapa|broccol\w*|cavolfior\w*|cavol\w*|verz\w*|zucchin\w*|melanzan\w*|peperon\w*|carciof\w*|fungh\w*|patat\w*|finocch\w*|carot\w*|asparag\w*|cipoll\w*|porr\w*|zucca|card\w*|puntarell\w*|rap\w*|friariell\w*|erbett\w*|catalogn\w*|scarol\w*|indivi\w*|radicchi\w*|sedan\w*|topinambur|peperonata|caponata|verdur\w*|ortagg\w*|pomodor\w*|cetriol\w*|barbabietol\w*|lattug\w*|rucola|agretti|taccole|cicorie)\b/i;
+const NOT_SIDE_RX=/pasta|spaghett|maccheron|penne|rigaton|lasagn|gnocch|riso|risott|zupp|minestr|crem\w*|vellutat|polpett|frittat|parmigian|ripien|torta|sformato|timballo|pizza|focacc|pollo|carne|salsicc|manzo|maiale|agnello|vitell|tonno|baccal|pesce|cozze|vongole|gamber|calamar|seppie|polpo|speck|pancetta|guanciale|salame|prosciutt|cotiche|trippa|uov[ao]|fave (bianche )?e cicori|tortino|flan|hummus|falafel|burger|crocchett|frittell|dolce/i;
+const PASTA_RX=/^(bucatini|spaghetti|penne|rigatoni|linguine|tagliatelle|fettuccine|maccheroni|orecchiette|trofie|troffiette|fusilli|paccheri|lasagne|ravioli|tortellini|cappelletti|agnolotti|pappardelle|tagliolini|vermicelli|ziti|mezze maniche|caserecce|strozzapreti|pizzoccheri|malloreddus|cavatelli|risotto|minestra|zuppa|vellutata|passato|pasta (e |al |alla |alle |ai |agli |con ))/i;
+function fixCat(r){
+  const t=(r.title||'').trim();
+  if(BASE_RX.test(t))return 'Altro';
+  if(PLAIN_RX.test(t))return 'Contorni';
+  if(PASTA_RX.test(t)&&!/zuppa di pesce|zuppa inglese|dolc/i.test(t)&&r.cat!=='Dolci')return 'Primi'; // pasta, risotti e minestre sono primi
+  if(VEG_RX.test(t)&&!NOT_SIDE_RX.test(t)&&['Primi','Secondi','Piatti unici'].includes(r.cat))return 'Contorni';
+  return r.cat;
 }
 function saveFromBook(i){
   const ex=items.find(x=>x.url===i.url);
@@ -1056,7 +1070,8 @@ function candidates(o){
   const out=[],seen=new Set();let noCost=0;
   for(const r of pool){
     const sweet=r.b?r.b.some(([k,g])=>k==='zucchero'&&g/baseS(r)>=15):/zucchero/i.test((r.ingredients||[]).join(' '));
-    const ro=role[r.cat]||(r.cat==='Lievitati'&&!sweet?'unico':null);if(!ro||!r.ingredients?.length||seen.has(r.title.toLowerCase()))continue;
+    // anche le tue ricette seguono le stesse regole; tra i lievitati solo pizze, calzoni e torte salate fanno da piatto unico (non pane e focacce)
+    const cat=r.book?r.cat:fixCat(r),ro=role[cat]||(cat==='Lievitati'&&!sweet&&/pizza|calzon|panzerott|torta|pasticcio|sfincion|farinata|scacci|pitta|casatiello|tortano|crescia|parigina|rustico|pizzoccher/i.test(r.title)?'unico':null);if(!ro||!r.ingredients?.length||seen.has(r.title.toLowerCase()))continue;
     const pp=perPerson(r);if(!pp||pp.eur==null){if(!r.book)noCost++;continue}
     const lim=ro==='contorno'?[15,700]:[150,1400];
     if(pp.kcal<lim[0]||pp.kcal>lim[1]||pp.eur<=0||pp.eur>25)continue;
@@ -1065,7 +1080,7 @@ function candidates(o){
     if(!o.diets.some(d=>/Vegan|Vegetariano/.test(d))&&/seitan|tofu|tempeh|\bsoia\b|vegan/i.test(r.title))continue; // sostituti vegani solo se richiesti
     const q=quotOf(r);
     if(o.cuisine==='quotidiana'&&!q&&!r.pronto)continue; // solo piatti della cucina italiana di tutti i giorni
-    if(o.cuisine!=='mondo'&&r.world&&r.country!=='Italia')continue;
+    if(o.cuisine!=='mondo'&&r.country&&r.country!=='Italia')continue; // piatti esteri (anche nel ricettario italiano, es. sashimi) solo con "anche dal mondo"
     const tm=timing(r);if(o.easy&&tm.d>1)continue;if(!o.ahead&&tm.w>=60)continue;
     seen.add(r.title.toLowerCase());
     out.push({r,q,role:ro,t:tm.t,w:tm.w,d:tm.d,eur:pp.eur,kcal:pp.kcal,p:pp.p??pp.kcal*.15/4,c:pp.c??pp.kcal*.5/4,f:pp.f??pp.kcal*.35/9,prot:protein(r),season:r.pronto?0:seasonScore(r,o.month)});
