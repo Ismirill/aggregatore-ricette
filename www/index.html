@@ -360,13 +360,16 @@ const ING={
 };
 const EXPLICIT={'Vegano':/\bvegan|\bvegana|\bvegano|plant.?based/,'Vegetariano':/vegetarian/,'Senza glutine':/senza glutine|gluten.?free|glutenfree|celiac/,'Senza lattosio':/senza lattosio|lactose.?free|senza latticini|dairy.?free/,'Senza uova':/senza uova|egg.?free/,'Ipocalorico':/ipocalor|light\b|poche calorie|low.?cal|\bfit\b|dietetic|proteic/};
 
+// Preparazioni di base (impasti, creme, salse, brodi): mai portate del menu, anche se il nome contiene "pasta"
+const BASE_RX=/^(pasta (frolla|sfoglia|bris[eé]e?|choux|matta|di mandorle|reale|di zucchero|madre|per pizza|di pane)|lievito madre|pasta madre|pan di spagna|crema (pasticcera|chantilly|inglese|al burro)|besciamella|maionese|brodo|fondo|sugo|salsa|ragù|pesto|glassa|meringa|caramello|ganache|impasto|marmellata|confettura|gelatina|sciroppo|liquore|rosolio)\b/i;
 function classify(d){
   const all=[d.title,d.caption,d.ingredients?.join('\n'),d.keywords,d.recipeCategory].join('\n').toLowerCase();
   const ingText=(d.ingredients||[]).join('\n').toLowerCase();
   // Tipo di piatto: prima i dati strutturati del sito, poi le parole chiave del titolo, poi del testo
   let cat=null;
   const rc=String(d.recipeCategory||'').toLowerCase();
-  for(const [re,c] of CAT_SCHEMA)if(re.test(rc)&&cats.includes(c)){cat=c;break}
+  if(BASE_RX.test(String(d.title||'').trim()))cat='Altro';
+  if(!cat)for(const [re,c] of CAT_SCHEMA)if(re.test(rc)&&cats.includes(c)){cat=c;break}
   for(const src of [d.title,[d.recipeCategory,d.keywords].join(' '),d.caption].map(s=>String(s||'').toLowerCase())){if(cat)break;for(const c in GUESS)if(cats.includes(c)&&GUESS[c].test(src)){cat=c;break}}
   // Diete: dalle parole esplicite sempre; per esclusione solo se c'è una lista ingredienti credibile
   const diets=new Set(d.schemaDiets||[]);
@@ -627,7 +630,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=32; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=33; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -678,6 +681,7 @@ async function loadBook(){
         steps:[],tags:[],_tm:{t:r.time||timing({...r,steps:[]}).t,w:0,d:r.diff||2}});
     }
   }catch{book=[];toast('Ricettario non disponibile offline')}
+  for(const b of book)if(BASE_RX.test(b.title.trim()))b.cat='Altro'; // preparazioni di base, da qualunque fonte
   fillSelects();render();
 }
 function saveFromBook(i){
@@ -968,7 +972,7 @@ function candidates(o){
     const pp=perPerson(r);if(!pp||pp.eur==null){if(!r.book)noCost++;continue}
     const lim=ro==='contorno'?[15,700]:[150,1400];
     if(pp.kcal<lim[0]||pp.kcal>lim[1]||pp.eur<=0||pp.eur>25)continue;
-    if(!allowed(r,o.diets,o.avoid))continue;
+    if(!allowed(r,o.diets,o.avoid)||BASE_RX.test(r.title.trim()))continue;
     const tm=timing(r);if(o.easy&&tm.d>1)continue;if(!o.ahead&&tm.w>=60)continue;
     seen.add(r.title.toLowerCase());
     out.push({r,role:ro,t:tm.t,w:tm.w,d:tm.d,eur:pp.eur,kcal:pp.kcal,p:pp.p??pp.kcal*.15/4,c:pp.c??pp.kcal*.5/4,f:pp.f??pp.kcal*.35/9,prot:protein(r),season:seasonScore(r,o.month)});
@@ -1096,10 +1100,12 @@ function showPlan(P){
       <div><b>${Math.round(kcalDay)} kcal</b><span>a persona ${week?`al giorno (${o.lunch&&o.dinner?'pranzo+cena':o.lunch?'pranzo':'cena'})`:'per il pasto'}</span></div></div>
     <div class="badges" style="margin-bottom:8px">${rule(`Proteine ${Math.round(res.macro.p*100)}%`,res.macro.p>=.12&&res.macro.p<=.22)}${rule(`Carboidrati ${Math.round(res.macro.c*100)}%`,res.macro.c>=.42&&res.macro.c<=.62)}${rule(`Grassi ${Math.round(res.macro.f*100)}%`,res.macro.f<=.36)}
       ${week&&res.cnt?`${o.diets.some(d=>/Vege|pesce/.test(d))?'':rule(`Pesce ${res.cnt.pesce}×`,res.cnt.pesce>=2)}${rule(`Legumi ${res.cnt.legumi}×`,res.cnt.legumi>=2)}${o.diets.some(d=>/Vege|Pesce/.test(d))?'':rule(`Carne rossa ${res.cnt.rossa}×`,res.cnt.rossa<=2)}`:''}</div>
-    <p class="meta">🍎 Di stagione a ${MESI[o.month]}: <b>${esc(X.fruits.join(', '))}</b><br>🥦 Verdura di stagione: ${esc(veg.join(', '))}</p>
+    <p class="meta">🍎 <b>Frutta di stagione a ${MESI[o.month]}</b> (prezzi medi al kg in ${esc(PT?.zone||'Italia')}): ${X.fruits.map(f=>{const k=keyOf(f);return esc(f)+(PT&&k&&PT.eur[k]?` ${euro(PT.eur[k])}`:'')}).join(' · ')}
+      <br>🥦 <b>Verdura di stagione</b>: ${veg.map(v=>{const k=keyOf(v);return esc(v)+(PT&&k&&PT.eur[k]?` ${euro(PT.eur[k])}`:'')}).join(' · ')}</p>
     ${days.map(({g,ms})=>`<div class="day"><h3>${g}<span>${euro(ms.reduce((a,m)=>a+m.eur,0)*o.people)}</span></h3>${ms.map(m=>`<div class="meal">${week?`<b>${m.m==='lunch'?'Pranzo':'Cena'}</b>`:''}
       ${m.dishes.map(x=>`<div class="dish" data-id="${esc(x.id)}" data-book="${x.book?1:''}"><span><span class="r">${ROLE[x.role]}</span>${esc(x.title)}</span><small>⏱${x.t?x.t+'′':'pochi min'} · ${Math.round(x.kcal)} kcal · ${euro(x.eur)}</small></div>`).join('')}
-      <div class="dish" style="cursor:default"><span><span class="r">Frutta</span>${esc(X.fruits[(m.d*2+(m.m==='dinner'?1:0))%X.fruits.length])}${m.m!=='lunch'&&X.bread&&(week||m.dishes.length<3)?' <span class="r" style="margin-left:6px">Pane</span>50 g':''}</span><small></small></div>
+      <div class="dish" style="cursor:default"><span><span class="r">Frutta</span>${esc(X.fruits[(m.d*2+(m.m==='dinner'?1:0))%X.fruits.length])} di stagione</span><small>150 g · ${Math.round(X.fruit.kcal)} kcal · ${euro(X.fruit.eur)}</small></div>
+      ${m.m!=='lunch'&&X.bread&&(week||m.dishes.length<3)?`<div class="dish" style="cursor:default"><span><span class="r">Pane</span>pane</span><small>50 g · ${Math.round(X.bread.kcal)} kcal · ${euro(X.bread.eur)}</small></div>`:''}
       <p class="meta" style="margin:4px 0 0;text-align:right">${m.t?`⏱ circa ${fmtMin(m.t)} in cucina · `:''}${Math.round(m.kcal)} kcal a persona</p></div>`).join('')}</div>`).join('')}
     <details class="meta" id="shop"><summary><b>🛒 Lista della spesa per ${o.people} ${o.people>1?'persone':'persona'}</b></summary><div id="shopList"></div></details>
     <p class="meta">Costi stimati con i prezzi medi${P.period?` dell'Osservatorio Prezzi MIMIT (${esc(P.period)}, ${esc(P.zone)})`:''} e prezzi indicativi; calorie e nutrienti medi, indicativi. Pasti scelti tra ${P.n} ricette compatibili${P.noCost?`; ${P.noCost} delle tue ricette sono escluse perché senza costo calcolato (aprile e tocca "Calcola calorie e costo")`:''}.</p>
@@ -1254,7 +1260,7 @@ async function runAnalysis(url,overwrite){
       if(f.url.value!==url)return;
       if(!r.is_recipe){showPv('L\'AI non trova una ricetta in questo post');return}
       if(r.title&&(overwrite||!f.title.value||f.title.value.length>80))f.title.value=r.title;
-      if(cats.includes(r.cat))f.cat.value=r.cat;
+      if(cats.includes(r.cat))f.cat.value=BASE_RX.test(f.title.value.trim())?'Altro':r.cat;
       // se la didascalia non contiene dosi né un elenco di ingredienti, le quantità sono dedotte: lo si dice sempre
       const cap=String(a.caption||'')+' '+f.caption.value;
       if(r.ingredients.length&&!/\d+\s?(g|gr|kg|ml|cl|l|cucchia|tazz)\b|ingredient/i.test(cap)&&!r.ingredients.some(x=>/dedott|stimat/i.test(x)))r.ingredients.push('(ingredienti e dosi dedotti, verifica nel video)');

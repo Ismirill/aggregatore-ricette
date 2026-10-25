@@ -49,6 +49,11 @@ TITLE_RULES = [
 ]
 TITLE_RX = [(re.compile(r, re.I), t) for r, t in TITLE_RULES]
 
+# Preparazioni di base (impasti, creme, salse, brodi): mai primi o secondi, anche se il nome contiene "pasta"
+BASE = re.compile(r"^(pasta (frolla|sfoglia|bris[eé]e?|choux|matta|di mandorle|reale|di zucchero|madre|per pizza|di pane)|lievito madre|pasta madre|pan di spagna|"
+                  r"crema (pasticcera|chantilly|inglese|al burro)|besciamella|maionese|brodo|fondo|sugo|salsa|ragù|pesto|glassa|meringa|caramello|ganache|impasto|"
+                  r"marmellata|confettura|gelatina|sciroppo|liquore|rosolio)\b", re.I)
+SWEET_TITLE = re.compile(r"\bdolc[ei]\b|\bdolcetti\b", re.I)
 STARCH = {'pasta', "pasta all'uovo", 'pasta fresca ripiena', 'riso', 'cereali', 'semola', 'farina di mais'}
 PROTEIN = {'pollo e tacchino', 'coniglio', 'agnello', 'maiale', 'carne macinata', 'interiora', 'manzo e vitello', 'salmone', 'tonno in scatola',
            'acciughe', 'baccalà', 'cozze e vongole', 'crostacei', 'molluschi', 'pesce', 'uova', 'salumi', 'tofu e seitan'}
@@ -158,6 +163,10 @@ def main():
             score.pop('Lievitati'); by.append('senza lievito')
             if not score:
                 score[first(TITLE_RX, r['title']) or 'Antipasti'] = 1
+        if BASE.search(r['title']):  # preparazione di base: ha la precedenza su tutto
+            score = defaultdict(float, {'Altro': 10}); by.append('preparazione di base (impasto, crema, salsa o brodo)')
+        elif SWEET_TITLE.search(r['title']):
+            score['Dolci'] += 4; by.append('"dolci" nel nome')
         cat = max(score, key=lambda k: (score[k], -TYPES.index(k))) if score else 'Altro'
         conf = 'alta' if score and score[cat] >= 4 else 'media' if score and score[cat] >= 2.5 else 'bassa'
         items[r['id']] = {'cat': cat, 'conf': conf, 'by': by}
