@@ -1,4 +1,8 @@
 {
+"achiote": {
+"as": null,
+"via": "non trovato"
+},
 "acido citrico": {
 "as": "spezie",
 "via": "Open Food Facts: Jengibre con mango"
@@ -59,6 +63,14 @@
 "as": "erbe aromatiche",
 "via": "Wikidata: gum resin used in cooking and in various systems of herbal medicine"
 },
+"asafoetida": {
+"as": "erbe aromatiche",
+"via": "Wikidata: gum resin used in cooking and in various systems of herbal medicine"
+},
+"attieke": {
+"as": null,
+"via": "non trovato"
+},
 "bacche pimento": {
 "as": null,
 "via": "non trovato"
@@ -91,6 +103,10 @@
 "as": "patate",
 "via": "sinonimo di patate"
 },
+"beccacce": {
+"as": null,
+"via": "non trovato"
+},
 "berbere": {
 "as": "spezie",
 "via": "Wikidata: miscela di spezie"
@@ -102,6 +118,10 @@
 "biancostato": {
 "as": "manzo",
 "via": "sinonimo di manzo"
+},
+"bok choy": {
+"as": "cavoli",
+"via": "Wikipedia: cultivar di Brassica rapa"
 },
 "bouquet garni erbe aromatiche": {
 "as": null,
@@ -122,6 +142,10 @@
 "cacio gruiera": {
 "as": null,
 "via": "non trovato"
+},
+"cacio q b": {
+"as": "formaggio",
+"via": "Open Food Facts: Sodebo box all'italiana 280g cacio & pep"
 },
 "caglio": {
 "as": "lievito",
@@ -199,6 +223,10 @@
 "as": "fegato",
 "via": "sinonimo di fegato"
 },
+"char masala": {
+"as": "marsala",
+"via": "simile a \"marsala\""
+},
 "chiocciole": {
 "as": "calamari",
 "via": "Wikipedia: mollusco"
@@ -227,6 +255,10 @@
 "as": "zenzero",
 "via": "sinonimo di zenzero"
 },
+"cocco rape": {
+"as": "rape",
+"via": "simile a \"rape\""
+},
 "cocco tostato": {
 "as": null,
 "via": "non trovato"
@@ -254,6 +286,10 @@
 "crauti": {
 "as": "cavoli",
 "via": "Wikipedia: contorno tipico tedesco, ottenuto dalla fermentazione del cavolo cappuccio"
+},
+"crema cocco": {
+"as": "panna",
+"via": "Open Food Facts: Crema di cocco"
 },
 "crema da cucina": {
 "as": "panna",
@@ -335,6 +371,10 @@
 "as": "erbe aromatiche",
 "via": "Wikipedia: pianta utilizzata per aromatizzare prodotti quali cibi, bevande o cosmetici"
 },
+"erbe essiccate": {
+"as": null,
+"via": "non trovato"
+},
 "farcia": {
 "as": null,
 "via": "non trovato"
@@ -391,6 +431,10 @@
 "as": null,
 "via": "non trovato"
 },
+"foglia pandan": {
+"as": null,
+"via": "non trovato"
+},
 "foglie fieno greco essiccate": {
 "as": "spezie",
 "via": "sinonimo di spezie"
@@ -399,9 +443,17 @@
 "as": "alloro",
 "via": "sinonimo di alloro"
 },
+"foglie sorgo essiccate": {
+"as": null,
+"via": "non trovato"
+},
 "foglio alga non spezzettato": {
 "as": null,
 "via": "non trovato"
+},
+"freekeh": {
+"as": "cereali",
+"via": "Wikipedia: Freekeh, noto anche come Farik, è un tipo di grano verde che"
 },
 "fumo liquido": {
 "as": "salsa",
@@ -422,6 +474,10 @@
 "garam masala": {
 "as": "marsala",
 "via": "simile a \"marsala\""
+},
+"gari": {
+"as": "calamari",
+"via": "Wikidata: genere di molluschi"
 },
 "garofani": {
 "as": null,
@@ -455,6 +511,14 @@
 "as": "cereali",
 "via": "Wikidata: seme delle granaglie (frumento, avena, grano saraceno, orzo, etc.)"
 },
+"grano intero": {
+"as": "cereali",
+"via": "Open Food Facts: Gallette Bio di Grano Saraceno"
+},
+"grano spezzato": {
+"as": null,
+"via": "non trovato"
+},
 "grasso": {
 "as": null,
 "via": "non trovato"
@@ -483,9 +547,17 @@
 "as": null,
 "via": "non trovato"
 },
+"halloumi": {
+"as": "formaggio",
+"via": "Wikipedia: formaggio tipico di Cipro"
+},
 "harissa": {
 "as": "salsa",
 "via": "sinonimo di salsa"
+},
+"hilsa o aringhe": {
+"as": null,
+"via": "non trovato"
 },
 "hominy": {
 "as": null,
@@ -502,6 +574,10 @@
 "k mosto cotto": {
 "as": "miele",
 "via": "sinonimo di miele"
+},
+"kajmak": {
+"as": "panna",
+"via": "Wikipedia: prodotto lattiero-caseario della tradizione turca"
 },
 "kasuri methi": {
 "as": "cereali",
@@ -531,6 +607,10 @@
 "as": null,
 "via": "non trovato"
 },
+"l kefir": {
+"as": null,
+"via": "non trovato"
+},
 "l mosto": {
 "as": "miele",
 "via": "sinonimo di miele"
@@ -543,6 +623,10 @@
 "as": null,
 "via": "non trovato"
 },
+"lardone q b": {
+"as": null,
+"via": "non trovato"
+},
 "latticello": {
 "as": "burro",
 "via": "Wikipedia: sottoprodotto della trasformazione in burro della panna"
@@ -551,7 +635,19 @@
 "as": null,
 "via": "non trovato"
 },
+"lesso q b": {
+"as": null,
+"via": "non trovato"
+},
+"levistico": {
+"as": "erbe aromatiche",
+"via": "Wikidata: herbal medicine documented by the European Medicines Agency"
+},
 "linome": {
+"as": null,
+"via": "non trovato"
+},
+"luganighe": {
 "as": null,
 "via": "non trovato"
 },
@@ -607,6 +703,10 @@
 "as": "pesce",
 "via": "Wikidata: prodotto ittico tradizionale italiano (PAT)"
 },
+"morcilla": {
+"as": "salame",
+"via": "Wikidata: insaccato spagnolo"
+},
 "mosto cotto q b": {
 "as": "miele",
 "via": "sinonimo di miele"
@@ -618,6 +718,10 @@
 "muso": {
 "as": "fegato",
 "via": "sinonimo di fegato"
+},
+"name": {
+"as": null,
+"via": "non trovato"
 },
 "nel pavese sono usate solo le puntine": {
 "as": "salsiccia",
@@ -691,9 +795,25 @@
 "as": "pasta",
 "via": "Open Food Facts: pipette rigate n.86"
 },
+"pita cipriota": {
+"as": null,
+"via": "non trovato"
+},
+"platani": {
+"as": null,
+"via": "non trovato"
+},
+"platani verdi": {
+"as": null,
+"via": "non trovato"
+},
 "platano": {
 "as": "frutta",
 "via": "Wikidata: frutto a forma di banana, meno dolce, da cuocere"
+},
+"platano verde": {
+"as": null,
+"via": "non trovato"
 },
 "pomidoro maturi": {
 "as": "pomodori",
@@ -735,11 +855,23 @@
 "as": "pollo",
 "via": "sinonimo di pollo"
 },
+"ranocchi": {
+"as": null,
+"via": "non trovato"
+},
+"ranocchi grossi": {
+"as": null,
+"via": "non trovato"
+},
 "rapa": {
 "as": "rape",
 "via": "sinonimo di rape"
 },
 "ras al hanout": {
+"as": "spezie",
+"via": "Wikidata: food spice"
+},
+"ras el hanout": {
 "as": "spezie",
 "via": "Wikidata: food spice"
 },
@@ -770,6 +902,10 @@
 "roti o paratha": {
 "as": "cereali",
 "via": "Open Food Facts: Crepe Blé Oignon Roti Paratha (5P. )"
+},
+"rutabaga": {
+"as": "cavoli",
+"via": "Wikipedia: cultivar di Brassica napus"
 },
 "sake": {
 "as": "vino",
@@ -815,11 +951,27 @@
 "as": "formaggio",
 "via": "Wikipedia: nome commerciale di vari tipi di formaggio fuso"
 },
+"spighe mais": {
+"as": "mais dolce",
+"via": "sinonimo di mais dolce"
+},
+"sumac": {
+"as": "spezie",
+"via": "Open Food Facts: Смрадлика"
+},
 "tartufi": {
 "as": "tartufo",
 "via": "simile a \"tartufo\""
 },
+"tartufi a sottili q b": {
+"as": "tartufo",
+"via": "simile a \"tartufo\""
+},
 "tartufi neri": {
+"as": "tartufo",
+"via": "simile a \"tartufo\""
+},
+"tartufi preparati al n": {
 "as": "tartufo",
 "via": "simile a \"tartufo\""
 },
@@ -842,6 +994,18 @@
 "the piu buono": {
 "as": null,
 "via": "non trovato"
+},
+"tilapia": {
+"as": "pesce",
+"via": "Wikipedia: genere di pesci"
+},
+"tinche": {
+"as": "pesce",
+"via": "Wikipedia: specie di pesce"
+},
+"tomatillos": {
+"as": "cereali",
+"via": "Open Food Facts: Tomatillo & Jalapeño Pepper Tortilla"
 },
 "toor dal": {
 "as": "legumi",
@@ -875,9 +1039,17 @@
 "as": "pesce",
 "via": "sinonimo di pesce"
 },
+"trucioli legno da affumicatura": {
+"as": null,
+"via": "non trovato"
+},
 "tufo": {
 "as": null,
 "via": "non trovato"
+},
+"urad dal": {
+"as": "legumi",
+"via": "Open Food Facts: Urad Dal"
 },
 "vacherin fribourgeois": {
 "as": "formaggio",
@@ -904,6 +1076,10 @@
 "via": "non trovato"
 },
 "yam nagaimo": {
+"as": null,
+"via": "non trovato"
+},
+"yautia o taro": {
 "as": null,
 "via": "non trovato"
 },
