@@ -662,7 +662,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=46; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=47; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -733,6 +733,8 @@ async function loadBook(){
   for(const b of book){b.cat=fixCat(b); // preparazioni di base, basi da sole e verdure/legumi conditi, da qualunque fonte
     const ph=IM[b.id];if(ph){if(!b.image)b.image=ph.img;if(ph.gen){b.imgGen=true;b.imgCredit='Immagine generata con l\'AI: indicativa, il piatto vero può essere diverso';delete b.imgFile}else if(!b.imgFile)b.imgFile=ph.file} // foto per ogni fonte
     if(PSEUDO_RX.test(b.title)){b.pseudo=true;b.country='Stati Uniti';b.cc='US';b.region=''}} // italo-americani
+  // Solo ricette complete: almeno 3 ingredienti e un procedimento vero (le altre restano fuori finché non vengono analizzate)
+  book=book.filter(b=>(b.ingredients?.length||0)>=3&&(b.steps||[]).join(' ').length>=120);
   fillSelects();render();
 }
 // Tipo di piatto corretto dal nome: una base da sola (polenta, purè, cuscus, gnocchi senza condimento) non è un primo né un
