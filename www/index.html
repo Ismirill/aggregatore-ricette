@@ -263,7 +263,7 @@ details summary{cursor:pointer}
       <label>Cucina<select name="cuisine"><option value="quotidiana">Italiana di tutti i giorni (consigliata)</option><option value="italiana">Italiana, anche piatti regionali rari</option><option value="mondo">Anche ricette dal mondo</option></select></label>
       <div class="two"><label>Periodo<select name="month" id="bMonth"></select></label>
       <label>Ricette da usare<select name="pool"><option value="all">Ricettario + le mie</option><option value="book">Solo ricettario</option><option value="mine">Solo le mie</option></select></label></div></section>
-    <div class="row" style="justify-content:space-between"><button type="button" class="btn" id="wBack">← Indietro</button><button type="button" class="btn pri" id="wNext">Avanti →</button><button class="btn pri" id="wGo" hidden>✨ Crea il menu</button></div>
+    <div class="row" style="justify-content:space-between;flex-wrap:nowrap;gap:8px"><span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn" id="wBack">← Indietro</button> <button type="button" class="btn" id="wCancel" hidden>✕ Annulla</button></span><span><button type="button" class="btn pri" id="wNext">Avanti →</button><button class="btn pri" id="wGo" hidden>✨ Crea il menu</button></span></div>
   </form>
   <div id="bOut"></div>
 </section></main>
@@ -662,7 +662,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=47; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=48; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1058,8 +1058,10 @@ function wizardValid(){
 }
 $('#wNext').onclick=()=>{if(wizardValid())showStep(wStep+1)};
 $('#wBack').onclick=()=>showStep(wStep-1);
+// Annulla: esce dal percorso e torna al menu già creato, senza cambiare nulla
+$('#wCancel').onclick=()=>{const plan=load('budgetPlan',null);if(plan){budgetView(false);loadSeason().then(()=>showPlan(plan))}};
 // mostra il modulo (dal passo indicato) o il menu
-function budgetView(showForm,step=0){$('#bForm').hidden=!showForm;$('#bOut').hidden=showForm;if(showForm)showStep(step)}
+function budgetView(showForm,step=0){$('#bForm').hidden=!showForm;$('#bOut').hidden=showForm;if(showForm){showStep(step);$('#wCancel').hidden=!load('budgetPlan',null)}}
 function modeUI(){const w=$('#bForm').mode.value==='week';$('#bLbl').textContent=w?'Budget settimanale (€)':'Budget per il pasto (€)';$('#bMealsL').hidden=!w;
   $('#bTimeEndL').hidden=!w;$('#bTimeL').textContent=w?'Tempo per cucinare a pasto (lun–ven)':'Tempo per cucinare';$('#bBreakL').hidden=!w}
 
@@ -1299,7 +1301,7 @@ function showPlan(P){
   const sum=`${week?'Settimana':'Un pasto'} · ${euro(o.budget)} · ${o.people} ${o.people>1?'persone':'persona'}${o.diets.length?' · '+o.diets.join(', '):''}${o.cuisine==='mondo'?' · anche dal mondo':o.cuisine==='italiana'?' · anche regionali rari':''}${o.ready==='yes'?' · anche cibi pronti':o.ready==='some'?' · cibi pronti se il tempo è poco':''}${o.breakfast&&o.breakfast!=='no'?` · colazione ${o.breakfast==='mista'?'varia':o.breakfast}`:''}${o.bread==='no'?' · senza pane':o.bread==='all'?' · pane a ogni pasto':''}`;
   const nPronti=res.plan.reduce((a,m)=>a+m.dishes.filter(x=>x.pronto).length,0);
   $('#bOut').innerHTML=`
-    <div class="row" style="justify-content:space-between;align-items:center;margin:0 0 10px"><span class="meta">${esc(sum)}</span><span><button class="btn" id="bEdit">✎ Modifica</button> <button class="btn pri" id="bVary">🔀 Varia menu</button></span></div>
+    <div class="row" style="justify-content:space-between;align-items:center;margin:0 0 10px"><span class="meta">${esc(sum)}</span><span><button class="btn" id="bEdit">✚ Nuovo</button> <button class="btn pri" id="bVary">🔀 Varia menu</button></span></div>
     ${stale?`<div class="warn">I prezzi sono stati aggiornati a ${esc(PT.period)} dopo la creazione di questo menu (${esc(P.period)}). <button class="btn" id="bRefresh">Ricalcola menu</button></div>`:''}
     ${over?(res.cost<=o.budget*1.04?`<div class="warn">Il menu supera di poco il budget (${euro(res.cost-o.budget)} in più): puoi rigenerarlo o sostituire un piatto.</div>`
       :`<div class="warn">Con ${euro(o.budget)} non si riesce a coprire tutto: il menu più economico che ho trovato costa circa <b>${euro(res.cost)}</b>. Prova ad alzare il budget o a ridurre i pasti.</div>`):''}
@@ -1319,7 +1321,7 @@ function showPlan(P){
     <p class="meta">Menu composto con i piatti della cucina italiana di tutti i giorni${o.region?`, dando la precedenza a quelli di ${esc(REG_AREA[o.region]==='isole'?'Sicilia e Sardegna':o.region)} e della sua area`:''}${o.cuisine==='italiana'?', inclusi i piatti regionali meno comuni':o.cuisine==='mondo'?', incluse ricette dal mondo':''}.</p>
     ${nPronti?`<p class="meta">I piatti segnati «pronto» (${nPronti}) sono cibi già pronti del supermercato: surgelati, freschi confezionati, in scatola o di gastronomia, con prezzi medi indicativi e valori nutrizionali medi della categoria (fa fede l'etichetta).</p>`:''}
     <p class="meta">Costi stimati con i prezzi medi${P.period?` dell'Osservatorio Prezzi MIMIT (${esc(P.period)}, ${esc(P.zone)})`:''} e prezzi indicativi; calorie e nutrienti medi, indicativi. Pasti scelti tra ${P.n} ricette compatibili${P.noCost?`; ${P.noCost} delle tue ricette sono escluse perché senza costo calcolato (aprile e tocca "Calcola calorie e costo")`:''}.</p>
-    <div class="row"><button class="btn" id="bEdit2">✎ Modifica scelte</button><button class="btn pri" id="bAgain">🔀 Varia menu</button></div>`;
+    <div class="row"><button class="btn" id="bEdit2">✚ Nuovo menu</button><button class="btn pri" id="bAgain">🔀 Varia menu</button></div>`;
   $('#bAgain').onclick=$('#bVary').onclick=()=>{$('#bOut').innerHTML='<p class="meta">Preparo un altro menu con le stesse scelte…</p>';$('#bForm').requestSubmit()};
   $('#bEdit').onclick=$('#bEdit2').onclick=()=>budgetView(true,0);
   if($('#bRefresh'))$('#bRefresh').onclick=()=>$('#bForm').requestSubmit();
