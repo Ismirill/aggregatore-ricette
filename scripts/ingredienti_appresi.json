@@ -31,6 +31,10 @@
 "as": null,
 "via": "non trovato"
 },
+"alcune cotenne lardone": {
+"as": null,
+"via": "non trovato"
+},
 "allspice in polvere": {
 "as": null,
 "via": "non trovato"
@@ -50,6 +54,10 @@
 "anisini q b": {
 "as": null,
 "via": "non trovato"
+},
+"annatto": {
+"as": "spezie",
+"via": "Open Food Facts: Sazón Con Culantro Y Achiote (With Coria"
 },
 "arancio candito": {
 "as": "arancia",
@@ -150,6 +158,10 @@
 "bouquet garni erbe aromatiche": {
 "as": null,
 "via": "non trovato"
+},
+"braciuole castrato nella lombata": {
+"as": "braciol",
+"via": "simile a \"braciol\""
 },
 "buccia arancio": {
 "as": "arancia",
@@ -291,6 +303,10 @@
 "as": "ciccioli",
 "via": "simile a \"ciccioli\""
 },
+"cignale": {
+"as": null,
+"via": "non trovato"
+},
 "ciliege marasche o visciole": {
 "as": "ciliegie",
 "via": "simile a \"ciliegie\""
@@ -347,9 +363,17 @@
 "as": "pasta",
 "via": "Wikipedia: alimento"
 },
+"coteghino": {
+"as": "cotechino",
+"via": "simile a \"cotechino\""
+},
 "crauti": {
 "as": "cavoli",
 "via": "Wikipedia: contorno tipico tedesco, ottenuto dalla fermentazione del cavolo cappuccio"
+},
+"crayfish essiccato": {
+"as": null,
+"via": "non trovato"
 },
 "crema cocco": {
 "as": "panna",
@@ -422,6 +446,10 @@
 "dischi per empanadas": {
 "as": "pere",
 "via": "simile a \"pere\""
+},
+"diverse foglie ramerino": {
+"as": null,
+"via": "non trovato"
 },
 "divino bianco": {
 "as": "vino",
@@ -543,6 +571,10 @@
 "as": null,
 "via": "non trovato"
 },
+"foglie nipitella q b": {
+"as": "nepitella",
+"via": "simile a \"nepitella\""
+},
 "foglie pandan": {
 "as": null,
 "via": "non trovato"
@@ -607,9 +639,17 @@
 "as": null,
 "via": "non trovato"
 },
+"garofano": {
+"as": null,
+"via": "non trovato"
+},
 "gelatina": {
 "as": "frutta",
 "via": "Wikidata: confettura ottenuta bollendo la frutta con lo zucchero, filtrandone il succo e lasciando che si rapprenda"
+},
+"gelatina q b": {
+"as": null,
+"via": "non trovato"
 },
 "germano": {
 "as": null,
@@ -755,6 +795,10 @@
 "as": null,
 "via": "non trovato"
 },
+"l katyk o kefir intero": {
+"as": null,
+"via": "non trovato"
+},
 "l kefir": {
 "as": null,
 "via": "non trovato"
@@ -766,6 +810,10 @@
 "la buccia arancio": {
 "as": "arancia",
 "via": "simile a \"arancia\""
+},
+"lardelli lardone q b": {
+"as": null,
+"via": "non trovato"
 },
 "lardone": {
 "as": null,
@@ -811,6 +859,10 @@
 "as": null,
 "via": "non trovato"
 },
+"magro coscia o culaccio bestia grossa": {
+"as": null,
+"via": "non trovato"
+},
 "mahlab": {
 "as": "spezie",
 "via": "Wikidata: Spezia aromatica"
@@ -848,6 +900,14 @@
 "via": "sinonimo di liquore"
 },
 "mazzetto guarnito": {
+"as": null,
+"via": "non trovato"
+},
+"mazzetto guarnizione": {
+"as": null,
+"via": "non trovato"
+},
+"mazzetto odoroso": {
 "as": null,
 "via": "non trovato"
 },
@@ -927,9 +987,17 @@
 "as": null,
 "via": "non trovato"
 },
+"ossa spalla o cosciotto": {
+"as": null,
+"via": "non trovato"
+},
 "ossi bestia": {
 "as": null,
 "via": "non trovato"
+},
+"ovoli": {
+"as": "uova",
+"via": "Wikidata: pattern that consists of half egg-shaped ornaments, used in design and architecture"
 },
 "paneer": {
 "as": "formaggio",
@@ -980,6 +1048,10 @@
 "via": "non trovato"
 },
 "petali rosa canina rossa coltivata possibilmente senza pesticidi": {
+"as": null,
+"via": "non trovato"
+},
+"petonciani": {
 "as": null,
 "via": "non trovato"
 },
@@ -1075,6 +1147,10 @@
 "as": "prosciutto",
 "via": "simile a \"prosciutto\""
 },
+"qualche ciocca ramerino": {
+"as": null,
+"via": "non trovato"
+},
 "qualche fungo secco": {
 "as": null,
 "via": "non trovato"
@@ -1088,6 +1164,10 @@
 "via": "sinonimo di spezie"
 },
 "radice iris": {
+"as": null,
+"via": "non trovato"
+},
+"rametti ramerino": {
 "as": null,
 "via": "non trovato"
 },
@@ -1139,6 +1219,10 @@
 "as": "cioccolato",
 "via": "sinonimo di cioccolato"
 },
+"rigaglie": {
+"as": "fegato",
+"via": "Wikipedia: interiora degli animali macellati"
+},
 "rigaglie piccione q b": {
 "as": null,
 "via": "non trovato"
@@ -1150,6 +1234,10 @@
 "risoni": {
 "as": "pasta",
 "via": "Wikipedia: tipo di pasta che somiglia a un chicco d'orzo"
+},
+"rookworst": {
+"as": "salame",
+"via": "Wikidata: Dutch kind of sausage"
 },
 "rosato salento": {
 "as": null,
@@ -1166,6 +1254,10 @@
 "sake": {
 "as": "vino",
 "via": "Wikipedia: bevanda alcolica giapponese"
+},
+"salnitro": {
+"as": "liquore",
+"via": "Wikipedia: composto chimico"
 },
 "salo stagionato": {
 "as": null,
@@ -1211,19 +1303,43 @@
 "as": "burro",
 "via": "sinonimo di burro"
 },
+"soda": {
+"as": null,
+"via": "non trovato"
+},
+"soda q b": {
+"as": null,
+"via": "non trovato"
+},
 "sottilette": {
 "as": "formaggio",
 "via": "Wikipedia: nome commerciale di vari tipi di formaggio fuso"
 },
+"spalla castrato": {
+"as": null,
+"via": "non trovato"
+},
+"spalla o cosciotto castrato": {
+"as": null,
+"via": "non trovato"
+},
 "spighe mais": {
 "as": "mais dolce",
 "via": "sinonimo di mais dolce"
+},
+"starna o pernice": {
+"as": null,
+"via": "non trovato"
 },
 "stockfish": {
 "as": "pesce",
 "via": "Wikipedia: motore scacchistico open source"
 },
 "stomachino": {
+"as": null,
+"via": "non trovato"
+},
+"storni": {
 "as": null,
 "via": "non trovato"
 },
@@ -1258,6 +1374,10 @@
 "tartufi tritati finissimi": {
 "as": "tartufo",
 "via": "simile a \"tartufo\""
+},
+"te verde": {
+"as": "pane",
+"via": "Wikidata: Japanese green tea roasted over charcoal"
 },
 "tenkasu": {
 "as": "frutta",
@@ -1294,6 +1414,10 @@
 "toor dal": {
 "as": "legumi",
 "via": "Open Food Facts: Unpolished Toor Dal"
+},
+"tordi": {
+"as": null,
+"via": "non trovato"
 },
 "tortillas mais": {
 "as": "mais dolce",
@@ -1339,6 +1463,10 @@
 "as": null,
 "via": "non trovato"
 },
+"uccelli": {
+"as": "uova",
+"via": "Wikipedia: subclasse di vertebrati teropodi (bipedi, alati, omeotermi ed ovipari)"
+},
 "urad dal": {
 "as": "legumi",
 "via": "Open Food Facts: Urad Dal"
@@ -1372,6 +1500,10 @@
 "via": "non trovato"
 },
 "yautia o taro": {
+"as": null,
+"via": "non trovato"
+},
+"zampa senz'osso": {
 "as": null,
 "via": "non trovato"
 },
