@@ -652,7 +652,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=39; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=40; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -856,7 +856,18 @@ function render(){
     :view==='book'&&book?.length?`<p class="lic">${book.length-nGz-nPu-nWo-nAr-nLi} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}${nPu?`, ${nPu} ricette tipiche della <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia</a> (CC BY 4.0)`:''}${nWo?`, ${nWo} ricette dal mondo di <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> (CC BY-SA 4.0, tradotte in italiano)`:''}${nAr?`, ${nAr} ricette dall'<a href="https://it.wikisource.org/wiki/La_scienza_in_cucina_e_l%27arte_di_mangiar_bene_(1895)" target="_blank" rel="noopener">Artusi (1895)</a>, pubblico dominio`:''}${nLi?`, ${nLi} da Wikipedia e dal Cookbook di Wikibooks (CC BY-SA 4.0) o ricette base`:''}</p>`:'';
   $('#list').innerHTML=lic+(list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
-    :`<div class="empty">${view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'<b>Il tuo ricettario è vuoto</b>Condividi un link da TikTok, Instagram o dal browser verso quest\'app, oppure tocca +.<br>Trovi idee pronte nella sezione Ricettario.'}</div>`);
+    :`<div class="empty">${q?noResults(q):view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'<b>Il tuo ricettario è vuoto</b>Condividi un link da TikTok, Instagram o dal browser verso quest\'app, oppure tocca +.<br>Trovi idee pronte nella sezione Ricettario.'}</div>`);
+  $('#list').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>$(`#tabs .tab[data-v=${b.dataset.goto}]`).click());
+}
+// Ricerca senza risultati: la stessa parola nell'altra sezione, oppure online (YouTube, TikTok, Instagram, Google)
+const hitQ=(i,q)=>[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q);
+function noResults(q){
+  const other=view==='mine'?(book||[]).filter(i=>hitQ(i,q)).length:items.filter(i=>hitQ(i,q)).length;
+  const e=encodeURIComponent('ricetta '+q),link=(h,l)=>`<a class="btn" href="${h}" target="_blank" rel="noopener">${l}</a>`;
+  return `<b>Nessuna ricetta per «${esc(q)}»</b>${view==='mine'?'tra le tue ricette':'nel ricettario'}${other?`, ma ${other} nel${view==='mine'?' Ricettario':'le tue ricette'}.`:'.'}
+    ${other?`<div class="row" style="justify-content:center;margin-top:12px"><button class="btn pri" data-goto="${view==='mine'?'book':'mine'}">Vedi ${other} ${other>1?'ricette':'ricetta'} ${view==='mine'?'nel Ricettario':'tra le tue'}</button></div>`:''}
+    <p style="margin:16px 0 8px">Cercala online: trovato il video giusto, condividilo con Gnamina o incolla il link con +.</p>
+    <div class="row" style="justify-content:center;flex-wrap:wrap;gap:8px">${link('https://www.youtube.com/results?search_query='+e,'▶ YouTube')}${link('https://www.tiktok.com/search?q='+e,'♪ TikTok')}${link('https://www.instagram.com/explore/search/keyword/?q='+e,'◎ Instagram')}${link('https://www.google.com/search?q='+e,'G Google')}</div>`;
 }
 
 /* ---------- Zona per i prezzi ---------- */
