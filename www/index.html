@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Gnamina</title>
+<title>Gnamina · la tua app di cucina</title>
+<meta name="description" content="Gnamina, la tua app di cucina: salva le ricette da TikTok, Instagram e YouTube, sfoglia il ricettario, crea menu a budget con la lista della spesa.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -161,7 +162,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .nut details{margin-bottom:10px}.nut details ul{margin:6px 0}
 details summary{cursor:pointer}
 .lic{font-size:.78rem;color:var(--mut);margin:0 0 6px}
-.empty:has(.welcome){padding:8px 0;text-align:left;color:var(--fg)}.welcome h2{margin:6px 0 6px;font-size:1.5rem}.welcome>p{margin:0 0 14px;color:var(--mut);line-height:1.5}.welcome h3{margin:20px 0 8px;font-size:1.05rem}
+.empty:has(.welcome){padding:8px 0;text-align:left;color:var(--fg)}.welcome h2{margin:6px 0 0;font-size:1.5rem}.welcome .tagline{margin:0 0 10px;font-family:'Fredoka',var(--sans);font-weight:600;color:var(--acc);font-size:1.05rem}.welcome>p{margin:0 0 14px;color:var(--mut);line-height:1.5}.welcome h3{margin:20px 0 8px;font-size:1.05rem}
 .wact{display:grid;gap:10px}.wbtn{font:inherit;text-align:left;background:var(--card);border:1px solid var(--bd);border-left:5px solid var(--acc);border-radius:14px;padding:12px 14px;cursor:pointer;color:var(--fg);box-shadow:var(--sh)}.wbtn b{display:block;font-size:1.02rem;margin-bottom:3px}.wbtn span{font-size:.82rem;color:var(--mut);line-height:1.4;display:block}.wbtn:active{transform:scale(.985)}
 .wsteps{margin:0;padding-left:22px;line-height:1.6;color:var(--fg)}.wsteps li{margin:2px 0}
 .hscroll{display:grid;grid-auto-flow:column;grid-auto-columns:68%;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 10px;-webkit-overflow-scrolling:touch}.hscroll .item{scroll-snap-align:start}@media(min-width:700px){.hscroll{grid-auto-columns:32%}}
@@ -681,7 +682,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=52; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=53; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -897,7 +898,7 @@ function welcome(){
   const day=Math.floor(Date.now()/864e5),pool=(book||[]).filter(b=>b.image&&b.country==='Italia'&&['Primi','Secondi','Contorni','Piatti unici','Dolci'].includes(b.cat));
   const pick=[];for(let i=0;pool.length&&pick.length<8&&i<40;i++){const b=pool[(day*7919+i*104729)%pool.length];if(!pick.includes(b))pick.push(b)}
   return `<div class="welcome">
-    <h2>Benvenuto in Gnamina</h2>
+    <h2>Benvenuto in Gnamina</h2><p class="tagline">La tua app di cucina</p>
     <p>Qui raccogli le tue ricette: quelle che trovi su TikTok, Instagram e YouTube, quelle di famiglia e quelle che scopri nel Ricettario. Per ogni ricetta hai dosi per quante persone vuoi, calorie e costo a persona con i prezzi della tua zona.</p>
     <div class="wact">
       <button type="button" class="wbtn" data-w="add"><b>➕ Salva la prima ricetta</b><span>Da un link social, scritta a mano, da una foto o da un file</span></button>
@@ -1410,7 +1411,7 @@ function shopping(P){
   SHOP_TXT=[`🛒 Lista della spesa ${when} · ${o.people} ${o.people>1?'persone':'persona'}`,...groups.flatMap(([name,xs])=>['',name.toUpperCase(),...xs.map(x=>`☐ ${line(x)}${x.note?` (${x.note})`:''}`)]),'',
     'DISPENSA (di solito già in casa, controlla):',...pantry.map(x=>`☐ ${line(x)}${x.note?` (${x.note})`:''}`),'☐ sale, pepe e spezie: q.b.',
     ...(extra.length?['','Dalle mie ricette:',...extra.map(e=>'☐ '+e.replace(/<[^>]+>/g,''))]:[]),'',
-    `Totale alla cassa ≈${euro(tot)} (confezioni intere; se manca anche la dispensa +${euro(totP)})${P.period?` · prezzi medi ${P.period} (${P.zone})`:''}`,`Menu creato con Gnamina · ${location.origin+location.pathname}`].join('\n');
+    `Totale alla cassa ≈${euro(tot)} (confezioni intere; se manca anche la dispensa +${euro(totP)})${P.period?` · prezzi medi ${P.period} (${P.zone})`:''}`,`Menu creato con Gnamina, la tua app di cucina · ${location.origin+location.pathname}`].join('\n');
   return `<div class="row" style="justify-content:flex-start;margin:8px 0;gap:8px"><button type="button" class="btn pri" id="shopShare">📤 Condividi</button><button type="button" class="btn" id="shopCopy">📋 Copia</button></div>
     <div class="row" id="shopAlt" hidden style="justify-content:flex-start;gap:8px;margin:0 0 8px"><a class="btn wa" href="#" target="_blank" rel="noopener">WhatsApp</a><a class="btn ml" href="#">E-mail</a><span class="meta">oppure copia e incolla dove vuoi</span></div>
     ${groups.map(([name,xs])=>`<p style="margin:10px 0 4px"><b>${esc(name)}</b> <span class="meta">${xs.length}</span></p><ul class="shop">${xs.map(row).join('')}</ul>`).join('')}
