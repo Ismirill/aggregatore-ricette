@@ -161,6 +161,10 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .nut details{margin-bottom:10px}.nut details ul{margin:6px 0}
 details summary{cursor:pointer}
 .lic{font-size:.78rem;color:var(--mut);margin:0 0 6px}
+.empty:has(.welcome){padding:8px 0;text-align:left;color:var(--fg)}.welcome h2{margin:6px 0 6px;font-size:1.5rem}.welcome>p{margin:0 0 14px;color:var(--mut);line-height:1.5}.welcome h3{margin:20px 0 8px;font-size:1.05rem}
+.wact{display:grid;gap:10px}.wbtn{font:inherit;text-align:left;background:var(--card);border:1px solid var(--bd);border-left:5px solid var(--acc);border-radius:14px;padding:12px 14px;cursor:pointer;color:var(--fg);box-shadow:var(--sh)}.wbtn b{display:block;font-size:1.02rem;margin-bottom:3px}.wbtn span{font-size:.82rem;color:var(--mut);line-height:1.4;display:block}.wbtn:active{transform:scale(.985)}
+.wsteps{margin:0;padding-left:22px;line-height:1.6;color:var(--fg)}.wsteps li{margin:2px 0}
+.hscroll{display:grid;grid-auto-flow:column;grid-auto-columns:68%;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 10px;-webkit-overflow-scrolling:touch}.hscroll .item{scroll-snap-align:start}@media(min-width:700px){.hscroll{grid-auto-columns:32%}}
 .srcGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.srcCard{font:inherit;text-align:left;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:12px;cursor:pointer;color:var(--fg)}.srcCard b{display:block;font-size:1rem;margin-bottom:4px}.srcCard span{font-size:.78rem;color:var(--mut);line-height:1.35;display:block}.srcCard:active{transform:scale(.98)}
 .shopBox{margin:4px 0 12px}.shopBox summary{list-style:none;cursor:pointer;background:var(--acc);color:#fff;font-weight:700;font-size:1.05rem;padding:14px 16px;border-radius:14px;text-align:center;box-shadow:var(--sh)}.shopBox summary::-webkit-details-marker{display:none}.shopBox summary span{font-weight:500;opacity:.85}.shopBox[open] summary{border-radius:14px 14px 0 0}.shopBox #shopList{background:var(--card);border:1px solid var(--bd);border-top:none;border-radius:0 0 14px 14px;padding:10px 14px 14px}
 #bOut .dish{font-size:1rem}#bOut .dish small{font-size:.82rem}#bOut .dish .r{font-size:.72rem}#bOut .meal>.meta{font-size:.85rem}#bOut .nbox span{font-size:.78rem}#bOut .bdg{font-size:.76rem}#bOut .fonti p{text-align:left;margin:8px 0 0;font-size:.82rem}.aiTag{position:absolute;right:8px;bottom:8px;z-index:2;font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:center}.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
@@ -677,7 +681,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=51; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=52; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -884,8 +888,26 @@ function render(){
     :view==='book'&&book?.length?`<p class="lic">${book.length-nGz-nPu-nWo-nAr-nLi} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}${nPu?`, ${nPu} ricette tipiche della <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia</a> (CC BY 4.0)`:''}${nWo?`, ${nWo} ricette dal mondo di <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> (CC BY-SA 4.0, tradotte in italiano)`:''}${nAr?`, ${nAr} ricette dall'<a href="https://it.wikisource.org/wiki/La_scienza_in_cucina_e_l%27arte_di_mangiar_bene_(1895)" target="_blank" rel="noopener">Artusi (1895)</a>, pubblico dominio`:''}${nLi?`, ${nLi} da Wikipedia e dal Cookbook di Wikibooks (CC BY-SA 4.0) o ricette base`:''}</p>`:'';
   $('#list').innerHTML=(list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
-    :`<div class="empty">${q?noResults(q):view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'<b>Il tuo ricettario è vuoto</b>Condividi un link da TikTok, Instagram o dal browser verso quest\'app, oppure tocca +.<br>Trovi idee pronte nella sezione Ricettario.'}</div>`)+(lic?`<details class="lic fonti"><summary>Fonti e licenze delle ricette</summary>${lic}</details>`:'');
+    :`<div class="empty">${q?noResults(q):view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':welcome()}</div>`)+(lic?`<details class="lic fonti"><summary>Fonti e licenze delle ricette</summary>${lic}</details>`:'');
   $('#list').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>$(`#tabs .tab[data-v=${b.dataset.goto}]`).click());
+}
+// Prima apertura: «Le mie ricette» è vuota, si mostrano le tre cose da fare e i piatti di oggi dal Ricettario
+function welcome(){
+  if(!book){loadBook().then(()=>{if(view==='mine'&&!items.length)render()})}
+  const day=Math.floor(Date.now()/864e5),pool=(book||[]).filter(b=>b.image&&b.country==='Italia'&&['Primi','Secondi','Contorni','Piatti unici','Dolci'].includes(b.cat));
+  const pick=[];for(let i=0;pool.length&&pick.length<8&&i<40;i++){const b=pool[(day*7919+i*104729)%pool.length];if(!pick.includes(b))pick.push(b)}
+  return `<div class="welcome">
+    <h2>Benvenuto in Gnamina</h2>
+    <p>Qui raccogli le tue ricette: quelle che trovi su TikTok, Instagram e YouTube, quelle di famiglia e quelle che scopri nel Ricettario. Per ogni ricetta hai dosi per quante persone vuoi, calorie e costo a persona con i prezzi della tua zona.</p>
+    <div class="wact">
+      <button type="button" class="wbtn" data-w="add"><b>➕ Salva la prima ricetta</b><span>Da un link social, scritta a mano, da una foto o da un file</span></button>
+      <button type="button" class="wbtn" data-w="book"><b>📖 Sfoglia il Ricettario</b><span>Oltre 1.400 ricette italiane e dal mondo, con foto, costi e calorie</span></button>
+      <button type="button" class="wbtn" data-w="budget"><b>🛒 Crea un menu a budget</b><span>Settimana o singolo pasto, bilanciato, con la lista della spesa</span></button>
+    </div>
+    <h3>Come si salva da TikTok e Instagram</h3>
+    <ol class="wsteps"><li>Apri il video della ricetta e tocca <b>Condividi</b></li><li>Scegli <b>Gnamina</b> tra le app (su iPhone: il comando rapido)</li><li>L'app legge il post e compila ingredienti, dosi e passaggi: tu controlli e salvi</li></ol>
+    ${pick.length?`<h3>Piatti di oggi dal Ricettario</h3><div class="hscroll">${pick.map(card).join('')}</div><p class="meta" style="text-align:center">Tocca un piatto per vederlo; «Salva nelle mie» lo porta qui.</p>`:'<p class="meta">Carico i piatti del giorno…</p>'}
+  </div>`;
 }
 // Ricerca senza risultati: la stessa parola nell'altra sezione, oppure online (YouTube, TikTok, Instagram, Google)
 const hitQ=(i,q)=>[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q);
@@ -1645,7 +1667,7 @@ const filtUI=()=>{const n=['#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate'
 $('#fBtn').onclick=()=>{const f=$('.filters');f.hidden=!f.hidden;$('#fBtn').setAttribute('aria-expanded',!f.hidden);filtUI()};
 $('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;cur2='';render()}};
 $('#chips2').onclick=e=>{const c=e.target.closest('.chip');if(c){cur2=c.dataset.p;render()}};
-$('#list').onclick=e=>{const it=e.target.closest('.item');if(it)openDetail([...src(),...products,...BK].find(i=>i.id===it.dataset.id))};
+$('#list').onclick=e=>{const w=e.target.closest('.wbtn');if(w){if(w.dataset.w==='add')openForm();else $(`#tabs .tab[data-v=${w.dataset.w}]`).click();return}const it=e.target.closest('.item');if(it)openDetail([...src(),...products,...BK,...(book||[])].find(i=>i.id===it.dataset.id))};
 const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${esc(c)}</span>`).join('')};
 // Tema: Automatico segue il sistema, Chiaro e Scuro restano fissi
 const setTheme=t=>{try{localStorage.setItem('theme',t||'auto')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme}; // predefinito: Trattoria chiara; Automatico solo se scelto
