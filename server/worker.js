@@ -307,6 +307,20 @@ ${JSON.stringify(src)}`);
   return { result: { name: str(out.name, 120), summary: str(out.summary, 700), ingredients: out.ingredients.map(x => ({ name: str(x.name, 80), note: str(x.note || '', 200) })), steps: out.steps.map(x => str(x, 900)) } };
 }
 
+// Foto generata con l'AI per una ricetta senza immagine (solo per l'aggiornamento automatico su GitHub, protetto da segreto).
+// Flux Schnell resta nella quota gratuita giornaliera di Workers AI; l'immagine torna in base64 (PNG).
+const CAT_EN = { Primi: 'pasta or rice first course', Secondi: 'main course', Contorni: 'vegetable side dish', Antipasti: 'appetizer', Dolci: 'dessert', Lievitati: 'baked bread or pizza', 'Piatti unici': 'one-dish meal', Colazione: 'breakfast' };
+async function genImage(env, b) {
+  const title = String(b.title || '').replace(/["\n]/g, ' ').trim().slice(0, 120);
+  if (!title) throw Object.assign(new Error('Titolo mancante'), { status: 400 });
+  const where = b.country && b.country !== 'Italia' ? `traditional dish from ${String(b.country).slice(0, 40)}` : 'traditional Italian home cooking';
+  const hint = (b.ingredients || []).slice(0, 5).map(x => String(x).replace(/^[\d\s.,/½¼¾]+(g|kg|ml|l|dl|cucchiai?o?|cucchiaini?|tazz[ae]|spicch[io]|fett[ae]|pizzic[oh]i?)?\.?\s*(di\s)?/i, '')).join(', ').slice(0, 160);
+  const prompt = `Professional food photography of "${title}", ${where}, ${CAT_EN[b.cat] || 'dish'}${hint ? `, made with ${hint}` : ''}, served on a plate on a rustic wooden table, natural soft daylight, shallow depth of field, appetizing, photorealistic, no text, no people, no hands`;
+  const r = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt, steps: 4 });
+  if (!r?.image) throw new Error('Immagine non generata');
+  return { image: r.image, prompt };
+}
+
 export default {
   // Aggiornamento automatico dei prezzi: un lotto di province ogni giorno
   async scheduled(event, env, ctx) {
@@ -349,6 +363,14 @@ export default {
     if (req.method === 'POST' && path === '/refresh-prices') {
       if (!env.ADMIN_TOKEN || req.headers.get('X-Admin') !== env.ADMIN_TOKEN) return reply(origin, { error: 'Non autorizzato' }, 403);
       try { return reply(origin, await refreshBatch(env)); } catch (e) { return reply(origin, { error: e.message }, 503); }
+    }
+    // Foto AI per le ricette senza immagine (solo GitHub Actions, header X-Admin)
+    if (req.method === 'POST' && path === '/genimg') {
+      if (!env.ADMIN_TOKEN || req.headers.get('X-Admin') !== env.ADMIN_TOKEN) return reply(origin, { error: 'Non autorizzato' }, 403);
+      try { return reply(origin, await genImage(env, await req.json())); } catch (e) {
+        const limit = e.status === 429 || /neuron|quota|limit|4006/i.test(e.message);
+        return reply(origin, { error: limit ? 'Limite giornaliero raggiunto' : e.message }, limit ? 429 : e.status === 400 ? 400 : 502);
+      }
     }
     if (req.method !== 'POST' || !['/analyze', '/photo', '/nutrition', '/preview', '/translate-recipe'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';

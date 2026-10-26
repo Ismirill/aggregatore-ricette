@@ -51,6 +51,9 @@ jobs:
         run: python3 scripts/libere.py
       - name: Foto dei piatti da Wikipedia / Wikimedia Commons (solo ricette nuove)
         run: python3 scripts/immagini.py
+      - name: Foto generate con l'AI per le ricette ancora senza immagine (lotto giornaliero)
+        env: { ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}, IMG_LIMIT: '60' }
+        run: pip3 install -q pillow && python3 scripts/immagini_ai.py
       - name: Tipo di piatto verificato incrociando Wikibooks, Wikipedia/Wikidata, nome e ingredienti
         run: python3 scripts/categorie.py
       - name: Versione pubblicata
@@ -61,7 +64,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898900+github-actions[bot]@users.noreply.github.com"
-          git add www/ricettario.json www/version.json www/immagini.json www/categorie.json www/puglia.json www/mondo.json www/artusi.json www/libere.json scripts/ingredienti_appresi.json
+          git add www/img www/ricettario.json www/version.json www/immagini.json www/categorie.json www/puglia.json www/mondo.json www/artusi.json www/libere.json scripts/ingredienti_appresi.json
           git diff --cached --quiet && exit 0
           git commit -m "Aggiornamento automatico ricettario e versione"
           # se nel frattempo sono arrivate altre modifiche, si allinea e riprova (i dati generati qui hanno la precedenza)

@@ -160,7 +160,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .nbox b{display:block;font-size:1.05rem;font-family:var(--serif)}.nbox span{font-size:.72rem;color:var(--mut)}
 .nut details{margin-bottom:10px}.nut details ul{margin:6px 0}
 details summary{cursor:pointer}
-.lic{font-size:.78rem;color:var(--mut);margin:0 0 6px}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:center}.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
+.lic{font-size:.78rem;color:var(--mut);margin:0 0 6px}.aiTag{position:absolute;right:8px;bottom:8px;z-index:2;font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:center}.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
 .kv{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
 .kv span{font-size:.8rem;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--bg2)}
 
@@ -656,7 +656,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=44; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=45; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -665,7 +665,7 @@ async function fetchData(name){
 }
 
 /* ---------- Ricettario (Wikibooks, CC BY-SA 4.0) ---------- */
-let view='mine',book=null,bookInfo=null,products=[],QUOT=[],PRONTI=[],PR_EUR={};
+let view='mine',book=null,bookInfo=null,products=[],QUOT=[],PRONTI=[],PR_EUR={};let IM={}; // foto trovate su Wikipedia/Commons o generate con l'AI (www/immagini.json)
 // una ricetta per id, dal ricettario, dalle tue o dai cibi pronti (menu Budget)
 const findRec=(id,isBook)=>((isBook?book:items)||[]).find(x=>x.id===id)||PRONTI.find(x=>x.id===id)||BK.find(x=>x.id===id);
 const src=()=>view==='book'?(book||[]):items;
@@ -677,7 +677,7 @@ async function loadBook(){
     PR_EUR=pr.prezzi||{};PR_PACK=pr.conf||{};
     PRONTI=(pr.items||[]).map(x=>({id:'pr-'+x.id,title:x.title,cat:x.cat,kind:x.kind,pronto:true,book:true,source:'Cibo pronto',country:'Italia',region:'',diets:x.diets||[],tags:[],
       servings:1,ingredients:x.ing,steps:[x.prep],b:x.b,n:x.n,cov:1,prot:x.prot,time:x.t,_tm:{t:x.t,w:0,d:1},_q:null}));
-    const nut=load('bookNut',{});
+    const nut=load('bookNut',{});IM=im.items||{};
     bookInfo=d;
     book=d.recipes.map(r=>{
       const c=classify({title:r.title,ingredients:r.ingredients,caption:[...r.tags,r.region].join(' '),keywords:r.tags.join(' ')});
@@ -725,6 +725,7 @@ async function loadBook(){
     }
   }catch{book=[];toast('Ricettario non disponibile offline')}
   for(const b of book){b.cat=fixCat(b); // preparazioni di base, basi da sole e verdure/legumi conditi, da qualunque fonte
+    const ph=IM[b.id];if(ph){if(!b.image)b.image=ph.img;if(ph.gen){b.imgGen=true;b.imgCredit='Immagine generata con l\'AI: indicativa, il piatto vero può essere diverso';delete b.imgFile}else if(!b.imgFile)b.imgFile=ph.file} // foto per ogni fonte
     if(PSEUDO_RX.test(b.title)){b.pseudo=true;b.country='Stati Uniti';b.cc='US';b.region=''}} // italo-americani
   fillSelects();render();
 }
@@ -820,7 +821,7 @@ function card(i){
   const facts=[tm&&`⏱ <b>${fmtMin(tm.t)}</b>`,tm&&DIFF[tm.d],pp&&`<b>${Math.round(pp.kcal)}</b> kcal`,pp?.eur!=null&&`${i.cov!=null&&i.cov<.85?'circa ':''}<b>${euro(pp.eur)}</b>/pers.`,i.linked&&i.cost&&`costo ${i.cost}`].filter(Boolean);
   const diets=(i.diets||[]).filter(d=>MAIN_DIETS.includes(d));if(i.pseudo)diets.unshift('Italo-americano');
   return `<div class="item" data-id="${i.id}">
-    <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
+    <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${i.imgGen?'<span class="aiTag" title="Immagine generata con l\'AI">AI</span>':''}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
       <span class="cat">${esc(i.cat||'Altro')}</span>${i.rating?`<span class="rt">★ ${i.rating}</span>`:''}${vid?'<span class="play">▶ video</span>':''}</div>
     <div class="b"><h3>${esc(i.title||i.url)}</h3>
       <div class="facts">${facts.map(f=>`<span>${f}</span>`).join('')}</div>
