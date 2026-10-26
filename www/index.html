@@ -202,6 +202,12 @@ details summary{cursor:pointer}
 #chips2{padding-top:6px}#chips2 .chip{font-size:.82rem;padding:5px 11px}
 .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:.9rem;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:9;box-shadow:var(--sh2);max-width:calc(100% - 32px)}
 .toast.on{opacity:1;transform:translateX(-50%)}
+@font-face{font-family:'Fredoka';src:url(fonts/fredoka.woff2) format('woff2');font-weight:500 700;font-display:swap}
+/* scritte della testata e delle schede in basso nello stesso carattere del logo Gnamina */
+.brand h1{font-family:'Fredoka',var(--sans);font-weight:700;letter-spacing:0;color:#3a2416}
+.brand small{font-family:'Fredoka',var(--sans);font-weight:500;letter-spacing:.01em}
+#tabs .tab{font-family:'Fredoka',var(--sans);font-weight:600;letter-spacing:.01em}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .brand h1{color:var(--fg)}}:root[data-theme=dark] .brand h1{color:var(--fg)}
 </style>
 </head>
 <body>
@@ -656,7 +662,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=45; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=46; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -754,7 +760,7 @@ function saveFromBook(i){
 $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;view=t.dataset.v;cur='Tutte';
   $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
   const bud=view==='budget';['#sbar','#chips','#list','#add'].forEach(x=>$(x).hidden=bud);if(bud)$('#chips2').hidden=true;if(bud)$('#chips2').hidden=true;if(bud)$('.filters').hidden=true;$('#budget').hidden=!bud;filtUI();
-  $('#vTitle').textContent={mine:'Le mie ricette',book:'Ricettario',budget:'Budget'}[view];$('#vSub').textContent={mine:'Le tue ricette salvate',book:'Ricette italiane e dal mondo',budget:'Menu per il tuo budget'}[view];window.scrollTo(0,0);
+  $('#vTitle').textContent={mine:'Le mie ricette',book:'Ricettario',budget:'Budget'}[view];$('#vSub').textContent={mine:'Le tue ricette salvate',book:'Italia e dal mondo',budget:'Menu per il tuo budget'}[view];window.scrollTo(0,0);
   if(bud){loadBook();loadPT();initBudget();return}
   $('#q').placeholder=view==='book'?'Cerca tra le ricette del ricettario…':'Cerca titolo, ingrediente, etichetta…';
   if(view==='book')loadBook();fillSelects();render()};
