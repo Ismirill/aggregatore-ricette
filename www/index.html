@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Aggregatore Ricette</title>
+<title>Gnamina</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -18,7 +18,7 @@
   --sh:0 1px 2px #2a231d10,0 6px 20px #2a231d0d;--sh2:0 10px 30px #2a231d26;--r:18px;--serif:'Fraunces',Georgia,'Times New Roman',serif;
   --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color-scheme:light}
 /* Stile Trattoria (tovaglia a quadretti): solo in modalità chiara */
-:root[data-style=trattoria]{--bg:#fbf5f1;--bg2:#fbece9;--card:#ffffff;--fg:#2b1b18;--mut:#86706a;--acc:#b3261e;--acc2:#e9a23b;--ok:#4f7a2a;--bd:#f0dcd8;
+:root[data-style=trattoria]{--bg:#fbf5f1;--bg2:#fbece9;--card:#ffffff;--fg:#2b1b18;--mut:#86706a;--acc:#d6362b;--acc2:#e9a23b;--ok:#4f7a2a;--bd:#f0dcd8;
   --sh:0 1px 2px #5a1a1414,0 6px 18px #5a1a1412;--sh2:0 12px 30px #5a1a1426;
   --pattern:repeating-linear-gradient(90deg,#b3261e1a 0 22px,transparent 22px 44px),repeating-linear-gradient(0deg,#b3261e1a 0 22px,transparent 22px 44px)}
 /* Tema scuro: automatico (sistema) salvo scelta Chiaro; oppure forzato con Scuro */
@@ -42,9 +42,9 @@ header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88
   padding:calc(10px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid color-mix(in srgb,var(--bd) 70%,transparent)}
 .top{display:flex;align-items:center;gap:10px;max-width:1100px;margin:0 auto}
 .brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-.brand svg{flex:none;width:34px;height:34px}
-.brand h1{margin:0;font-size:1.45rem;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand small{display:block;font-family:var(--sans);font-size:.72rem;color:var(--mut);font-weight:500;letter-spacing:.02em}
+.brand svg{flex:none;width:34px;height:34px}.brand .logo{flex:none;width:auto;height:34px;display:block}.brandSep{width:1px;height:30px;background:var(--bd);flex:none}
+.brand h1{margin:0;font-size:1.15rem;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand small{display:block;font-family:var(--sans);font-size:.72rem;color:var(--mut);font-weight:500;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.brand>div{min-width:0}
 .icon{background:var(--card);border:1px solid var(--bd);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--fg);cursor:pointer;padding:0;box-shadow:var(--sh)}
 .icon svg{width:20px;height:20px}
 .searchbar{max-width:1100px;margin:10px auto 0;display:flex;gap:8px}
@@ -203,7 +203,7 @@ details summary{cursor:pointer}
 <body>
 <header>
   <div class="top">
-    <div class="brand"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="18" fill="#c2502f"/><path d="M12 33h40a20 20 0 0 1-40 0z" fill="#fff8ef"/><rect x="22" y="51" width="20" height="4" rx="2" fill="#fff8ef"/><path d="M25 26c-3-4 3-6 0-11M32 26c-3-4 3-6 0-11M39 26c-3-4 3-6 0-11" stroke="#f3c27a" stroke-width="3" fill="none" stroke-linecap="round"/></svg><div><h1 id="vTitle">Le mie ricette</h1><small id="vSub">Aggregatore Ricette</small></div></div>
+    <div class="brand"><img class="logo" src="logo.svg" alt="Gnamina" width="402" height="128"><span class="brandSep" aria-hidden="true"></span><div><h1 id="vTitle">Le mie ricette</h1><small id="vSub">Le tue ricette salvate</small></div></div>
     <button class="icon" id="camBtn" aria-label="Trova ricette da una foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden>
     <button class="icon" id="setBtn" aria-label="Impostazioni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </div>
@@ -652,7 +652,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=38; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=39; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -749,7 +749,7 @@ function saveFromBook(i){
 $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;view=t.dataset.v;cur='Tutte';
   $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
   const bud=view==='budget';['#sbar','#chips','#list','#add'].forEach(x=>$(x).hidden=bud);if(bud)$('#chips2').hidden=true;if(bud)$('#chips2').hidden=true;if(bud)$('.filters').hidden=true;$('#budget').hidden=!bud;filtUI();
-  $('#vTitle').textContent={mine:'Le mie ricette',book:'Ricettario',budget:'Budget e menu'}[view];$('#vSub').textContent={mine:'Aggregatore Ricette',book:'Ricette italiane da Wikibooks',budget:'Menu bilanciati per il tuo budget'}[view];window.scrollTo(0,0);
+  $('#vTitle').textContent={mine:'Le mie ricette',book:'Ricettario',budget:'Budget'}[view];$('#vSub').textContent={mine:'Le tue ricette salvate',book:'Ricette italiane e dal mondo',budget:'Menu per il tuo budget'}[view];window.scrollTo(0,0);
   if(bud){loadBook();loadPT();initBudget();return}
   $('#q').placeholder=view==='book'?'Cerca tra le ricette del ricettario…':'Cerca titolo, ingrediente, etichetta…';
   if(view==='book')loadBook();fillSelects();render()};
@@ -1329,7 +1329,7 @@ function shopping(P){
   SHOP_TXT=[`🛒 Lista della spesa ${when} · ${o.people} ${o.people>1?'persone':'persona'}`,...groups.flatMap(([name,xs])=>['',name.toUpperCase(),...xs.map(x=>`☐ ${line(x)}${x.note?` (${x.note})`:''}`)]),'',
     'DISPENSA (di solito già in casa, controlla):',...pantry.map(x=>`☐ ${line(x)}${x.note?` (${x.note})`:''}`),'☐ sale, pepe e spezie: q.b.',
     ...(extra.length?['','Dalle mie ricette:',...extra.map(e=>'☐ '+e.replace(/<[^>]+>/g,''))]:[]),'',
-    `Totale alla cassa ≈${euro(tot)} (confezioni intere; se manca anche la dispensa +${euro(totP)})${P.period?` · prezzi medi ${P.period} (${P.zone})`:''}`,`Menu creato con Aggregatore Ricette · ${location.origin+location.pathname}`].join('\n');
+    `Totale alla cassa ≈${euro(tot)} (confezioni intere; se manca anche la dispensa +${euro(totP)})${P.period?` · prezzi medi ${P.period} (${P.zone})`:''}`,`Menu creato con Gnamina · ${location.origin+location.pathname}`].join('\n');
   return `<div class="row" style="justify-content:flex-start;margin:8px 0;gap:8px"><button type="button" class="btn pri" id="shopShare">📤 Condividi</button><button type="button" class="btn" id="shopCopy">📋 Copia</button></div>
     <div class="row" id="shopAlt" hidden style="justify-content:flex-start;gap:8px;margin:0 0 8px"><a class="btn wa" href="#" target="_blank" rel="noopener">WhatsApp</a><a class="btn ml" href="#">E-mail</a><span class="meta">oppure copia e incolla dove vuoi</span></div>
     ${groups.map(([name,xs])=>`<p style="margin:10px 0 4px"><b>${esc(name)}</b> <span class="meta">${xs.length}</span></p><ul class="shop">${xs.map(row).join('')}</ul>`).join('')}
