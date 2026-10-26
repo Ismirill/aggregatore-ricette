@@ -160,7 +160,9 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .nbox b{display:block;font-size:1.05rem;font-family:var(--serif)}.nbox span{font-size:.72rem;color:var(--mut)}
 .nut details{margin-bottom:10px}.nut details ul{margin:6px 0}
 details summary{cursor:pointer}
-.lic{font-size:.78rem;color:var(--mut);margin:0 0 6px}.aiTag{position:absolute;right:8px;bottom:8px;z-index:2;font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:center}.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
+.lic{font-size:.78rem;color:var(--mut);margin:0 0 6px}
+.shopBox{margin:4px 0 12px}.shopBox summary{list-style:none;cursor:pointer;background:var(--acc);color:#fff;font-weight:700;font-size:1.05rem;padding:14px 16px;border-radius:14px;text-align:center;box-shadow:var(--sh)}.shopBox summary::-webkit-details-marker{display:none}.shopBox summary span{font-weight:500;opacity:.85}.shopBox[open] summary{border-radius:14px 14px 0 0}.shopBox #shopList{background:var(--card);border:1px solid var(--bd);border-top:none;border-radius:0 0 14px 14px;padding:10px 14px 14px}
+#bOut .dish{font-size:1rem}#bOut .dish small{font-size:.82rem}#bOut .dish .r{font-size:.72rem}#bOut .meal>.meta{font-size:.85rem}#bOut .nbox span{font-size:.78rem}#bOut .bdg{font-size:.76rem}#bOut .fonti p{text-align:left;margin:8px 0 0;font-size:.82rem}.aiTag{position:absolute;right:8px;bottom:8px;z-index:2;font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:center}.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
 .kv{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
 .kv span{font-size:.8rem;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--bg2)}
 
@@ -662,7 +664,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=48; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=49; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1308,19 +1310,20 @@ function showPlan(P){
     <div class="nbox"><div><b>${euro(res.cost)}</b><span>costo stimato su ${euro(o.budget)}</span></div>
       <div><b>${euro(res.cost/o.people/(week?7:1))}</b><span>a persona${week?' al giorno':''}</span></div>
       <div><b>${Math.round(kcalDay)} kcal</b><span>a persona ${week?`al giorno (${[hasBk?'colazione':'',o.lunch?'pranzo':'',o.dinner?'cena':''].filter(Boolean).join('+')})`:'per il pasto'}</span></div></div>
+    <details class="shopBox" id="shop"><summary>🛒 Lista della spesa <span>per ${o.people} ${o.people>1?'persone':'persona'}</span></summary><div id="shopList"></div></details>
     <div class="badges" style="margin-bottom:8px">${rule(`Proteine ${Math.round(res.macro.p*100)}%`,res.macro.p>=.12&&res.macro.p<=.22)}${rule(`Carboidrati ${Math.round(res.macro.c*100)}%`,res.macro.c>=.42&&res.macro.c<=.62)}${rule(`Grassi ${Math.round(res.macro.f*100)}%`,res.macro.f<=.36)}
       ${week&&res.cnt?`${o.diets.some(d=>/Vege|pesce/.test(d))?'':rule(`Pesce ${res.cnt.pesce}×`,res.cnt.pesce>=2)}${rule(`Legumi ${res.cnt.legumi}×`,res.cnt.legumi>=2)}${o.diets.some(d=>/Vege|Pesce/.test(d))?'':rule(`Carne rossa ${res.cnt.rossa}×`,res.cnt.rossa<=2)}`:''}</div>
-    <p class="meta">🍎 <b>Frutta di stagione a ${MESI[o.month]}</b> (prezzi medi al kg in ${esc(PT?.zone||'Italia')}): ${X.fruits.map(f=>{const k=keyOf(f);return esc(f)+(PT&&k&&PT.eur[k]?` ${euro(PT.eur[k])}`:'')}).join(' · ')}
-      <br>🥦 <b>Verdura di stagione</b>: ${veg.map(v=>{const k=keyOf(v);return esc(v)+(PT&&k&&PT.eur[k]?` ${euro(PT.eur[k])}`:'')}).join(' · ')}</p>
     ${days.map(({g,ms})=>`<div class="day"><h3>${g}<span>${euro(ms.reduce((a,m)=>a+m.eur,0)*o.people)}</span></h3>${ms.map(m=>`<div class="meal">${week?`<b>${MEAL[m.m]}</b>`:''}
       ${m.dishes.map(x=>`<div class="dish" data-id="${esc(x.id)}" data-book="${x.book?1:''}"><span><span class="r">${ROLE[x.role]||(x.kind?x.kind[0].toUpperCase()+x.kind.slice(1):'Colazione')}${x.pronto?' · pronto':''}</span>${esc(x.title)}</span><small>⏱${x.t?x.t+'′':'pochi min'} · ${Math.round(x.kcal)} kcal · ${euro(x.eur)}</small></div>`).join('')}
       ${m.m==='breakfast'?'':`<div class="dish" style="cursor:default"><span><span class="r">Frutta</span>${esc(X.fruits[(m.d*2+(m.m==='dinner'?1:0))%X.fruits.length])} di stagione</span><small>150 g · ${Math.round(X.fruit.kcal)} kcal · ${euro(X.fruit.eur)}</small></div>`}
       ${breadAt(o,X,m)?`<div class="dish" style="cursor:default"><span><span class="r">Pane</span>pane</span><small>50 g · ${Math.round(X.bread.kcal)} kcal · ${euro(X.bread.eur)}</small></div>`:''}
       <p class="meta" style="margin:4px 0 0;text-align:right">${m.t?`⏱ circa ${fmtMin(m.t)} in cucina · `:''}${Math.round(m.kcal)} kcal a persona</p></div>`).join('')}</div>`).join('')}
-    <details class="meta" id="shop"><summary><b>🛒 Lista della spesa per ${o.people} ${o.people>1?'persone':'persona'}</b></summary><div id="shopList"></div></details>
+    <details class="meta fonti" style="text-align:left"><summary>Note, prezzi di stagione e fonti</summary>    <p class="meta">🍎 <b>Frutta di stagione a ${MESI[o.month]}</b> (prezzi medi al kg in ${esc(PT?.zone||'Italia')}): ${X.fruits.map(f=>{const k=keyOf(f);return esc(f)+(PT&&k&&PT.eur[k]?` ${euro(PT.eur[k])}`:'')}).join(' · ')}
+      <br>🥦 <b>Verdura di stagione</b>: ${veg.map(v=>{const k=keyOf(v);return esc(v)+(PT&&k&&PT.eur[k]?` ${euro(PT.eur[k])}`:'')}).join(' · ')}</p>
     <p class="meta">Menu composto con i piatti della cucina italiana di tutti i giorni${o.region?`, dando la precedenza a quelli di ${esc(REG_AREA[o.region]==='isole'?'Sicilia e Sardegna':o.region)} e della sua area`:''}${o.cuisine==='italiana'?', inclusi i piatti regionali meno comuni':o.cuisine==='mondo'?', incluse ricette dal mondo':''}.</p>
     ${nPronti?`<p class="meta">I piatti segnati «pronto» (${nPronti}) sono cibi già pronti del supermercato: surgelati, freschi confezionati, in scatola o di gastronomia, con prezzi medi indicativi e valori nutrizionali medi della categoria (fa fede l'etichetta).</p>`:''}
     <p class="meta">Costi stimati con i prezzi medi${P.period?` dell'Osservatorio Prezzi MIMIT (${esc(P.period)}, ${esc(P.zone)})`:''} e prezzi indicativi; calorie e nutrienti medi, indicativi. Pasti scelti tra ${P.n} ricette compatibili${P.noCost?`; ${P.noCost} delle tue ricette sono escluse perché senza costo calcolato (aprile e tocca "Calcola calorie e costo")`:''}.</p>
+</details>
     <div class="row"><button class="btn" id="bEdit2">✚ Nuovo menu</button><button class="btn pri" id="bAgain">🔀 Varia menu</button></div>`;
   $('#bAgain').onclick=$('#bVary').onclick=()=>{$('#bOut').innerHTML='<p class="meta">Preparo un altro menu con le stesse scelte…</p>';$('#bForm').requestSubmit()};
   $('#bEdit').onclick=$('#bEdit2').onclick=()=>budgetView(true,0);
