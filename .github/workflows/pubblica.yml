@@ -52,7 +52,9 @@ jobs:
       - name: Foto dei piatti da Wikipedia / Wikimedia Commons (solo ricette nuove)
         run: python3 scripts/immagini.py
       - name: Foto generate con l'AI per le ricette ancora senza immagine (lotto giornaliero)
-        env: { ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}, IMG_LIMIT: '60' }
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          IMG_LIMIT: '60'
         run: pip3 install -q pillow && python3 scripts/immagini_ai.py
       - name: Tipo di piatto verificato incrociando Wikibooks, Wikipedia/Wikidata, nome e ingredienti
         run: python3 scripts/categorie.py
