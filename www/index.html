@@ -656,7 +656,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=41; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=42; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -867,7 +867,7 @@ function render(){
 const hitQ=(i,q)=>[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q);
 function noResults(q){
   const other=view==='mine'?(book||[]).filter(i=>hitQ(i,q)).length:items.filter(i=>hitQ(i,q)).length;
-  const e=encodeURIComponent('ricetta '+q),link=(h,cls,icon,l)=>`<a class="soc ${cls}" href="${h}" target="_blank" rel="noopener">${icon}<span>${l}</span></a>`;
+  const e=encodeURIComponent('ricetta '+q),link=(h,cls,icon,l)=>`<a class="soc ${cls}" href="${h}" target="_blank" rel="noopener" data-soc="${cls}" data-q="${esc(q)}">${icon}<span>${l}</span></a>`;
   const I={yt:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>',
     tt:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.6 5.8A4.3 4.3 0 0 1 15.5 3h-3.1v12.4a2.6 2.6 0 1 1-1.8-2.5V9.7a5.7 5.7 0 1 0 4.9 5.7V9.1a7.3 7.3 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.2-1.6z"/></svg>',
     ig:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>',
@@ -875,8 +875,21 @@ function noResults(q){
   return `<b>Nessuna ricetta per «${esc(q)}»</b>${view==='mine'?'tra le tue ricette':'nel ricettario'}${other?`, ma ${other} nel${view==='mine'?' Ricettario':'le tue ricette'}.`:'.'}
     ${other?`<div class="row" style="justify-content:center;margin-top:12px"><button class="btn pri" data-goto="${view==='mine'?'book':'mine'}">Vedi ${other} ${other>1?'ricette':'ricetta'} ${view==='mine'?'nel Ricettario':'tra le tue'}</button></div>`:''}
     <p style="margin:16px 0 8px">Cercala online: trovato il video giusto, condividilo con Gnamina o incolla il link con +.</p>
-    <div class="socs">${link('https://www.youtube.com/results?search_query='+e,'yt',I.yt,'YouTube')}${link('https://www.tiktok.com/search?q='+e,'tt',I.tt,'TikTok')}${link('https://www.instagram.com/explore/search/keyword/?q='+e,'ig',I.ig,'Instagram')}${link('https://www.google.com/search?q='+e,'gg',I.gg,'Google')}</div>`;
+    <div class="socs">${link('https://www.youtube.com/results?search_query='+e,'yt',I.yt,'YouTube')}${link('https://www.tiktok.com/search?q='+e,'tt',I.tt,'TikTok')}${link('https://www.instagram.com/explore/tags/'+igTag(q)+'/','ig',I.ig,'Instagram')}${link('https://www.google.com/search?q='+e,'gg',I.gg,'Google')}</div>`;
 }
+// Sul telefono i link https a YouTube/Instagram aprono l'app ma spesso perdono la ricerca: si prova prima lo schema dell'app
+// (youtube://, instagram://) e, se l'app non c'è, dopo un attimo si apre la pagina web normale
+const igTag=q=>q.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
+const IOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function openSocial(kind,q,web){
+  const e=encodeURIComponent('ricetta '+q);
+  const app={yt:'youtube://www.youtube.com/results?search_query='+e,ig:'instagram://tag?name='+igTag(q)}[kind];
+  if(!IOS||!app)return false; // su Android e sul computer il link https porta già alla ricerca
+  const t0=Date.now();location.href=app;
+  setTimeout(()=>{if(!document.hidden&&Date.now()-t0<2500)location.href=web},1400); // app non installata: pagina web
+  return true;
+}
+document.addEventListener('click',e=>{const a=e.target.closest('a.soc[data-soc]');if(a&&openSocial(a.dataset.soc,a.dataset.q,a.href))e.preventDefault()});
 
 /* ---------- Zona per i prezzi ---------- */
 // {province} scelta a mano, {lat,lon} dal GPS, oppure vuoto = il server stima la posizione dall'indirizzo IP
