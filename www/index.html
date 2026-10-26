@@ -581,7 +581,8 @@ async function server(path,body){
   if(!res.ok)throw Object.assign(new Error(d.error||res.statusText),{status:res.status});
   return d;
 }
-const aiErr=e=>e?.status===429?'Troppe richieste, riprova tra un minuto':e?.message||'Servizio AI non disponibile';
+// 429 dal server: o troppe richieste dallo stesso telefono (15 al minuto) o quota gratuita giornaliera dell'AI esaurita (si rinnova alle 2 di notte, ora italiana)
+const aiErr=e=>e?.status===429?(/giornalier|quota|limite/i.test(e.message||'')?'Quota AI gratuita del giorno esaurita: riprova dopo le 2 di notte':'Troppe richieste, riprova tra un minuto'):e?.message||'Servizio AI non disponibile';
 
 // Estrae i dati di una ricetta da un post social (didascalia + copertina, analizzati dal server)
 async function aiAnalyze(d){
@@ -682,7 +683,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=53; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=54; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){

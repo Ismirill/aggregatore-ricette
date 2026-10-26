@@ -44,7 +44,7 @@ jobs:
         run: python3 scripts/mondo.py
       - name: Artusi 1895 da Wikisource, analizzato a lotti (solo ricette mancanti)
         if: github.event_name != 'push'
-        env: { ARTUSI_LIMIT: '100' }  # con le 150 traduzioni giornaliere resta nella quota gratuita dell'AI
+        env: { ARTUSI_LIMIT: '60' }  # con le 150 traduzioni giornaliere resta nella quota gratuita dell'AI
         run: python3 scripts/artusi.py
       - name: Ricette singole con licenza libera (Wikipedia, Cookbook inglese), solo mancanti
         if: github.event_name != 'push'
@@ -54,7 +54,7 @@ jobs:
       - name: Foto generate con l'AI per le ricette ancora senza immagine (lotto giornaliero)
         env:
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
-          IMG_LIMIT: '60'
+          IMG_LIMIT: '25'
         run: pip3 install -q pillow && python3 scripts/immagini_ai.py
       - name: Tipo di piatto verificato incrociando Wikibooks, Wikipedia/Wikidata, nome e ingredienti
         run: python3 scripts/categorie.py
