@@ -85,6 +85,10 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px}
 .bdg.z{background:var(--bg2);color:var(--mut)}
 .stars{color:var(--star);letter-spacing:1px}
 .empty{color:var(--mut);text-align:center;padding:48px 16px;line-height:1.6}
+.socs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:360px;margin:4px auto 0}
+.soc{display:flex;align-items:center;justify-content:center;gap:9px;padding:12px 14px;border-radius:14px;font-weight:700;font-size:.95rem;text-decoration:none;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.12);transition:transform .15s}.soc:active{transform:scale(.97)}.soc svg{width:22px;height:22px;flex:none}
+.soc.yt{background:#ff0033}.soc.tt{background:#111;box-shadow:0 4px 14px rgba(0,0,0,.12),inset 0 0 0 1px #25f4ee55,inset 2px 2px 0 #fe2c5533}.soc.ig{background:linear-gradient(45deg,#f9ce34,#ee2a7b 50%,#6228d7)}.soc.gg{background:#fff;color:#3c4043;border:1px solid #dadce0}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .soc.gg{background:#2a2622;color:#f2ebe1;border-color:#3f3730}}:root[data-theme=dark] .soc.gg{background:#2a2622;color:#f2ebe1;border-color:#3f3730}
 .empty b{display:block;font-family:var(--serif);font-size:1.3rem;color:var(--fg);margin-bottom:6px}
 
 /* ---------- Pulsanti ---------- */
@@ -652,7 +656,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=40; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=41; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -863,11 +867,15 @@ function render(){
 const hitQ=(i,q)=>[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q);
 function noResults(q){
   const other=view==='mine'?(book||[]).filter(i=>hitQ(i,q)).length:items.filter(i=>hitQ(i,q)).length;
-  const e=encodeURIComponent('ricetta '+q),link=(h,l)=>`<a class="btn" href="${h}" target="_blank" rel="noopener">${l}</a>`;
+  const e=encodeURIComponent('ricetta '+q),link=(h,cls,icon,l)=>`<a class="soc ${cls}" href="${h}" target="_blank" rel="noopener">${icon}<span>${l}</span></a>`;
+  const I={yt:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>',
+    tt:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.6 5.8A4.3 4.3 0 0 1 15.5 3h-3.1v12.4a2.6 2.6 0 1 1-1.8-2.5V9.7a5.7 5.7 0 1 0 4.9 5.7V9.1a7.3 7.3 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.2-1.6z"/></svg>',
+    ig:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>',
+    gg:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.8 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.5a4.7 4.7 0 0 1-2 3.1v2.6h3.3c1.9-1.8 3-4.4 3-7.6z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.6c-.9.6-2.1 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3v2.6A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.4 13.9a6 6 0 0 1 0-3.8V7.5H3a10 10 0 0 0 0 9z"/><path fill="#EA4335" d="M12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.9A10 10 0 0 0 3 7.5l3.4 2.6C7.2 7.8 9.4 6 12 6z"/></svg>'};
   return `<b>Nessuna ricetta per «${esc(q)}»</b>${view==='mine'?'tra le tue ricette':'nel ricettario'}${other?`, ma ${other} nel${view==='mine'?' Ricettario':'le tue ricette'}.`:'.'}
     ${other?`<div class="row" style="justify-content:center;margin-top:12px"><button class="btn pri" data-goto="${view==='mine'?'book':'mine'}">Vedi ${other} ${other>1?'ricette':'ricetta'} ${view==='mine'?'nel Ricettario':'tra le tue'}</button></div>`:''}
     <p style="margin:16px 0 8px">Cercala online: trovato il video giusto, condividilo con Gnamina o incolla il link con +.</p>
-    <div class="row" style="justify-content:center;flex-wrap:wrap;gap:8px">${link('https://www.youtube.com/results?search_query='+e,'▶ YouTube')}${link('https://www.tiktok.com/search?q='+e,'♪ TikTok')}${link('https://www.instagram.com/explore/search/keyword/?q='+e,'◎ Instagram')}${link('https://www.google.com/search?q='+e,'G Google')}</div>`;
+    <div class="socs">${link('https://www.youtube.com/results?search_query='+e,'yt',I.yt,'YouTube')}${link('https://www.tiktok.com/search?q='+e,'tt',I.tt,'TikTok')}${link('https://www.instagram.com/explore/search/keyword/?q='+e,'ig',I.ig,'Instagram')}${link('https://www.google.com/search?q='+e,'gg',I.gg,'Google')}</div>`;
 }
 
 /* ---------- Zona per i prezzi ---------- */
