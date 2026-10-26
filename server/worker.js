@@ -87,6 +87,16 @@ async function giallo(query) {
   } catch { return []; }
 }
 
+// Trascrizione di una ricetta fotografata (scritta a mano, stampata, su un libro o uno schermo)
+async function ocr(env, b) {
+  const data = str(b.image, 6e6);
+  if (!data) throw Object.assign(new Error('Foto mancante'), { status: 400 });
+  const result = await aiJson(env, `Questa foto mostra una ricetta scritta (a mano, stampata, su un libro, una rivista o uno schermo). Trascrivila fedelmente, senza inventare quello che non c'è. Rispondi SOLO con un oggetto JSON:
+{"is_recipe":true|false,"title":"nome del piatto","servings":numero di persone o null,"time":minuti totali o null,"cat":"Antipasti|Primi|Secondi|Contorni|Piatti unici|Lievitati|Dolci|Altro","ingredients":["quantità e ingrediente, uno per voce, come scritto"],"steps":["un passaggio per voce, in ordine"],"notes":"eventuali note o consigli presenti"}
+Se il testo è in un'altra lingua, traducilo in italiano. Se la foto non contiene una ricetta leggibile, restituisci is_recipe false.`, `data:image/jpeg;base64,${data}`);
+  return { result };
+}
+
 async function photo(env, b) {
   const data = str(b.image, 6e6);
   if (!data) throw Object.assign(new Error('Foto mancante'), { status: 400 });
@@ -372,12 +382,12 @@ export default {
         return reply(origin, { error: limit ? 'Limite giornaliero raggiunto' : e.message }, limit ? 429 : e.status === 400 ? 400 : 502);
       }
     }
-    if (req.method !== 'POST' || !['/analyze', '/photo', '/nutrition', '/preview', '/translate-recipe'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
+    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/nutrition', '/preview', '/translate-recipe'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';
     if (env.LIMITER && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
     try {
       const body = await req.json();
-      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await preview(body) : path === '/translate-recipe' ? await translateRecipe(env, body) : await analyze(env, body));
+      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/ocr' ? await ocr(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await preview(body) : path === '/translate-recipe' ? await translateRecipe(env, body) : await analyze(env, body));
     } catch (e) {
       // Quota giornaliera gratuita esaurita o errore del modello
       const limit = e.status === 429 || /neuron|quota|limit|4006/i.test(e.message);

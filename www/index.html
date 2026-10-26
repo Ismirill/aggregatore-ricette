@@ -161,6 +161,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .nut details{margin-bottom:10px}.nut details ul{margin:6px 0}
 details summary{cursor:pointer}
 .lic{font-size:.78rem;color:var(--mut);margin:0 0 6px}
+.srcGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.srcCard{font:inherit;text-align:left;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:12px;cursor:pointer;color:var(--fg)}.srcCard b{display:block;font-size:1rem;margin-bottom:4px}.srcCard span{font-size:.78rem;color:var(--mut);line-height:1.35;display:block}.srcCard:active{transform:scale(.98)}
 .shopBox{margin:4px 0 12px}.shopBox summary{list-style:none;cursor:pointer;background:var(--acc);color:#fff;font-weight:700;font-size:1.05rem;padding:14px 16px;border-radius:14px;text-align:center;box-shadow:var(--sh)}.shopBox summary::-webkit-details-marker{display:none}.shopBox summary span{font-weight:500;opacity:.85}.shopBox[open] summary{border-radius:14px 14px 0 0}.shopBox #shopList{background:var(--card);border:1px solid var(--bd);border-top:none;border-radius:0 0 14px 14px;padding:10px 14px 14px}
 #bOut .dish{font-size:1rem}#bOut .dish small{font-size:.82rem}#bOut .dish .r{font-size:.72rem}#bOut .meal>.meta{font-size:.85rem}#bOut .nbox span{font-size:.78rem}#bOut .bdg{font-size:.76rem}#bOut .fonti p{text-align:left;margin:8px 0 0;font-size:.82rem}.aiTag{position:absolute;right:8px;bottom:8px;z-index:2;font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:center}.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
 .kv{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
@@ -275,8 +276,20 @@ details summary{cursor:pointer}
 
 <dialog id="dlg">
   <h2 id="dlgT">Nuova ricetta</h2>
+  <div id="srcStep">
+    <p class="meta" style="margin:0 0 10px">Da dove viene la ricetta?</p>
+    <div class="srcGrid">
+      <button type="button" class="srcCard" data-src="link"><b>🔗 Da un link</b><span>TikTok, Instagram, YouTube, Facebook o un sito di ricette</span></button>
+      <button type="button" class="srcCard" data-src="manual"><b>✍️ La scrivo io</b><span>Titolo, ingredienti e procedimento scritti a mano</span></button>
+      <button type="button" class="srcCard" data-src="photo"><b>📷 La fotografo</b><span>Un quaderno, un libro, una rivista: l'AI la trascrive</span></button>
+      <button type="button" class="srcCard" data-src="file"><b>📄 Da un file</b><span>Un testo (.txt) o un'immagine già salvata</span></button>
+    </div>
+    <div class="row" style="justify-content:flex-end;margin-top:10px"><button type="button" class="btn" id="srcCancel">Annulla</button></div>
+  </div>
+  <input type="file" id="ocrIn" accept="image/*" capture="environment" hidden><input type="file" id="fileIn" accept=".txt,.md,.text,.rtf,.html,.htm,image/*" hidden>
   <form id="f">
-    <label>Link del video o della ricetta<span class="inl" style="margin:0"><input name="url" type="url" required placeholder="Incolla qui il link…"><button type="button" class="btn pri" id="analyzeBtn">Analizza</button></span></label>
+    <p class="meta" id="srcBar" hidden style="margin:0 0 8px"><span id="srcLbl"></span> · <a href="#" id="srcBack">cambia</a></p>
+    <label id="urlL">Link del video o della ricetta<span class="inl" style="margin:0"><input name="url" type="url" required placeholder="Incolla qui il link…"><button type="button" class="btn pri" id="analyzeBtn">Analizza</button></span></label>
     <label id="capL" hidden>Descrizione del post <span class="meta" style="font-weight:400">— se l'app non la legge da sola: tieni premuto il testo del post, copialo e incollalo qui</span>
       <span class="inl" style="margin:0;align-items:flex-start"><textarea name="caption" rows="3" placeholder="Ingredienti, dosi, procedimento…"></textarea><button type="button" class="btn" id="pasteCap">📋 Incolla</button></span></label>
     <div class="pv" id="pv"></div>
@@ -664,7 +677,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=50; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=51; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1521,8 +1534,46 @@ function openForm(data={}){
   $('#dlgT').textContent=editing?'Modifica ricetta':'Nuova ricetta';
   $('#del').hidden=!editing;
   showPv();
+  // primo passo: da dove viene la ricetta (saltato quando si modifica o arriva già un link)
+  if(editing)setMode(data.url?'link':'manual');else if(data.url)setMode('link');else{$('#srcStep').hidden=false;f.hidden=true}
   if(!$('#dlg').open)$('#dlg').showModal();
   if(!editing&&data.url)runAnalysis(data.url,false);
+}
+// Nuova ricetta passo per passo: link, scritta a mano, fotografata (trascritta dall'AI) o da un file
+let addMode='link';
+const SRC_LBL={link:'🔗 Da un link',manual:'✍️ Scritta da te',photo:'📷 Dalla foto di una ricetta',file:'📄 Da un file'};
+function setMode(m,fromUser){
+  addMode=m;const f=$('#f');
+  $('#srcStep').hidden=true;f.hidden=false;$('#srcBar').hidden=!!editing;$('#srcLbl').textContent=SRC_LBL[m];
+  $('#urlL').hidden=m!=='link';f.url.required=m==='link';
+  if(fromUser){if(m==='link')f.url.focus();if(m==='manual')f.title.focus();if(m==='photo')$('#ocrIn').click();if(m==='file')$('#fileIn').click()}
+}
+$('#srcStep').onclick=e=>{const c=e.target.closest('.srcCard');if(c)setMode(c.dataset.src,true)};
+$('#srcCancel').onclick=()=>$('#dlg').close();
+$('#srcBack').onclick=e=>{e.preventDefault();$('#srcStep').hidden=false;$('#f').hidden=true};
+$('#ocrIn').onchange=e=>{const file=e.target.files[0];e.target.value='';if(file)ocrFill(file)};
+$('#fileIn').onchange=e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(file.type.startsWith('image/'))ocrFill(file);else textFill(file)};
+function fillFrom(r,label){
+  const f=$('#f');if(!r||r.is_recipe===false){showPv('Non trovo una ricetta leggibile: compila tu i campi');return}
+  const put=(el,v)=>{if(v&&!el.value)el.value=v};
+  put(f.title,r.title);put(f.servings,r.servings);put(f.time,r.time);put(f.ingredients,(r.ingredients||[]).join('\n'));put(f.steps,(r.steps||[]).join('\n'));if(r.notes)put(f.note,r.notes);
+  const c=classify({title:f.title.value,ingredients:lines(f.ingredients.value)});
+  f.cat.value=cats.includes(r.cat)?r.cat:(c.cat||f.cat.value);put(f.country,c.country);put(f.region,c.region);
+  setDiets([...new Set([...getDiets(),...(r.diets||[]),...c.diets])]);
+  showPv(`${label}: ${(r.ingredients||[]).length} ingredienti e ${(r.steps||[]).length} passaggi. Controlla, correggi se serve e salva.`);
+}
+async function ocrFill(file){
+  if(!aiOn()){toast('Lettura da foto non attiva');return}
+  showPv('Leggo la ricetta dalla foto…');
+  try{const dataUrl=await shrink(file);const {result}=await server('/ocr',{image:dataUrl.split(',')[1]});fillFrom(result,'Letta dalla foto')}catch(e){showPv(aiErr(e))}
+}
+async function textFill(file){
+  showPv('Leggo il file…');
+  try{const t=(await file.text()).replace(/<[^>]+>/g,' ').replace(/[ \t]+/g,' ').trim().slice(0,6000);
+    if(!t){showPv('Il file è vuoto');return}
+    if(!aiOn()){$('#f').steps.value=t;showPv('Testo copiato nel procedimento: sistema i campi');return}
+    fillFrom(await aiAnalyze({url:'',title:file.name.replace(/\.[^.]+$/,''),caption:t}),'Letta dal file');
+  }catch(e){showPv(aiErr(e))}
 }
 function showPv(msg){$('#pv').innerHTML=(extra.image?`<img src="${esc(extra.image)}" alt="" referrerpolicy="no-referrer">`:'')+`<span>${esc(msg||sourceOf($('#f').url.value))}</span>`}
 async function runAnalysis(url,overwrite){
@@ -1575,7 +1626,7 @@ $('#f').onsubmit=e=>{
   const rec={...extra,id:editing?.id||Date.now().toString(36),created:editing?.created||Date.now(),url,
     title:f.title.value.trim(),cat:f.cat.value,time:+f.time.value||null,servings:+f.servings.value||null,diets:getDiets(),country:f.country.value.trim(),region:f.region.value.trim(),
     rating:formRating,ingredients:lines(f.ingredients.value),steps:lines(f.steps.value),
-    tags:f.tags.value.split(',').map(s=>s.trim()).filter(Boolean),note:f.note.value.trim(),source:sourceOf(url)};
+    tags:f.tags.value.split(',').map(s=>s.trim()).filter(Boolean),note:f.note.value.trim(),source:url?sourceOf(url):({photo:'Fotografata',file:'Da file'}[addMode]||'Scritta da te')};
   delete rec._tm;
   items=editing?items.map(i=>i.id===rec.id?rec:i):[rec,...items];
   if(editing?.nutrition?.key===rec.ingredients.join('|')+'#'+(rec.servings||4))rec.nutrition=editing.nutrition;
