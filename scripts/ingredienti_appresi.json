@@ -11,6 +11,10 @@
 "as": null,
 "via": "non trovato"
 },
+"acquavite": {
+"as": "liquore",
+"via": "Wikipedia: bevanda alcolica derivata dalla distillazione di un liquido zuccherino fermentato"
+},
 "aji amarillo": {
 "as": "frutta",
 "via": "Wikipedia: cultivar di peperoncino"
@@ -23,7 +27,15 @@
 "as": "albicocche",
 "via": "simile a \"albicocche\""
 },
+"alcune ciocchette ramerino": {
+"as": null,
+"via": "non trovato"
+},
 "allspice in polvere": {
+"as": null,
+"via": "non trovato"
+},
+"amba": {
 "as": null,
 "via": "non trovato"
 },
@@ -42,6 +54,10 @@
 "arancio candito": {
 "as": "arancia",
 "via": "simile a \"arancia\""
+},
+"arepas": {
+"as": "pane",
+"via": "Wikidata: pane di forma circolare preparato con farina di mais"
 },
 "aringa affumicata": {
 "as": "pesce",
@@ -68,6 +84,10 @@
 "via": "Wikidata: gum resin used in cooking and in various systems of herbal medicine"
 },
 "attieke": {
+"as": null,
+"via": "non trovato"
+},
+"ayib o cagliata fresca": {
 "as": null,
 "via": "non trovato"
 },
@@ -107,6 +127,10 @@
 "as": null,
 "via": "non trovato"
 },
+"belacan": {
+"as": null,
+"via": "non trovato"
+},
 "berbere": {
 "as": "spezie",
 "via": "Wikidata: miscela di spezie"
@@ -142,6 +166,14 @@
 "cacio gruiera": {
 "as": null,
 "via": "non trovato"
+},
+"cacio gruviera": {
+"as": "groviera",
+"via": "simile a \"groviera\""
+},
+"cacio gruyere": {
+"as": "gruyere",
+"via": "simile a \"gruyere\""
 },
 "cacio q b": {
 "as": "formaggio",
@@ -227,13 +259,29 @@
 "as": "marsala",
 "via": "simile a \"marsala\""
 },
+"chicchi mais": {
+"as": "mais dolce",
+"via": "sinonimo di mais dolce"
+},
+"chifel": {
+"as": null,
+"via": "non trovato"
+},
 "chiocciole": {
 "as": "calamari",
 "via": "Wikipedia: mollusco"
 },
+"chips platano": {
+"as": "verdure varie",
+"via": "Open Food Facts: Platanitos Verdes"
+},
 "chorizo": {
 "as": "salame",
 "via": "sinonimo di salame"
+},
+"chourico": {
+"as": "salame",
+"via": "Wikidata: insaccato di maiale a ricetta regionale"
 },
 "cicale": {
 "as": "scampi",
@@ -246,6 +294,10 @@
 "ciliege marasche o visciole": {
 "as": "ciliegie",
 "via": "simile a \"ciliegie\""
+},
+"ciocca ramerino": {
+"as": null,
+"via": "non trovato"
 },
 "cm alga kombu": {
 "as": "verdure",
@@ -263,9 +315,17 @@
 "as": null,
 "via": "non trovato"
 },
+"coda bue": {
+"as": null,
+"via": "non trovato"
+},
 "colorante per sughi": {
 "as": "pere",
 "via": "simile a \"pere\""
+},
+"condimento verde": {
+"as": "salsa",
+"via": "Open Food Facts: Guacamole"
 },
 "confettini colorati": {
 "as": "zucchero",
@@ -282,6 +342,10 @@
 "corn flakes": {
 "as": "cereali",
 "via": "sinonimo di cereali"
+},
+"cornflakes": {
+"as": "pasta",
+"via": "Wikipedia: alimento"
 },
 "crauti": {
 "as": "cavoli",
@@ -306,6 +370,18 @@
 "cremor tartaro": {
 "as": "vino",
 "via": "Wikidata: tartrates from wine reused as food ingredient"
+},
+"cucchiaiata acquavite": {
+"as": null,
+"via": "non trovato"
+},
+"cucchiaiata rhum": {
+"as": "rum",
+"via": "sinonimo di rum"
+},
+"cuore": {
+"as": "manzo",
+"via": "Wikidata: romanzo di Edmondo de Amicis"
 },
 "da a msemmen": {
 "as": null,
@@ -339,6 +415,10 @@
 "as": "zucchero",
 "via": "sinonimo di zucchero"
 },
+"dill": {
+"as": null,
+"via": "non trovato"
+},
 "dischi per empanadas": {
 "as": "pere",
 "via": "simile a \"pere\""
@@ -350,6 +430,10 @@
 "doubanjiang": {
 "as": "legumi",
 "via": "Wikidata: Chinese bean paste"
+},
+"dulce de leche": {
+"as": "latte",
+"via": "Wikipedia: dessert dell'America latina"
 },
 "dzavar": {
 "as": null,
@@ -372,6 +456,14 @@
 "via": "Wikipedia: pianta utilizzata per aromatizzare prodotti quali cibi, bevande o cosmetici"
 },
 "erbe essiccate": {
+"as": null,
+"via": "non trovato"
+},
+"estragon": {
+"as": null,
+"via": "non trovato"
+},
+"estragone": {
 "as": null,
 "via": "non trovato"
 },
@@ -439,11 +531,27 @@
 "as": "spezie",
 "via": "sinonimo di spezie"
 },
+"foglie laksa": {
+"as": null,
+"via": "non trovato"
+},
 "foglie lauro": {
 "as": "alloro",
 "via": "sinonimo di alloro"
 },
+"foglie molokhia": {
+"as": null,
+"via": "non trovato"
+},
+"foglie pandan": {
+"as": null,
+"via": "non trovato"
+},
 "foglie sorgo essiccate": {
+"as": null,
+"via": "non trovato"
+},
+"foglie vite": {
 "as": null,
 "via": "non trovato"
 },
@@ -451,9 +559,21 @@
 "as": null,
 "via": "non trovato"
 },
+"folaghe": {
+"as": null,
+"via": "non trovato"
+},
+"frankfurter": {
+"as": "salame",
+"via": "Wikidata: insaccato tipico tedesco"
+},
 "freekeh": {
 "as": "cereali",
 "via": "Wikipedia: Freekeh, noto anche come Farik, è un tipo di grano verde che"
+},
+"fumetto": {
+"as": null,
+"via": "non trovato"
 },
 "fumo liquido": {
 "as": "salsa",
@@ -471,6 +591,10 @@
 "as": "pesce",
 "via": "sinonimo di pesce"
 },
+"gambbi ninfea": {
+"as": null,
+"via": "non trovato"
+},
 "garam masala": {
 "as": "marsala",
 "via": "simile a \"marsala\""
@@ -486,6 +610,10 @@
 "gelatina": {
 "as": "frutta",
 "via": "Wikidata: confettura ottenuta bollendo la frutta con lo zucchero, filtrandone il succo e lasciando che si rapprenda"
+},
+"germano": {
+"as": null,
+"via": "non trovato"
 },
 "ghee": {
 "as": "burro",
@@ -520,6 +648,10 @@
 "via": "non trovato"
 },
 "grasso": {
+"as": null,
+"via": "non trovato"
+},
+"grasso coda": {
 "as": null,
 "via": "non trovato"
 },
@@ -563,9 +695,17 @@
 "as": null,
 "via": "non trovato"
 },
+"horseradish": {
+"as": "spezie",
+"via": "Wikidata: radice dell'Armoracia rusticana, usata come verdura o in polvere come spezia"
+},
 "ingrediente": {
 "as": null,
 "via": "non trovato"
+},
+"injera": {
+"as": "cereali",
+"via": "Wikipedia: piatto base della cucina etiope ed eritrea"
 },
 "jalapeno": {
 "as": "burro",
@@ -594,6 +734,14 @@
 "kefir": {
 "as": "latte",
 "via": "Wikipedia: Bevanda ottenuta da latte fermentato"
+},
+"khmeli suneli": {
+"as": "spezie",
+"via": "Wikipedia: Il khmeli suneli è una miscela di spezie georgiana che, in g"
+},
+"kielbasa affumicata": {
+"as": null,
+"via": "non trovato"
 },
 "kimel": {
 "as": "liquore",
@@ -647,6 +795,10 @@
 "as": null,
 "via": "non trovato"
 },
+"locoto o jalapeno": {
+"as": null,
+"via": "non trovato"
+},
 "luganighe": {
 "as": null,
 "via": "non trovato"
@@ -655,11 +807,23 @@
 "as": "pasta",
 "via": "Wikidata: tipo di pasta"
 },
+"lupini": {
+"as": null,
+"via": "non trovato"
+},
+"mahlab": {
+"as": "spezie",
+"via": "Wikidata: Spezia aromatica"
+},
 "mais": {
 "as": "mais dolce",
 "via": "sinonimo di mais dolce"
 },
 "mais in spiga": {
+"as": "mais dolce",
+"via": "sinonimo di mais dolce"
+},
+"mais viola": {
 "as": "mais dolce",
 "via": "sinonimo di mais dolce"
 },
@@ -671,6 +835,10 @@
 "as": "miele",
 "via": "sinonimo di miele"
 },
+"malto segale": {
+"as": "miele",
+"via": "sinonimo di miele"
+},
 "mars": {
 "as": "pesce",
 "via": "Open Food Facts: Atun"
@@ -678,6 +846,10 @@
 "martini dry": {
 "as": "liquore",
 "via": "sinonimo di liquore"
+},
+"mazzetto guarnito": {
+"as": null,
+"via": "non trovato"
 },
 "mazzetto verde piantine papavero campo": {
 "as": null,
@@ -719,6 +891,10 @@
 "as": "fegato",
 "via": "sinonimo di fegato"
 },
+"naan": {
+"as": "pane",
+"via": "Wikipedia: Il naan è un tipo di pane lievitato diffuso in Asia centrale"
+},
 "name": {
 "as": null,
 "via": "non trovato"
@@ -739,6 +915,10 @@
 "as": "olio",
 "via": "simile a \"olio\""
 },
+"oliva q b": {
+"as": null,
+"via": "non trovato"
+},
 "orecchia": {
 "as": "fegato",
 "via": "sinonimo di fegato"
@@ -758,6 +938,18 @@
 "paparine": {
 "as": null,
 "via": "non trovato"
+},
+"pastella": {
+"as": "pesce",
+"via": "Wikipedia: preparato gastronomico"
+},
+"pastella n": {
+"as": "pesce",
+"via": "Open Food Facts: Filetti in pastella"
+},
+"pastella n q b": {
+"as": "pesce",
+"via": "Open Food Facts: Filetti in pastella"
 },
 "pastello": {
 "as": null,
@@ -783,13 +975,37 @@
 "as": "pesce",
 "via": "sinonimo di pesce"
 },
+"petali calendula": {
+"as": null,
+"via": "non trovato"
+},
 "petali rosa canina rossa coltivata possibilmente senza pesticidi": {
+"as": null,
+"via": "non trovato"
+},
+"petto folaga fine": {
 "as": null,
 "via": "non trovato"
 },
 "petto vitrello da ciascuna": {
 "as": "vitell",
 "via": "simile a \"vitell\""
+},
+"piccione giovane grosso": {
+"as": null,
+"via": "non trovato"
+},
+"piccioni": {
+"as": "verdure varie",
+"via": "Open Food Facts: Champignons Tranchés"
+},
+"piccolo cervello lessato": {
+"as": null,
+"via": "non trovato"
+},
+"pimento in polvere": {
+"as": null,
+"via": "non trovato"
 },
 "pipette": {
 "as": "pasta",
@@ -799,7 +1015,15 @@
 "as": null,
 "via": "non trovato"
 },
+"pizzichi caglio": {
+"as": "lievito",
+"via": "sinonimo di lievito"
+},
 "platani": {
+"as": null,
+"via": "non trovato"
+},
+"platani maturi": {
 "as": null,
 "via": "non trovato"
 },
@@ -811,6 +1035,10 @@
 "as": "frutta",
 "via": "Wikidata: frutto a forma di banana, meno dolce, da cuocere"
 },
+"platano maturo": {
+"as": null,
+"via": "non trovato"
+},
 "platano verde": {
 "as": null,
 "via": "non trovato"
@@ -818,6 +1046,18 @@
 "pomidoro maturi": {
 "as": "pomodori",
 "via": "sinonimo di pomodori"
+},
+"popcorn": {
+"as": null,
+"via": "non trovato"
+},
+"poussin": {
+"as": null,
+"via": "non trovato"
+},
+"prahok": {
+"as": "pesce",
+"via": "Wikipedia: prodotto alimentare"
 },
 "prescinsoea": {
 "as": "ricotta",
@@ -848,6 +1088,10 @@
 "via": "sinonimo di spezie"
 },
 "radice iris": {
+"as": null,
+"via": "non trovato"
+},
+"rametto ramerino": {
 "as": null,
 "via": "non trovato"
 },
@@ -883,6 +1127,10 @@
 "as": null,
 "via": "non trovato"
 },
+"reni": {
+"as": null,
+"via": "non trovato"
+},
 "rhum": {
 "as": "rum",
 "via": "sinonimo di rum"
@@ -890,6 +1138,14 @@
 "ricopertura": {
 "as": "cioccolato",
 "via": "sinonimo di cioccolato"
+},
+"rigaglie piccione q b": {
+"as": null,
+"via": "non trovato"
+},
+"ripieno": {
+"as": "cioccolato",
+"via": "Open Food Facts: Lindor Latte"
 },
 "risoni": {
 "as": "pasta",
@@ -915,9 +1171,17 @@
 "as": null,
 "via": "non trovato"
 },
+"sambal": {
+"as": "spezie",
+"via": "Wikidata: salsa speziata e piccante"
+},
 "sanguinaccio": {
 "as": "salame",
 "via": "sinonimo di salame"
+},
+"sapa q b": {
+"as": "miele",
+"via": "sinonimo di miele"
 },
 "sbrinz": {
 "as": "parmigiano",
@@ -955,9 +1219,21 @@
 "as": "mais dolce",
 "via": "sinonimo di mais dolce"
 },
+"stockfish": {
+"as": "pesce",
+"via": "Wikipedia: motore scacchistico open source"
+},
+"stomachino": {
+"as": null,
+"via": "non trovato"
+},
 "sumac": {
 "as": "spezie",
 "via": "Open Food Facts: Смрадлика"
+},
+"tamalitos mais": {
+"as": "mais dolce",
+"via": "sinonimo di mais dolce"
 },
 "tartufi": {
 "as": "tartufo",
@@ -972,6 +1248,14 @@
 "via": "simile a \"tartufo\""
 },
 "tartufi preparati al n": {
+"as": "tartufo",
+"via": "simile a \"tartufo\""
+},
+"tartufi q b": {
+"as": "tartufo",
+"via": "simile a \"tartufo\""
+},
+"tartufi tritati finissimi": {
 "as": "tartufo",
 "via": "simile a \"tartufo\""
 },
@@ -1043,7 +1327,15 @@
 "as": null,
 "via": "non trovato"
 },
+"trucioli legno hickory o melo": {
+"as": null,
+"via": "non trovato"
+},
 "tufo": {
+"as": null,
+"via": "non trovato"
+},
+"uccelletti cotti in umido": {
 "as": null,
 "via": "non trovato"
 },
@@ -1086,6 +1378,10 @@
 "zampa senz’osso": {
 "as": null,
 "via": "non trovato"
+},
+"zhug": {
+"as": "salsa",
+"via": "Wikidata: hot sauce origin"
 },
 "zibibbo": {
 "as": "vino",
