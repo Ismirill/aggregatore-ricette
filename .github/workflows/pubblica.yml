@@ -54,7 +54,7 @@ jobs:
       - name: Foto generate con l'AI per le ricette ancora senza immagine (lotto giornaliero)
         env:
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
-          IMG_LIMIT: '25'
+          IMG_LIMIT: '12'   # ogni foto costa ~165 neuroni: 12 al giorno ≈ 2.000 su 10.000 gratuiti, il resto resta agli utenti
         run: pip3 install -q pillow && python3 scripts/immagini_ai.py
       - name: Tipo di piatto verificato incrociando Wikibooks, Wikipedia/Wikidata, nome e ingredienti
         run: python3 scripts/categorie.py
