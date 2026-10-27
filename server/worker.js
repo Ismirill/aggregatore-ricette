@@ -331,6 +331,20 @@ async function genImage(env, b) {
   return { image: r.image, prompt };
 }
 
+// Verifica che una foto trovata su una banca immagini mostri davvero il piatto (solo GitHub Actions, protetto da segreto).
+// Costa pochi neuroni rispetto a generare l'immagine: si prova prima questa strada.
+async function checkImage(env, b) {
+  const title = str(b.title, 120).trim(), data = str(b.image, 4e6);
+  if (!title || !data) throw Object.assign(new Error('Titolo o foto mancante'), { status: 400 });
+  const ing = (Array.isArray(b.ingredients) ? b.ingredients : []).slice(0, 6).map(x => str(x, 40)).join(', ');
+  const r = await aiJson(env, `Questa foto è stata trovata cercando «${title}»${ing ? ` (ingredienti: ${ing})` : ''} su una banca di immagini.
+Guarda SOLO la foto e rispondi con un oggetto JSON:
+{"seen":"cosa mostra davvero la foto, in poche parole","match":true|false,"confidence":"alta|media|bassa"}
+match è true solo se la foto mostra un piatto pronto che un cuoco italiano riconoscerebbe come «${title}» o una sua variante molto vicina (stesso piatto, stessi ingredienti principali, stesso tipo di preparazione).
+È false se mostra un piatto diverso, ingredienti crudi, un animale vivo, un'illustrazione, un testo, persone in primo piano o non è chiaro cosa sia.`, `data:image/jpeg;base64,${data}`);
+  return { result: r && { seen: str(r.seen, 160), match: r.match === true, confidence: str(r.confidence, 10) } };
+}
+
 export default {
   // Aggiornamento automatico dei prezzi: un lotto di province ogni giorno
   async scheduled(event, env, ctx) {
@@ -378,6 +392,13 @@ export default {
     if (req.method === 'POST' && path === '/genimg') {
       if (!env.ADMIN_TOKEN || req.headers.get('X-Admin') !== env.ADMIN_TOKEN) return reply(origin, { error: 'Non autorizzato' }, 403);
       try { return reply(origin, await genImage(env, await req.json())); } catch (e) {
+        const limit = e.status === 429 || /neuron|quota|limit|4006/i.test(e.message);
+        return reply(origin, { error: limit ? 'Limite giornaliero raggiunto' : e.message }, limit ? 429 : e.status === 400 ? 400 : 502);
+      }
+    }
+    if (req.method === 'POST' && path === '/checkimg') {
+      if (!env.ADMIN_TOKEN || req.headers.get('X-Admin') !== env.ADMIN_TOKEN) return reply(origin, { error: 'Non autorizzato' }, 403);
+      try { return reply(origin, await checkImage(env, await req.json())); } catch (e) {
         const limit = e.status === 429 || /neuron|quota|limit|4006/i.test(e.message);
         return reply(origin, { error: limit ? 'Limite giornaliero raggiunto' : e.message }, limit ? 429 : e.status === 400 ? 400 : 502);
       }

@@ -683,7 +683,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=56; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=57; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -752,7 +752,7 @@ async function loadBook(){
     }
   }catch{book=[];toast('Ricettario non disponibile offline')}
   for(const b of book){b.cat=fixCat(b); // preparazioni di base, basi da sole e verdure/legumi conditi, da qualunque fonte
-    const ph=IM[b.id];if(ph){if(!b.image)b.image=ph.img;if(ph.gen){b.imgGen=true;b.imgCredit='Immagine generata con l\'AI: indicativa, il piatto vero può essere diverso';delete b.imgFile}else if(!b.imgFile)b.imgFile=ph.file} // foto per ogni fonte
+    const ph=IM[b.id];if(ph){if(!b.image)b.image=ph.img;if(ph.gen){b.imgGen=true;b.imgCredit='Immagine generata con l\'AI: indicativa, il piatto vero può essere diverso';delete b.imgFile}else if(ph.web){b.imgCredit=`Foto: ${ph.web.by||ph.web.src} (${ph.web.lic}) via ${ph.web.src}`;b.imgLink=ph.web.page;delete b.imgFile}else if(!b.imgFile)b.imgFile=ph.file} // foto per ogni fonte
     if(PSEUDO_RX.test(b.title)){b.pseudo=true;b.country='Stati Uniti';b.cc='US';b.region=''}} // italo-americani
   // Solo ricette complete: almeno 3 ingredienti e un procedimento vero (le altre restano fuori finché non vengono analizzate)
   book=book.filter(b=>(b.ingredients?.length||0)>=3&&(b.steps||[]).join(' ').length>=120);
@@ -1522,7 +1522,7 @@ function openDetail(i){
     ${i.steps?.length?`<h3>Procedimento</h3><ol>${i.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
     ${i.note?`<h3>Note</h3><p class="cap">${esc(i.note)}</p>`:''}
     ${!i.ingredients?.length&&i.caption?`<h3>Descrizione</h3><p class="cap">${esc(i.caption)}</p>`:''}
-    ${i.imgFile?`<p class="lic">Foto: <a href="${esc(i.imgFile)}" target="_blank" rel="noopener">Wikimedia Commons</a> (licenza libera, autore e licenza nella pagina della foto)</p>`:i.imgCredit?`<p class="lic">${esc(i.imgCredit)}</p>`:''}
+    ${i.imgFile?`<p class="lic">Foto: <a href="${esc(i.imgFile)}" target="_blank" rel="noopener">Wikimedia Commons</a> (licenza libera, autore e licenza nella pagina della foto)</p>`:i.imgCredit?`<p class="lic">${esc(i.imgCredit)}${i.imgLink?` · <a href="${esc(i.imgLink)}" target="_blank" rel="noopener">pagina della foto</a>`:''}</p>`:''}
     <div class="row">${i.url?`<a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">Apri originale</a>`:''}
       <a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">▶ Cerca su YouTube</a><span class="sp"></span>
       ${i.pronto||i.colazione?'':i.book?'<button class="btn pri" id="dSave">Salva nelle mie</button>':'<button class="btn" id="dEdit">Modifica</button>'}<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button></div>`;

@@ -51,6 +51,13 @@ jobs:
         run: python3 scripts/libere.py
       - name: Foto dei piatti da Wikipedia / Wikimedia Commons (solo ricette nuove)
         run: python3 scripts/immagini.py
+      - name: Foto cercate sulle banche di immagini libere, verificate dall'AI (lotto giornaliero)
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          PEXELS_KEY: ${{ secrets.PEXELS_KEY }}
+          PIXABAY_KEY: ${{ secrets.PIXABAY_KEY }}
+          SEARCH_LIMIT: '30'
+        run: pip3 install -q pillow && python3 scripts/immagini_web.py
       - name: Foto generate con l'AI per le ricette ancora senza immagine (lotto giornaliero)
         env:
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
