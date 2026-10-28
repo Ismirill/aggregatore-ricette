@@ -63,7 +63,7 @@ jobs:
         if: github.event_name != 'push'   # solo il lotto giornaliero: a ogni pubblicazione consumerebbe la quota AI
         env:
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
-          IMG_LIMIT: '20'   # ogni foto costa ~190 neuroni: 20 al giorno ≈ 3.800 su 10.000 gratuiti, il resto resta agli utenti
+          IMG_LIMIT: '25'   # ogni foto costa ~170 neuroni: 25 al giorno ≈ 4.300 su 10.000 gratuiti, il resto resta agli utenti
         run: pip3 install -q pillow && python3 scripts/immagini_ai.py
       - name: Tipo di piatto verificato incrociando Wikibooks, Wikipedia/Wikidata, nome e ingredienti
         run: python3 scripts/categorie.py

@@ -55,8 +55,14 @@ def call(path, body):
     return json.loads(urllib.request.urlopen(req, timeout=180).read())
 
 
+ASPETTO = json.loads((ROOT / 'scripts' / 'aspetto_piatti.json').read_text(encoding='utf-8')) if (ROOT / 'scripts' / 'aspetto_piatti.json').exists() else {}
+
+
 def gen(r):
-    return call('/genimg', {'title': r['title'], 'cat': r.get('cat'), 'country': r.get('country'), 'ingredients': (r.get('ingredients') or [])[:12]})
+    body = {'title': r['title'], 'cat': r.get('cat'), 'country': r.get('country'), 'ingredients': (r.get('ingredients') or [])[:12]}
+    if ASPETTO.get(r['title']):
+        body['visual'] = ASPETTO[r['title']]  # descrizione scritta guardando foto reali del piatto
+    return call('/genimg', body)
 
 
 def check(r, path):

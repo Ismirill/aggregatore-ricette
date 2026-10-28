@@ -327,11 +327,13 @@ async function genImage(env, b) {
   if (!title) throw Object.assign(new Error('Titolo mancante'), { status: 400 });
   const ing = (b.ingredients || []).slice(0, 12).map(x => String(x).slice(0, 60)).join('; ');
   const where = b.country && b.country !== 'Italia' ? `della cucina di ${String(b.country).slice(0, 40)}` : 'della cucina italiana';
-  const d = await aiJson(env, `Ricetta ${where}: «${title}»${b.cat ? ` (tipo di piatto: ${str(b.cat, 20)})` : ''}.
+  // descrizione già scritta guardando foto reali del piatto (scripts/aspetto_piatti.json): niente passaggio di testo
+  const given = str(b.visual, 600).replace(/["\n]/g, ' ').trim();
+  const d = given ? { visual: given, dish: title, course: '' } : await aiJson(env, `Ricetta ${where}: «${title}»${b.cat ? ` (tipo di piatto: ${str(b.cat, 20)})` : ''}.
 Ingredienti: ${ing || 'non indicati'}.
 Descrivi come appare questo piatto una volta pronto e servito, basandoti sugli ingredienti e sul tipo di preparazione, senza inventare ingredienti che non ci sono (se non c'è pasta, non è un piatto di pasta; se è un antipasto o un contorno, non mostrarlo come primo).
 Rispondi SOLO con JSON: {"dish":"nome del piatto in inglese","course":"appetizer|first course|main course|side dish|one-dish meal|bread or pizza|dessert|breakfast|other","visual":"descrizione visiva in inglese in una frase (max 40 parole): forma, colori, ingredienti visibili, come è impiattato"}`);
-  const visual = str(d?.visual, 400).replace(/["\n]/g, ' ').trim(), dish = str(d?.dish, 80).replace(/["\n]/g, ' ').trim(), course = str(d?.course, 20);
+  const visual = str(d?.visual, 600).replace(/["\n]/g, ' ').trim(), dish = str(d?.dish, 80).replace(/["\n]/g, ' ').trim(), course = str(d?.course, 20);
   const prompt = `Professional food photography of ${dish || title}, ${course && course !== 'other' ? course + ', ' : ''}${b.country && b.country !== 'Italia' ? `traditional dish from ${String(b.country).slice(0, 40)}` : 'traditional Italian home cooking'}. ${visual || `made with ${ing.slice(0, 160)}`} Served on a plate on a rustic wooden table, natural soft daylight, shallow depth of field, appetizing, photorealistic, no text, no people, no hands`;
   const r = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt, steps: 4 });
   if (!r?.image) throw new Error('Immagine non generata');
