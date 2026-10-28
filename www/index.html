@@ -151,7 +151,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .shot{width:100%;max-height:240px;object-fit:cover;border-radius:16px}
 .dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}.dhead h2{margin:0}
 .dhead .icon{box-shadow:none}
-.sec{border-top:1px solid var(--bd);padding:14px 0 6px}.sec h3{margin:0 0 8px}.sec .meta{margin:0 0 10px}
+.syCode{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.3rem;font-weight:700;letter-spacing:.08em;text-align:center;padding:10px;border:2px dashed var(--bd);border-radius:12px;margin:0 0 8px;user-select:all;-webkit-user-select:all}.sec{border-top:1px solid var(--bd);padding:14px 0 6px}.sec h3{margin:0 0 8px}.sec .meta{margin:0 0 10px}
 .inl{display:flex;gap:8px;margin-top:10px;grid-template-columns:none}.inl input{flex:1;min-width:0}.inl .btn{flex:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid2 .btn{width:100%}
 .srv{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
@@ -334,6 +334,7 @@ details summary{cursor:pointer}
   <section class="sec"><h3>Zona per i prezzi</h3><p class="meta" id="zoneInfo">Costi calcolati con i prezzi medi ufficiali (Osservatorio Prezzi del Ministero) della tua provincia.</p>
     <select id="zoneSel" aria-label="Provincia per i prezzi"><option value="">Automatica (posizione approssimativa)</option></select>
     <div class="grid2" style="margin-top:8px"><button class="btn" id="gpsBtn">📍 Usa la mia posizione</button><button class="btn" id="zoneReset">Automatica</button></div></section>
+  <section class="sec"><h3>Ricette su tutti i tuoi dispositivi</h3><div id="syncBox"></div></section>
   <section class="sec"><h3>Backup</h3><p class="meta">Copia i dati e incollali su un altro dispositivo per trasferire le ricette.</p>
     <div class="grid2"><button class="btn" id="exp">Copia backup</button><button class="btn" id="imp">Incolla backup</button></div></section>
   <p class="meta" style="text-align:center;margin:12px 0 0" id="verInfo"></p>
@@ -344,6 +345,8 @@ details summary{cursor:pointer}
 const $=s=>document.querySelector(s);
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+let persistAsked=false;
+const saveItems=()=>{save('items',items);queueSync();if(!persistAsked){persistAsked=true;try{navigator.storage?.persist?.().catch(()=>{})}catch{}}}; // salva e, se c'è il codice ricettario, sincronizza
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200)};
 const lines=s=>String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);
@@ -665,9 +668,9 @@ async function repairThumbs(){
       else{const p=await server('/preview',{url:i.url});img=parseHtml(p.html).image||img}
     }catch{}
     const kept=await keepThumb(img);
-    if(kept&&kept.startsWith('data:')){i.image=kept;changed=true}
+    if(kept&&kept.startsWith('data:')){i.image=kept;i.t=Date.now();changed=true}
   }
-  if(changed){save('items',items);render()}
+  if(changed){saveItems();render()}
 }
 
 /* ---------- Video ---------- */
@@ -683,7 +686,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=57; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=58; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -776,9 +779,9 @@ function saveFromBook(i){
   const ex=items.find(x=>x.url===i.url);
   if(ex){toast('Già nelle tue ricette');return ex}
   const {book:_,...r}=i;
-  const rec={...r,id:Date.now().toString(36),created:Date.now(),rating:0,
+  const rec={...r,id:Date.now().toString(36),created:Date.now(),t:Date.now(),rating:0,
     note:i.artusi?'Ricetta di Pellegrino Artusi, La scienza in cucina (1895), pubblico dominio.':i.libera?`Ricetta da ${i.source} (${i.license}).`:i.world?'Ricetta da UniTools — theunitools.com (CC BY-SA 4.0), tradotta in italiano.':i.source==='Regione Puglia'?'Ricetta tipica dalla Regione Puglia – Pugliapromozione (CC BY 4.0).':`Ricetta da Wikibooks, Libro di cucina (${bookInfo?.license||'CC BY-SA 4.0'}). Autori: cronologia della pagina originale.`};
-  items=[rec,...items];save('items',items);toast('Salvata in Le mie ricette');return rec;
+  items=[rec,...items];saveItems();toast('Salvata in Le mie ricette');return rec;
 }
 $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;view=t.dataset.v;cur='Tutte';
   $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
@@ -1023,7 +1026,7 @@ async function computeNutrition(i){
   i.nutrition={...result,key:i.ingredients.join('|')+'#'+(i.servings||4)};
   const p=perPerson(i);
   if(p.kcal<=450&&!i.diets?.includes('Ipocalorico'))i.diets=[...(i.diets||[]),'Ipocalorico'];
-  if(i.book){const m=load('bookNut',{});m[i.id]=i.nutrition;save('bookNut',m)}else save('items',items);
+  if(i.book){const m=load('bookNut',{});m[i.id]=i.nutrition;save('bookNut',m)}else{i.t=Date.now();saveItems()}
   render();
 }
 
@@ -1526,7 +1529,7 @@ function openDetail(i){
     <div class="row">${i.url?`<a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">Apri originale</a>`:''}
       <a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">▶ Cerca su YouTube</a><span class="sp"></span>
       ${i.pronto||i.colazione?'':i.book?'<button class="btn pri" id="dSave">Salva nelle mie</button>':'<button class="btn" id="dEdit">Modifica</button>'}<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button></div>`;
-  $('#dRate').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n;i.rating=i.rating===n?0:n;save('items',items);render();
+  $('#dRate').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n;i.rating=i.rating===n?0:n;i.t=Date.now();saveItems();render();
     $('#dRate').querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.n<=i.rating))};
   if(i.ingredients?.length&&!i.linked){
     const base=i.servings||i.s||4;let n=base;
@@ -1652,19 +1655,19 @@ $('#reanalyze').onclick=()=>{const u=extractUrl($('#f').url.value);if(u)runAnaly
   const f=$('#f'),c=classify({title:f.title.value,ingredients:lines(f.ingredients.value),caption:extra.caption});if(c.cat)f.cat.value=c.cat;setDiets(c.diets);if(c.country)f.country.value=c.country;if(c.region)f.region.value=c.region}};
 $('#f').onsubmit=e=>{
   e.preventDefault();const f=e.target,url=extractUrl(f.url.value)||f.url.value;
-  const rec={...extra,id:editing?.id||Date.now().toString(36),created:editing?.created||Date.now(),url,
+  const rec={...extra,id:editing?.id||Date.now().toString(36),created:editing?.created||Date.now(),t:Date.now(),url,
     title:f.title.value.trim(),cat:f.cat.value,time:+f.time.value||null,servings:+f.servings.value||null,diets:getDiets(),country:f.country.value.trim(),region:f.region.value.trim(),
     rating:formRating,ingredients:lines(f.ingredients.value),steps:lines(f.steps.value),
     tags:f.tags.value.split(',').map(s=>s.trim()).filter(Boolean),note:f.note.value.trim(),source:url?sourceOf(url):({photo:'Fotografata',file:'Da file'}[addMode]||'Scritta da te')};
   delete rec._tm;
   items=editing?items.map(i=>i.id===rec.id?rec:i):[rec,...items];
   if(editing?.nutrition?.key===rec.ingredients.join('|')+'#'+(rec.servings||4))rec.nutrition=editing.nutrition;
-  save('items',items);$('#dlg').close();fillSelects();render();toast('Salvata in '+rec.cat);
-  if(rec.image&&!String(rec.image).startsWith('data:'))keepThumb(rec.image).then(img=>{if(img!==rec.image){const it=items.find(x=>x.id===rec.id);if(it){it.image=img;save('items',items);render()}}});
+  saveItems();$('#dlg').close();fillSelects();render();toast('Salvata in '+rec.cat);
+  if(rec.image&&!String(rec.image).startsWith('data:'))keepThumb(rec.image).then(img=>{if(img!==rec.image){const it=items.find(x=>x.id===rec.id);if(it){it.image=img;it.t=Date.now();saveItems();render()}}});
   if(aiOn()&&rec.ingredients.length&&!rec.nutrition)computeNutrition(items.find(x=>x.id===rec.id)).catch(()=>{});
 };
 $('#cancel').onclick=()=>$('#dlg').close();
-$('#del').onclick=()=>{if(confirm('Eliminare questa ricetta?')){items=items.filter(i=>i.id!==editing.id);save('items',items);$('#dlg').close();fillSelects();render()}};
+$('#del').onclick=()=>{if(confirm('Eliminare questa ricetta?')){const tb=load('tomb',{});tb[editing.id]=Date.now();save('tomb',tb);items=items.filter(i=>i.id!==editing.id);saveItems();$('#dlg').close();fillSelects();render()}};
 
 /* ---------- Eventi generali ---------- */
 $('#add').onclick=()=>openForm();
@@ -1680,19 +1683,98 @@ const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${e
 const setTheme=t=>{try{localStorage.setItem('theme',t||'auto')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme}; // predefinito: Trattoria chiara; Automatico solo se scelto
 $('#themeSeg').onchange=e=>setTheme(e.target.value);
 $('#styleSeg').onchange=e=>{try{localStorage.setItem('style',e.target.value)}catch{}document.documentElement.dataset.style=e.target.value};
-$('#setBtn').onclick=()=>{const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();if(aiOn())initZone();$('#set').showModal()};
+$('#setBtn').onclick=()=>{const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();syncUI();if(aiOn())initZone();$('#set').showModal()};
 $('#camBtn').onclick=()=>$('#camIn').click();
 $('#camIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)photoSearch(f)};
 $('#setClose').onclick=()=>$('#set').close();
-$('#catF').onsubmit=e=>{e.preventDefault();const c=e.target.c.value.trim();if(c&&!cats.includes(c)){cats.splice(cats.length-1,0,c);save('cats',cats);render();showCats();toast('Tipo aggiunto')}e.target.reset()};
+$('#catF').onsubmit=e=>{e.preventDefault();const c=e.target.c.value.trim();if(c&&!cats.includes(c)){cats.splice(cats.length-1,0,c);save('cats',cats);save('catsT',Date.now());queueSync();render();showCats();toast('Tipo aggiunto')}e.target.reset()};
 $('#exp').onclick=async()=>{try{await navigator.clipboard.writeText(JSON.stringify({cats,items}));toast('Backup copiato negli appunti')}catch{prompt('Copia questo testo:',JSON.stringify({cats,items}))}};
 $('#imp').onclick=async()=>{
   let t;try{t=await navigator.clipboard.readText()}catch{}
   if(!t)t=prompt('Incolla qui il backup:');if(!t)return;
   try{const d=JSON.parse(t),ids=new Set(items.map(i=>i.id));
     cats=[...new Set([...cats,...(d.cats||[])])];items=[...items,...(d.items||[]).filter(i=>!ids.has(i.id))];
-    save('cats',cats);save('items',items);fillSelects();render();toast('Backup importato')}catch{toast('Backup non valido')}
+    save('cats',cats);save('catsT',Date.now());items.forEach(i=>{if(!tOf(i))i.t=Date.now()});saveItems();fillSelects();render();toast('Backup importato')}catch{toast('Backup non valido')}
 };
+
+
+// --- Ricette personali su tutti i dispositivi (iPhone, Android, computer) ---
+// Un «codice ricettario» casuale (16 caratteri, 80 bit) identifica il ricettario: dal codice il dispositivo deriva la chiave
+// di cifratura (AES-GCM) e un'impronta per il server, che riceve e conserva solo dati illeggibili. Niente account né password.
+// Ogni ricetta ha l'ora di modifica t: vince la più recente; le cancellazioni restano in "tomb" per non far tornare la ricetta.
+const SY_AB='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+let SY=load('sync',null),syncBusy=false,syncTimer=0,syKeys=null;
+const newCode=()=>[...crypto.getRandomValues(new Uint8Array(16))].map(x=>SY_AB[x%32]).join('');
+const fmtCode=c=>c.replace(/(.{4})(?=.)/g,'$1-');
+const normCode=s=>String(s||'').toUpperCase().replace(/[^A-Z2-9]/g,'');
+const b64=u=>{let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode(...u.subarray(i,i+0x8000));return btoa(s)};
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const tOf=i=>i.t||i.created||0;
+async function syncKeys(code){
+  if(syKeys?.code===code)return syKeys;
+  const te=new TextEncoder();
+  const base=await crypto.subtle.importKey('raw',te.encode(code),'PBKDF2',false,['deriveKey']);
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:te.encode('gnamina-ricettario'),iterations:150000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  const k=[...new Uint8Array(await crypto.subtle.digest('SHA-256',te.encode('gnamina-id:'+code)))].map(x=>x.toString(16).padStart(2,'0')).join('');
+  return syKeys={code,key,k};
+}
+async function seal(key,obj){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj)));return b64(iv)+'.'+b64(new Uint8Array(ct))}
+async function unseal(key,s){const [iv,ct]=String(s).split('.');return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(iv)},key,unb64(ct))))}
+const queueSync=()=>{if(!SY?.code)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>doSync(),2000)};
+async function doSync(full=false){
+  if(!SY?.code||syncBusy||!crypto.subtle)return false;
+  if(!navigator.onLine){syncUI('Offline: si sincronizza appena c\'è rete');return false}
+  syncBusy=true;syncUI('Sincronizzazione…');
+  try{
+    const {key,k}=await syncKeys(SY.code);
+    const pushed=full?0:SY.pushed||0,tomb=load('tomb',{}),ch=[];
+    for(const i of items)if(tOf(i)>pushed)ch.push({id:i.id,t:tOf(i),data:await seal(key,i)});
+    for(const [id,t] of Object.entries(tomb))if(t>pushed)ch.push({id,t,del:1});
+    const catsT=load('catsT',0);if(catsT>pushed)ch.push({id:'_cats',t:catsT,data:await seal(key,cats)});
+    const start=Date.now();
+    for(let i=0;i<ch.length;i+=40)await server('/sync',{k,since:-1,changes:ch.slice(i,i+40)});
+    let since=full?0:SY.since||0,res,changed=false;
+    do{res=await server('/sync',{k,since,changes:[]});if(await applyRows(res.rows||[],key))changed=true;since=res.next}while(res.more);
+    SY={...SY,pushed:start,since,last:Date.now()};save('sync',SY);
+    if(changed){items.sort((a,b)=>(b.created||0)-(a.created||0));save('items',items);fillSelects();render()}
+    syncUI();return true;
+  }catch(e){syncUI(e.status===0?'Offline: si sincronizza appena c\'è rete':'Sincronizzazione non riuscita, si riprova più tardi');return false}
+  finally{syncBusy=false}
+}
+async function applyRows(rows,key){
+  let changed=false;const tomb=load('tomb',{});
+  for(const r of rows){
+    if(r.id==='_cats'){if(!r.del&&r.t>load('catsT',0)){try{const c=await unseal(key,r.data);if(Array.isArray(c)&&c.length){const last=cats.at(-1);cats=[...new Set([...cats.slice(0,-1),...c.filter(x=>x!==last)]),last];save('cats',cats);save('catsT',r.t)}}catch{}}continue}
+    const loc=items.find(x=>x.id===r.id);
+    if(r.del){if(loc&&tOf(loc)<=r.t){items=items.filter(x=>x.id!==r.id);changed=true}tomb[r.id]=Math.max(tomb[r.id]||0,r.t);continue}
+    if((tomb[r.id]||0)>=r.t)continue;
+    if(!loc||tOf(loc)<r.t){try{const d=await unseal(key,r.data);if(d&&d.id===r.id){d.t=r.t;items=loc?items.map(x=>x.id===r.id?d:x):[d,...items];changed=true}}catch{}}
+  }
+  save('tomb',tomb);return changed;
+}
+function syncUI(status){
+  const box=$('#syncBox');if(!box)return;
+  if(!SY?.code){
+    box.innerHTML=`<p class="meta">Crea un <b>codice ricettario</b>: le ricette vengono salvate cifrate online e compaiono su iPhone, Android e computer. Senza account né password: basta scrivere lo stesso codice sull'altro dispositivo.</p><div class="grid2"><button class="btn pri" id="syNew">Crea il codice</button><button class="btn" id="syHave">Ho già un codice</button></div>${IOS?'<p class="meta" style="margin-top:10px">Su iPhone aggiungi Gnamina alla schermata Home (Condividi → Aggiungi alla schermata Home): così Safari non cancella le ricette.</p>':''}`;
+    $('#syNew').onclick=()=>linkCode(newCode(),true);
+    $('#syHave').onclick=()=>{const c=normCode(prompt('Scrivi il codice ricettario che vedi sull\'altro dispositivo:'));if(c.length===16)linkCode(c);else if(c)toast('Codice non valido: sono 16 tra lettere e numeri')};
+    return}
+  const last=SY.last?new Date(SY.last).toLocaleString('it-IT',{dateStyle:'short',timeStyle:'short'}):'mai';
+  box.innerHTML=`<p class="meta">Il tuo codice ricettario. Sull'altro dispositivo apri Impostazioni → «Ho già un codice» e scrivilo: le ricette si uniscono e restano aggiornate.</p><div class="syCode">${fmtCode(SY.code)}</div><p class="meta" id="syStat">${esc(status||'Ultima sincronizzazione: '+last)}</p><div class="grid2"><button class="btn" id="syCopy">Copia</button><button class="btn" id="syShare">Condividi</button><button class="btn" id="syNow">Sincronizza ora</button><button class="btn" id="syOff">Scollega</button></div>`;
+  $('#syCopy').onclick=async()=>{try{await navigator.clipboard.writeText(fmtCode(SY.code));toast('Codice copiato')}catch{prompt('Copia il codice:',fmtCode(SY.code))}};
+  $('#syShare').onclick=()=>shareText('Codice ricettario Gnamina',`Il mio codice ricettario Gnamina: ${fmtCode(SY.code)}\nPer collegare un dispositivo apri ${SITE}?codice=${SY.code}`);
+  $('#syNow').onclick=()=>doSync();
+  $('#syOff').onclick=()=>{if(confirm('Scollegare questo dispositivo? Le ricette restano qui, ma non si aggiornano più con gli altri.')){SY=null;try{localStorage.removeItem('sync')}catch{}syKeys=null;syncUI()}};
+}
+async function linkCode(code,fresh){
+  const now=Date.now();items.forEach(i=>{if(!tOf(i))i.t=now});save('items',items);
+  if(!load('catsT',0))save('catsT',now);
+  SY={code,pushed:0,since:0,last:0};save('sync',SY);syncUI('Sincronizzazione…');
+  if(await doSync(true))toast(fresh?'Codice creato: le ricette sono al sicuro':'Dispositivo collegato');
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&SY?.code&&Date.now()-(SY.last||0)>60000)doSync()});
+window.addEventListener('online',()=>SY?.code&&doSync());
+setInterval(()=>SY?.code&&document.visibilityState==='visible'&&doSync(),5*60000);
 
 // Link in arrivo: da Android (condividi verso l'APK) o da URL ?url=/&text= (share target web, Comandi Rapidi iOS)
 function receive(d){
@@ -1707,8 +1789,10 @@ window.onShared=()=>{const s=window.AndroidShare?.take();if(s)receive(JSON.parse
 const p=new URLSearchParams(location.search);
 if(p.has('url')||p.has('text')){receive({url:p.get('url'),text:p.get('text'),title:p.get('title'),desc:p.get('desc')});history.replaceState(null,'',location.pathname)}
 window.onShared();
+if(p.has('codice')){const c=normCode(p.get('codice'));history.replaceState(null,'',location.pathname);if(c.length===16&&SY?.code!==c&&confirm('Collegare questo dispositivo al ricettario con il codice '+fmtCode(c)+'?'))linkCode(c)}
 
 fillSelects();render();
+if(SY?.code)setTimeout(()=>doSync(),800);
 loadPT().then(()=>PT&&render());
 setTimeout(repairThumbs,1500);
 $('#verInfo').textContent='Versione '+APP_VERSION;

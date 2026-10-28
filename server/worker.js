@@ -2,7 +2,7 @@ import ING from './ingredienti.json';
 // Server dell'Aggregatore Ricette: fa le richieste AI per conto dell'app con Cloudflare Workers AI
 // (quota gratuita giornaliera, nessuna chiave per l'utente). I prompt stanno qui, così l'endpoint non è un proxy generico.
 const MODEL = '@cf/google/gemma-4-26b-a4b-it'; // visione + testo, licenza Gemma (utilizzabile in UE)
-const ORIGINS = ['https://ismirill.github.io', 'https://localhost', 'http://localhost', 'http://localhost:8080', 'capacitor://localhost'];
+const ORIGINS = ['https://ismirill.github.io', 'https://localhost', 'http://localhost', 'http://localhost:8080', 'http://127.0.0.1:8080', 'capacitor://localhost'];
 const DIETS = ['Vegano', 'Vegetariano', 'Senza glutine', 'Senza lattosio', 'Senza uova', 'Senza frutta secca', 'Ipocalorico'];
 
 const cors = origin => ({
@@ -345,6 +345,31 @@ match è true solo se la foto mostra un piatto pronto che un cuoco italiano rico
   return { result: r && { seen: str(r.seen, 160), match: r.match === true, confidence: str(r.confidence, 10) } };
 }
 
+// Sincronizzazione delle ricette personali tra dispositivi. Il telefono cifra ogni ricetta con una chiave derivata dal
+// «codice ricettario» e manda qui solo l'impronta del codice (k) e i dati cifrati: il server non può leggere le ricette.
+// Ogni documento vince se la sua ora di modifica t è più recente; le cancellazioni restano come segnaposto (del=1).
+async function sync(env, b) {
+  if (!env.SYNC) throw Object.assign(new Error('Sincronizzazione non disponibile'), { status: 503 });
+  const k = String(b.k || '');
+  if (!/^[0-9a-f]{64}$/.test(k)) throw Object.assign(new Error('Codice non valido'), { status: 400 });
+  const now = Date.now();
+  const stmts = [];
+  for (const c of (Array.isArray(b.changes) ? b.changes : []).slice(0, 60)) {
+    const id = str(c.id, 80), t = Math.floor(+c.t || 0), del = c.del ? 1 : 0, data = del ? '' : String(c.data || '');
+    if (!id || !t || data.length > 500000) continue;
+    stmts.push(env.SYNC.prepare('INSERT INTO docs (k,id,t,s,del,data) VALUES (?1,?2,?3,?4,?5,?6) ON CONFLICT(k,id) DO UPDATE SET t=excluded.t, s=excluded.s, del=excluded.del, data=excluded.data WHERE excluded.t > docs.t').bind(k, id, t, now, del, data));
+  }
+  if (stmts.length) await env.SYNC.batch(stmts);
+  const since = Math.floor(+b.since);
+  let rows = [], more = false;
+  if (since >= 0) {
+    const r = await env.SYNC.prepare('SELECT id, t, s, del, data FROM docs WHERE k = ?1 AND s > ?2 ORDER BY s LIMIT 100').bind(k, since).all();
+    rows = r.results || []; more = rows.length === 100;
+  }
+  // prossimo "since": l'ultimo arrivo letto se c'è altro, altrimenti adesso con un margine per le scritture concorrenti
+  return { now, next: more ? rows[rows.length - 1].s : now - 5000, rows, more };
+}
+
 export default {
   // Aggiornamento automatico dei prezzi: un lotto di province ogni giorno
   async scheduled(event, env, ctx) {
@@ -403,9 +428,12 @@ export default {
         return reply(origin, { error: limit ? 'Limite giornaliero raggiunto' : e.message }, limit ? 429 : e.status === 400 ? 400 : 502);
       }
     }
-    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/nutrition', '/preview', '/translate-recipe'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
+    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/nutrition', '/preview', '/translate-recipe', '/sync'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';
     if (env.LIMITER && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
+    if (path === '/sync') {
+      try { return reply(origin, await sync(env, await req.json())); } catch (e) { console.log('errore sync', e.message); return reply(origin, { error: e.status ? e.message : 'Sincronizzazione non riuscita' }, e.status || 502); }
+    }
     try {
       const body = await req.json();
       return reply(origin, path === '/photo' ? await photo(env, body) : path === '/ocr' ? await ocr(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await preview(body) : path === '/translate-recipe' ? await translateRecipe(env, body) : await analyze(env, body));
