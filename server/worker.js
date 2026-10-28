@@ -320,15 +320,22 @@ ${JSON.stringify(src)}`);
 // Foto generata con l'AI per una ricetta senza immagine (solo per l'aggiornamento automatico su GitHub, protetto da segreto).
 // Flux Schnell resta nella quota gratuita giornaliera di Workers AI; l'immagine torna in base64 (PNG).
 const CAT_EN = { Primi: 'pasta or rice first course', Secondi: 'main course', Contorni: 'vegetable side dish', Antipasti: 'appetizer', Dolci: 'dessert', Lievitati: 'baked bread or pizza', 'Piatti unici': 'one-dish meal', Colazione: 'breakfast' };
+// Prima il modello di testo "studia" la ricetta (nome italiano, ingredienti, tipo di piatto) e descrive in inglese
+// com'è il piatto pronto: così il generatore di immagini non fraintende il nome (es. "Acciughe alle olive" non è una pasta).
 async function genImage(env, b) {
   const title = String(b.title || '').replace(/["\n]/g, ' ').trim().slice(0, 120);
   if (!title) throw Object.assign(new Error('Titolo mancante'), { status: 400 });
-  const where = b.country && b.country !== 'Italia' ? `traditional dish from ${String(b.country).slice(0, 40)}` : 'traditional Italian home cooking';
-  const hint = (b.ingredients || []).slice(0, 5).map(x => String(x).replace(/^[\d\s.,/½¼¾]+(g|kg|ml|l|dl|cucchiai?o?|cucchiaini?|tazz[ae]|spicch[io]|fett[ae]|pizzic[oh]i?)?\.?\s*(di\s)?/i, '')).join(', ').slice(0, 160);
-  const prompt = `Professional food photography of "${title}", ${where}, ${CAT_EN[b.cat] || 'dish'}${hint ? `, made with ${hint}` : ''}, served on a plate on a rustic wooden table, natural soft daylight, shallow depth of field, appetizing, photorealistic, no text, no people, no hands`;
+  const ing = (b.ingredients || []).slice(0, 12).map(x => String(x).slice(0, 60)).join('; ');
+  const where = b.country && b.country !== 'Italia' ? `della cucina di ${String(b.country).slice(0, 40)}` : 'della cucina italiana';
+  const d = await aiJson(env, `Ricetta ${where}: «${title}»${b.cat ? ` (tipo di piatto: ${str(b.cat, 20)})` : ''}.
+Ingredienti: ${ing || 'non indicati'}.
+Descrivi come appare questo piatto una volta pronto e servito, basandoti sugli ingredienti e sul tipo di preparazione, senza inventare ingredienti che non ci sono (se non c'è pasta, non è un piatto di pasta; se è un antipasto o un contorno, non mostrarlo come primo).
+Rispondi SOLO con JSON: {"dish":"nome del piatto in inglese","course":"appetizer|first course|main course|side dish|one-dish meal|bread or pizza|dessert|breakfast|other","visual":"descrizione visiva in inglese in una frase (max 40 parole): forma, colori, ingredienti visibili, come è impiattato"}`);
+  const visual = str(d?.visual, 400).replace(/["\n]/g, ' ').trim(), dish = str(d?.dish, 80).replace(/["\n]/g, ' ').trim(), course = str(d?.course, 20);
+  const prompt = `Professional food photography of ${dish || title}, ${course && course !== 'other' ? course + ', ' : ''}${b.country && b.country !== 'Italia' ? `traditional dish from ${String(b.country).slice(0, 40)}` : 'traditional Italian home cooking'}. ${visual || `made with ${ing.slice(0, 160)}`} Served on a plate on a rustic wooden table, natural soft daylight, shallow depth of field, appetizing, photorealistic, no text, no people, no hands`;
   const r = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt, steps: 4 });
   if (!r?.image) throw new Error('Immagine non generata');
-  return { image: r.image, prompt };
+  return { image: r.image, prompt, dish, course };
 }
 
 // Verifica che una foto trovata su una banca immagini mostri davvero il piatto (solo GitHub Actions, protetto da segreto).

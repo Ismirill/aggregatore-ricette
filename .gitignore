@@ -8,3 +8,4 @@ android/local.properties
 android/.idea/
 android/capacitor-cordova-android-plugins/build/
 android/app/src/main/assets/public/
+scripts/__pycache__/
