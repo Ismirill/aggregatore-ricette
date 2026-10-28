@@ -25,3 +25,7 @@ crons = ["0 4 * * *"]
 binding = "SYNC"
 database_name = "gnamina-sync"
 database_id = "379736d5-8d05-4c1e-b18c-fb3aed808a59"
+
+# Account: ID del progetto Firebase (Authentication). Vuoto finché il progetto non è configurato: gli account restano disattivati.
+[vars]
+FIREBASE_PROJECT = ""

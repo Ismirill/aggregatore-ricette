@@ -28,6 +28,14 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
 
+            <!-- Ritorno nell'app dopo l'accesso con Google/Apple/Facebook fatto nel browser -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="gnamina" android:host="accedi" />
+            </intent-filter>
+
         </activity>
 
         <provider

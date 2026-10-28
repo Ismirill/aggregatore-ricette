@@ -31,11 +31,16 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void handleShare(Intent intent) {
-        if (intent == null || !Intent.ACTION_SEND.equals(intent.getAction())) return;
+        if (intent == null) return;
         try {
             JSONObject o = new JSONObject();
-            o.put("text", intent.getStringExtra(Intent.EXTRA_TEXT));
-            o.put("title", intent.getStringExtra(Intent.EXTRA_SUBJECT));
+            if (Intent.ACTION_SEND.equals(intent.getAction())) {
+                o.put("text", intent.getStringExtra(Intent.EXTRA_TEXT));
+                o.put("title", intent.getStringExtra(Intent.EXTRA_SUBJECT));
+            } else if (Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getData() != null) {
+                // link gnamina://accedi?codice=... dal browser, dopo l'accesso con Google/Apple/Facebook
+                o.put("url", intent.getData().toString());
+            } else return;
             pendingShare = o.toString();
         } catch (Exception ignored) {}
     }
@@ -75,6 +80,14 @@ public class MainActivity extends BridgeActivity {
             i.putExtra(Intent.EXTRA_SUBJECT, title);
             i.putExtra(Intent.EXTRA_TEXT, text);
             runOnUiThread(() -> startActivity(Intent.createChooser(i, title)));
+        }
+
+        // Apre un indirizzo nel browser di sistema (l'accesso Google/Apple/Facebook non è permesso dentro la WebView)
+        @JavascriptInterface
+        public void open(String url) {
+            if (url == null || !url.startsWith("https://")) return;
+            Intent i = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url));
+            runOnUiThread(() -> startActivity(i));
         }
 
         // Salva un file di testo con il selettore di Android: l'utente sceglie Google Drive, la memoria del telefono o Download

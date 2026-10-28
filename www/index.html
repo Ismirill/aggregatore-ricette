@@ -151,7 +151,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .shot{width:100%;max-height:240px;object-fit:cover;border-radius:16px}
 .dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}.dhead h2{margin:0}
 .dhead .icon{box-shadow:none}
-.syCode{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.3rem;font-weight:700;letter-spacing:.08em;text-align:center;padding:10px;border:2px dashed var(--bd);border-radius:12px;margin:0 0 8px;user-select:all;-webkit-user-select:all}.sec{border-top:1px solid var(--bd);padding:14px 0 6px}.sec h3{margin:0 0 8px}.sec .meta{margin:0 0 10px}
+.accF input{margin-bottom:8px}.socs{display:grid;gap:8px}.lnk{background:none;border:0;padding:0;color:var(--acc);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline}.syCode{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.3rem;font-weight:700;letter-spacing:.08em;text-align:center;padding:10px;border:2px dashed var(--bd);border-radius:12px;margin:0 0 8px;user-select:all;-webkit-user-select:all}.sec{border-top:1px solid var(--bd);padding:14px 0 6px}.sec h3{margin:0 0 8px}.sec .meta{margin:0 0 10px}
 .inl{display:flex;gap:8px;margin-top:10px;grid-template-columns:none}.inl input{flex:1;min-width:0}.inl .btn{flex:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid2 .btn{width:100%}
 .srv{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
@@ -328,6 +328,7 @@ details summary{cursor:pointer}
 
 <dialog id="set">
   <div class="dhead"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi">✕</button></div>
+  <section class="sec"><h3>Account</h3><div id="accBox"></div></section>
   <section class="sec"><h3>Aspetto</h3><div class="seg" id="styleSeg" style="margin-bottom:8px"><label><input type="radio" name="style" value="trattoria"><span>Trattoria</span></label><label><input type="radio" name="style" value="crema"><span>Crema</span></label></div><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div></section>
   <section class="sec"><h3>Tipi di piatto</h3><div class="badges" id="catList"></div>
     <form id="catF" class="inl"><input name="c" placeholder="Nuovo tipo, es. Lievitati" aria-label="Nuovo tipo di piatto"><button class="btn pri">Aggiungi</button></form></section>
@@ -577,10 +578,10 @@ async function analyze(url,pasted){
 // Indirizzo del server Cloudflare (cartella server/); vuoto = funzioni AI disattivate
 const AI_URL=(()=>{try{return localStorage.getItem('aiUrl')}catch{}})()||'https://ricette-ai.ricettedelcuore.workers.dev';
 const aiOn=()=>!!AI_URL;
-async function server(path,body){
+async function server(path,body,auth){
   const ctl=new AbortController();setTimeout(()=>ctl.abort(),90000);
   let res;
-  try{res=await fetch(AI_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ctl.signal})}
+  try{res=await fetch(AI_URL+path,{method:'POST',headers:{'Content-Type':'application/json',...(auth?{Authorization:'Bearer '+auth}:{})},body:JSON.stringify(body),signal:ctl.signal})}
   catch{throw Object.assign(new Error('Servizio AI non raggiungibile: controlla la connessione'),{status:0})}
   const d=await res.json().catch(()=>({}));
   if(!res.ok)throw Object.assign(new Error(d.error||res.statusText),{status:res.status});
@@ -688,7 +689,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=59; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=60; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1685,7 +1686,7 @@ const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${e
 const setTheme=t=>{try{localStorage.setItem('theme',t||'auto')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme}; // predefinito: Trattoria chiara; Automatico solo se scelto
 $('#themeSeg').onchange=e=>setTheme(e.target.value);
 $('#styleSeg').onchange=e=>{try{localStorage.setItem('style',e.target.value)}catch{}document.documentElement.dataset.style=e.target.value};
-$('#setBtn').onclick=()=>{const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();syncUI();if(aiOn())initZone();$('#set').showModal()};
+$('#setBtn').onclick=()=>{const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();accUI();syncUI();if(aiOn())initZone();$('#set').showModal()};
 $('#camBtn').onclick=()=>$('#camIn').click();
 $('#camIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)photoSearch(f)};
 $('#setClose').onclick=()=>$('#set').close();
@@ -1797,8 +1798,112 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('online',()=>SY?.code&&doSync());
 setInterval(()=>SY?.code&&document.visibilityState==='visible'&&doSync(),5*60000);
 
+
+// --- Account: email e password, oppure Google / Apple / Facebook, con Firebase Authentication (gratuito) ---
+// Email e password parlano direttamente con le API REST di Firebase (poco codice, funziona anche nell'APK); l'SDK web viene
+// caricato solo per la finestra di accesso di Google/Apple/Facebook. La sessione (refresh token) è conservata qui.
+// Il server (/account) verifica il token e dà il codice ricettario dell'account: da lì in poi vale la sincronizzazione normale.
+const FB=load('fbCfg',null)||{apiKey:'',authDomain:'',projectId:'',appId:'',providers:['google']}; // dal progetto Firebase (console → impostazioni → app web)
+const FB_API=(()=>{try{return localStorage.getItem('fbUrl')}catch{}})()||'https://identitytoolkit.googleapis.com/v1';
+const FB_TOKEN=(()=>{try{return localStorage.getItem('fbTok')}catch{}})()||'https://securetoken.googleapis.com/v1/token';
+const FB_SDK='https://www.gstatic.com/firebasejs/11.10.0/';
+const PROV_NAME={google:'Google',apple:'Apple',facebook:'Facebook'};
+let ACC=load('acc',null);
+const accOn=()=>!!FB.apiKey;
+const FB_MSG={EMAIL_EXISTS:'Esiste già un account con questa email: accedi, o usa «Password dimenticata?»',INVALID_LOGIN_CREDENTIALS:'Email o password non corretti',INVALID_PASSWORD:'Password non corretta',EMAIL_NOT_FOUND:'Nessun account con questa email',WEAK_PASSWORD:'Password troppo corta: almeno 6 caratteri',INVALID_EMAIL:'Indirizzo email non valido',MISSING_PASSWORD:'Scrivi la password',TOO_MANY_ATTEMPTS_TRY_LATER:'Troppi tentativi: riprova tra qualche minuto',USER_DISABLED:'Account disabilitato',INVALID_ID_TOKEN:'Sessione scaduta: accedi di nuovo'};
+const fbMsg=m=>FB_MSG[String(m||'').split(/[ :]/)[0]]||'Operazione non riuscita, riprova';
+async function fbRest(path,body){
+  const r=await fetch(`${FB_API}/accounts:${path}?key=${encodeURIComponent(FB.apiKey)}`,{method:'POST',headers:{'Content-Type':'application/json','X-Firebase-Locale':'it'},body:JSON.stringify(body)}).catch(()=>{throw new Error('Servizio non raggiungibile: controlla la connessione')});
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(fbMsg(d.error?.message)),{code:d.error?.message});return d;
+}
+async function fbRefresh(rt){
+  const r=await fetch(`${FB_TOKEN}?key=${encodeURIComponent(FB.apiKey)}`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(rt)}).catch(()=>null);
+  if(!r)throw new Error('Servizio non raggiungibile: controlla la connessione');
+  if(!r.ok)throw Object.assign(new Error('Sessione scaduta: accedi di nuovo'),{expired:r.status===400});
+  return r.json();
+}
+async function setSession(d){
+  ACC={uid:d.localId,it:d.idToken,rt:d.refreshToken,exp:Date.now()+((+d.expiresIn||3600)-60)*1000,email:d.email||'',name:'',verified:false,provider:'password'};
+  try{const u=(await fbRest('lookup',{idToken:ACC.it})).users?.[0];if(u){ACC.email=u.email||ACC.email;ACC.name=u.displayName||'';ACC.verified=!!u.emailVerified;ACC.provider=u.providerUserInfo?.[0]?.providerId||ACC.provider}}catch{}
+  save('acc',ACC);
+}
+async function idToken(){
+  if(!ACC)throw Object.assign(new Error('Accesso richiesto'),{status:401});
+  if(Date.now()<ACC.exp)return ACC.it;
+  try{const d=await fbRefresh(ACC.rt);ACC={...ACC,it:d.id_token,rt:d.refresh_token||ACC.rt,exp:Date.now()+((+d.expires_in||3600)-60)*1000};save('acc',ACC);return ACC.it}
+  catch(e){if(e.expired){ACC=null;save('acc',null);accUI();syncUI()}throw e}
+}
+// Dopo l'accesso: il server dà il codice ricettario dell'account (al primo accesso adotta quello del dispositivo) e si collega
+async function accountLink(){
+  const r=await server('/account',{code:SY?.code||''},await idToken());
+  ACC={...ACC,email:r.email||ACC.email,name:r.name||ACC.name,verified:r.verified??ACC.verified};save('acc',ACC);
+  if(r.code&&SY?.code!==r.code)await linkCode(r.code);else if(SY?.code)doSync();
+  accUI();syncUI();
+}
+async function accRun(fn,msg){const s0=$('#accStat');if(s0)s0.textContent='Un momento…';try{await fn();if(msg)toast(msg)}catch(e){const s=$('#accStat');if(s)s.textContent=e.message||'Operazione non riuscita';else toast(e.message||'Operazione non riuscita')}}
+async function accRegister(email,pw){await setSession(await fbRest('signUp',{email,password:pw,returnSecureToken:true}));try{await fbRest('sendOobCode',{requestType:'VERIFY_EMAIL',idToken:ACC.it})}catch{}await accountLink()}
+async function accLogin(email,pw){await setSession(await fbRest('signInWithPassword',{email,password:pw,returnSecureToken:true}));await accountLink()}
+const accReset=email=>fbRest('sendOobCode',{requestType:'PASSWORD_RESET',email});
+async function accVerify(){await fbRest('sendOobCode',{requestType:'VERIFY_EMAIL',idToken:await idToken()})}
+function accLogout(){ACC=null;save('acc',null);if(SY?.code){SY=null;try{localStorage.removeItem('sync')}catch{}syKeys=null}accUI();syncUI();toast('Sei uscito: le ricette restano su questo dispositivo')}
+async function accDelete(){
+  if(!confirm('Eliminare l\'account e le ricette salvate online? Le ricette su questo dispositivo restano.'))return;
+  const t=await idToken();await server('/account',{delete:true},t);try{await fbRest('delete',{idToken:t})}catch{}
+  accLogout();toast('Account eliminato');
+}
+// Google / Apple / Facebook: finestra di accesso dell'SDK Firebase (sul sito); nell'APK si passa dal browser di sistema
+async function fbSdk(){const [a,b]=await Promise.all([import(FB_SDK+'firebase-app.js'),import(FB_SDK+'firebase-auth.js')]);const app=a.getApps()[0]||a.initializeApp(FB);const auth=b.getAuth(app);auth.languageCode='it';return {auth,...b}}
+function fbProvider(f,p){if(p==='google')return new f.GoogleAuthProvider();if(p==='facebook')return new f.FacebookAuthProvider();const o=new f.OAuthProvider('apple.com');o.addScope('email');o.addScope('name');return o}
+const fbSocialMsg=e=>e.code==='auth/account-exists-with-different-credential'?'Questa email è già registrata con un altro metodo: accedi con quello':e.code==='auth/unauthorized-domain'?'Dominio non autorizzato nel progetto Firebase':e.code==='auth/network-request-failed'?'Servizio non raggiungibile: controlla la connessione':'Accesso non riuscito ('+(e.code||e.message)+')';
+async function fromSdkUser(f,u){await setSession({idToken:await u.getIdToken(),refreshToken:u.refreshToken,expiresIn:3600,localId:u.uid,email:u.email||''});await f.signOut(f.auth).catch(()=>{});await accountLink()}
+async function accSocial(p){
+  if(window.AndroidShare?.open){AndroidShare.open(SITE+'?accedi='+p);accUI('Completa l\'accesso nel browser: poi torna qui e tocca «Ho un codice di accesso»');return}
+  const f=await fbSdk(),P=fbProvider(f,p);
+  let res;
+  try{res=await f.signInWithPopup(f.auth,P)}
+  catch(e){
+    if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request')return;
+    if(['auth/popup-blocked','auth/operation-not-supported-in-this-environment'].includes(e.code)){try{sessionStorage.setItem('fbRedirect',p)}catch{}await f.signInWithRedirect(f.auth,P);return}
+    throw new Error(fbSocialMsg(e));
+  }
+  await fromSdkUser(f,res.user);
+}
+async function accRedirectResult(){let p;try{p=sessionStorage.getItem('fbRedirect');sessionStorage.removeItem('fbRedirect')}catch{}if(!p||!accOn())return;try{const f=await fbSdk();const r=await f.getRedirectResult(f.auth);if(r?.user){await fromSdkUser(f,r.user);toast('Accesso effettuato')}}catch(e){toast(fbSocialMsg(e))}}
+// Passaggio dell'accesso dal sito all'app Android: codice a 6 cifre (vale 10 minuti) e link gnamina://accedi
+async function handoffShow(){
+  const r=await server('/handoff',{rt:ACC.rt},await idToken()),link='gnamina://accedi?codice='+r.code;
+  $('#accBox').innerHTML=`<p class="meta">Accesso effettuato. Torna nell'app Gnamina e scrivi questo codice (vale 10 minuti):</p><div class="syCode">${r.code.slice(0,3)} ${r.code.slice(3)}</div><div class="grid2"><a class="btn pri" href="${link}">Apri l'app</a><button class="btn" id="hoCopy">Copia</button></div>`;
+  $('#hoCopy').onclick=()=>navigator.clipboard?.writeText(r.code).then(()=>toast('Codice copiato'),()=>{});
+  setTimeout(()=>{location.href=link},400);
+}
+async function handoffTake(code){
+  code=String(code||'').replace(/\D/g,'');if(code.length!==6){if(code)toast('Il codice di accesso ha 6 cifre');return}
+  await accRun(async()=>{const {rt}=await server('/handoff/take',{code});const d=await fbRefresh(rt);await setSession({idToken:d.id_token,refreshToken:d.refresh_token||rt,expiresIn:d.expires_in,localId:d.user_id});await accountLink()},'Accesso effettuato');
+}
+function accUI(status){
+  const box=$('#accBox');if(!box)return;
+  if(!accOn()){box.innerHTML='<p class="meta">L\'accesso con account non è ancora attivo. Nel frattempo le ricette si allineano tra i dispositivi con il codice ricettario, più in basso.</p>';return}
+  if(ACC){
+    box.innerHTML=`<p class="meta">Sei dentro come <b>${esc(ACC.name||ACC.email)}</b>${ACC.name&&ACC.email?` (${esc(ACC.email)})`:''}. Le ricette si salvano online e compaiono su tutti i dispositivi in cui accedi.</p>${ACC.provider==='password'&&!ACC.verified?'<p class="meta">Email non ancora confermata: controlla la posta. <button class="lnk" id="accVerify">Invia di nuovo l\'email</button></p>':''}<p class="meta" id="accStat">${esc(status||'')}</p><div class="grid2"><button class="btn" id="accOut">Esci</button><button class="btn" id="accDel">Elimina account</button></div>`;
+    $('#accOut').onclick=accLogout;$('#accDel').onclick=()=>accRun(accDelete);const v=$('#accVerify');if(v)v.onclick=()=>accRun(accVerify,'Email inviata');
+    return}
+  const socials=(FB.providers||['google']).filter(p=>PROV_NAME[p]).map(p=>`<button class="btn soc" type="button" data-p="${p}">Continua con ${PROV_NAME[p]}</button>`).join('');
+  box.innerHTML=`<p class="meta">Con un account le ricette sono salvate online e ti seguono su iPhone, Android e computer. Gli account sono gestiti da Firebase (Google).</p>
+  <form id="accF" class="accF"><input name="email" type="email" autocomplete="email" placeholder="Email" required><input name="pw" type="password" autocomplete="current-password" placeholder="Password (almeno 6 caratteri)" minlength="6" required>
+  <div class="grid2"><button class="btn pri">Accedi</button><button class="btn" type="button" data-a="reg">Registrati</button></div>
+  <p class="meta" style="margin:8px 0 0"><button class="lnk" type="button" data-a="reset">Password dimenticata?</button></p></form>
+  <p class="meta" style="text-align:center;margin:10px 0 6px">oppure</p><div class="socs">${socials}${window.AndroidShare?.open?'<button class="btn" type="button" data-a="code">Ho un codice di accesso</button>':''}</div><p class="meta" id="accStat" style="margin-top:8px">${esc(status||'')}</p>`;
+  const f=$('#accF');
+  f.onsubmit=e=>{e.preventDefault();accRun(()=>accLogin(f.email.value.trim(),f.pw.value),'Accesso effettuato')};
+  f.querySelector('[data-a=reg]').onclick=()=>{if(!f.reportValidity())return;accRun(()=>accRegister(f.email.value.trim(),f.pw.value),'Account creato: ti abbiamo inviato un\'email per confermarlo')};
+  f.querySelector('[data-a=reset]').onclick=()=>{const em=f.email.value.trim();if(!em){toast('Scrivi prima la tua email');return}accRun(()=>accReset(em),'Email per reimpostare la password inviata')};
+  box.querySelectorAll('.soc').forEach(b=>b.onclick=()=>accRun(()=>accSocial(b.dataset.p)));
+  const c=box.querySelector('[data-a=code]');if(c)c.onclick=()=>handoffTake(prompt('Scrivi il codice di accesso a 6 cifre mostrato nel browser:'));
+}
+
 // Link in arrivo: da Android (condividi verso l'APK) o da URL ?url=/&text= (share target web, Comandi Rapidi iOS)
 function receive(d){
+  const ho=/^gnamina:\/\/accedi\?codice=(\d{6})/.exec(d.url||'');if(ho){$('#setBtn').click();handoffTake(ho[1]);return} // link di accesso dal browser (APK)
   const url=extractUrl(d.url)||extractUrl(d.text)||extractUrl(d.title);
   if(!url)return;
   const ex=items.find(i=>i.url===url);
@@ -1814,6 +1919,9 @@ if(p.has('codice')){const c=normCode(p.get('codice'));history.replaceState(null,
 
 fillSelects();render();
 if(SY?.code)setTimeout(()=>doSync(),800);
+// Accesso per l'app Android aperto nel browser (?accedi=google|apple|facebook): finestra di accesso, poi codice da scrivere nell'app
+if(p.has('accedi')){const pr=p.get('accedi');history.replaceState(null,'',location.pathname);if(accOn()&&PROV_NAME[pr]){$('#setBtn').click();$('#accBox').innerHTML=`<p class="meta">Accesso per l'app Gnamina: tocca il pulsante per continuare con ${PROV_NAME[pr]}.</p><div class="grid2"><button class="btn pri" id="hoGo">Continua con ${PROV_NAME[pr]}</button></div><p class="meta" id="accStat"></p>`;$('#hoGo').onclick=()=>accRun(async()=>{if(!ACC)await accSocial(pr);if(ACC)await handoffShow()})}}
+accRedirectResult();
 loadPT().then(()=>PT&&render());
 setTimeout(repairThumbs,1500);
 $('#verInfo').textContent='Versione '+APP_VERSION;

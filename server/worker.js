@@ -8,7 +8,7 @@ const DIETS = ['Vegano', 'Vegetariano', 'Senza glutine', 'Senza lattosio', 'Senz
 const cors = origin => ({
   'Access-Control-Allow-Origin': ORIGINS.includes(origin) ? origin : ORIGINS[0],
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 });
 const reply = (origin, body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...cors(origin) } });
@@ -370,6 +370,84 @@ async function sync(env, b) {
   return { now, next: more ? rows[rows.length - 1].s : now - 5000, rows, more };
 }
 
+// --- Account: Firebase Authentication (email, Google, Apple, Facebook) ---
+// L'app ottiene un ID token da Firebase; qui si verifica la firma con le chiavi pubbliche di Google e si collega l'utente
+// al suo codice ricettario (cifrato nel database con una chiave derivata dal segreto del server). Niente password qui.
+const te = new TextEncoder(), td = new TextDecoder();
+const b64u = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(s.length / 4) * 4, '=')), c => c.charCodeAt(0));
+const b64 = u => { let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); };
+let jwks = { keys: null, at: 0 };
+async function firebaseKeys(env) {
+  if (jwks.keys && Date.now() - jwks.at < 3600e3) return jwks.keys;
+  const r = await fetch(env.FIREBASE_JWKS || 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com');
+  if (!r.ok) throw new Error('Chiavi di verifica non disponibili');
+  jwks = { keys: (await r.json()).keys || [], at: Date.now() };
+  return jwks.keys;
+}
+async function verifyUser(env, req) {
+  const no = m => Object.assign(new Error(m), { status: 401 });
+  const m = /^Bearer ([\w-]+\.[\w-]+\.[\w-]+)$/.exec(req.headers.get('Authorization') || '');
+  if (!m) throw no('Accesso richiesto');
+  if (!env.FIREBASE_PROJECT) throw Object.assign(new Error('Account non ancora attivi'), { status: 503 });
+  const [h, p, s] = m[1].split('.');
+  let hdr, pay;
+  try { hdr = JSON.parse(td.decode(b64u(h))); pay = JSON.parse(td.decode(b64u(p))); } catch { throw no('Sessione non valida'); }
+  const now = Date.now() / 1000;
+  if (hdr.alg !== 'RS256' || pay.aud !== env.FIREBASE_PROJECT || pay.iss !== `https://securetoken.google.com/${env.FIREBASE_PROJECT}` || !pay.sub || !(pay.exp > now - 60) || !(pay.iat < now + 300)) throw no('Sessione non valida');
+  const jwk = (await firebaseKeys(env)).find(k => k.kid === hdr.kid);
+  if (!jwk) throw no('Sessione non valida');
+  const key = await crypto.subtle.importKey('jwk', { kty: jwk.kty, n: jwk.n, e: jwk.e }, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
+  if (!(await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, b64u(s), te.encode(`${h}.${p}`)))) throw no('Sessione non valida');
+  return { uid: pay.sub, email: pay.email || '', name: pay.name || '', verified: !!pay.email_verified, provider: pay.firebase?.sign_in_provider || '' };
+}
+// Cifratura lato server (codici ricettario, passaggi di accesso) con una chiave derivata dal segreto ADMIN_TOKEN
+async function serverKey(env, info) {
+  if (!env.ADMIN_TOKEN) throw new Error('Segreto del server mancante');
+  const base = await crypto.subtle.importKey('raw', te.encode(env.ADMIN_TOKEN), 'HKDF', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'HKDF', hash: 'SHA-256', salt: te.encode('gnamina'), info: te.encode(info) }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function sealS(env, info, text) { const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await serverKey(env, info), te.encode(text)); return b64(iv) + '.' + b64(new Uint8Array(ct)); }
+async function openS(env, info, s) { const [iv, ct] = String(s).split('.'); return td.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64u(iv) }, await serverKey(env, info), b64u(ct))); }
+const CODE_AB = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const randomCode = () => [...crypto.getRandomValues(new Uint8Array(16))].map(x => CODE_AB[x % 32]).join('');
+const hexSha = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode(s)))].map(x => x.toString(16).padStart(2, '0')).join('');
+
+// POST /account (Bearer): restituisce il codice ricettario dell'utente, creandolo al primo accesso (o adottando quello del
+// dispositivo, così le ricette già sincronizzate diventano quelle dell'account). Con {delete:true} cancella account e ricette.
+async function account(env, req, b) {
+  const u = await verifyUser(env, req);
+  if (!env.SYNC) throw Object.assign(new Error('Sincronizzazione non disponibile'), { status: 503 });
+  const now = Date.now();
+  const row = await env.SYNC.prepare('SELECT code FROM users WHERE uid = ?1').bind(u.uid).first();
+  let code = row ? await openS(env, 'codice', row.code) : null;
+  if (b.delete) {
+    if (code) await env.SYNC.batch([env.SYNC.prepare('DELETE FROM docs WHERE k = ?1').bind(await hexSha('gnamina-id:' + code)), env.SYNC.prepare('DELETE FROM users WHERE uid = ?1').bind(u.uid)]);
+    return { deleted: true };
+  }
+  if (!code) {
+    code = /^[A-Z2-9]{16}$/.test(b.code || '') ? b.code : randomCode();
+    await env.SYNC.prepare('INSERT INTO users (uid,email,name,provider,code,created,seen) VALUES (?1,?2,?3,?4,?5,?6,?6)').bind(u.uid, u.email, u.name, u.provider, await sealS(env, 'codice', code), now).run();
+  } else await env.SYNC.prepare('UPDATE users SET seen = ?2, email = ?3, name = ?4 WHERE uid = ?1').bind(u.uid, now, u.email, u.name).run();
+  return { code, email: u.email, name: u.name, verified: u.verified, provider: u.provider };
+}
+// Passaggio dell'accesso dal sito all'app Android (dove l'accesso Google/Apple/Facebook non può avvenire nella WebView):
+// il sito deposita il refresh token cifrato sotto un codice a 6 cifre, l'app lo ritira entro 10 minuti.
+async function handoffNew(env, req, b) {
+  await verifyUser(env, req);
+  const rt = str(b.rt, 2000);
+  if (!rt) throw Object.assign(new Error('Dati mancanti'), { status: 400 });
+  const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, '0');
+  await env.SYNC.batch([env.SYNC.prepare('DELETE FROM handoff WHERE exp < ?1').bind(Date.now()), env.SYNC.prepare('INSERT OR REPLACE INTO handoff (code,data,exp) VALUES (?1,?2,?3)').bind(code, await sealS(env, 'accesso', rt), Date.now() + 600e3)]);
+  return { code };
+}
+async function handoffTake(env, b) {
+  const code = String(b.code || '').replace(/\D/g, '');
+  const row = code.length === 6 ? await env.SYNC.prepare('SELECT data, exp FROM handoff WHERE code = ?1').bind(code).first() : null;
+  if (row) await env.SYNC.prepare('DELETE FROM handoff WHERE code = ?1').bind(code).run();
+  if (!row || row.exp < Date.now()) throw Object.assign(new Error('Codice di accesso non valido o scaduto'), { status: 404 });
+  return { rt: await openS(env, 'accesso', row.data) };
+}
+
 export default {
   // Aggiornamento automatico dei prezzi: un lotto di province ogni giorno
   async scheduled(event, env, ctx) {
@@ -428,11 +506,14 @@ export default {
         return reply(origin, { error: limit ? 'Limite giornaliero raggiunto' : e.message }, limit ? 429 : e.status === 400 ? 400 : 502);
       }
     }
-    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/nutrition', '/preview', '/translate-recipe', '/sync'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
+    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/nutrition', '/preview', '/translate-recipe', '/sync', '/account', '/handoff', '/handoff/take'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';
     if (env.LIMITER && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
-    if (path === '/sync') {
-      try { return reply(origin, await sync(env, await req.json())); } catch (e) { console.log('errore sync', e.message); return reply(origin, { error: e.status ? e.message : 'Sincronizzazione non riuscita' }, e.status || 502); }
+    if (path === '/sync' || path === '/account' || path === '/handoff' || path === '/handoff/take') {
+      try {
+        const body = await req.json();
+        return reply(origin, path === '/sync' ? await sync(env, body) : path === '/account' ? await account(env, req, body) : path === '/handoff' ? await handoffNew(env, req, body) : await handoffTake(env, body));
+      } catch (e) { console.log('errore', path, e.message); return reply(origin, { error: e.status ? e.message : 'Operazione non riuscita' }, e.status || 502); }
     }
     try {
       const body = await req.json();
