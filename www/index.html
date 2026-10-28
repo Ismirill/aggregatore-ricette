@@ -335,7 +335,9 @@ details summary{cursor:pointer}
     <select id="zoneSel" aria-label="Provincia per i prezzi"><option value="">Automatica (posizione approssimativa)</option></select>
     <div class="grid2" style="margin-top:8px"><button class="btn" id="gpsBtn">📍 Usa la mia posizione</button><button class="btn" id="zoneReset">Automatica</button></div></section>
   <section class="sec"><h3>Ricette su tutti i tuoi dispositivi</h3><div id="syncBox"></div></section>
-  <section class="sec"><h3>Backup</h3><p class="meta">Copia i dati e incollali su un altro dispositivo per trasferire le ricette.</p>
+  <section class="sec"><h3>Backup su file</h3><p class="meta">Salva tutte le ricette in un file e tienilo dove vuoi: su iCloud Drive o Google Drive, nel telefono o sul computer. Per ripristinarle apri il file da qui.</p>
+    <div class="grid2"><button class="btn pri" id="expFile">💾 Salva file</button><button class="btn" id="impFile">📂 Apri file</button></div><input type="file" id="impIn" accept=".json,application/json,text/plain" hidden>
+    <p class="meta" style="margin-top:10px">Oppure copia i dati come testo e incollali sull'altro dispositivo.</p>
     <div class="grid2"><button class="btn" id="exp">Copia backup</button><button class="btn" id="imp">Incolla backup</button></div></section>
   <p class="meta" style="text-align:center;margin:12px 0 0" id="verInfo"></p>
 </dialog>
@@ -686,7 +688,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=58; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=59; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1689,13 +1691,32 @@ $('#camIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)photoS
 $('#setClose').onclick=()=>$('#set').close();
 $('#catF').onsubmit=e=>{e.preventDefault();const c=e.target.c.value.trim();if(c&&!cats.includes(c)){cats.splice(cats.length-1,0,c);save('cats',cats);save('catsT',Date.now());queueSync();render();showCats();toast('Tipo aggiunto')}e.target.reset()};
 $('#exp').onclick=async()=>{try{await navigator.clipboard.writeText(JSON.stringify({cats,items}));toast('Backup copiato negli appunti')}catch{prompt('Copia questo testo:',JSON.stringify({cats,items}))}};
+// Ripristino da testo o file: aggiunge le ricette che mancano (stesso id = già presente) e i tipi di piatto
+function importBackup(t){
+  try{const d=JSON.parse(t),ids=new Set(items.map(i=>i.id)),add=(d.items||[]).filter(i=>i&&i.id&&i.title&&!ids.has(i.id));
+    if(!Array.isArray(d.items))throw 0;
+    const last=cats.at(-1);cats=[...new Set([...cats.slice(0,-1),...(d.cats||[]).filter(x=>x!==last)]),last];
+    items=[...add,...items];items.sort((a,b)=>(b.created||0)-(a.created||0));
+    save('cats',cats);save('catsT',Date.now());items.forEach(i=>{if(!tOf(i))i.t=Date.now()});saveItems();fillSelects();render();
+    toast(add.length?`${add.length} ricette importate`:'Nessuna ricetta nuova nel backup')}catch{toast('Backup non valido')}
+}
 $('#imp').onclick=async()=>{
   let t;try{t=await navigator.clipboard.readText()}catch{}
   if(!t)t=prompt('Incolla qui il backup:');if(!t)return;
-  try{const d=JSON.parse(t),ids=new Set(items.map(i=>i.id));
-    cats=[...new Set([...cats,...(d.cats||[])])];items=[...items,...(d.items||[]).filter(i=>!ids.has(i.id))];
-    save('cats',cats);save('catsT',Date.now());items.forEach(i=>{if(!tOf(i))i.t=Date.now()});saveItems();fillSelects();render();toast('Backup importato')}catch{toast('Backup non valido')}
+  importBackup(t);
 };
+// File di backup: su iPhone il menu di condivisione permette «Salva su File» (iCloud Drive, Google Drive…), nell'APK si apre
+// il selettore di Android (Drive, memoria del telefono, Download), sul computer si scarica
+const backupText=()=>JSON.stringify({app:'Gnamina',version:APP_VERSION,exported:new Date().toISOString(),cats,items});
+$('#expFile').onclick=async()=>{
+  const name=`gnamina-ricette-${new Date().toISOString().slice(0,10)}.json`,txt=backupText();
+  if(window.AndroidShare?.saveFile){AndroidShare.saveFile(name,txt);return}
+  try{const file=new File([txt],name,{type:'application/json'});
+    if(navigator.canShare?.({files:[file]})){try{await navigator.share({files:[file],title:'Backup Gnamina'});return}catch(e){if(e.name==='AbortError')return}}}catch{}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),10000);toast('File di backup scaricato');
+};
+$('#impFile').onclick=()=>$('#impIn').click();
+$('#impIn').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(f)importBackup(await f.text())};
 
 
 // --- Ricette personali su tutti i dispositivi (iPhone, Android, computer) ---
