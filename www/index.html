@@ -689,7 +689,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=61; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=62; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -710,13 +710,13 @@ async function loadBook(){
     PR_EUR=pr.prezzi||{};PR_PACK=pr.conf||{};
     PRONTI=(pr.items||[]).map(x=>({id:'pr-'+x.id,title:x.title,cat:x.cat,kind:x.kind,pronto:true,book:true,source:'Cibo pronto',country:'Italia',region:'',diets:x.diets||[],tags:[],
       servings:1,ingredients:x.ing,steps:[x.prep],b:x.b,n:x.n,cov:1,prot:x.prot,time:x.t,_tm:{t:x.t,w:0,d:1},_q:null}));
-    const nut=load('bookNut',{});IM=im.items||{};
+    const nut=load('bookNut',{});IM=Object.fromEntries(Object.entries(im.items||{}).filter(([,v])=>!v.redo)); // le foto AI sbagliate, in attesa di essere rifatte, non si mostrano
     bookInfo=d;
     book=d.recipes.map(r=>{
       const c=classify({title:r.title,ingredients:r.ingredients,caption:[...r.tags,r.region].join(' '),keywords:r.tags.join(' ')});
       const key=x=>x.toLowerCase().replace(/[^a-z]/g,'');
       const reg=r.region&&(REGIONS.find(x=>key(x)===key(r.region)||key(r.region).startsWith(key(x).slice(0,7)))||r.region);
-      const ph=im.items?.[r.id];
+      const ph=IM[r.id];
       r.tags=(r.tags||[]).filter(t=>!/^(moduli|pagine|libro|stub|ricette|categoria|wikibooks|da (controllare|wikificare|aiutare))/i.test(t));
       const vc=ct.items?.[r.id]; // tipo di piatto verificato incrociando Wikibooks, Wikipedia/Wikidata, nome e ingredienti
       return {...r,...(ph?{image:ph.img,imgFile:ph.file}:{}),...(vc?{catBy:vc.by,catConf:vc.conf}:{}),book:true,source:'Wikibooks',cat:vc?.cat||c.cat||'Altro',diets:c.diets,country:reg?'Italia':c.country,region:reg||c.region,nutrition:nut[r.id]};
@@ -752,7 +752,7 @@ async function loadBook(){
     // ricette collegate: solo dati descrittivi, dosi e procedimento restano su GialloZafferano
     bookInfo.gz=gz;
     for(const r of gz.recipes||[]){
-      const c=classify({title:r.title,ingredients:r.ingredients.length>=3?r.ingredients:[],caption:r.ingredients.join(' ')}),ph=im.items?.[r.id];
+      const c=classify({title:r.title,ingredients:r.ingredients.length>=3?r.ingredients:[],caption:r.ingredients.join(' ')}),ph=IM[r.id];
       book.push({...r,...(ph?{image:ph.img,imgFile:ph.file}:{}),book:true,linked:true,source:'GialloZafferano',cat:r.cat||c.cat||'Altro',diets:c.diets,country:c.country||'Italia',region:c.region,
         steps:[],tags:[],_tm:{t:r.time||timing({...r,steps:[]}).t,w:0,d:r.diff||2}});
     }

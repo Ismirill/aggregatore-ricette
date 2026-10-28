@@ -90,8 +90,24 @@ def main():
     allr = {r['id']: r for r in recipes()}
     done = checked = redone = 0
     try:
+        # 0) foto segnate come sbagliate (controllo a vista): si rifanno subito, senza altro controllo
+        for i in [i for i, v in data['items'].items() if v.get('redo') and i in allr and (not ONLY or i == ONLY)]:
+            if done >= LIMIT:
+                break
+            r = allr[i]
+            try:
+                g = gen(r)
+            except urllib.error.HTTPError as e:
+                if e.code == 429: raise Quota()
+                print('non rigenerata', i, e.code); continue
+            except Exception as e:
+                print('non rigenerata', i, e); continue
+            if g.get('image'):
+                save_image(r, data, g); done += 1; redone += 1
+                print(f"{r['title']}: rifatta come «{g.get('dish')}» ({g.get('course')})")
+            time.sleep(2)
         # 1) vecchie immagini generate senza descrizione: controllo con la visione AI, rigenerazione se sbagliate
-        old = [i for i, v in data['items'].items() if v.get('gen') and v.get('v', 1) < GEN_VERSION and not v.get('ok') and i in allr and (not ONLY or i == ONLY)]
+        old = [i for i, v in data['items'].items() if v.get('gen') and v.get('v', 1) < GEN_VERSION and not v.get('ok') and not v.get('redo') and i in allr and (not ONLY or i == ONLY)]
         for i in old[:CHECK_LIMIT]:
             r, v = allr[i], data['items'][i]
             try:
