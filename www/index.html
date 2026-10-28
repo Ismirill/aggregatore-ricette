@@ -238,7 +238,7 @@ details summary{cursor:pointer}
     <select id="fSort"><option value="new">In evidenza / più recenti</option><option value="fast">Più veloci</option><option value="easy">Più facili</option><option value="cheap">Più economiche</option><option value="rate">Più votate</option><option value="az">A–Z</option></select>
   </div>
 </header>
-<nav class="nav" id="tabs"><button class="tab on" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario</button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>Budget</button></nav>
+<nav class="nav" id="tabs"><button class="tab on" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario</button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v7M10 3v7M17 3c-2 2-3 4-3 7h3v11"/></svg>Il mio menu</button></nav>
 <main><div class="list" id="list"></div>
 <section id="budget" hidden>
   <div class="bhead"><h2>Il menu giusto per il tuo budget</h2><p>Rispondi a sei domande: preparo un menu con i piatti italiani di tutti i giorni, bilanciato e con frutta e verdura di stagione. Alla fine puoi variarlo quante volte vuoi.</p></div>
@@ -689,7 +689,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=60; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=61; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -789,7 +789,7 @@ function saveFromBook(i){
 $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;view=t.dataset.v;cur='Tutte';
   $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
   const bud=view==='budget';['#sbar','#chips','#list','#add'].forEach(x=>$(x).hidden=bud);if(bud)$('#chips2').hidden=true;if(bud)$('#chips2').hidden=true;if(bud)$('.filters').hidden=true;$('#budget').hidden=!bud;filtUI();
-  $('#vTitle').textContent={mine:'Le mie ricette',book:'Ricettario',budget:'Budget'}[view];$('#vSub').textContent={mine:'Le tue ricette salvate',book:'Italia e dal mondo',budget:'Menu per il tuo budget'}[view];window.scrollTo(0,0);
+  $('#vTitle').textContent={mine:'Le mie ricette',book:'Ricettario',budget:'Il mio menu'}[view];$('#vSub').textContent={mine:'Le tue ricette salvate',book:'Italia e dal mondo',budget:'Settimana o pasto, nel tuo budget'}[view];window.scrollTo(0,0);
   if(bud){loadBook();loadPT();initBudget();return}
   $('#q').placeholder=view==='book'?'Cerca tra le ricette del ricettario…':'Cerca titolo, ingrediente, etichetta…';
   if(view==='book')loadBook();fillSelects();render()};
@@ -910,7 +910,7 @@ function welcome(){
     <div class="wact">
       <button type="button" class="wbtn" data-w="add"><b>➕ Salva la prima ricetta</b><span>Da un link social, scritta a mano, da una foto o da un file</span></button>
       <button type="button" class="wbtn" data-w="book"><b>📖 Sfoglia il Ricettario</b><span>Oltre 1.400 ricette italiane e dal mondo, con foto, costi e calorie</span></button>
-      <button type="button" class="wbtn" data-w="budget"><b>🛒 Crea un menu a budget</b><span>Settimana o singolo pasto, bilanciato, con la lista della spesa</span></button>
+      <button type="button" class="wbtn" data-w="budget"><b>🍽️ Crea il mio menu</b><span>Settimana o singolo pasto, bilanciato, con la lista della spesa</span></button>
     </div>
     <h3>Come si salva da TikTok e Instagram</h3>
     <ol class="wsteps"><li>Apri il video della ricetta e tocca <b>Condividi</b></li><li>Scegli <b>Gnamina</b> tra le app (su iPhone: il comando rapido)</li><li>L'app legge il post e compila ingredienti, dosi e passaggi: tu controlli e salvi</li></ol>
