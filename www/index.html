@@ -689,7 +689,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=62; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=63; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -698,7 +698,7 @@ async function fetchData(name){
 }
 
 /* ---------- Ricettario (Wikibooks, CC BY-SA 4.0) ---------- */
-let view='mine',book=null,bookInfo=null,products=[],QUOT=[],PRONTI=[],PR_EUR={};let IM={}; // foto trovate su Wikipedia/Commons o generate con l'AI (www/immagini.json)
+let QFONTI=[];let view='mine',book=null,bookInfo=null,products=[],QUOT=[],PRONTI=[],PR_EUR={};let IM={}; // foto trovate su Wikipedia/Commons o generate con l'AI (www/immagini.json)
 // una ricetta per id, dal ricettario, dalle tue o dai cibi pronti (menu Budget)
 const findRec=(id,isBook)=>((isBook?book:items)||[]).find(x=>x.id===id)||PRONTI.find(x=>x.id===id)||BK.find(x=>x.id===id);
 const src=()=>view==='book'?(book||[]):items;
@@ -748,7 +748,7 @@ async function loadBook(){
       const c=classify({title:r.title,ingredients:r.ingredients});
       book.push({...r,book:true,libera:true,country:r.country||'Italia',region:r.region||c.region,diets:[...new Set([...(r.diets||[]),...c.diets])],tags:[]});
     }
-    QUOT=qu.piatti||[];
+    QUOT=qu.piatti||[];QFONTI=qu.fonti||[];
     // ricette collegate: solo dati descrittivi, dosi e procedimento restano su GialloZafferano
     bookInfo.gz=gz;
     for(const r of gz.recipes||[]){
@@ -892,11 +892,11 @@ function render(){
     .sort(sorter(fs,!!q));
   const nGz=view==='book'&&book?book.filter(x=>x.linked).length:0;
   const nPu=view==='book'&&book?book.filter(x=>x.source==='Regione Puglia').length:0,nWo=view==='book'&&book?book.filter(x=>x.world).length:0,nAr=view==='book'&&book?book.filter(x=>x.artusi).length:0,nLi=view==='book'&&book?book.filter(x=>x.libera).length:0;
-  const lic=showProd?`<p class="lic">${products.length} prodotti tipici pugliesi dalla <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia – Pugliapromozione</a> (CC BY 4.0)</p>`
-    :view==='book'&&book?.length?`<p class="lic">${book.length-nGz-nPu-nWo-nAr-nLi} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}${nPu?`, ${nPu} ricette tipiche della <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia</a> (CC BY 4.0)`:''}${nWo?`, ${nWo} ricette dal mondo di <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> (CC BY-SA 4.0, tradotte in italiano)`:''}${nAr?`, ${nAr} ricette dall'<a href="https://it.wikisource.org/wiki/La_scienza_in_cucina_e_l%27arte_di_mangiar_bene_(1895)" target="_blank" rel="noopener">Artusi (1895)</a>, pubblico dominio`:''}${nLi?`, ${nLi} da Wikipedia e dal Cookbook di Wikibooks (CC BY-SA 4.0) o ricette base`:''}</p>`:'';
+  const lic=view==='mine'&&items.length?`<p class="lic">Le ricette salvate da te restano tue: per quelle importate da un link la fonte originale è indicata nella scheda, insieme alla foto e al suo autore.</p>${fontiDati()}`:showProd?`<p class="lic">${products.length} prodotti tipici pugliesi dalla <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia – Pugliapromozione</a> (CC BY 4.0)</p>`
+    :view==='book'&&book?.length?`<p class="lic">${book.length-nGz-nPu-nWo-nAr-nLi} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}${nPu?`, ${nPu} ricette tipiche della <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia</a> (CC BY 4.0)`:''}${nWo?`, ${nWo} ricette dal mondo di <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> (CC BY-SA 4.0, tradotte in italiano)`:''}${nAr?`, ${nAr} ricette dall'<a href="https://it.wikisource.org/wiki/La_scienza_in_cucina_e_l%27arte_di_mangiar_bene_(1895)" target="_blank" rel="noopener">Artusi (1895)</a>, pubblico dominio`:''}${nLi?`, ${nLi} da Wikipedia e dal Cookbook di Wikibooks (CC BY-SA 4.0) o ricette base`:''}</p>${fontiFoto()}${fontiDati()}`:'';
   $('#list').innerHTML=(list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
-    :`<div class="empty">${q?noResults(q):view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':welcome()}</div>`)+(lic?`<details class="lic fonti"><summary>Fonti e licenze delle ricette</summary>${lic}</details>`:'');
+    :`<div class="empty">${q?noResults(q):view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':welcome()}</div>`)+(lic?`<details class="lic fonti"><summary>Fonti e licenze</summary>${lic}</details>`:'');
   $('#list').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>$(`#tabs .tab[data-v=${b.dataset.goto}]`).click());
 }
 // Prima apertura: «Le mie ricette» è vuota, si mostrano le tre cose da fare e i piatti di oggi dal Ricettario
@@ -1369,6 +1369,7 @@ function showPlan(P){
     <details class="meta fonti" style="text-align:left"><summary>Note, prezzi di stagione e fonti</summary><p><b>Avvertenza.</b> I menu proposti da Gnamina sono semplici suggerimenti per organizzare la spesa e i pasti, generati in automatico a partire da ricette, prezzi medi e valori nutrizionali indicativi. Non costituiscono una dieta, un piano alimentare né un consiglio medico, dietetico o nutrizionale, e non tengono conto delle condizioni di salute, delle esigenze o delle intolleranze della singola persona oltre a quanto indicato nei filtri. Ognuno è libero di seguirli, modificarli o ignorarli sotto la propria responsabilità; per esigenze alimentari particolari, allergie, patologie, gravidanza o regimi dietetici rivolgiti al medico o a un professionista della nutrizione. Verifica sempre ingredienti, etichette e allergeni dei prodotti che acquisti: calorie, nutrienti e costi sono stime medie e possono differire da quelli reali.</p>    <p class="meta">🍎 <b>Frutta di stagione a ${MESI[o.month]}</b> (prezzi medi al kg in ${esc(PT?.zone||'Italia')}): ${X.fruits.map(f=>{const k=keyOf(f);return esc(f)+(PT&&k&&PT.eur[k]?` ${euro(PT.eur[k])}`:'')}).join(' · ')}
       <br>🥦 <b>Verdura di stagione</b>: ${veg.map(v=>{const k=keyOf(v);return esc(v)+(PT&&k&&PT.eur[k]?` ${euro(PT.eur[k])}`:'')}).join(' · ')}</p>
     <p class="meta">Menu composto con i piatti della cucina italiana di tutti i giorni${o.region?`, dando la precedenza a quelli di ${esc(REG_AREA[o.region]==='isole'?'Sicilia e Sardegna':o.region)} e della sua area`:''}${o.cuisine==='italiana'?', inclusi i piatti regionali meno comuni':o.cuisine==='mondo'?', incluse ricette dal mondo':''}.</p>
+    <p class="meta"><b>Fonti.</b> Struttura dei pasti ed equilibrio: <a href="https://www.crea.gov.it/web/alimenti-e-nutrizione/-/linee-guida-per-una-sana-alimentazione-2018" target="_blank" rel="noopener">Linee guida per una sana alimentazione del CREA</a>. Prezzi: <a href="https://osservaprezzi.mimit.gov.it/" target="_blank" rel="noopener">Osservatorio Prezzi del Ministero delle Imprese e del Made in Italy</a>, medie mensili per provincia. Frutta e verdura di stagione: calendario della produzione nazionale. Piatti di tutti i giorni scelti incrociando: ${QFONTI.map(f=>esc(f.split(':')[0])).join(' · ')}.</p>${fontiFoto()}
     ${nPronti?`<p class="meta">I piatti segnati «pronto» (${nPronti}) sono cibi già pronti del supermercato: surgelati, freschi confezionati, in scatola o di gastronomia, con prezzi medi indicativi e valori nutrizionali medi della categoria (fa fede l'etichetta).</p>`:''}
     <p class="meta">Costi stimati con i prezzi medi${P.period?` dell'Osservatorio Prezzi MIMIT (${esc(P.period)}, ${esc(P.zone)})`:''} e prezzi indicativi; calorie e nutrienti medi, indicativi. Pasti scelti tra ${P.n} ricette compatibili${P.noCost?`; ${P.noCost} delle tue ricette sono escluse perché senza costo calcolato (aprile e tocca "Calcola calorie e costo")`:''}.</p>
 </details>
@@ -1489,6 +1490,12 @@ function openProduct(i){
   $('#prodSearch').onclick=()=>{$('#det').close();cur='Tutte';$('#q').value=(i.title.toLowerCase().match(/[a-zàèéìòù]{4,}/)||[''])[0];render();window.scrollTo(0,0)};
   $('#det').showModal();
 }
+// Fonti delle foto, contate dal catalogo immagini (www/immagini.json)
+function fontiFoto(){const v=Object.values(IM);if(!v.length)return'';
+  const n=f=>v.filter(f).length,cc='<a href="https://creativecommons.org/licenses/" target="_blank" rel="noopener">licenze Creative Commons</a>';
+  const com=n(x=>x.file||x.web?.src==='Wikimedia Commons'),fl=n(x=>x.web&&/flickr/i.test(x.web.src)),px=n(x=>x.web?.src==='Pixabay'),ai=n(x=>x.gen);
+  return `<p class="lic"><b>Foto.</b> ${[com&&`${com} da <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons</a> e Wikipedia`,fl&&`${fl} da <a href="https://www.flickr.com/creativecommons/" target="_blank" rel="noopener">Flickr</a> tramite <a href="https://openverse.org/" target="_blank" rel="noopener">Openverse</a>`,px&&`${px} da <a href="https://pixabay.com/" target="_blank" rel="noopener">Pixabay</a> (licenza Pixabay)`].filter(Boolean).join(', ')}, con ${cc} o di pubblico dominio: autore e licenza di ogni foto sono indicati nella sua scheda. Le foto della Regione Puglia sono CC BY 4.0. ${ai?`${ai} immagini sono generate con l'AI (modello FLUX, tramite <a href="https://developers.cloudflare.com/workers-ai/" target="_blank" rel="noopener">Cloudflare Workers AI</a> e <a href="https://pollinations.ai/" target="_blank" rel="noopener">Pollinations</a>) e sono solo indicative.`:''}</p>`}
+function fontiDati(){return `<p class="lic"><b>Costi e nutrienti.</b> Prezzi medi mensili dell'<a href="https://osservaprezzi.mimit.gov.it/" target="_blank" rel="noopener">Osservatorio Prezzi MIMIT</a> per provincia; calorie e nutrienti sono valori medi per ingrediente, indicativi. Il tipo di piatto è verificato incrociando Wikibooks, <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>, nome e ingredienti.</p>`}
 // Riga della fonte nella scheda, secondo la provenienza della ricetta
 function sourceLine(i){
   if(i.colazione)return `Colazione ${esc(i.kind)} all'italiana: quantità per una persona, prezzi medi del mese, valori nutrizionali medi indicativi.`;
