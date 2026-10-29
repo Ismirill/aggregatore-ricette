@@ -16,12 +16,12 @@ for n, i in enumerate(ids):
     t = re.sub(r'\(.*?\)', '', rec[i]['title']).strip()
     q = {'key': KEY, 'q': t[:100], 'lang': 'it', 'image_type': 'photo', 'category': 'food', 'safesearch': 'true', 'per_page': 3}
     try:
-        d = json.load(urllib.request.urlopen('https://pixabay.com/api/?' + urllib.parse.urlencode(q), timeout=30))
+        d = json.load(urllib.request.urlopen(urllib.request.Request('https://pixabay.com/api/?' + urllib.parse.urlencode(q), headers={'User-Agent': 'Gnamina/1.0 (https://ismirill.github.io/aggregatore-ricette/)'}), timeout=30))
         h = (d.get('hits') or [None])[0]
         if h:
             out[i] = {'thumb': h['webformatURL'], 'page': h['pageURL'], 'by': h.get('user', 'Pixabay'), 'lic': 'Pixabay License', 'src': 'Pixabay', 'tags': h.get('tags', '')}
     except Exception as e:
-        print('errore', i, e)
+        print('errore', i, e, getattr(e, 'read', lambda: b'')()[:200])
     time.sleep(0.7)  # limite Pixabay: 100 richieste al minuto
 print(len(ids), 'cercate,', len(out), 'trovate')
 json.dump(out, open('pixabay_candidate.json', 'w'), ensure_ascii=False)
