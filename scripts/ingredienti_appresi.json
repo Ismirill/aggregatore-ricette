@@ -167,6 +167,10 @@
 "as": "braciol",
 "via": "simile a \"braciol\""
 },
+"branzini da": {
+"as": "branzino",
+"via": "simile a \"branzino\""
+},
 "buccia arancio": {
 "as": "arancia",
 "via": "simile a \"arancia\""
@@ -691,6 +695,10 @@
 "as": "cereali",
 "via": "Wikidata: seme delle granaglie (frumento, avena, grano saraceno, orzo, etc.)"
 },
+"grano cotto": {
+"as": null,
+"via": "non trovato"
+},
 "grano intero": {
 "as": "cereali",
 "via": "Open Food Facts: Gallette Bio di Grano Saraceno"
@@ -1011,6 +1019,10 @@
 "as": "uova",
 "via": "Wikidata: pattern that consists of half egg-shaped ornaments, used in design and architecture"
 },
+"palline gelato al fiordilatte": {
+"as": null,
+"via": "non trovato"
+},
 "paneer": {
 "as": "formaggio",
 "via": "Wikipedia: tipo di formaggio fresco"
@@ -1158,6 +1170,10 @@
 "presciutto piuttosto magro": {
 "as": "prosciutto",
 "via": "simile a \"prosciutto\""
+},
+"provolone monaco": {
+"as": null,
+"via": "non trovato"
 },
 "q b tartufi tritati": {
 "as": "tartufo",

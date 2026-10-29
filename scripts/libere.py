@@ -4,7 +4,7 @@
 Fonti, scelte una per una:
   - Wikipedia in italiano (CC BY-SA 4.0): sezione "Preparazione" delle voci di piatti; dosi e passaggi li ricava il server AI
   - Cookbook di Wikibooks in inglese (CC BY-SA 4.0): ricette con ingredienti e passaggi, tradotte in italiano dal server AI
-  - ricette base dell'app (preparazioni elementari come l'insalata mista), scritte qui
+  - ricette base dell'app (preparazioni elementari come l'insalata mista), scritte qui, e i piatti di tutti i giorni di scripts/ricette_app.json
 Le ricette già ottenute restano salvate; gira in automatico su GitHub.
 """
 import json
@@ -21,6 +21,7 @@ import base_ricette  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / 'www' / 'libere.json'
+APP = ROOT / 'scripts' / 'ricette_app.json'  # piatti di tutti i giorni scritti per l'app (nessun contenuto di terzi)
 SRV = 'https://ricette-ai.ricettedelcuore.workers.dev'
 UA = {'User-Agent': 'AggregatoreRicette/1.0 (https://ismirill.github.io/aggregatore-ricette/)', 'Content-Type': 'application/json'}
 CATS = ['Antipasti', 'Primi', 'Secondi', 'Contorni', 'Piatti unici', 'Lievitati', 'Dolci', 'Altro']
@@ -158,9 +159,9 @@ def main():
             print('Cookbook non riuscito', page, e.code)
         except Exception as e:
             print('Cookbook non riuscito', page, e)
-    for b in BASE:
-        out.append({**b, 'id': 'base-' + re.sub(r'\W+', '-', b['title'].lower()).strip('-'), 'url': 'https://ismirill.github.io/aggregatore-ricette/', 'source': 'Aggregatore Ricette',
-                    'license': 'Ricetta base dell\'app', 'diets': [], 'country': 'Italia', 'region': ''})
+    for b in BASE + json.loads(APP.read_text(encoding='utf-8')):
+        out.append({'region': '', **b, 'id': 'base-' + re.sub(r'\W+', '-', b['title'].lower()).strip('-'), 'url': 'https://ismirill.github.io/aggregatore-ricette/', 'source': 'Gnamina',
+                    'license': 'ricetta scritta per l\'app', 'diets': [], 'country': 'Italia'})
     for r in out:
         for f in ('b', 'n', 'cov', 's', 'sub'):
             r.pop(f, None)

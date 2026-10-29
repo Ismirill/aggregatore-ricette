@@ -689,7 +689,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=63; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=64; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -738,8 +738,9 @@ async function loadBook(){
         diets:[...new Set([...(r.diets||[]),...c.diets])],tags:[],imgCredit:r.image?`Foto: ${r.imgAuthor||'Wikimedia Commons'}${r.imgLicense?' ('+r.imgLicense+')':''} via Wikimedia Commons`:'',
         _tm:{t:r.time||timing({...r,world:false,_tm:null}).t,w:0,d:r.diff||2}});
     }
-    // Artusi 1895 (pubblico dominio, trascrizione Wikisource): titolo moderno, dosi e passaggi ricavati con l'AI; testo originale conservato
+    // Artusi 1895 (pubblico dominio, trascrizione Wikisource): solo i piatti ancora in uso, con titolo moderno, dosi e passaggi ricavati con l'AI; testo originale conservato
     for(const r of ar.recipes||[]){
+      if(r.hide||!r.analyzed)continue; // piatti fuori uso o testo antico non ancora riscritto
       const c=classify({title:r.title,ingredients:r.ingredients,caption:r.text});
       book.push({...r,book:true,artusi:true,source:'Artusi 1895',url:ar.url,country:'Italia',region:r.region||c.region,diets:[...new Set([...(r.diets||[]),...c.diets])],tags:[]});
     }
@@ -891,9 +892,9 @@ function render(){
       &&(!q||[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q)))
     .sort(sorter(fs,!!q));
   const nGz=view==='book'&&book?book.filter(x=>x.linked).length:0;
-  const nPu=view==='book'&&book?book.filter(x=>x.source==='Regione Puglia').length:0,nWo=view==='book'&&book?book.filter(x=>x.world).length:0,nAr=view==='book'&&book?book.filter(x=>x.artusi).length:0,nLi=view==='book'&&book?book.filter(x=>x.libera).length:0;
+  const nPu=view==='book'&&book?book.filter(x=>x.source==='Regione Puglia').length:0,nWo=view==='book'&&book?book.filter(x=>x.world).length:0,nAr=view==='book'&&book?book.filter(x=>x.artusi).length:0,nLi=view==='book'&&book?book.filter(x=>x.libera&&x.source!=='Gnamina').length:0,nGn=view==='book'&&book?book.filter(x=>x.source==='Gnamina').length:0;
   const lic=view==='mine'&&items.length?`<p class="lic">Le ricette salvate da te restano tue: per quelle importate da un link la fonte originale è indicata nella scheda, insieme alla foto e al suo autore.</p>${fontiDati()}`:showProd?`<p class="lic">${products.length} prodotti tipici pugliesi dalla <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia – Pugliapromozione</a> (CC BY 4.0)</p>`
-    :view==='book'&&book?.length?`<p class="lic">${book.length-nGz-nPu-nWo-nAr-nLi} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}${nPu?`, ${nPu} ricette tipiche della <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia</a> (CC BY 4.0)`:''}${nWo?`, ${nWo} ricette dal mondo di <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> (CC BY-SA 4.0, tradotte in italiano)`:''}${nAr?`, ${nAr} ricette dall'<a href="https://it.wikisource.org/wiki/La_scienza_in_cucina_e_l%27arte_di_mangiar_bene_(1895)" target="_blank" rel="noopener">Artusi (1895)</a>, pubblico dominio`:''}${nLi?`, ${nLi} da Wikipedia e dal Cookbook di Wikibooks (CC BY-SA 4.0) o ricette base`:''}</p>${fontiFoto()}${fontiDati()}`:'';
+    :view==='book'&&book?.length?`<p class="lic">${book.length-nGz-nPu-nWo-nAr-nLi-nGn} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}${nPu?`, ${nPu} ricette tipiche della <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia</a> (CC BY 4.0)`:''}${nWo?`, ${nWo} ricette dal mondo di <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> (CC BY-SA 4.0, tradotte in italiano)`:''}${nAr?`, ${nAr} ricette dall'<a href="https://it.wikisource.org/wiki/La_scienza_in_cucina_e_l%27arte_di_mangiar_bene_(1895)" target="_blank" rel="noopener">Artusi (1895)</a>, pubblico dominio`:''}${nLi?`, ${nLi} da Wikipedia e dal Cookbook di Wikibooks (CC BY-SA 4.0)`:''}${nGn?`, ${nGn} piatti di tutti i giorni scritti per Gnamina`:''}</p>${fontiFoto()}${fontiDati()}`:'';
   $('#list').innerHTML=(list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
     :`<div class="empty">${q?noResults(q):view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':welcome()}</div>`)+(lic?`<details class="lic fonti"><summary>Fonti e licenze</summary>${lic}</details>`:'');
@@ -1504,7 +1505,7 @@ function sourceLine(i){
   if(i.artusi)return `Fonte: Pellegrino Artusi, <a href="${esc(i.url)}" target="_blank" rel="noopener">La scienza in cucina e l'arte di mangiar bene</a> (1895, trascrizione di Wikisource) · pubblico dominio · ${i.analyzed?'titolo moderno, dosi e passaggi ricavati dal testo originale con l\'AI':'testo originale, non ancora analizzato'}`;
   if(i.source==='Wikipedia')return `Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Wikipedia</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · autori nella <a href="${esc(String(i.url).replace('/wiki/','/w/index.php?action=history&title='))}" target="_blank" rel="noopener">cronologia</a> · dosi e passaggi ricavati con l'AI`;
   if(i.source==='Wikibooks (Cookbook)')return `Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Cookbook di Wikibooks</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · tradotta in italiano con l'AI`;
-  if(i.source==='Aggregatore Ricette')return `Ricetta base dell'app (preparazione elementare)`;
+  if(i.source==='Gnamina'||i.source==='Aggregatore Ricette')return `Ricetta scritta per Gnamina: versione casalinga di oggi, senza contenuti di terzi`;
   if(i.world)return `Fonte: <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · tradotta in italiano con l'AI`;
   return `Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · autori nella <a href="${esc(String(i.url).replace('/wiki/','/w/index.php?action=history&title='))}" target="_blank" rel="noopener">cronologia</a>`;
 }
@@ -1536,7 +1537,7 @@ function openDetail(i){
     ${i.note?`<h3>Note</h3><p class="cap">${esc(i.note)}</p>`:''}
     ${!i.ingredients?.length&&i.caption?`<h3>Descrizione</h3><p class="cap">${esc(i.caption)}</p>`:''}
     ${i.imgFile?`<p class="lic">Foto: <a href="${esc(i.imgFile)}" target="_blank" rel="noopener">Wikimedia Commons</a> (licenza libera, autore e licenza nella pagina della foto)</p>`:i.imgCredit?`<p class="lic">${esc(i.imgCredit)}${i.imgLink?` · <a href="${esc(i.imgLink)}" target="_blank" rel="noopener">pagina della foto</a>`:''}</p>`:''}
-    <div class="row">${i.url?`<a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">Apri originale</a>`:''}
+    <div class="row">${i.url&&i.source!=='Gnamina'&&i.source!=='Aggregatore Ricette'?`<a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">Apri originale</a>`:''}
       <a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">▶ Cerca su YouTube</a><span class="sp"></span>
       ${i.pronto||i.colazione?'':i.book?'<button class="btn pri" id="dSave">Salva nelle mie</button>':'<button class="btn" id="dEdit">Modifica</button>'}<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button></div>`;
   $('#dRate').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n;i.rating=i.rating===n?0:n;i.t=Date.now();saveItems();render();
