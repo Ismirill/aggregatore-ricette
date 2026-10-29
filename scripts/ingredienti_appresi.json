@@ -47,6 +47,10 @@
 "as": null,
 "via": "non trovato"
 },
+"anguille": {
+"as": "anguilla",
+"via": "simile a \"anguilla\""
+},
 "animella": {
 "as": "animelle",
 "via": "sinonimo di animelle"
@@ -283,6 +287,10 @@
 "as": "calamari",
 "via": "Wikipedia: mollusco"
 },
+"chiodo garofano": {
+"as": "salsa",
+"via": "Open Food Facts: Chiodo di garofano interi"
+},
 "chips platano": {
 "as": "verdure varie",
 "via": "Open Food Facts: Platanitos Verdes"
@@ -296,6 +304,10 @@
 "via": "Wikidata: insaccato di maiale a ricetta regionale"
 },
 "cicale": {
+"as": "scampi",
+"via": "sinonimo di scampi"
+},
+"cicale q b": {
 "as": "scampi",
 "via": "sinonimo di scampi"
 },
@@ -1147,6 +1159,10 @@
 "as": "prosciutto",
 "via": "simile a \"prosciutto\""
 },
+"q b tartufi tritati": {
+"as": "tartufo",
+"via": "simile a \"tartufo\""
+},
 "qualche ciocca ramerino": {
 "as": null,
 "via": "non trovato"
@@ -1164,6 +1180,10 @@
 "via": "sinonimo di spezie"
 },
 "radice iris": {
+"as": null,
+"via": "non trovato"
+},
+"ramarino q b": {
 "as": null,
 "via": "non trovato"
 },
@@ -1327,6 +1347,10 @@
 "as": "mais dolce",
 "via": "sinonimo di mais dolce"
 },
+"squille": {
+"as": null,
+"via": "non trovato"
+},
 "starna o pernice": {
 "as": null,
 "via": "non trovato"
@@ -1338,6 +1362,10 @@
 "stomachino": {
 "as": null,
 "via": "non trovato"
+},
+"storione": {
+"as": "pesce",
+"via": "Wikidata: specie di pesce"
 },
 "storni": {
 "as": null,
