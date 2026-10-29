@@ -4,7 +4,6 @@ import json, os, re, time, urllib.request, urllib.parse
 from pathlib import Path
 W = Path(__file__).resolve().parent.parent / 'www'
 KEY = re.sub(r'\s', '', os.environ.get('PIXABAY_KEY', '')).strip('"\'')
-print('chiave: lunghezza', len(KEY), '| forma corretta (numero-trattino-32 caratteri):', bool(re.fullmatch(r'\d+-[0-9a-f]{32}', KEY)))
 im = json.load(open(W/'immagini.json'))['items']
 rec = {}
 for f in ['ricettario', 'puglia', 'mondo', 'artusi', 'libere', 'collegate']:
