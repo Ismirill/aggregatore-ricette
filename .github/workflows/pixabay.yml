@@ -1,0 +1,17 @@
+# Avvio manuale: cerca su Pixabay le foto delle ricette senza immagine. Non pubblica niente e non usa l'AI.
+name: Cerca foto su Pixabay
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  cerca:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/pixabay_cerca.py
+        env:
+          PIXABAY_KEY: ${{ secrets.PIXABAY_KEY }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pixabay
+          path: pixabay_candidate.json
