@@ -693,7 +693,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=67; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=68; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -702,7 +702,7 @@ async function fetchData(name){
 }
 
 /* ---------- Ricettario (Wikibooks, CC BY-SA 4.0) ---------- */
-let QFONTI=[];let view='mine',book=null,bookInfo=null,QUOT=[],PRONTI=[],PR_EUR={};let IM={}; // foto trovate su Wikipedia/Commons o generate con l'AI (www/immagini.json)
+let CAT_FIX={};let QFONTI=[];let view='mine',book=null,bookInfo=null,QUOT=[],PRONTI=[],PR_EUR={};let IM={}; // foto trovate su Wikipedia/Commons o generate con l'AI (www/immagini.json)
 // una ricetta per id, dal ricettario, dalle tue o dai cibi pronti (menu Budget)
 const findRec=(id,isBook)=>((isBook?book:items)||[]).find(x=>x.id===id)||PRONTI.find(x=>x.id===id)||BK.find(x=>x.id===id);
 const src=()=>view==='book'?(book||[]):items;
@@ -710,6 +710,7 @@ async function loadBook(){
   if(book)return;
   try{
     const [d,im,ct,gz,pu,wo,ar,li,qu,pr]=await Promise.all([fetchData('ricettario.json'),fetchData('immagini.json').catch(()=>({items:{}})),fetchData('categorie.json').catch(()=>({items:{}})),fetchData('collegate.json').catch(()=>({recipes:[]})),fetchData('puglia.json').catch(()=>({recipes:[]})),fetchData('mondo.json').catch(()=>({recipes:[]})),fetchData('artusi.json').catch(()=>({recipes:[]})),fetchData('libere.json').catch(()=>({recipes:[]})),fetchData('quotidiani.json').catch(()=>({piatti:[]})),fetchData('pronti.json').catch(()=>({items:[],prezzi:{}}))]);
+    CAT_FIX=ct.manual||{};
     // Cibi già pronti del supermercato: solo per il menu Budget, se richiesti (non compaiono nel ricettario)
     PR_EUR=pr.prezzi||{};PR_PACK=pr.conf||{};
     PRONTI=(pr.items||[]).map(x=>({id:'pr-'+x.id,title:x.title,cat:x.cat,kind:x.kind,pronto:true,book:true,source:'Cibo pronto',country:'Italia',region:'',diets:x.diets||[],tags:[],
@@ -760,7 +761,7 @@ async function loadBook(){
         steps:[],tags:[],_tm:{t:r.time||timing({...r,steps:[]}).t,w:0,d:r.diff||2}});
     }
   }catch{book=[];toast('Ricettario non disponibile offline')}
-  for(const b of book){b.cat=fixCat(b); // preparazioni di base, basi da sole e verdure/legumi conditi, da qualunque fonte
+  for(const b of book){b.cat=CAT_FIX[b.id]||fixCat(b); // correzioni controllate a mano (categorie.json), poi preparazioni di base, basi da sole e verdure/legumi conditi, da qualunque fonte
     const ph=IM[b.id];if(ph){if(!b.image)b.image=ph.img;if(ph.gen){b.imgGen=true;b.imgCredit='Immagine generata con l\'AI: indicativa, il piatto vero può essere diverso';delete b.imgFile}else if(ph.web){b.imgCredit=`Foto: ${ph.web.by||ph.web.src} (${ph.web.lic}) via ${ph.web.src}`;b.imgLink=ph.web.page;delete b.imgFile}else if(!b.imgFile)b.imgFile=ph.file} // foto per ogni fonte
     if(PSEUDO_RX.test(b.title)){b.pseudo=true;b.country='Stati Uniti';b.cc='US';b.region=''}} // italo-americani
   // Solo ricette complete: almeno 3 ingredienti e un procedimento vero (le altre restano fuori finché non vengono analizzate)

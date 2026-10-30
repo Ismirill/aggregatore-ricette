@@ -6,6 +6,7 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-10-30
 
+- Versione 68: 35 ricette che erano in «Altro» spostate nella categoria giusta (es. hummus e guacamole negli antipasti, gazpacho nei primi, fagioli all'uccelletto nei contorni, shakshuka nei secondi, granita nei dolci); correzioni a mano in scripts/categorie.py (MANUAL), valide per tutte le fonti. In «Altro» restano salse, sughi, creme, impasti di base, brodi, bevande e liquori
 - Versione 67: tolta dal Ricettario la sezione «Prodotti tipici» (193 schede della Regione Puglia di vini, formaggi, oli, frutta e conserve, senza ingredienti né procedimento); restano le ricette pugliesi vere; lo script puglia.py non scarica più i prodotti
 - Versione 66: ✕ in alto per uscire subito, sempre visibile anche scorrendo, in «Nuova ricetta / Modifica», Impostazioni e riconoscimento da foto; nel percorso de «Il mio menu» freccia ← e ✕ anche in alto (sito, APK e iOS)
 - Sito, APK e app iOS aggiornati insieme: GitHub compila anche l'app iOS a ogni modifica; nasce questo registro delle modifiche

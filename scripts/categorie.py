@@ -23,6 +23,46 @@ OUT = ROOT / 'www' / 'categorie.json'
 UA = {'User-Agent': 'AggregatoreRicette/1.0 (https://ismirill.github.io/aggregatore-ricette/)'}
 TYPES = ['Antipasti', 'Primi', 'Secondi', 'Contorni', 'Piatti unici', 'Lievitati', 'Dolci', 'Altro']
 
+# Correzioni controllate a mano, per ricette di qualsiasi fonte (Wikibooks, UniTools, Artusi, Puglia…): l'app le applica dopo
+# tutto il resto. Le preparazioni di base (creme, impasti, salse, sughi, brodi) e bevande/liquori restano apposta in «Altro».
+MANUAL = {
+    'wb-baba-ganush': 'Antipasti',
+    'wb-bagna-càuda': 'Antipasti',
+    'wb-guacamole': 'Antipasti',
+    'wb-hummus': 'Antipasti',
+    'wb-strufuggiu': 'Antipasti',
+    'wb-brustengo': 'Lievitati',
+    'wb-scrippelle': 'Primi',
+    'wb-gazpacho': 'Primi',
+    'wb-cicoria-ripassata-in-padella': 'Contorni',
+    'wb-fagioli-all-uccelletto': 'Contorni',
+    'wb-insalata-turca': 'Contorni',
+    'wb-mirchi-ka-salan': 'Contorni',
+    'wo-pol-sambol': 'Contorni',
+    'wb-jambon-au-porto-prosciutto-al-porto': 'Secondi',
+    'wb-seitan-alla-pizzaiola': 'Secondi',
+    'wb-shakshuka': 'Secondi',
+    'wo-shakshuka': 'Secondi',
+    'wo-shakshuka-tunisian': 'Secondi',
+    'wo-menemen': 'Secondi',
+    'wo-ackee-and-saltfish': 'Secondi',
+    'wb-fondue-fribourgeoise': 'Piatti unici',
+    'wo-ful-medames': 'Piatti unici',
+    'wo-ful-sudani': 'Piatti unici',
+    'wo-banitsa': 'Piatti unici',
+    'wo-gallo-pinto': 'Piatti unici',
+    'wo-gallo-pinto-nicaraguense': 'Piatti unici',
+    'wo-mangu': 'Piatti unici',
+    'wo-baleadas': 'Piatti unici',
+    'wo-nacatamal': 'Piatti unici',
+    'wo-mas-huni': 'Piatti unici',
+    'wo-rolex-uganda': 'Piatti unici',
+    'wo-masala-dosa': 'Piatti unici',
+    'wb-gelatina-d-arancia': 'Dolci',
+    'wb-granita-siciliana': 'Dolci',
+    'wb-propato-della-zita': 'Dolci',
+}
+
 # Testo (categoria o descrizione) -> tipo. L'ordine conta: le regole più specifiche prima.
 TEXT_RULES = [
     (r'pane e focacce|\bpizz[ae]\b|focacc|lievitat|impasti lievitati|\bpane\b|pagnott|brioche|panettone|pandoro|colomba|lievito madre|pasta madre|\bbread\b|bun\b|yeast', 'Lievitati'),
@@ -169,10 +209,12 @@ def main():
             score['Dolci'] += 4; by.append('"dolci" nel nome')
         cat = max(score, key=lambda k: (score[k], -TYPES.index(k))) if score else 'Altro'
         conf = 'alta' if score and score[cat] >= 4 else 'media' if score and score[cat] >= 2.5 else 'bassa'
+        if r['id'] in MANUAL:
+            cat, conf, by = MANUAL[r['id']], 'alta', by + ['corretto a mano']
         items[r['id']] = {'cat': cat, 'conf': conf, 'by': by}
         if prev.get('items', {}).get(r['id'], {}).get('cat') not in (None, cat):
             changed += 1
-    OUT.write_text(json.dumps({'updated': time.strftime('%Y-%m-%d'), 'items': items, 'desc': desc}, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+    OUT.write_text(json.dumps({'updated': time.strftime('%Y-%m-%d'), 'items': items, 'manual': MANUAL, 'desc': desc}, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     count = defaultdict(int)
     for x in items.values():
         count[x['cat']] += 1
