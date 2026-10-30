@@ -403,6 +403,10 @@
 "as": "latte",
 "via": "sinonimo di latte"
 },
+"crema q b": {
+"as": "legumi",
+"via": "Open Food Facts: Crema de cacahuetes 100%"
+},
 "creme fraiche": {
 "as": "panna",
 "via": "sinonimo di panna"
@@ -416,6 +420,10 @@
 "via": "non trovato"
 },
 "cucchiaiata rhum": {
+"as": "rum",
+"via": "sinonimo di rum"
+},
+"cucchiaiate rhum": {
 "as": "rum",
 "via": "sinonimo di rum"
 },
@@ -1018,6 +1026,10 @@
 "ovoli": {
 "as": "uova",
 "via": "Wikidata: pattern that consists of half egg-shaped ornaments, used in design and architecture"
+},
+"pallina tartufi": {
+"as": "gallina",
+"via": "simile a \"gallina\""
 },
 "palline gelato al fiordilatte": {
 "as": null,
