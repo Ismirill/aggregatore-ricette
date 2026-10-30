@@ -693,7 +693,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=69; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=70; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1930,7 +1930,7 @@ $('#verInfo').textContent='Versione '+APP_VERSION;
 // Nell'APK: avvisa se sul sito c'è una versione più recente da installare
 if(inApp)fetch(SITE+'version.json?t='+Date.now()).then(r=>r.json()).then(v=>{if(v.version>APP_VERSION){
   const b=document.createElement('div');b.className='warn';b.style.margin='8px 16px';
-  b.innerHTML=`È disponibile una nuova versione dell'app. <a class="btn pri" href="${esc(v.apk)}" target="_blank" rel="noopener">Scarica e installa</a>`;
+  b.innerHTML=`È disponibile la versione ${v.version} dell'app (questa è la ${APP_VERSION}). <a class="btn pri" href="${esc(v.apk)}" target="_blank" rel="noopener">Scarica e installa</a><br><small>Finito il download apri il file «${esc(v.apk.split('/').pop())}» e tocca Aggiorna.</small>`;
   document.querySelector('main').prepend(b);$('#verInfo').textContent+=` · disponibile la ${v.version}`}}).catch(()=>{});
 if('serviceWorker' in navigator&&location.protocol==='https:'&&location.hostname!=='localhost')navigator.serviceWorker.register('sw.js');
 </script>

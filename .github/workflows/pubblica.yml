@@ -71,7 +71,8 @@ jobs:
       - name: Versione pubblicata
         run: |
           v=$(grep -oE 'const APP_VERSION=[0-9]+' www/index.html | grep -oE '[0-9]+$')
-          echo "{\"version\":$v,\"apk\":\"https://github.com/${{ github.repository }}/releases/download/apk/AggregatoreRicette.apk\"}" > www/version.json
+          # un nome di file diverso per ogni versione: sul telefono il download non si confonde con l'APK vecchio già scaricato
+          echo "{\"version\":$v,\"apk\":\"https://github.com/${{ github.repository }}/releases/download/apk/Gnamina-$v.apk\"}" > www/version.json
       - name: Salva i dati aggiornati
         run: |
           git config user.name "github-actions[bot]"
@@ -85,7 +86,7 @@ jobs:
         with: { name: www, path: www }
 
   sito:
-    needs: ricettario
+    needs: [ricettario, apk]  # il sito (e il suo version.json) esce solo quando l'APK della stessa versione è già scaricabile
     runs-on: ubuntu-latest
     environment: { name: github-pages, url: '${{ steps.deploy.outputs.page_url }}' }
     steps:
@@ -117,9 +118,13 @@ jobs:
       - name: Pubblica APK nella release "apk"
         env: { GH_TOKEN: '${{ github.token }}' }
         run: |
+          v=$(grep -oE 'const APP_VERSION=[0-9]+' www/index.html | grep -oE '[0-9]+$')
           cp android/app/build/outputs/apk/debug/app-debug.apk AggregatoreRicette.apk
+          cp AggregatoreRicette.apk "Gnamina-$v.apk"
           gh release view apk >/dev/null 2>&1 || gh release create apk --title "App Android" --notes "Ultima versione dell'app, aggiornata automaticamente."
-          gh release upload apk AggregatoreRicette.apk --clobber
+          gh release upload apk AggregatoreRicette.apk "Gnamina-$v.apk" --clobber
+          # tiene solo le ultime 3 versioni numerate (AggregatoreRicette.apk resta il link fisso all'ultima)
+          gh release view apk --json assets -q '.assets[].name' | grep -E '^Gnamina-[0-9]+\.apk$' | sort -t- -k2 -n -r | tail -n +4 | while read f; do gh release delete-asset apk "$f" -y; done
 
   ios:
     needs: ricettario

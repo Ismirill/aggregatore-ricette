@@ -6,6 +6,7 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-10-30
 
+- Versione 70: corretto l'aggiornamento dell'APK che reinstallava la versione vecchia. Ogni versione ha ora un file con il suo numero (Gnamina-70.apk…), così il telefono non riapre l'APK già scaricato; il sito con il nuovo numero di versione esce solo quando l'APK è già scaricabile; l'avviso nell'app dice quale versione c'è e quale file aprire. AggregatoreRicette.apk resta il link fisso all'ultima versione
 - Versione 69: il Ricettario si apre su «🇮🇹 Italiane» (tutte le ricette italiane, con i tipi di piatto nella seconda riga); restano Tutte, Colazione, Internazionali e le categorie; la ricerca cerca sempre in tutto il ricettario
 - Versione 68: 35 ricette che erano in «Altro» spostate nella categoria giusta (es. hummus e guacamole negli antipasti, gazpacho nei primi, fagioli all'uccelletto nei contorni, shakshuka nei secondi, granita nei dolci); correzioni a mano in scripts/categorie.py (MANUAL), valide per tutte le fonti. In «Altro» restano salse, sughi, creme, impasti di base, brodi, bevande e liquori
 - Versione 67: tolta dal Ricettario la sezione «Prodotti tipici» (193 schede della Regione Puglia di vini, formaggi, oli, frutta e conserve, senza ingredienti né procedimento); restano le ricette pugliesi vere; lo script puglia.py non scarica più i prodotti
