@@ -693,7 +693,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=68; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=69; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -790,7 +790,8 @@ function saveFromBook(i){
     note:i.artusi?'Ricetta di Pellegrino Artusi, La scienza in cucina (1895), pubblico dominio.':i.libera?`Ricetta da ${i.source} (${i.license}).`:i.world?'Ricetta da UniTools — theunitools.com (CC BY-SA 4.0), tradotta in italiano.':i.source==='Regione Puglia'?'Ricetta tipica dalla Regione Puglia – Pugliapromozione (CC BY 4.0).':`Ricetta da Wikibooks, Libro di cucina (${bookInfo?.license||'CC BY-SA 4.0'}). Autori: cronologia della pagina originale.`};
   items=[rec,...items];saveItems();toast('Salvata in Le mie ricette');return rec;
 }
-$('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;view=t.dataset.v;cur='Tutte';
+$('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;view=t.dataset.v;cur=view==='book'?'Italiane':'Tutte';cur2=''; // il Ricettario parte dalle ricette italiane
+
   $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
   const bud=view==='budget';['#sbar','#chips','#list','#add'].forEach(x=>$(x).hidden=bud);if(bud)$('#chips2').hidden=true;if(bud)$('#chips2').hidden=true;if(bud)$('.filters').hidden=true;$('#budget').hidden=!bud;filtUI();
   $('#vTitle').textContent={mine:'Le mie ricette',book:'Ricettario',budget:'Il mio menu'}[view];$('#vSub').textContent={mine:'Le tue ricette salvate',book:'Italia e dal mondo',budget:'Settimana o pasto, nel tuo budget'}[view];window.scrollTo(0,0);
@@ -878,10 +879,11 @@ function fillSelects(){
 }
 function render(){
   const q=$('#q').value.trim().toLowerCase(),fd=$('#fDiet').value,fz=$('#fZone').value,fr=+$('#fRate').value,ft=+$('#fTime').value,fdf=+$('#fDiff').value,fc=+$('#fCost').value,fs=$('#fSort').value;
-  const showIntl=view==='book'&&cur==='Internazionali',showBk=view==='book'&&cur==='Colazione';
-  const data=showIntl?src().filter(isIntl):showBk?BK:src();
-  const counts={};src().forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);if(view==='book'&&book)counts['Internazionali']=book.filter(isIntl).length;if(view==='book')counts['Colazione']=BK.length;
-  $('#chips').innerHTML=['Tutte',...(view==='book'?['Colazione','Internazionali']:[]),...cats].filter(c=>c==='Tutte'||counts[c]).map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${c==='Internazionali'?'🌍 ':c==='Colazione'?'☕ ':''}${esc(c)}<small>${c==='Tutte'?src().length:counts[c]}</small></button>`).join('');
+  // «Italiane»: vista di partenza del Ricettario, tutte le ricette italiane con i tipi di piatto nella seconda riga; cercando si cerca in tutto il ricettario
+  const showIntl=view==='book'&&cur==='Internazionali',showBk=view==='book'&&cur==='Colazione',showIta=view==='book'&&cur==='Italiane'&&!q;
+  const data=showIntl?src().filter(isIntl):showBk?BK:showIta?src().filter(i=>!isIntl(i)):src();
+  const counts={};src().forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);if(view==='book'&&book){counts['Internazionali']=book.filter(isIntl).length;counts['Italiane']=book.length-counts['Internazionali']}if(view==='book')counts['Colazione']=BK.length;
+  $('#chips').innerHTML=[...(view==='book'?['Italiane']:[]),'Tutte',...(view==='book'?['Colazione','Internazionali']:[]),...cats].filter(c=>c==='Tutte'||counts[c]).map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${c==='Italiane'?'🇮🇹 ':c==='Internazionali'?'🌍 ':c==='Colazione'?'☕ ':''}${esc(c)}<small>${c==='Tutte'?src().length:counts[c]}</small></button>`).join('');
   // seconda riga per le colazioni: classiche, dolci, salate
   if(showBk){const KL={classica:'Classiche',dolce:'Dolci',salata:'Salate'};if(cur2&&!KL[cur2])cur2='';
     $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutte<small>${BK.length}</small></button>`+Object.entries(KL).map(([k,l])=>`<button class="chip${k===cur2?' on':''}" data-p="${k}">${l}<small>${BK.filter(r=>r.kind===k).length}</small></button>`).join('')}
@@ -889,8 +891,11 @@ function render(){
   if(showIntl){const pc={};data.forEach(i=>{const k=i.country;pc[k]=(pc[k]||0)+1});
     const ord=Object.entries(pc).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));if(cur2&&!pc[cur2])cur2='';
     $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutti i paesi<small>${data.length}</small></button>`+ord.map(([k,n])=>{const it=data.find(i=>i.country===k);return `<button class="chip${k===cur2?' on':''}" data-p="${esc(k)}">${flag(ccOf(it))} ${esc(k)}<small>${n}</small></button>`}).join('');}
-  $('#chips2').hidden=!showIntl&&!showBk;
-  const list=data.filter(i=>(cur==='Tutte'||i.cat===cur||(showIntl&&(!cur2||i.country===cur2)))&&(!showBk||!cur2||i.kind===cur2)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(!ft||timing(i).t<=ft)&&(!fdf||(fdf===3?timing(i).d===3:timing(i).d<=fdf))&&(!fc||((perPerson(i)?.eur??99)<=fc))
+  // seconda riga per le italiane: i tipi di piatto
+  if(showIta){const tc={};data.forEach(i=>tc[i.cat]=(tc[i.cat]||0)+1);if(cur2&&!tc[cur2])cur2='';
+    $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutte<small>${data.length}</small></button>`+cats.filter(c=>tc[c]).map(c=>`<button class="chip${c===cur2?' on':''}" data-p="${esc(c)}">${esc(c)}<small>${tc[c]}</small></button>`).join('')}
+  $('#chips2').hidden=!showIntl&&!showBk&&!showIta;
+  const list=data.filter(i=>(cur==='Tutte'||i.cat===cur||(showIntl&&(!cur2||i.country===cur2))||(cur==='Italiane'&&(!showIta||!cur2||i.cat===cur2)))&&(!showBk||!cur2||i.kind===cur2)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(!ft||timing(i).t<=ft)&&(!fdf||(fdf===3?timing(i).d===3:timing(i).d<=fdf))&&(!fc||((perPerson(i)?.eur??99)<=fc))
       &&(!q||[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q)))
     .sort(sorter(fs,!!q));
   const nGz=view==='book'&&book?book.filter(x=>x.linked).length:0;
@@ -1557,7 +1562,7 @@ function openForm(data={}){
   const f=$('#f');f.reset();
   $('#catSel').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('');
   f.url.value=data.url||'';f.title.value=data.title||'';f.caption.value=data.desc||'';$('#capL').hidden=!(data.desc||['Facebook','Instagram'].includes(sourceOf(data.url||'')));f.tags.value=(data.tags||[]).join(', ');f.note.value=data.note||'';
-  f.cat.value=data.cat||(cur!=='Tutte'?cur:'Altro');f.time.value=data.time||'';f.servings.value=data.servings||'';f.country.value=data.country||'';f.region.value=data.region||'';
+  f.cat.value=data.cat||(cats.includes(cur)?cur:'Altro');f.time.value=data.time||'';f.servings.value=data.servings||'';f.country.value=data.country||'';f.region.value=data.region||'';
   f.ingredients.value=(data.ingredients||[]).join('\n');f.steps.value=(data.steps||[]).join('\n');
   setDiets(data.diets||[]);setRating(data.rating||0);
   extra={image:data.image||'',author:data.author||'',caption:data.caption||'',videoId:data.videoId||'',videoEmbed:data.videoEmbed||'',finalUrl:data.finalUrl||''};
