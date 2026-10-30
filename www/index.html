@@ -151,6 +151,10 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .shot{width:100%;max-height:240px;object-fit:cover;border-radius:16px}
 .dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}.dhead h2{margin:0}
 .dhead .icon{box-shadow:none}
+/* testata fissa nelle finestre: la ✕ resta sempre a portata anche scorrendo */
+.dhead.stk{position:sticky;top:-20px;z-index:3;background:var(--card);margin:-20px -20px 8px;padding:14px 20px 8px}
+@media (max-width:620px){.dhead.stk{top:-18px;margin:-18px -16px 8px;padding:12px 16px 8px}}
+.wiz .icon{flex:none;box-shadow:none}.wiz .wmid{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
 .accF input{margin-bottom:8px}.socs{display:grid;gap:8px}.lnk{background:none;border:0;padding:0;color:var(--acc);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline}.syCode{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.3rem;font-weight:700;letter-spacing:.08em;text-align:center;padding:10px;border:2px dashed var(--bd);border-radius:12px;margin:0 0 8px;user-select:all;-webkit-user-select:all}.sec{border-top:1px solid var(--bd);padding:14px 0 6px}.sec h3{margin:0 0 8px}.sec .meta{margin:0 0 10px}
 .inl{display:flex;gap:8px;margin-top:10px;grid-template-columns:none}.inl input{flex:1;min-width:0}.inl .btn{flex:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid2 .btn{width:100%}
@@ -243,7 +247,7 @@ details summary{cursor:pointer}
 <section id="budget" hidden>
   <div class="bhead"><h2>Il menu giusto per il tuo budget</h2><p>Rispondi a sei domande: preparo un menu con i piatti italiani di tutti i giorni, bilanciato e con frutta e verdura di stagione. Alla fine puoi variarlo quante volte vuoi.</p></div>
   <form id="bForm" class="bform">
-    <div class="wiz"><div class="wdots" id="wDots"></div><div class="meta" id="wStep"></div></div>
+    <div class="wiz"><button type="button" class="icon" id="wTopBack" aria-label="Indietro" style="visibility:hidden">←</button><div class="wmid"><div class="wdots" id="wDots"></div><div class="meta" id="wStep"></div></div><button type="button" class="icon" id="wTopX" aria-label="Annulla" style="visibility:hidden">✕</button></div>
     <section class="step" data-s="0"><h3>Che menu vuoi?</h3>
       <div class="seg"><label><input type="radio" name="mode" value="week" checked><span>Tutta la settimana</span></label><label><input type="radio" name="mode" value="meal"><span>Un solo pasto</span></label></div>
       <p class="meta" id="wHint0">Settimana: pranzi e cene da lunedì a domenica, bilanciati tra loro. Un solo pasto: un menu completo per oggi.</p>
@@ -280,7 +284,7 @@ details summary{cursor:pointer}
 <dialog id="det"><div class="dv" id="dv"></div></dialog>
 
 <dialog id="dlg">
-  <h2 id="dlgT">Nuova ricetta</h2>
+  <div class="dhead stk"><h2 id="dlgT">Nuova ricetta</h2><button type="button" class="icon" id="dlgX" aria-label="Chiudi">✕</button></div>
   <div id="srcStep">
     <p class="meta" style="margin:0 0 10px">Da dove viene la ricetta?</p>
     <div class="srcGrid">
@@ -324,10 +328,10 @@ details summary{cursor:pointer}
 </dialog>
 <datalist id="countries"></datalist><datalist id="regions"></datalist>
 
-<dialog id="photo"><div id="phv"></div></dialog>
+<dialog id="photo"><button class="dclose" id="phX" aria-label="Chiudi">✕</button><div id="phv"></div></dialog>
 
 <dialog id="set">
-  <div class="dhead"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi">✕</button></div>
+  <div class="dhead stk"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi">✕</button></div>
   <section class="sec"><h3>Account</h3><div id="accBox"></div></section>
   <section class="sec"><h3>Aspetto</h3><div class="seg" id="styleSeg" style="margin-bottom:8px"><label><input type="radio" name="style" value="trattoria"><span>Trattoria</span></label><label><input type="radio" name="style" value="crema"><span>Crema</span></label></div><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div></section>
   <section class="sec"><h3>Tipi di piatto</h3><div class="badges" id="catList"></div>
@@ -689,7 +693,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=65; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=66; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1092,7 +1096,7 @@ function showStep(k){
   f.querySelectorAll('.step').forEach(st=>st.hidden=+st.dataset.s!==wStep);
   $('#wDots').innerHTML=Array.from({length:W_N},(_,i)=>`<i class="${i===wStep?'on':i<wStep?'done':''}"></i>`).join('');
   $('#wStep').textContent=`Passo ${wStep+1} di ${W_N}`;
-  $('#wBack').style.visibility=wStep?'visible':'hidden';$('#wNext').hidden=wStep===W_N-1;$('#wGo').hidden=wStep!==W_N-1;
+  $('#wBack').style.visibility=$('#wTopBack').style.visibility=wStep?'visible':'hidden';$('#wNext').hidden=wStep===W_N-1;$('#wGo').hidden=wStep!==W_N-1;
   modeUI();
 }
 function wizardValid(){
@@ -1103,11 +1107,11 @@ function wizardValid(){
   return true;
 }
 $('#wNext').onclick=()=>{if(wizardValid())showStep(wStep+1)};
-$('#wBack').onclick=()=>showStep(wStep-1);
+$('#wBack').onclick=$('#wTopBack').onclick=()=>showStep(wStep-1);
 // Annulla: esce dal percorso e torna al menu già creato, senza cambiare nulla
-$('#wCancel').onclick=()=>{const plan=load('budgetPlan',null);if(plan){budgetView(false);loadSeason().then(()=>showPlan(plan))}};
+$('#wCancel').onclick=$('#wTopX').onclick=()=>{const plan=load('budgetPlan',null);if(plan){budgetView(false);loadSeason().then(()=>showPlan(plan))}};
 // mostra il modulo (dal passo indicato) o il menu
-function budgetView(showForm,step=0){$('#bForm').hidden=!showForm;$('#bOut').hidden=showForm;if(showForm){showStep(step);$('#wCancel').hidden=!load('budgetPlan',null)}}
+function budgetView(showForm,step=0){$('#bForm').hidden=!showForm;$('#bOut').hidden=showForm;if(showForm){showStep(step);const p=!!load('budgetPlan',null);$('#wCancel').hidden=!p;$('#wTopX').style.visibility=p?'visible':'hidden'}}
 function modeUI(){const w=$('#bForm').mode.value==='week';$('#bLbl').textContent=w?'Budget settimanale (€)':'Budget per il pasto (€)';$('#bMealsL').hidden=!w;
   $('#bTimeEndL').hidden=!w;$('#bTimeL').textContent=w?'Tempo per cucinare a pasto (lun–ven)':'Tempo per cucinare';$('#bBreakL').hidden=!w}
 
@@ -1677,7 +1681,8 @@ $('#f').onsubmit=e=>{
   if(rec.image&&!String(rec.image).startsWith('data:'))keepThumb(rec.image).then(img=>{if(img!==rec.image){const it=items.find(x=>x.id===rec.id);if(it){it.image=img;it.t=Date.now();saveItems();render()}}});
   if(aiOn()&&rec.ingredients.length&&!rec.nutrition)computeNutrition(items.find(x=>x.id===rec.id)).catch(()=>{});
 };
-$('#cancel').onclick=()=>$('#dlg').close();
+$('#cancel').onclick=$('#dlgX').onclick=()=>$('#dlg').close();
+$('#phX').onclick=()=>$('#photo').close();
 $('#del').onclick=()=>{if(confirm('Eliminare questa ricetta?')){const tb=load('tomb',{});tb[editing.id]=Date.now();save('tomb',tb);items=items.filter(i=>i.id!==editing.id);saveItems();$('#dlg').close();fillSelects();render()}};
 
 /* ---------- Eventi generali ---------- */

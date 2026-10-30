@@ -6,6 +6,7 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-10-30
 
+- Versione 66: ✕ in alto per uscire subito, sempre visibile anche scorrendo, in «Nuova ricetta / Modifica», Impostazioni e riconoscimento da foto; nel percorso de «Il mio menu» freccia ← e ✕ anche in alto (sito, APK e iOS)
 - Sito, APK e app iOS aggiornati insieme: GitHub compila anche l'app iOS a ogni modifica; nasce questo registro delle modifiche
 - iOS: estensione Condividi verso Gnamina e link gnamina:// passati alla pagina
 - App iOS con Capacitor: progetto Xcode, avvio a scene per iOS 27, icona e schermata di avvio di Gnamina
