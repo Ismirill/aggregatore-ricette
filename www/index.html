@@ -693,7 +693,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=66; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=67; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -702,14 +702,14 @@ async function fetchData(name){
 }
 
 /* ---------- Ricettario (Wikibooks, CC BY-SA 4.0) ---------- */
-let QFONTI=[];let view='mine',book=null,bookInfo=null,products=[],QUOT=[],PRONTI=[],PR_EUR={};let IM={}; // foto trovate su Wikipedia/Commons o generate con l'AI (www/immagini.json)
+let QFONTI=[];let view='mine',book=null,bookInfo=null,QUOT=[],PRONTI=[],PR_EUR={};let IM={}; // foto trovate su Wikipedia/Commons o generate con l'AI (www/immagini.json)
 // una ricetta per id, dal ricettario, dalle tue o dai cibi pronti (menu Budget)
 const findRec=(id,isBook)=>((isBook?book:items)||[]).find(x=>x.id===id)||PRONTI.find(x=>x.id===id)||BK.find(x=>x.id===id);
 const src=()=>view==='book'?(book||[]):items;
 async function loadBook(){
   if(book)return;
   try{
-    const [d,im,ct,gz,pu,wo,ar,li,qu,pr]=await Promise.all([fetchData('ricettario.json'),fetchData('immagini.json').catch(()=>({items:{}})),fetchData('categorie.json').catch(()=>({items:{}})),fetchData('collegate.json').catch(()=>({recipes:[]})),fetchData('puglia.json').catch(()=>({recipes:[],products:[]})),fetchData('mondo.json').catch(()=>({recipes:[]})),fetchData('artusi.json').catch(()=>({recipes:[]})),fetchData('libere.json').catch(()=>({recipes:[]})),fetchData('quotidiani.json').catch(()=>({piatti:[]})),fetchData('pronti.json').catch(()=>({items:[],prezzi:{}}))]);
+    const [d,im,ct,gz,pu,wo,ar,li,qu,pr]=await Promise.all([fetchData('ricettario.json'),fetchData('immagini.json').catch(()=>({items:{}})),fetchData('categorie.json').catch(()=>({items:{}})),fetchData('collegate.json').catch(()=>({recipes:[]})),fetchData('puglia.json').catch(()=>({recipes:[]})),fetchData('mondo.json').catch(()=>({recipes:[]})),fetchData('artusi.json').catch(()=>({recipes:[]})),fetchData('libere.json').catch(()=>({recipes:[]})),fetchData('quotidiani.json').catch(()=>({piatti:[]})),fetchData('pronti.json').catch(()=>({items:[],prezzi:{}}))]);
     // Cibi già pronti del supermercato: solo per il menu Budget, se richiesti (non compaiono nel ricettario)
     PR_EUR=pr.prezzi||{};PR_PACK=pr.conf||{};
     PRONTI=(pr.items||[]).map(x=>({id:'pr-'+x.id,title:x.title,cat:x.cat,kind:x.kind,pronto:true,book:true,source:'Cibo pronto',country:'Italia',region:'',diets:x.diets||[],tags:[],
@@ -725,15 +725,13 @@ async function loadBook(){
       const vc=ct.items?.[r.id]; // tipo di piatto verificato incrociando Wikibooks, Wikipedia/Wikidata, nome e ingredienti
       return {...r,...(ph?{image:ph.img,imgFile:ph.file}:{}),...(vc?{catBy:vc.by,catConf:vc.conf}:{}),book:true,source:'Wikibooks',cat:vc?.cat||c.cat||'Altro',diets:c.diets,country:reg?'Italia':c.country,region:reg||c.region,nutrition:nut[r.id]};
     });
-    // Regione Puglia (CC BY 4.0): ricette tipiche e prodotti del territorio
+    // Regione Puglia (CC BY 4.0): ricette tipiche (i prodotti del territorio non sono ricette e restano fuori)
     bookInfo.pu=pu;bookInfo.wo=wo;
     for(const r of pu.recipes||[]){
       const c=classify({title:r.title,ingredients:r.ingredients});
       book.push({...r,book:true,source:'Regione Puglia',url:r.link,country:'Italia',region:'Puglia',diets:[...new Set([...(r.diets||[]),...c.diets])],
         imgCredit:r.imgAuthor?`Foto: ${r.imgAuthor} · Regione Puglia (CC BY 4.0)`:'Foto: Regione Puglia (CC BY 4.0)',tags:[]});
     }
-    products=(pu.products||[]).map(r=>({...r,prod:true,book:true,cat:'Prodotti tipici',source:'Regione Puglia',url:r.link,country:'Italia',region:'Puglia',
-      imgCredit:r.imgAuthor?`Foto: ${r.imgAuthor} · Regione Puglia (CC BY 4.0)`:'Foto: Regione Puglia (CC BY 4.0)',ingredients:[],steps:[],tags:[],diets:[]}));
     // Ricette dal mondo (UniTools, CC BY-SA 4.0), tradotte in italiano
     const country=cc=>{try{return new Intl.DisplayNames(['it'],{type:'region'}).of(cc)}catch{return cc}};
     for(const r of wo.recipes||[]){
@@ -838,7 +836,7 @@ try{const dn=new Intl.DisplayNames(['it'],{type:'region'});'AD AE AF AL AM AO AR
 Object.assign(CC_NAME,{usa:'US','stati uniti':'US',corea:'KR','corea del sud':'KR',inghilterra:'GB','regno unito':'GB',olanda:'NL',russia:'RU',cina:'CN',persia:'IR',svizzera:'CH'});
 const ccOf=i=>i.cc||CC_NAME[String(i.country||'').toLowerCase()]||'';
 const flag=cc=>cc&&cc.length===2?String.fromCodePoint(...[...cc.toUpperCase()].map(c=>127397+c.charCodeAt(0))):'🌍';
-const isIntl=i=>i.country&&!/^italia$/i.test(i.country)&&!i.prod;
+const isIntl=i=>i.country&&!/^italia$/i.test(i.country);
 
 /* ---------- Lista ---------- */
 // Ordinamenti: in evidenza (ricettario: prima con foto), veloci, facili, economiche, votate, A–Z
@@ -856,7 +854,6 @@ const CAT_LOOK={'Primi':['🍝','#f3c27a','#e07a4f'],'Secondi':['🍖','#e9a28a'
 const PROT_EM={pesce:'🐟',legumi:'🫘',uova:'🍳',formaggi:'🧀',verdure:'🥦',bianca:'🍗',rossa:'🍖'};
 function look(i){const l=[...(CAT_LOOK[i.cat]||CAT_LOOK.Altro)];if(['Secondi','Piatti unici'].includes(i.cat)&&i.ingredients?.length){i._pr??=protein(i);if(PROT_EM[i._pr]&&i.cat==='Secondi'||['pesce','legumi'].includes(i._pr))l[0]=PROT_EM[i._pr]}return l}
 function card(i){
-  if(i.prod)return `<div class="item" data-id="${i.id}"><div class="thumb" style="--ph:linear-gradient(135deg,#f6dd8f55,#d9a44066)">🧺${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}<span class="cat">Prodotto tipico</span></div><div class="b"><h3>${esc(i.title)}</h3><div class="meta">${esc(i.place||i.area||'Puglia')}</div></div></div>`;
   const [em,c1,c2]=look(i),pp=perPerson(i),tm=(i.ingredients?.length||i.steps?.length)?timing(i):null,vid=embedOf(i);
   const facts=[tm&&`⏱ <b>${fmtMin(tm.t)}</b>`,tm&&DIFF[tm.d],pp&&`<b>${Math.round(pp.kcal)}</b> kcal`,pp?.eur!=null&&`${i.cov!=null&&i.cov<.85?'circa ':''}<b>${euro(pp.eur)}</b>/pers.`,i.linked&&i.cost&&`costo ${i.cost}`].filter(Boolean);
   const diets=(i.diets||[]).filter(d=>MAIN_DIETS.includes(d));if(i.pseudo)diets.unshift('Italo-americano');
@@ -880,10 +877,10 @@ function fillSelects(){
 }
 function render(){
   const q=$('#q').value.trim().toLowerCase(),fd=$('#fDiet').value,fz=$('#fZone').value,fr=+$('#fRate').value,ft=+$('#fTime').value,fdf=+$('#fDiff').value,fc=+$('#fCost').value,fs=$('#fSort').value;
-  const showProd=view==='book'&&cur==='Prodotti tipici',showIntl=view==='book'&&cur==='Internazionali',showBk=view==='book'&&cur==='Colazione';
-  const data=showProd?products:showIntl?src().filter(isIntl):showBk?BK:src();
-  const counts={};src().forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);if(view==='book'&&products.length)counts['Prodotti tipici']=products.length;if(view==='book'&&book)counts['Internazionali']=book.filter(isIntl).length;if(view==='book')counts['Colazione']=BK.length;
-  $('#chips').innerHTML=['Tutte',...(view==='book'?['Colazione','Internazionali']:[]),...cats,...(view==='book'&&products.length?['Prodotti tipici']:[])].filter(c=>c==='Tutte'||counts[c]).map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${c==='Internazionali'?'🌍 ':c==='Prodotti tipici'?'🧺 ':c==='Colazione'?'☕ ':''}${esc(c)}<small>${c==='Tutte'?src().length:counts[c]}</small></button>`).join('');
+  const showIntl=view==='book'&&cur==='Internazionali',showBk=view==='book'&&cur==='Colazione';
+  const data=showIntl?src().filter(isIntl):showBk?BK:src();
+  const counts={};src().forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);if(view==='book'&&book)counts['Internazionali']=book.filter(isIntl).length;if(view==='book')counts['Colazione']=BK.length;
+  $('#chips').innerHTML=['Tutte',...(view==='book'?['Colazione','Internazionali']:[]),...cats].filter(c=>c==='Tutte'||counts[c]).map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${c==='Internazionali'?'🌍 ':c==='Colazione'?'☕ ':''}${esc(c)}<small>${c==='Tutte'?src().length:counts[c]}</small></button>`).join('');
   // seconda riga per le colazioni: classiche, dolci, salate
   if(showBk){const KL={classica:'Classiche',dolce:'Dolci',salata:'Salate'};if(cur2&&!KL[cur2])cur2='';
     $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutte<small>${BK.length}</small></button>`+Object.entries(KL).map(([k,l])=>`<button class="chip${k===cur2?' on':''}" data-p="${k}">${l}<small>${BK.filter(r=>r.kind===k).length}</small></button>`).join('')}
@@ -892,12 +889,12 @@ function render(){
     const ord=Object.entries(pc).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));if(cur2&&!pc[cur2])cur2='';
     $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutti i paesi<small>${data.length}</small></button>`+ord.map(([k,n])=>{const it=data.find(i=>i.country===k);return `<button class="chip${k===cur2?' on':''}" data-p="${esc(k)}">${flag(ccOf(it))} ${esc(k)}<small>${n}</small></button>`}).join('');}
   $('#chips2').hidden=!showIntl&&!showBk;
-  const list=data.filter(i=>(cur==='Tutte'||i.cat===cur||showProd||(showIntl&&(!cur2||i.country===cur2)))&&(!showBk||!cur2||i.kind===cur2)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(!ft||timing(i).t<=ft)&&(!fdf||(fdf===3?timing(i).d===3:timing(i).d<=fdf))&&(!fc||((perPerson(i)?.eur??99)<=fc))
+  const list=data.filter(i=>(cur==='Tutte'||i.cat===cur||(showIntl&&(!cur2||i.country===cur2)))&&(!showBk||!cur2||i.kind===cur2)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(!ft||timing(i).t<=ft)&&(!fdf||(fdf===3?timing(i).d===3:timing(i).d<=fdf))&&(!fc||((perPerson(i)?.eur??99)<=fc))
       &&(!q||[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q)))
     .sort(sorter(fs,!!q));
   const nGz=view==='book'&&book?book.filter(x=>x.linked).length:0;
   const nPu=view==='book'&&book?book.filter(x=>x.source==='Regione Puglia').length:0,nWo=view==='book'&&book?book.filter(x=>x.world).length:0,nAr=view==='book'&&book?book.filter(x=>x.artusi).length:0,nLi=view==='book'&&book?book.filter(x=>x.libera&&x.source!=='Gnamina').length:0,nGn=view==='book'&&book?book.filter(x=>x.source==='Gnamina').length:0;
-  const lic=view==='mine'&&items.length?`<p class="lic">Le ricette salvate da te restano tue: per quelle importate da un link la fonte originale è indicata nella scheda, insieme alla foto e al suo autore.</p>${fontiDati()}`:showProd?`<p class="lic">${products.length} prodotti tipici pugliesi dalla <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia – Pugliapromozione</a> (CC BY 4.0)</p>`
+  const lic=view==='mine'&&items.length?`<p class="lic">Le ricette salvate da te restano tue: per quelle importate da un link la fonte originale è indicata nella scheda, insieme alla foto e al suo autore.</p>${fontiDati()}`
     :view==='book'&&book?.length?`<p class="lic">${book.length-nGz-nPu-nWo-nAr-nLi-nGn} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}${nPu?`, ${nPu} ricette tipiche della <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia</a> (CC BY 4.0)`:''}${nWo?`, ${nWo} ricette dal mondo di <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> (CC BY-SA 4.0, tradotte in italiano)`:''}${nAr?`, ${nAr} ricette dall'<a href="https://it.wikisource.org/wiki/La_scienza_in_cucina_e_l%27arte_di_mangiar_bene_(1895)" target="_blank" rel="noopener">Artusi (1895)</a>, pubblico dominio`:''}${nLi?`, ${nLi} da Wikipedia e dal Cookbook di Wikibooks (CC BY-SA 4.0)`:''}${nGn?`, ${nGn} piatti di tutti i giorni scritti per Gnamina`:''}</p>${fontiFoto()}${fontiDati()}`:'';
   $('#list').innerHTML=(list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
@@ -1481,20 +1478,6 @@ const REPARTI=[
 const reparto=k=>(PR_EUR[k]!=null?'Surgelati e pronti':(REPARTI.find(([,rx])=>rx.test(k))||REPARTI.at(-1))[0]);
 
 /* ---------- Scheda ricetta ---------- */
-function openProduct(i){
-  $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button>
-    ${i.image?`<div class="heroWrap"><img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()"></div>`:''}
-    <h2 style="margin-top:12px">${esc(i.title)}</h2><div class="kv"><span>Prodotto tipico</span><span>📍 ${esc(i.place||'Puglia')}</span>${i.area?`<span>${esc(i.area)}</span>`:''}</div>
-    <p class="cap" style="color:var(--fg)">${esc(i.text)}</p>
-    <p class="lic">${esc(i.imgCredit)} · Testo: <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia – Pugliapromozione</a>, CC BY 4.0</p>
-    <div class="row">${i.url?`<a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">Scopri su viaggiareinpuglia.it</a>`:''}<span class="sp"></span>
-      <button class="btn" id="prodSearch">Ricette con questo prodotto</button>
-      <button class="btn pri" id="dClose">Chiudi</button></div>`;
-  $('#dClose').onclick=$('#dX').onclick=()=>$('#det').close();
-  // cerca nel ricettario la parola principale del prodotto (es. "burrata", "capocollo")
-  $('#prodSearch').onclick=()=>{$('#det').close();cur='Tutte';$('#q').value=(i.title.toLowerCase().match(/[a-zàèéìòù]{4,}/)||[''])[0];render();window.scrollTo(0,0)};
-  $('#det').showModal();
-}
 // Fonti delle foto, contate dal catalogo immagini (www/immagini.json)
 function fontiFoto(){const v=Object.values(IM);if(!v.length)return'';
   const n=f=>v.filter(f).length,cc='<a href="https://creativecommons.org/licenses/" target="_blank" rel="noopener">licenze Creative Commons</a>';
@@ -1514,7 +1497,6 @@ function sourceLine(i){
   return `Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · autori nella <a href="${esc(String(i.url).replace('/wiki/','/w/index.php?action=history&title='))}" target="_blank" rel="noopener">cronologia</a>`;
 }
 function openDetail(i){
-  if(i.prod)return openProduct(i);
   const e=embedOf(i);
   const [em,c1,c2]=look(i),tm=(i.ingredients?.length||i.steps?.length)?timing(i):null;
   $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button>
@@ -1693,7 +1675,7 @@ const filtUI=()=>{const n=['#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate'
 $('#fBtn').onclick=()=>{const f=$('.filters');f.hidden=!f.hidden;$('#fBtn').setAttribute('aria-expanded',!f.hidden);filtUI()};
 $('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;cur2='';render()}};
 $('#chips2').onclick=e=>{const c=e.target.closest('.chip');if(c){cur2=c.dataset.p;render()}};
-$('#list').onclick=e=>{const w=e.target.closest('.wbtn');if(w){if(w.dataset.w==='add')openForm();else $(`#tabs .tab[data-v=${w.dataset.w}]`).click();return}const it=e.target.closest('.item');if(it)openDetail([...src(),...products,...BK,...(book||[])].find(i=>i.id===it.dataset.id))};
+$('#list').onclick=e=>{const w=e.target.closest('.wbtn');if(w){if(w.dataset.w==='add')openForm();else $(`#tabs .tab[data-v=${w.dataset.w}]`).click();return}const it=e.target.closest('.item');if(it)openDetail([...src(),...BK,...(book||[])].find(i=>i.id===it.dataset.id))};
 const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${esc(c)}</span>`).join('')};
 // Tema: Automatico segue il sistema, Chiaro e Scuro restano fissi
 const setTheme=t=>{try{localStorage.setItem('theme',t||'auto')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme}; // predefinito: Trattoria chiara; Automatico solo se scelto

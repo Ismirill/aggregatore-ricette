@@ -55,7 +55,7 @@ def main():
     rows = rows_from_xlsx(get(xlsx))
     prev = json.loads(OUT.read_text(encoding='utf-8')) if OUT.exists() else {}
     done = {r['id']: r for r in prev.get('recipes', [])}
-    recipes, products = [], []
+    recipes = []  # solo le ricette: i prodotti del territorio (vini, formaggi, oli, frutta…) non sono ricette
     for x in rows:
         base = {'id': 'pu-' + x['ID'], 'title': clean(x['NOME']), 'image': x.get('FOTO', ''), 'imgAuthor': x.get('AUTORE', ''),
                 'link': x.get('LINK', ''), 'place': clean(x.get('LOCALITAASSOCIATE', '')), 'area': clean(x.get('TERRITORIASSOCIATI', ''))}
@@ -71,8 +71,6 @@ def main():
             recipes.append({**base, 'text': text, 'cat': r.get('cat') if r.get('cat') in CATS else 'Altro', 'servings': r.get('servings') or None,
                             'time': r.get('time') or None, 'ingredients': r.get('ingredients') or [], 'steps': r.get('steps') or [text],
                             'diets': r.get('diets') or []})
-        else:
-            products.append({**base, 'text': text})
     for r in recipes:  # grammi, calorie e nutrienti per costo e Budget, come per il ricettario
         for f in ('b', 'n', 'cov', 's', 'sub'):
             r.pop(f, None)
@@ -81,9 +79,9 @@ def main():
             r.update(res)
     base_ricette.RES.save()
     data = {'source': 'Regione Puglia - Pugliapromozione, "Prodotti tipici e ricette"', 'url': 'https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette',
-            'license': 'CC BY 4.0', 'updated': time.strftime('%Y-%m-%d'), 'recipes': recipes, 'products': products}
+            'license': 'CC BY 4.0', 'updated': time.strftime('%Y-%m-%d'), 'recipes': recipes}
     OUT.write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
-    print(f'Puglia: {len(recipes)} ricette, {len(products)} prodotti tipici')
+    print(f'Puglia: {len(recipes)} ricette')
 
 
 if __name__ == '__main__':
