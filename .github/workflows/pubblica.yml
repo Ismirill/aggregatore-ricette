@@ -2,7 +2,8 @@
 # - ogni giorno traduce un lotto delle ricette dal mondo (UniTools) e analizza un lotto dell'Artusi finché non sono tutte, e aggiorna la Puglia
 # - ogni mese (giorno 3) scarica le ricette nuove da Wikibooks, ricalcola la base (grammi, calorie, nutrienti)
 #   e cerca le foto dei piatti nuovi su Wikipedia / Wikimedia Commons
-# - a ogni modifica, e dopo l'aggiornamento mensile, pubblica il sito e compila l'APK (release "apk")
+# - a ogni modifica, e dopo l'aggiornamento mensile, pubblica il sito, compila l'APK (release "apk") e compila l'app iOS
+#   (per il simulatore, senza firma: controlla che l'app iOS resti allineata; l'installazione sull'iPhone si fa da Xcode)
 # I prezzi non passano da qui: li aggiorna ogni giorno il server Cloudflare con i dati MIMIT.
 name: Aggiorna e pubblica
 
@@ -13,7 +14,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['www/**', 'android/**', 'scripts/**', 'server/ingredienti.json', 'package*.json', 'capacitor.config.json', '.github/workflows/**']
+    paths: ['www/**', 'android/**', 'ios/**', 'scripts/**', 'server/ingredienti.json', 'package*.json', 'capacitor.config.json', '.github/workflows/**']
 
 permissions:
   contents: write
@@ -119,3 +120,26 @@ jobs:
           cp android/app/build/outputs/apk/debug/app-debug.apk AggregatoreRicette.apk
           gh release view apk >/dev/null 2>&1 || gh release create apk --title "App Android" --notes "Ultima versione dell'app, aggiornata automaticamente."
           gh release upload apk AggregatoreRicette.apk --clobber
+
+  ios:
+    needs: ricettario
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main }
+      - uses: actions/download-artifact@v4
+        with: { name: www, path: www }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Compila l'app iOS (simulatore, senza firma)
+        run: |
+          npm ci
+          npx cap sync ios
+          cd ios/App
+          xcodebuild -version
+          xcodebuild -project App.xcodeproj -scheme App -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+      - name: Allega l'app per il simulatore
+        run: cd ios/App/build/Build/Products/Debug-iphonesimulator && zip -qr "$GITHUB_WORKSPACE/Gnamina-simulatore.zip" App.app
+      - uses: actions/upload-artifact@v4
+        with: { name: gnamina-ios-simulatore, path: Gnamina-simulatore.zip }
