@@ -54,10 +54,40 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
+    // App aperta da un link (es. dall'estensione Condividi) quando non era già avviata
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        if let url = connectionOptions.urlContexts.first?.url { deliver(url) }
+    }
+
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         for ctx in URLContexts {
             _ = ApplicationDelegateProxy.shared.application(UIApplication.shared, open: ctx.url, options: [:])
+            deliver(ctx.url)
         }
+    }
+
+    // gnamina://condividi?url=…&text=…&title=… (estensione Condividi) o gnamina://accedi?codice=… (accesso dal browser):
+    // passa i dati alla pagina con window.onShared, come MainActivity su Android. Se la pagina sta ancora caricando riprova.
+    private func deliver(_ url: URL, attempt: Int = 0) {
+        guard url.scheme == "gnamina" else { return }
+        var d: [String: String] = [:]
+        if url.host == "condividi" {
+            for q in URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? [] { d[q.name] = q.value ?? "" }
+        } else {
+            d["url"] = url.absoluteString
+        }
+        guard let data = try? JSONSerialization.data(withJSONObject: d), let json = String(data: data, encoding: .utf8) else { return }
+        let js = "window.onShared?(window.onShared(\(json)),true):false"
+        let web = (window?.rootViewController as? CAPBridgeViewController)?.webView
+        guard let web = web, !web.isLoading else { retry(url, attempt); return }
+        web.evaluateJavaScript(js) { [weak self] res, _ in
+            if (res as? Bool) != true { self?.retry(url, attempt) }
+        }
+    }
+
+    private func retry(_ url: URL, _ attempt: Int) {
+        guard attempt < 40 else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in self?.deliver(url, attempt: attempt + 1) }
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {

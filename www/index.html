@@ -689,7 +689,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=64; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=65; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1785,7 +1785,7 @@ async function applyRows(rows,key){
 function syncUI(status){
   const box=$('#syncBox');if(!box)return;
   if(!SY?.code){
-    box.innerHTML=`<p class="meta">Crea un <b>codice ricettario</b>: le ricette vengono salvate cifrate online e compaiono su iPhone, Android e computer. Senza account né password: basta scrivere lo stesso codice sull'altro dispositivo.</p><div class="grid2"><button class="btn pri" id="syNew">Crea il codice</button><button class="btn" id="syHave">Ho già un codice</button></div>${IOS?'<p class="meta" style="margin-top:10px">Su iPhone aggiungi Gnamina alla schermata Home (Condividi → Aggiungi alla schermata Home): così Safari non cancella le ricette.</p>':''}`;
+    box.innerHTML=`<p class="meta">Crea un <b>codice ricettario</b>: le ricette vengono salvate cifrate online e compaiono su iPhone, Android e computer. Senza account né password: basta scrivere lo stesso codice sull'altro dispositivo.</p><div class="grid2"><button class="btn pri" id="syNew">Crea il codice</button><button class="btn" id="syHave">Ho già un codice</button></div>${IOS&&!inApp?'<p class="meta" style="margin-top:10px">Su iPhone aggiungi Gnamina alla schermata Home (Condividi → Aggiungi alla schermata Home): così Safari non cancella le ricette.</p>':''}`;
     $('#syNew').onclick=()=>linkCode(newCode(),true);
     $('#syHave').onclick=()=>{const c=normCode(prompt('Scrivi il codice ricettario che vedi sull\'altro dispositivo:'));if(c.length===16)linkCode(c);else if(c)toast('Codice non valido: sono 16 tra lettere e numeri')};
     return}
@@ -1919,7 +1919,8 @@ function receive(d){
   const title=(d.title&&!extractUrl(d.title))?d.title:'';
   openForm({url,title,desc:d.desc||''});
 }
-window.onShared=()=>{const s=window.AndroidShare?.take();if(s)receive(JSON.parse(s))};
+// Android: la pagina chiede il link a AndroidShare.take(); iOS: l'app lo passa direttamente come oggetto
+window.onShared=d=>{if(!d){const s=window.AndroidShare?.take();d=s&&JSON.parse(s)}if(d)receive(d)};
 const p=new URLSearchParams(location.search);
 if(p.has('url')||p.has('text')){receive({url:p.get('url'),text:p.get('text'),title:p.get('title'),desc:p.get('desc')});history.replaceState(null,'',location.pathname)}
 window.onShared();
