@@ -69,6 +69,12 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px}
 .list>.lic,.list>.meta,.list>.empty,.list>.warn{grid-column:1/-1}
 .item{display:flex;flex-direction:column;background:var(--card);border-radius:var(--r);overflow:hidden;cursor:pointer;box-shadow:var(--sh);border:1px solid color-mix(in srgb,var(--bd) 60%,transparent);transition:transform .15s,box-shadow .15s}
 .item:hover{transform:translateY(-2px);box-shadow:var(--sh2)}.item:active{transform:scale(.985)}
+.item{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+/* «⋯» sulle tue ricette: apre il menu con Modifica ed Elimina (lo stesso della pressione lunga) */
+.item .more{position:absolute;top:8px;right:8px;z-index:2;width:32px;height:32px;border-radius:50%;border:none;background:color-mix(in srgb,var(--card) 80%,transparent);color:var(--fg);font-size:1.1rem;line-height:1;cursor:pointer;box-shadow:var(--sh);backdrop-filter:blur(6px);display:grid;place-items:center}
+.item .thumb{position:relative}
+#menu{padding:12px 16px calc(16px + env(safe-area-inset-bottom));max-width:480px}#menu h3{margin:4px 0 12px;font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#menu .btn{width:100%;justify-content:center;margin-bottom:8px;font-size:1rem;padding:13px}#menu .btn.danger{color:#fff;background:#c62828;border-color:#c62828}
 .thumb{aspect-ratio:4/3;position:relative;display:grid;place-items:center;font-size:2.6rem;overflow:hidden;background:var(--ph,linear-gradient(135deg,#e9a23b33,#c2502f33))}
 .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s}
 .item:hover .thumb img{transform:scale(1.04)}
@@ -328,6 +334,7 @@ details summary{cursor:pointer}
 </dialog>
 <datalist id="countries"></datalist><datalist id="regions"></datalist>
 
+<dialog id="menu"><h3 id="menuT"></h3><button class="btn" id="menuEdit">✏️ Modifica</button><button class="btn danger" id="menuDel">🗑 Elimina</button><button class="btn" id="menuCancel">Annulla</button></dialog>
 <dialog id="photo"><button class="dclose" id="phX" aria-label="Chiudi">✕</button><div id="phv"></div></dialog>
 
 <dialog id="set">
@@ -699,7 +706,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=73; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=74; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -866,7 +873,7 @@ function card(i){
   const facts=[tm&&`⏱ <b>${fmtMin(tm.t)}</b>`,tm&&DIFF[tm.d],pp&&`<b>${Math.round(pp.kcal)}</b> kcal`,pp?.eur!=null&&`${i.cov!=null&&i.cov<.85?'circa ':''}<b>${euro(pp.eur)}</b>/pers.`,i.linked&&i.cost&&`costo ${i.cost}`].filter(Boolean);
   const diets=(i.diets||[]).filter(d=>MAIN_DIETS.includes(d));if(i.pseudo)diets.unshift('Italo-americano');
   return `<div class="item" data-id="${i.id}">
-    <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${i.imgGen?'<span class="aiTag" title="Immagine generata con l\'AI">AI</span>':''}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
+    <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${!i.book&&!i.pronto&&!i.colazione?'<button type="button" class="more" aria-label="Altre azioni">⋯</button>':''}${i.imgGen?'<span class="aiTag" title="Immagine generata con l\'AI">AI</span>':''}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
       <span class="cat">${esc(i.cat||'Altro')}</span>${i.rating?`<span class="rt">★ ${i.rating}</span>`:''}${vid?'<span class="play">▶ video</span>':''}</div>
     <div class="b"><h3>${esc(i.title||i.url)}</h3>
       <div class="facts">${facts.map(f=>`<span>${f}</span>`).join('')}</div>
@@ -1678,7 +1685,29 @@ $('#f').onsubmit=e=>{
 };
 $('#cancel').onclick=$('#dlgX').onclick=()=>$('#dlg').close();
 $('#phX').onclick=()=>$('#photo').close();
-$('#del').onclick=()=>{if(confirm('Eliminare questa ricetta?')){const tb=load('tomb',{});tb[editing.id]=Date.now();save('tomb',tb);items=items.filter(i=>i.id!==editing.id);saveItems();$('#dlg').close();fillSelects();render()}};
+// Elimina una tua ricetta (la «lapide» serve alla sincronizzazione: così non torna dagli altri dispositivi)
+function deleteRecipe(id){const tb=load('tomb',{});tb[id]=Date.now();save('tomb',tb);items=items.filter(i=>i.id!==id);saveItems();fillSelects();render();toast('Ricetta eliminata')}
+$('#del').onclick=()=>{if(confirm('Eliminare questa ricetta?')){deleteRecipe(editing.id);$('#dlg').close()}};
+// Menu rapido su una tua ricetta: dal pulsante ⋯, tenendo premuta la scheda o con il tasto destro
+function openItemMenu(id){
+  const it=items.find(i=>i.id===id);if(!it)return;
+  try{navigator.vibrate?.(12)}catch{}
+  $('#menuT').textContent=it.title||it.url||'Ricetta';
+  $('#menuEdit').onclick=()=>{$('#menu').close();openForm(it)};
+  $('#menuDel').onclick=()=>{if(confirm(`Eliminare «${it.title||'questa ricetta'}»?`)){$('#menu').close();deleteRecipe(id)}};
+  $('#menuCancel').onclick=()=>$('#menu').close();
+  $('#menu').showModal();
+}
+$('#menu').onclick=e=>{if(e.target===$('#menu'))$('#menu').close()}; // tocco fuori: chiude
+let lp=null,lpFired=false;
+const lpCancel=()=>{clearTimeout(lp);lp=null};
+$('#list').addEventListener('pointerdown',e=>{const it=e.target.closest('.item');if(!it||view!=='mine'||e.button!==0)return;lpFired=false;const x=e.clientX,y=e.clientY;lpCancel();
+  lp=setTimeout(()=>{lp=null;lpFired=true;openItemMenu(it.dataset.id)},550);
+  const mv=ev=>{if(Math.hypot(ev.clientX-x,ev.clientY-y)>10)lpCancel()};
+  it.addEventListener('pointermove',mv,{passive:true});
+  const end=()=>{lpCancel();it.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',end);window.removeEventListener('pointercancel',end);window.removeEventListener('scroll',end)};
+  window.addEventListener('pointerup',end);window.addEventListener('pointercancel',end);window.addEventListener('scroll',end,{passive:true})});
+$('#list').addEventListener('contextmenu',e=>{const it=e.target.closest('.item');if(it&&view==='mine'){e.preventDefault();lpFired=true;openItemMenu(it.dataset.id)}});
 
 /* ---------- Eventi generali ---------- */
 $('#add').onclick=()=>openForm();
@@ -1688,7 +1717,9 @@ const filtUI=()=>{const n=['#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate'
 $('#fBtn').onclick=()=>{const f=$('.filters');f.hidden=!f.hidden;$('#fBtn').setAttribute('aria-expanded',!f.hidden);filtUI()};
 $('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;cur2='';render()}};
 $('#chips2').onclick=e=>{const c=e.target.closest('.chip');if(c){cur2=c.dataset.p;render()}};
-$('#list').onclick=e=>{const w=e.target.closest('.wbtn');if(w){if(w.dataset.w==='add')openForm();else $(`#tabs .tab[data-v=${w.dataset.w}]`).click();return}const it=e.target.closest('.item');if(it)openDetail([...src(),...BK,...(book||[])].find(i=>i.id===it.dataset.id))};
+$('#list').onclick=e=>{if(lpFired){lpFired=false;return} // il tocco che chiude una pressione lunga non apre la scheda
+  const m=e.target.closest('.more');if(m){e.stopPropagation();openItemMenu(m.closest('.item').dataset.id);return}
+  const w=e.target.closest('.wbtn');if(w){if(w.dataset.w==='add')openForm();else $(`#tabs .tab[data-v=${w.dataset.w}]`).click();return}const it=e.target.closest('.item');if(it)openDetail([...src(),...BK,...(book||[])].find(i=>i.id===it.dataset.id))};
 const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${esc(c)}</span>`).join('')};
 // Tema: Automatico segue il sistema, Chiaro e Scuro restano fissi
 const setTheme=t=>{try{localStorage.setItem('theme',t||'auto')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme}; // predefinito: Trattoria chiara; Automatico solo se scelto
