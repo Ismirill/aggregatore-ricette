@@ -563,16 +563,18 @@ async function analyze(url,pasted){
       const social=['Instagram','Facebook','TikTok','Pinterest'].includes(src);
       const useful=g=>g&&(g.ingredients?.length||(g.caption&&g.caption.length>40&&!/^(instagram|tiktok|facebook|log in|accedi|login)\b/i.test(g.caption)&&!/log in or sign up|accedi o iscriviti|make your day/i.test(g.caption)));
       if(!social)try{const res=await fetch(url,{signal:ctl.signal});html=await res.text();fin=res.url;if(!useful(parseHtml(html)))html=''}catch{}
-      if(!html&&aiOn())try{const p=await server('/preview',{url});html=p.html;fin=p.url}catch{}
+      let transcript='';
+      if(!html&&aiOn())try{const p=await server('/preview',{url});html=p.html;fin=p.url;transcript=String(p.transcript||'')}catch{}
       if(!html&&!social)try{const res=await fetch(url,{signal:ctl.signal});html=await res.text();fin=res.url}catch{}
       out=parseHtml(html||'<html></html>');
       if(!useful(out)&&!out.title)out={};
+      if(transcript)out.transcript=transcript; // parlato del video (TikTok), trascritto dal server
       if(fin&&fin!==url)out.finalUrl=fin;
     }
   }catch{}
   // testo incollato o arrivato dal Comando Rapido: ha la precedenza se è più completo di quello letto
   if(pasted&&pasted.length>(out.caption||'').length)out={...out,caption:pasted,title:out.title&&out.title.length>8?out.title:pasted};
-  if(!out.caption&&!out.title&&!out.ingredients?.length)return null;
+  if(!out.caption&&!out.title&&!out.ingredients?.length&&!out.transcript)return null;
   if(!out.ingredients?.length&&out.caption){
     const pc=parseCaption(out.caption);
     out.ingredients=pc.ingredients;if(!out.steps?.length)out.steps=pc.steps;out.time=out.time||pc.time;out.servings=out.servings||pc.servings;
@@ -697,7 +699,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=72; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=73; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1622,7 +1624,7 @@ async function runAnalysis(url,overwrite){
   const a=await analyze(url,f.caption.value.trim());
   if(f.url.value!==url)return;
   if(!a){$('#capL').hidden=false;showPv(social?'Non riesco a leggere il post: copia la sua descrizione e incollala qui sotto':'Non riesco a leggere la pagina: compila tu i dati');if(social)f.caption.focus();return}
-  Object.assign(extra,{image:a.image||extra.image,author:a.author||extra.author,caption:a.caption||extra.caption,videoId:a.videoId||extra.videoId,videoEmbed:a.videoEmbed||extra.videoEmbed,finalUrl:a.finalUrl||extra.finalUrl});
+  Object.assign(extra,{image:a.image||extra.image,author:a.author||extra.author,caption:a.caption||extra.caption,transcript:a.transcript||'',videoId:a.videoId||extra.videoId,videoEmbed:a.videoEmbed||extra.videoEmbed,finalUrl:a.finalUrl||extra.finalUrl});
   const put=(el,v)=>{if(v&&(overwrite||!el.value))el.value=v};
   put(f.title,a.title);put(f.time,a.time);put(f.servings,a.servings);
   put(f.ingredients,(a.ingredients||[]).join('\n'));put(f.steps,(a.steps||[]).join('\n'));
@@ -1631,12 +1633,14 @@ async function runAnalysis(url,overwrite){
   put(f.country,c.country);put(f.region,c.region);
   setDiets([...new Set([...(overwrite?[]:getDiets()),...c.diets])]);
   const n=(a.ingredients||[]).length;
-  showPv(n?`Trovati ${n} ingredienti`:'Ingredienti non trovati: aggiungili tu se vuoi');
+  showPv(n?`Trovati ${n} ingredienti`:a.transcript?'Trascritto il parlato del video':'Ingredienti non trovati: aggiungili tu se vuoi');
   // Post social o pagine senza dati strutturati: completa con l'AI se la chiave è configurata
   if(aiOn()&&(['TikTok','Instagram','YouTube','Facebook','Pinterest'].includes(sourceOf(url))||n<3)){
     showPv('Analisi AI della ricetta…');
     try{
-      const r=await aiAnalyze({url,title:f.title.value,caption:a.caption,image:a.image,author:a.author});
+      // didascalia + parlato del video: ciò che il cuoco dice a voce vale come testo del post
+      const cap=[a.caption,a.transcript?'Parlato nel video:\n'+a.transcript:''].filter(Boolean).join('\n\n');
+      const r=await aiAnalyze({url,title:f.title.value,caption:cap,image:a.image,author:a.author});
       if(f.url.value!==url)return;
       if(!r.is_recipe){showPv('L\'AI non trova una ricetta in questo post');return}
       if(r.title&&(overwrite||!f.title.value||f.title.value.length>80))f.title.value=r.title;
@@ -1649,7 +1653,7 @@ async function runAnalysis(url,overwrite){
       if(r.servings&&(overwrite||!f.servings.value))f.servings.value=r.servings;
       if(r.country){f.country.value=r.country;f.region.value=r.region}
       setDiets(r.diets);
-      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata · ${r.ingredients.length} ingredienti${!r.time?' · tempo non indicato nel post':r.timeHow==='sommato'?` · tempo ≈ ${r.time} min, somma dei passaggi (riposi, cotture, forno)`:''}`);
+      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata${a.transcript?' (didascalia + parlato del video)':''} · ${r.ingredients.length} ingredienti${!r.time?' · tempo non indicato nel post':r.timeHow==='sommato'?` · tempo ≈ ${r.time} min, somma dei passaggi (riposi, cotture, forno)`:''}`);
     }catch(e){showPv(aiErr(e))}
   }
 }

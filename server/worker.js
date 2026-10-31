@@ -62,23 +62,25 @@ async function analyze(env, b) {
   const prompt = `Questo è un post con una ricetta, salvato in un ricettario personale in italiano.
 Link: ${str(b.url, 500)}
 Fonte: ${str(b.source, 40)}${b.author ? ' · autore: ' + str(b.author, 80) : ''}
-Titolo/didascalia:
+Titolo/didascalia (e, se presente, la trascrizione di ciò che viene detto nel video, sotto «Parlato nel video»: vale quanto il testo scritto, comprese le dosi e i tempi detti a voce):
 """${text}"""
 
-Sei un trascrittore fedele, non un cuoco: riporta SOLO ciò che è scritto nel testo o chiaramente visibile nell'immagine. Non aggiungere dosi, tempi, porzioni o passaggi che non ci sono. Meglio un campo vuoto di un dato inventato.
+Sei un trascrittore fedele, non un cuoco: riporta SOLO ciò che è scritto nel testo (hashtag compresi: #cannellini, #carote sono ingredienti) o chiaramente visibile nell'immagine allegata. Non aggiungere dosi, tempi, porzioni o passaggi che non ci sono. Meglio un campo vuoto di un dato inventato.
+Guarda bene l'immagine: se mostra il piatto, elenca gli ingredienti che si riconoscono con certezza (es. fagioli bianchi, carote a dadini, patate, pasta corta, pane); se contiene testo sovrimpresso (titolo, elenco di ingredienti, dosi), trascrivilo e usalo come se fosse nel post.
 Estrai i dati in italiano:
 - title: nome breve del piatto (senza hashtag né emoji).
 - cat: uno tra ${cats.map(c => `"${c}"`).join(', ')}.
 - servings: per quante persone sono le dosi, SOLO se scritto nel post ("per 4 persone", "4 porzioni", "ingredienti per 2"…); altrimenti 0. "per 10 minuti" non è una porzione.
-- ingredients: un ingrediente per voce, nell'ordine del post, formato "quantità unità ingrediente" (es. "320 g spaghetti", "2 uova", "olio extravergine q.b."). Le quantità solo se scritte nel post: se un ingrediente è nominato senza dose, scrivi solo il nome (es. "pomodori secchi"), NON "q.b." e NON una dose tipica. Se il post non elenca ingredienti ma il piatto è chiaramente riconoscibile dal nome o dall'immagine, metti i soli NOMI degli ingredienti tipici, senza dosi, e imposta inferred a true. Se non riconosci il piatto, lascia vuoto.
+- ingredients: un ingrediente per voce, nell'ordine del post, formato "quantità unità ingrediente" (es. "320 g spaghetti", "2 uova", "olio extravergine q.b."). Le quantità solo se scritte nel post: se un ingrediente è nominato senza dose, scrivi solo il nome (es. "pomodori secchi"), NON "q.b." e NON una dose tipica. Se il post non elenca ingredienti, metti i soli NOMI: prima quelli nominati nel testo e negli hashtag, poi quelli che vedi nell'immagine (mettili anche in seen), senza dosi, e imposta inferred a true. Usa nomi concreti, non categorie: niente "verdure" o "legumi" se sai quali sono (carote, cannellini). Se non riconosci il piatto, lascia vuoto.
 - steps: passaggi del procedimento SOLO se descritti nel post, un passaggio per voce, con le parole del post; altrimenti vuoto.
 - diets: solo tra ${DIETS.map(x => `"${x}"`).join(', ')} e solo se evidente dagli ingredienti elencati; nel dubbio nessuna.
 - country e region: zona d'origine del piatto se chiara dal nome (region solo per regioni italiane), altrimenti stringa vuota.
 - time: minuti totali dall'inizio al piatto pronto. Se il post dichiara un tempo totale ("pronta in 30 minuti", "tempo: 1 ora") usa quello. Altrimenti, se il procedimento indica le durate dei singoli passaggi (riposo dell'impasto, cottura, forno, raffreddamento…), SOMMALE tutte in ordine per avere il totale (es. "lievitare 2 ore" + "cuocere 25 minuti" + "raffreddare un quarto d'ora" = 160); se una durata è un intervallo o un'alternativa ("almeno mezz'ora, anche un'ora") prendi la più lunga. Non prendere mai la durata di un solo passaggio come totale. Se nel post non c'è nessuna durata, metti 0: non stimarlo.
 - time_how: "indicato" se il post dichiara il tempo totale, "sommato" se l'hai ottenuto sommando i passaggi, "" se time è 0.
-- inferred: true solo se gli ingredienti non sono scritti nel post e li hai dedotti dal piatto.
+- seen: gli ingredienti che hai riconosciuto guardando l'immagine (e non scritti nel post), stessi nomi usati in ingredients.
+- inferred: true solo se gli ingredienti non sono scritti nel post (li hai presi dal nome del piatto o dall'immagine).
 - is_recipe: false se il post non riguarda una ricetta o un piatto.
-Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diets":[],"country":"","region":"","time":0,"time_how":"","inferred":false,"ingredients":[],"steps":[]}`;
+Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diets":[],"country":"","region":"","time":0,"time_how":"","inferred":false,"seen":[],"ingredients":[],"steps":[]}`;
   const img = b.image ? await imagePart(str(b.image, 2000)) : null;
   const r = await aiJson(env, prompt, img);
   return { result: r && faithful(r, text) };
@@ -134,6 +136,8 @@ function faithful(r, text) {
     return x.trim();
   }).filter(Boolean);
   if (r.inferred && r.ingredients.length) r.ingredients = r.ingredients.map(x => x.replace(/^\d[\d.,\/\s]*(?:g|gr|kg|ml|cl|l)?\s*/i, '').trim()).filter(Boolean);
+  const low = r.ingredients.map(x => x.toLowerCase());
+  r.seen = (Array.isArray(r.seen) ? r.seen : []).map(String).map(x => x.trim()).filter(x => x && low.some(y => y.includes(x.toLowerCase()) || x.toLowerCase().includes(y)));
   return r;
 }
 
@@ -324,7 +328,20 @@ Rispondi solo con JSON: {"items":[{"name":"","grams":0,"kcal":0,"protein":0,"car
 // Il server si identifica in modo trasparente come "AggregatoreRicette" e usa solo i dati pubblici delle anteprime dei link
 // (titolo, descrizione, immagine) e i blocchi schema.org Recipe.
 const PREVIEW_UA = 'AggregatoreRicette/1.0 (+https://ismirill.github.io/aggregatore-ricette/)';
-async function preview(b) {
+// Trascrizione del parlato di un video (Whisper su Workers AI). Solo video brevi e non troppo pesanti: la quota è condivisa.
+async function transcribe(env, videoUrl, seconds) {
+  try {
+    if (!env?.AI || !/^https:\/\//.test(videoUrl) || !seconds || seconds > 240) return '';
+    const r = await fetch(videoUrl, { headers: { 'User-Agent': PREVIEW_UA, Referer: 'https://www.tiktok.com/' } });
+    if (!r.ok) return '';
+    const buf = await r.arrayBuffer();
+    if (buf.byteLength > 24e6) return '';
+    const out = await env.AI.run('@cf/openai/whisper-large-v3-turbo', { audio: Buffer.from(buf).toString('base64'), language: 'it', task: 'transcribe' });
+    return str(out?.text, 8000).trim();
+  } catch { return ''; }
+}
+
+async function preview(env, b) {
   let u;
   try { u = new URL(str(b.url, 2000)); } catch { throw Object.assign(new Error('Link non valido'), { status: 400 }); }
   if (!/^https?:$/.test(u.protocol) || /^(localhost|127\.|10\.|192\.168\.|169\.254\.|0\.|\[)/.test(u.hostname)) throw Object.assign(new Error('Link non valido'), { status: 400 });
@@ -358,11 +375,14 @@ async function preview(b) {
     const m = e && e.html.match(/<script id="__FRONTITY_CONNECT_STATE__"[^>]*>([\s\S]*?)<\/script>/);
     try {
       const data = m && JSON.parse(m[1]).source.data, v = data && Object.values(data).find(x => x && x.videoData)?.videoData;
-      if (v) tk = { text: str(v.itemInfos?.text, 6000), author: str(v.authorInfos?.nickName || v.authorInfos?.uniqueId, 80), image: str((v.itemInfos?.covers || [])[0], 1000), url: id ? `https://www.tiktok.com/@${v.authorInfos?.uniqueId || 'tiktok'}/video/${id}` : u.href };
+      if (v) tk = { text: str(v.itemInfos?.text, 6000), author: str(v.authorInfos?.nickName || v.authorInfos?.uniqueId, 80), image: str((v.itemInfos?.covers || [])[0], 1000), url: id ? `https://www.tiktok.com/@${v.authorInfos?.uniqueId || 'tiktok'}/video/${id}` : u.href,
+        video: str((v.itemInfos?.video?.urls || [])[0], 2000), seconds: +v.itemInfos?.video?.videoMeta?.duration || 0 };
     } catch {}
     if (tk) {
+      // il parlato del video, trascritto: nei reel la ricetta spesso è solo detta a voce
+      const transcript = b.transcribe === false ? '' : await transcribe(env, tk.video, tk.seconds);
       const esc = v => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-      return { html: `<html><head><title>${esc(tk.text.split('\n')[0].slice(0, 140))}</title><meta property="og:title" content="${esc(tk.text)}"><meta property="og:site_name" content="${esc(tk.author)}"><meta property="og:image" content="${esc(tk.image)}"></head></html>`, url: tk.url };
+      return { html: `<html><head><title>${esc(tk.text.split('\n')[0].slice(0, 140))}</title><meta property="og:title" content="${esc(tk.text)}"><meta property="og:site_name" content="${esc(tk.author)}"><meta property="og:image" content="${esc(tk.image)}"></head></html>`, url: tk.url, transcript };
     }
   }
   const page = await get(u);
@@ -612,7 +632,7 @@ export default {
     }
     try {
       const body = await req.json();
-      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/ocr' ? await ocr(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await preview(body) : path === '/translate-recipe' ? await translateRecipe(env, body) : await analyze(env, body));
+      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/ocr' ? await ocr(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await preview(env, body) : path === '/translate-recipe' ? await translateRecipe(env, body) : await analyze(env, body));
     } catch (e) {
       // Quota giornaliera gratuita esaurita o errore del modello
       const limit = e.status === 429 || /neuron|quota|limit|4006/i.test(e.message);

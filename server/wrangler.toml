@@ -1,6 +1,7 @@
 name = "ricette-ai"
 main = "worker.js"
 compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]  # Buffer: base64 veloce per l'audio da trascrivere
 
 # Limite per dispositivo/IP: protegge la chiave da abusi
 [[ratelimits]]
