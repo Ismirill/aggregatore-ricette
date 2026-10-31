@@ -49,8 +49,12 @@ async function imagePart(url) {
 
 // Numeri scritti nel testo del post (per controllare che dosi, tempi e porzioni non siano inventati)
 const numsIn = t => new Set((String(t).match(/\d+(?:[.,]\d+)?/g) || []).map(x => x.replace(',', '.')));
-const TIME_RX = /\d+\s*(?:'|min\b|minut|ore\b|ora\b|\bh\b|hour|hrs?\b|sec\b)|(?:mezz'?ora|mezzora|un'?ora|quarto d'ora)/i;
-const SERV_RX = /(?:per|x|serves?|for)\s*\d+\s*(?:person|porzion|pers\b|people|serving|pax)?|\d+\s*(?:person|porzion|serving|pax)/i;
+// Durate scritte nel post: "30 minuti", "1 ora", "15'", "mezz'ora", "una decina di minuti", "una ventina di minuti"
+const NUM_IT = { un: 1, una: 1, uno: 1, due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8, nove: 9, dieci: 10, dodici: 12, quindici: 15, venti: 20, venticinque: 25, trenta: 30, quaranta: 40, quarantacinque: 45, cinquanta: 50, sessanta: 60,
+  decina: 10, dozzina: 12, quindicina: 15, ventina: 20, trentina: 30, quarantina: 40, cinquantina: 50 };
+const TIME_RX = /(?:\d+(?:[.,]\d+)?|\b(?:un[ao]?|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|dodici|quindici|venti(?:cinque)?|trenta|quaranta(?:cinque)?|cinquanta|sessanta)\b|\b(?:una\s+)?(?:decina|dozzina|quindicina|ventina|trentina|quarantina|cinquantina)\s+di)\s*(?:['’′]|min\b|minut\w*|ore\b|ora\b|h\b|hour\w*|hrs?\b)|mezz['’]?\s?ora|mezzora|un['’]ora|quarto d['’]ora|tre quarti d['’]ora/i;
+// Porzioni: solo con la parola (persone, porzioni…) o nell'intestazione "ingredienti per 4": "per 10 minuti" non è una porzione
+const SERV_RX = /(?:per|x|serves?|for)\s*\d+\s*(?:person|porzion|pers\b|people|serving|pax)|\d+\s*(?:person|porzion|serving|pax)|(?:ingredienti|dosi)[^\n:]{0,25}(?:per|x)\s*\d+\s*(?=$|\n|:|\)|\.)/i;
 
 async function analyze(env, b) {
   const cats = (Array.isArray(b.cats) ? b.cats : []).slice(0, 30).map(c => str(c, 40));
@@ -65,15 +69,16 @@ Sei un trascrittore fedele, non un cuoco: riporta SOLO ciò che è scritto nel t
 Estrai i dati in italiano:
 - title: nome breve del piatto (senza hashtag né emoji).
 - cat: uno tra ${cats.map(c => `"${c}"`).join(', ')}.
-- servings: per quante persone sono le dosi, SOLO se scritto nel post ("per 4", "4 porzioni", "x2"…); altrimenti 0.
+- servings: per quante persone sono le dosi, SOLO se scritto nel post ("per 4 persone", "4 porzioni", "ingredienti per 2"…); altrimenti 0. "per 10 minuti" non è una porzione.
 - ingredients: un ingrediente per voce, nell'ordine del post, formato "quantità unità ingrediente" (es. "320 g spaghetti", "2 uova", "olio extravergine q.b."). Le quantità solo se scritte nel post: se un ingrediente è nominato senza dose, scrivi solo il nome (es. "pomodori secchi"), NON "q.b." e NON una dose tipica. Se il post non elenca ingredienti ma il piatto è chiaramente riconoscibile dal nome o dall'immagine, metti i soli NOMI degli ingredienti tipici, senza dosi, e imposta inferred a true. Se non riconosci il piatto, lascia vuoto.
 - steps: passaggi del procedimento SOLO se descritti nel post, un passaggio per voce, con le parole del post; altrimenti vuoto.
 - diets: solo tra ${DIETS.map(x => `"${x}"`).join(', ')} e solo se evidente dagli ingredienti elencati; nel dubbio nessuna.
 - country e region: zona d'origine del piatto se chiara dal nome (region solo per regioni italiane), altrimenti stringa vuota.
-- time: minuti totali SOLO se il post indica un tempo (es. "30 minuti", "1 ora", "pronta in 15'"); altrimenti 0. Non stimarlo.
+- time: minuti totali dall'inizio al piatto pronto. Se il post dichiara un tempo totale ("pronta in 30 minuti", "tempo: 1 ora") usa quello. Altrimenti, se il procedimento indica le durate dei singoli passaggi (riposo dell'impasto, cottura, forno, raffreddamento…), SOMMALE tutte in ordine per avere il totale (es. "lievitare 2 ore" + "cuocere 25 minuti" + "raffreddare un quarto d'ora" = 160); se una durata è un intervallo o un'alternativa ("almeno mezz'ora, anche un'ora") prendi la più lunga. Non prendere mai la durata di un solo passaggio come totale. Se nel post non c'è nessuna durata, metti 0: non stimarlo.
+- time_how: "indicato" se il post dichiara il tempo totale, "sommato" se l'hai ottenuto sommando i passaggi, "" se time è 0.
 - inferred: true solo se gli ingredienti non sono scritti nel post e li hai dedotti dal piatto.
 - is_recipe: false se il post non riguarda una ricetta o un piatto.
-Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diets":[],"country":"","region":"","time":0,"inferred":false,"ingredients":[],"steps":[]}`;
+Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diets":[],"country":"","region":"","time":0,"time_how":"","inferred":false,"ingredients":[],"steps":[]}`;
   const img = b.image ? await imagePart(str(b.image, 2000)) : null;
   const r = await aiJson(env, prompt, img);
   return { result: r && faithful(r, text) };
@@ -81,27 +86,43 @@ Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diet
 
 // Controllo meccanico sul risultato: tutto ciò che è un numero deve stare nel testo del post, altrimenti via.
 // Il modello a volte "completa" lo stesso: così dosi, tempi e porzioni inventati non arrivano all'utente.
-// Tempo totale scritto nel post, in minuti: se ce n'è più d'uno vince quello presentato come totale ("pronta in", "tempo"), altrimenti il più lungo
-function timeIn(text) {
-  const t = String(text).toLowerCase(), out = [];
-  for (const m of t.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:'|min\b|minut\w*|ore\b|ora\b|h\b|hour\w*|hrs?\b)|(mezz'?ora|mezzora|un'?ora|quarto d'ora|tre quarti d'ora)/g)) {
-    const mins = m[2] ? ({ "mezz'ora": 30, mezzora: 30, "un'ora": 60, "quarto d'ora": 15, "tre quarti d'ora": 45 }[m[2].replace(/mezz ora/, "mezz'ora")] || 30)
-      : Math.round(parseFloat(m[1].replace(',', '.')) * (/or|h\b|hour|hr/.test(m[0]) && !/min/.test(m[0]) ? 60 : 1));
-    const before = t.slice(Math.max(0, m.index - 40), m.index);
-    out.push({ mins, total: /pront[aoie]?\s+in|tempo|totale|ci vogliono|in sol[io]|bastano|preparazione|cottura/.test(before) });
+// Tutte le durate scritte nel post, in minuti, per frase: dentro una frase le durate sono alternative o intervalli
+// ("almeno mezz'ora, anche un'ora", "10-12 minuti") e vale la più lunga; frasi diverse sono passaggi diversi e si sommano.
+// Un tempo presentato come totale ("pronta in", "tempo totale") vale da solo.
+function timesIn(text) {
+  const t = String(text).toLowerCase().replace(/[’′]/g, "'"), res = { total: 0, sum: 0, max: 0, n: 0 };
+  for (const sent of t.split(/(?<=[.!?\n])\s+|\n+/)) {
+    let best = 0;
+    for (const m of sent.matchAll(/(mezz'?\s?ora|mezzora|un'ora|quarto d'ora|tre quarti d'ora)|(\d+(?:[.,]\d+)?|\b(?:un[ao]?|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|dodici|quindici|venti(?:cinque)?|trenta|quaranta(?:cinque)?|cinquanta|sessanta)\b|\b(?:una\s+)?(decina|dozzina|quindicina|ventina|trentina|quarantina|cinquantina)\s+di)\s*('|min\b|minut\w*|ore\b|ora\b|h\b|hour\w*|hrs?\b)/g)) {
+      let mins;
+      if (m[1]) mins = { "mezz'ora": 30, 'mezz ora': 30, mezzora: 30, "un'ora": 60, "quarto d'ora": 15, "tre quarti d'ora": 45 }[m[1]] || 30;
+      else {
+        const w = m[3] || m[2].replace(/^una\s+/, '').trim(), n = /^\d/.test(w) ? parseFloat(w.replace(',', '.')) : NUM_IT[w] || 0;
+        mins = Math.round(n * (/^(or|h\b|hour|hr)/.test(m[4]) ? 60 : 1));
+      }
+      if (!mins) continue;
+      const before = sent.slice(Math.max(0, m.index - 40), m.index);
+      if (/pront[aoie]?\s+in|tempo\s+(?:totale|di preparazione|complessivo)?|totale|ci vogliono|in sol[io]|bastano|si prepara in/.test(before)) res.total = Math.max(res.total, mins);
+      best = Math.max(best, mins); res.n++;
+    }
+    res.sum += best; res.max = Math.max(res.max, best);
   }
-  if (!out.length) return 0;
-  const tot = out.filter(x => x.total);
-  return Math.max(...(tot.length ? tot : out).map(x => x.mins)) || 0;
+  return res;
 }
 const servingsIn = text => +((String(text).match(SERV_RX) || [''])[0].match(/\d+/) || [0])[0] || 0;
 
 function faithful(r, text) {
   const nums = numsIn(text), hasList = /ingredient/i.test(text) || /\d+\s?(?:g|gr|kg|ml|cl|l|cucchia|tazz)\b/i.test(text);
   // tempo e porzioni: valgono solo se scritti nel post; se il modello li salta o li inventa, si legge direttamente il testo
-  const tt = timeIn(text), sv = servingsIn(text);
-  if (!TIME_RX.test(text)) r.time = 0;
-  else if (!r.time || (!nums.has(String(r.time)) && !/mezz'?ora|mezzora|un'?ora|quarto d'ora/i.test(text) && !nums.has(String(r.time / 60)))) r.time = tt;
+  const tm = timesIn(text), sv = servingsIn(text);
+  r.time = Math.round(+r.time) || 0;
+  if (!TIME_RX.test(text)) { r.time = 0; r.time_how = ''; }
+  else if (tm.total) { r.time = tm.total; r.time_how = 'indicato'; } // il post dichiara il totale: vale quello
+  else if (tm.n <= 1) { r.time = tm.max; r.time_how = 'indicato'; } // una sola durata nel post
+  else { // più durate: il totale è la somma dei passaggi; il modello può scendere un po' (passaggi in parallelo) ma mai sotto la durata più lunga né sopra la somma
+    if (!(r.time >= Math.max(tm.max, Math.round(tm.sum * 0.7)) && r.time <= tm.sum)) r.time = tm.sum;
+    r.time_how = 'sommato';
+  }
   if (!SERV_RX.test(text) || !r.servings || !nums.has(String(r.servings))) r.servings = sv;
   if (!hasList) r.inferred = true;
   r.ingredients = (Array.isArray(r.ingredients) ? r.ingredients : []).map(String).map(x => {

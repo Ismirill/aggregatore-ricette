@@ -6,6 +6,7 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-10-31
 
+- Versione 72: tempo totale della ricetta calcolato bene. Prima l'AI prendeva la durata di un solo passaggio (es. «12 minuti» di forno per una torta salata che ne richiede quasi due ore). Ora: se il post dichiara il totale («pronta in 30 minuti») vale quello; altrimenti si sommano le durate di tutti i passaggi (riposo dell'impasto, cotture, forno, raffreddamento), anche scritte a parole («una ventina di minuti», «mezz'ora, anche un'ora»); il server ricontrolla la somma sul testo e corregge l'AI se sbaglia; l'app indica «tempo ≈ N min, somma dei passaggi». Corretto anche «per 10 minuti» scambiato per «10 persone»
 - Versione 71: ricette dai social più fedeli e lettura dei post corretta.
   - Instagram e Facebook dall'app Android: la WebView riceveva la pagina di accesso di Instagram (solo «Instagram», senza didascalia) e l'AI rispondeva «non trovo una ricetta». Ora per Instagram, Facebook, TikTok e Pinterest il post lo legge sempre il server dalla pagina di incorporamento; il browser legge da solo solo gli altri siti, e una pagina di accesso non viene più scambiata per il post
   - TikTok: oEmbed non dà più didascalia, autore e copertina; il server li prende dalla pagina di incorporamento (anche dai link corti vm/vt.tiktok.com)
