@@ -17,7 +17,7 @@ async function ai(env, prompt, image) {
   const content = [...(image ? [{ type: 'image_url', image_url: { url: image } }] : []), { type: 'text', text: prompt }];
   // Senza ragionamento: risponde subito in JSON e consuma meno quota gratuita
   const r = await env.AI.run(MODEL, {
-    messages: [{ role: 'user', content }], max_tokens: 2000,
+    messages: [{ role: 'user', content }], max_tokens: 2000, temperature: 0.2, // bassa: deve trascrivere, non inventare
     chat_template_kwargs: { enable_thinking: false }, response_format: { type: 'json_object' },
   });
   return typeof r.response === 'string' ? r.response : r.choices?.[0]?.message?.content || JSON.stringify(r.response ?? '');
@@ -47,27 +47,73 @@ async function imagePart(url) {
   } catch { return null; }
 }
 
+// Numeri scritti nel testo del post (per controllare che dosi, tempi e porzioni non siano inventati)
+const numsIn = t => new Set((String(t).match(/\d+(?:[.,]\d+)?/g) || []).map(x => x.replace(',', '.')));
+const TIME_RX = /\d+\s*(?:'|min\b|minut|ore\b|ora\b|\bh\b|hour|hrs?\b|sec\b)|(?:mezz'?ora|mezzora|un'?ora|quarto d'ora)/i;
+const SERV_RX = /(?:per|x|serves?|for)\s*\d+\s*(?:person|porzion|pers\b|people|serving|pax)?|\d+\s*(?:person|porzion|serving|pax)/i;
+
 async function analyze(env, b) {
   const cats = (Array.isArray(b.cats) ? b.cats : []).slice(0, 30).map(c => str(c, 40));
+  const text = str(b.caption || b.title, 6000);
   const prompt = `Questo è un post con una ricetta, salvato in un ricettario personale in italiano.
 Link: ${str(b.url, 500)}
 Fonte: ${str(b.source, 40)}${b.author ? ' · autore: ' + str(b.author, 80) : ''}
 Titolo/didascalia:
-"""${str(b.caption || b.title, 6000)}"""
+"""${text}"""
 
+Sei un trascrittore fedele, non un cuoco: riporta SOLO ciò che è scritto nel testo o chiaramente visibile nell'immagine. Non aggiungere dosi, tempi, porzioni o passaggi che non ci sono. Meglio un campo vuoto di un dato inventato.
 Estrai i dati in italiano:
 - title: nome breve del piatto (senza hashtag né emoji).
 - cat: uno tra ${cats.map(c => `"${c}"`).join(', ')}.
-- servings: per quante persone sono le dosi. Usa il numero indicato nel post ("per 4", "4 porzioni"…); se non è indicato, stimalo dalle quantità (di solito 80-100 g di pasta o 150-200 g di carne a persona); se non ci sono quantità, metti 4.
-- ingredients: un ingrediente per voce, nel formato "quantità unità ingrediente" (es. "320 g spaghetti", "2 uova", "1 spicchio d'aglio", "olio extravergine q.b."), con le quantità per il numero di persone in servings. Usa le quantità del post; quelle mancanti stimale con le dosi tipiche e, se ne hai stimata almeno una, aggiungi alla fine la voce "(dosi stimate, verifica nel video)". Se la didascalia non elenca gli ingredienti ma il piatto è chiaramente riconoscibile, metti gli ingredienti tipici con le dosi e aggiungi alla fine "(ingredienti e dosi dedotti, verifica nel video)". Se non riconosci il piatto, lascia vuoto.
-- steps: passaggi del procedimento, solo se descritti o deducibili con certezza; altrimenti vuoto.
-- diets: solo tra ${DIETS.map(x => `"${x}"`).join(', ')} e solo se sei ragionevolmente sicuro dagli ingredienti; nel dubbio non metterla.
-- country e region: zona d'origine del piatto (region solo per regioni italiane), stringa vuota se non chiaro.
-- time: minuti totali, 0 se non noto.
-- is_recipe: false se il post non riguarda una ricetta.
-Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":4,"cat":"","diets":[],"country":"","region":"","time":0,"ingredients":[],"steps":[]}`;
+- servings: per quante persone sono le dosi, SOLO se scritto nel post ("per 4", "4 porzioni", "x2"…); altrimenti 0.
+- ingredients: un ingrediente per voce, nell'ordine del post, formato "quantità unità ingrediente" (es. "320 g spaghetti", "2 uova", "olio extravergine q.b."). Le quantità solo se scritte nel post: se un ingrediente è nominato senza dose, scrivi solo il nome (es. "pomodori secchi"), NON "q.b." e NON una dose tipica. Se il post non elenca ingredienti ma il piatto è chiaramente riconoscibile dal nome o dall'immagine, metti i soli NOMI degli ingredienti tipici, senza dosi, e imposta inferred a true. Se non riconosci il piatto, lascia vuoto.
+- steps: passaggi del procedimento SOLO se descritti nel post, un passaggio per voce, con le parole del post; altrimenti vuoto.
+- diets: solo tra ${DIETS.map(x => `"${x}"`).join(', ')} e solo se evidente dagli ingredienti elencati; nel dubbio nessuna.
+- country e region: zona d'origine del piatto se chiara dal nome (region solo per regioni italiane), altrimenti stringa vuota.
+- time: minuti totali SOLO se il post indica un tempo (es. "30 minuti", "1 ora", "pronta in 15'"); altrimenti 0. Non stimarlo.
+- inferred: true solo se gli ingredienti non sono scritti nel post e li hai dedotti dal piatto.
+- is_recipe: false se il post non riguarda una ricetta o un piatto.
+Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diets":[],"country":"","region":"","time":0,"inferred":false,"ingredients":[],"steps":[]}`;
   const img = b.image ? await imagePart(str(b.image, 2000)) : null;
-  return { result: await aiJson(env, prompt, img) };
+  const r = await aiJson(env, prompt, img);
+  return { result: r && faithful(r, text) };
+}
+
+// Controllo meccanico sul risultato: tutto ciò che è un numero deve stare nel testo del post, altrimenti via.
+// Il modello a volte "completa" lo stesso: così dosi, tempi e porzioni inventati non arrivano all'utente.
+// Tempo totale scritto nel post, in minuti: se ce n'è più d'uno vince quello presentato come totale ("pronta in", "tempo"), altrimenti il più lungo
+function timeIn(text) {
+  const t = String(text).toLowerCase(), out = [];
+  for (const m of t.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:'|min\b|minut\w*|ore\b|ora\b|h\b|hour\w*|hrs?\b)|(mezz'?ora|mezzora|un'?ora|quarto d'ora|tre quarti d'ora)/g)) {
+    const mins = m[2] ? ({ "mezz'ora": 30, mezzora: 30, "un'ora": 60, "quarto d'ora": 15, "tre quarti d'ora": 45 }[m[2].replace(/mezz ora/, "mezz'ora")] || 30)
+      : Math.round(parseFloat(m[1].replace(',', '.')) * (/or|h\b|hour|hr/.test(m[0]) && !/min/.test(m[0]) ? 60 : 1));
+    const before = t.slice(Math.max(0, m.index - 40), m.index);
+    out.push({ mins, total: /pront[aoie]?\s+in|tempo|totale|ci vogliono|in sol[io]|bastano|preparazione|cottura/.test(before) });
+  }
+  if (!out.length) return 0;
+  const tot = out.filter(x => x.total);
+  return Math.max(...(tot.length ? tot : out).map(x => x.mins)) || 0;
+}
+const servingsIn = text => +((String(text).match(SERV_RX) || [''])[0].match(/\d+/) || [0])[0] || 0;
+
+function faithful(r, text) {
+  const nums = numsIn(text), hasList = /ingredient/i.test(text) || /\d+\s?(?:g|gr|kg|ml|cl|l|cucchia|tazz)\b/i.test(text);
+  // tempo e porzioni: valgono solo se scritti nel post; se il modello li salta o li inventa, si legge direttamente il testo
+  const tt = timeIn(text), sv = servingsIn(text);
+  if (!TIME_RX.test(text)) r.time = 0;
+  else if (!r.time || (!nums.has(String(r.time)) && !/mezz'?ora|mezzora|un'?ora|quarto d'ora/i.test(text) && !nums.has(String(r.time / 60)))) r.time = tt;
+  if (!SERV_RX.test(text) || !r.servings || !nums.has(String(r.servings))) r.servings = sv;
+  if (!hasList) r.inferred = true;
+  r.ingredients = (Array.isArray(r.ingredients) ? r.ingredients : []).map(String).map(x => {
+    const m = x.match(/^\s*(\d+(?:[.,]\d+)?)(?:\s*[-–\/]\s*\d+(?:[.,]\d+)?)?\s*/); // "300 g …", "2-3 …", "1/2 …"
+    const frac = x.match(/^\s*(?:[½¼¾⅓⅔]|\d+\/\d+)\s/);
+    if (m && !nums.has(m[1].replace(',', '.'))) return x.slice(m[0].length).replace(/^(?:g|gr|kg|ml|cl|l|cucchiai?n?[oi]?|tazz[ae]|spicchi?o?|fette?|pizzic[oh]i?|bustin[ae]|foglie?|rametti?|cucchiaini?)\s+(?:di\s+)?/i, '').trim(); // dose non nel post: resta il nome
+    if (frac && !/[½¼¾⅓⅔]|\d\/\d/.test(text)) return x.replace(frac[0], '').trim();
+    if (/\bq\.?\s?b\.?/i.test(x) && !/\bq\.?\s?b\b/i.test(text)) return x.replace(/\s*,?\s*q\.?\s?b\.?\s*$/i, '').trim(); // "q.b." messo dal modello
+    return x.trim();
+  }).filter(Boolean);
+  if (r.inferred && r.ingredients.length) r.ingredients = r.ingredients.map(x => x.replace(/^\d[\d.,\/\s]*(?:g|gr|kg|ml|cl|l)?\s*/i, '').trim()).filter(Boolean);
+  return r;
 }
 
 // Ricette di GialloZafferano per il piatto riconosciuto (titolo, link, foto)
@@ -278,6 +324,25 @@ async function preview(b) {
     const im = e && e.html.match(/class="EmbeddedMediaImage"[^>]*src="([^"]+)"/);
     if (im) embedImage = im[1].replace(/&amp;/g, '&');
     if (m) embedCaption = unescape(m[1].replace(/<br\s*\/?>/gi, '\n').replace(/<a [^>]*class="CaptionUsername"[^>]*>[\s\S]*?<\/a>/i, '')).replace(/View all \d+ comments\s*$/i, '').trim();
+  }
+  // TikTok: la pagina del video chiede l'accesso e oEmbed non dà più il testo; la pagina di incorporamento ha didascalia, autore e copertina
+  let tk = null;
+  if (/(^|\.)tiktok\.com$/.test(u.hostname)) {
+    let id = (u.pathname.match(/\/video\/(\d+)/) || u.pathname.match(/^\/(?:embed|player\/v1)\/(\d+)/) || [])[1];
+    if (!id) { // link corti vm.tiktok.com / vt.tiktok.com / tiktok.com/t/…: si segue il reindirizzamento
+      const h = await fetch(u, { method: 'HEAD', redirect: 'follow', headers: { 'User-Agent': PREVIEW_UA } }).catch(() => null);
+      id = (h && new URL(h.url).pathname.match(/\/video\/(\d+)/) || [])[1];
+    }
+    const e = id && await get(`https://www.tiktok.com/embed/${id}`);
+    const m = e && e.html.match(/<script id="__FRONTITY_CONNECT_STATE__"[^>]*>([\s\S]*?)<\/script>/);
+    try {
+      const data = m && JSON.parse(m[1]).source.data, v = data && Object.values(data).find(x => x && x.videoData)?.videoData;
+      if (v) tk = { text: str(v.itemInfos?.text, 6000), author: str(v.authorInfos?.nickName || v.authorInfos?.uniqueId, 80), image: str((v.itemInfos?.covers || [])[0], 1000), url: id ? `https://www.tiktok.com/@${v.authorInfos?.uniqueId || 'tiktok'}/video/${id}` : u.href };
+    } catch {}
+    if (tk) {
+      const esc = v => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+      return { html: `<html><head><title>${esc(tk.text.split('\n')[0].slice(0, 140))}</title><meta property="og:title" content="${esc(tk.text)}"><meta property="og:site_name" content="${esc(tk.author)}"><meta property="og:image" content="${esc(tk.image)}"></head></html>`, url: tk.url };
+    }
   }
   const page = await get(u);
   if (!page && !embedCaption) throw Object.assign(new Error('Il sito non permette di leggere questo post'), { status: 502 });

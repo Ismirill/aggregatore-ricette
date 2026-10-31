@@ -4,6 +4,15 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-10-31
+
+- Versione 71: ricette dai social più fedeli e lettura dei post corretta.
+  - Instagram e Facebook dall'app Android: la WebView riceveva la pagina di accesso di Instagram (solo «Instagram», senza didascalia) e l'AI rispondeva «non trovo una ricetta». Ora per Instagram, Facebook, TikTok e Pinterest il post lo legge sempre il server dalla pagina di incorporamento; il browser legge da solo solo gli altri siti, e una pagina di accesso non viene più scambiata per il post
+  - TikTok: oEmbed non dà più didascalia, autore e copertina; il server li prende dalla pagina di incorporamento (anche dai link corti vm/vt.tiktok.com)
+  - Analisi AI «da trascrittore»: riporta solo ciò che è scritto nel post. Niente dosi tipiche, niente «q.b.» aggiunti, niente tempi o porzioni stimati; temperatura del modello bassa. Se il post non elenca gli ingredienti, dà solo i nomi tipici del piatto, senza dosi, e l'app lo dice chiaramente
+  - Controllo meccanico sul server: ogni numero della risposta (dosi, tempo, porzioni) deve comparire nel testo del post, altrimenti viene tolto; tempo e porzioni scritti nel post vengono letti direttamente dal testo («pronta in 20 minuti», «per 2 persone»)
+  - Didascalie Instagram: tolto anche il prefisso «13K likes, 71 comments - nome su data:»
+
 ## 2026-10-30
 
 - Versione 70: corretto l'aggiornamento dell'APK che reinstallava la versione vecchia. Ogni versione ha ora un file con il suo numero (Gnamina-70.apk…), così il telefono non riapre l'APK già scaricato; il sito con il nuovo numero di versione esce solo quando l'APK è già scaricabile; l'avviso nell'app dice quale versione c'è e quale file aprire. AggregatoreRicette.apk resta il link fisso all'ultima versione

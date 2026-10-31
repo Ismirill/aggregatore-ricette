@@ -513,7 +513,7 @@ function parseHtml(html){
   const m=p=>d.querySelector(`meta[property="${p}"],meta[name="${p}"]`)?.content||'';
   // via i prefissi di Facebook/Instagram: "Visualizzazioni … |", "Nome su Instagram: \"…\"", "792 likes, 18 comments - nome su data: \"…\""
   const clean=t=>String(t||'').replace(/^(?:[^|]{0,80}(?:visualizzazioni|views|reazioni|reactions|mi piace|likes|commenti|comments)[^|]{0,80}\|\s*)/i,'')
-    .replace(/^[^:\n]{0,90}\s(?:su|on) instagram\s*:\s*/i,'').replace(/^[\d.,]+\s*(?:likes|mi piace)[^:\n]{0,120}:\s*/i,'').replace(/^["“]|["”]\.?$/g,'').trim();
+    .replace(/^[^:\n]{0,90}\s(?:su|on) instagram\s*:\s*/i,'').replace(/^[\d.,]+\s*[KM]?\s*(?:likes|mi piace)[^:\n]{0,120}:\s*/i,'').replace(/^["“]|["”]\.?$/g,'').trim();
   // la didascalia più completa tra titolo e descrizione (Facebook mette quella intera nel titolo della pagina)
   const caption=[clean(m('og:title')),clean(d.title),clean(m('og:description')),clean(m('description'))].sort((a,b)=>b.length-a.length)[0]||'';
   const out={title:clean(m('og:title'))||clean(m('twitter:title'))||clean(d.title)||'',image:m('og:image')||m('twitter:image')||'',author:m('og:site_name'),caption};
@@ -556,13 +556,17 @@ async function analyze(url,pasted){
       const j=await getJson('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent(url),ctl);
       out={title:j.title||'',image:j.thumbnail_url||'',author:j.author_name||''};
     }
-    if(src!=='YouTube'&&src!=='TikTok'){
+    if(src!=='YouTube'){
       let html='',fin='';
-      // il browser legge la pagina se il sito lo permette (nell'APK quasi sempre); altrimenti l'anteprima arriva dal server
-      try{const res=await fetch(url,{signal:ctl.signal});html=await res.text();fin=res.url}catch{}
-      const got=html&&parseHtml(html);
-      if((!got||!(got.caption||got.ingredients?.length))&&aiOn())try{const p=await server('/preview',{url});html=p.html;fin=p.url}catch{}
+      // Instagram, Facebook e TikTok mostrano al telefono solo la pagina di accesso (senza didascalia): il post lo legge il server,
+      // dalla pagina di incorporamento. Per gli altri siti prova prima il browser/WebView, poi il server.
+      const social=['Instagram','Facebook','TikTok','Pinterest'].includes(src);
+      const useful=g=>g&&(g.ingredients?.length||(g.caption&&g.caption.length>40&&!/^(instagram|tiktok|facebook|log in|accedi|login)\b/i.test(g.caption)&&!/log in or sign up|accedi o iscriviti|make your day/i.test(g.caption)));
+      if(!social)try{const res=await fetch(url,{signal:ctl.signal});html=await res.text();fin=res.url;if(!useful(parseHtml(html)))html=''}catch{}
+      if(!html&&aiOn())try{const p=await server('/preview',{url});html=p.html;fin=p.url}catch{}
+      if(!html&&!social)try{const res=await fetch(url,{signal:ctl.signal});html=await res.text();fin=res.url}catch{}
       out=parseHtml(html||'<html></html>');
+      if(!useful(out)&&!out.title)out={};
       if(fin&&fin!==url)out.finalUrl=fin;
     }
   }catch{}
@@ -599,7 +603,7 @@ async function aiAnalyze(d){
   const {result:r}=await server('/analyze',{url:d.url,source:sourceOf(d.url),author:d.author,caption:d.caption||d.title,image:d.image,cats});
   if(!r)throw new Error('Risposta AI non valida');
   return {servings:Math.min(100,Math.max(0,parseInt(r.servings)||0)),is_recipe:r.is_recipe!==false,title:r.title||'',cat:r.cat||'',diets:(r.diets||[]).filter(x=>DIETS.includes(x)),country:r.country||'',region:r.region||'',
-    time:+r.time||0,ingredients:(r.ingredients||[]).map(String),steps:(r.steps||[]).map(String)};
+    time:+r.time||0,inferred:r.inferred===true,ingredients:(r.ingredients||[]).map(String),steps:(r.steps||[]).map(String)};
 }
 
 // Riduce la foto per contenere costi e tempi di invio
@@ -693,7 +697,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=70; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=71; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1637,16 +1641,15 @@ async function runAnalysis(url,overwrite){
       if(!r.is_recipe){showPv('L\'AI non trova una ricetta in questo post');return}
       if(r.title&&(overwrite||!f.title.value||f.title.value.length>80))f.title.value=r.title;
       if(cats.includes(r.cat))f.cat.value=BASE_RX.test(f.title.value.trim())?'Altro':r.cat;
-      // se la didascalia non contiene dosi né un elenco di ingredienti, le quantità sono dedotte: lo si dice sempre
-      const cap=String(a.caption||'')+' '+f.caption.value;
-      if(r.ingredients.length&&!/\d+\s?(g|gr|kg|ml|cl|l|cucchia|tazz)\b|ingredient/i.test(cap)&&!r.ingredients.some(x=>/dedott|stimat/i.test(x)))r.ingredients.push('(ingredienti e dosi dedotti, verifica nel video)');
+      // il post non elenca gli ingredienti: l'AI dà solo i nomi tipici del piatto, senza dosi, e lo si dice
+      if(r.inferred&&r.ingredients.length)r.ingredients.push('(il post non elenca gli ingredienti: questi sono quelli tipici del piatto, senza dosi; guarda il video e completa)');
       if(r.ingredients.length>=n)f.ingredients.value=r.ingredients.join('\n');
       if(r.steps.length&&!(a.steps||[]).length)f.steps.value=r.steps.join('\n');
       if(r.time&&(overwrite||!f.time.value))f.time.value=r.time;
       if(r.servings&&(overwrite||!f.servings.value))f.servings.value=r.servings;
       if(r.country){f.country.value=r.country;f.region.value=r.region}
       setDiets(r.diets);
-      showPv(`Analisi AI completata · ${r.ingredients.length} ingredienti`);
+      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata · ${r.ingredients.length} ingredienti${r.time?'':' · tempo non indicato nel post'}`);
     }catch(e){showPv(aiErr(e))}
   }
 }
