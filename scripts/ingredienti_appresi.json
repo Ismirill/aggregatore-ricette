@@ -63,6 +63,10 @@
 "as": "spezie",
 "via": "Open Food Facts: Sazón Con Culantro Y Achiote (With Coria"
 },
+"arancio": {
+"as": "arancia",
+"via": "simile a \"arancia\""
+},
 "arancio candito": {
 "as": "arancia",
 "via": "simile a \"arancia\""
@@ -1260,6 +1264,10 @@
 "via": "non trovato"
 },
 "rhum": {
+"as": "rum",
+"via": "sinonimo di rum"
+},
+"rhum genuino cucchiaiate": {
 "as": "rum",
 "via": "sinonimo di rum"
 },
