@@ -522,7 +522,7 @@ function parseHtml(html){
   if(r){
     const img=[].concat(r.image||[])[0];
     Object.assign(out,{title:strip(r.name)||out.title,image:(typeof img==='string'?img:img?.url)||out.image,
-      ingredients:[].concat(r.recipeIngredient||r.ingredients||[]).map(strip).filter(Boolean),steps:stepsOf(r.recipeInstructions),
+      ingredients:[].concat(r.recipeIngredient||r.ingredients||[]).map(strip).filter(Boolean),steps:stepsOf(r.recipeInstructions),stepsFromSchema:!!r.recipeInstructions,
       cuisine:[].concat(r.recipeCuisine||[]).join(', '),recipeCategory:[].concat(r.recipeCategory||[]).join(', '),keywords:[].concat(r.keywords||[]).join(', '),
       servings:servingsOf([].concat(r.recipeYield||[]).join(' ')),
       time:isoMin(r.totalTime)||((isoMin(r.prepTime)||0)+(isoMin(r.cookTime)||0))||null,
@@ -1644,7 +1644,7 @@ async function runAnalysis(url,overwrite){
       // il post non elenca gli ingredienti: l'AI dà solo i nomi tipici del piatto, senza dosi, e lo si dice
       if(r.inferred&&r.ingredients.length)r.ingredients.push('(il post non elenca gli ingredienti: questi sono quelli tipici del piatto, senza dosi; guarda il video e completa)');
       if(r.ingredients.length)f.ingredients.value=r.ingredients.join('\n');
-      if(r.steps.length&&!(a.steps||[]).length)f.steps.value=r.steps.join('\n');
+      if(r.steps.length&&(overwrite||!f.steps.value||!(a.stepsFromSchema)))f.steps.value=r.steps.join('\n'); // i passaggi dell'AI (fedeli al testo) vincono sulla divisione a paragrafi della didascalia
       if(r.time&&(overwrite||!f.time.value))f.time.value=r.time;
       if(r.servings&&(overwrite||!f.servings.value))f.servings.value=r.servings;
       if(r.country){f.country.value=r.country;f.region.value=r.region}
