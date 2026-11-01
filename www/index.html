@@ -185,6 +185,9 @@ details summary{cursor:pointer}
 /* ---------- Budget ---------- */
 .wiz{display:flex;align-items:center;justify-content:space-between}.wdots{display:flex;gap:6px}.wdots i{width:10px;height:10px;border-radius:50%;background:var(--bd);display:block}.wdots i.on{background:var(--acc)}.wdots i.done{background:color-mix(in srgb,var(--acc) 45%,var(--bd))}
 .step h3{margin:0 0 10px;font-size:1.25rem}.step{display:grid;gap:12px}
+#f.all .step h3,#f.all .hint{display:none}#f.all .step{margin-bottom:2px}#srcStep h3{margin-bottom:0}
+#f:not(.all) textarea[name=ingredients],#f:not(.all) textarea[name=steps]{min-height:34dvh;font-size:17px;line-height:1.5}#f:not(.all) input,#f:not(.all) select{font-size:17px}#f:not(.all) .step>label{font-size:.9rem}
+.sum{margin:-4px 0 0;font-size:1rem;background:var(--bg2);border-radius:14px;padding:12px 14px;line-height:1.45}
 .bform{display:grid;gap:14px;margin-bottom:18px;background:var(--card);padding:16px;border-radius:var(--r);box-shadow:var(--sh)}
 .bhead{margin:4px 0 14px}.bhead h2{margin:0;font-size:1.6rem}.bhead p{margin:4px 0 0;color:var(--mut);font-size:.9rem}
 .seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));background:var(--bg2);border-radius:14px;padding:4px;gap:4px}
@@ -291,49 +294,76 @@ details summary{cursor:pointer}
 
 <dialog id="dlg">
   <div class="dhead stk"><h2 id="dlgT">Nuova ricetta</h2><button type="button" class="icon" id="dlgX" aria-label="Chiudi">✕</button></div>
-  <div id="srcStep">
-    <p class="meta" style="margin:0 0 10px">Da dove viene la ricetta?</p>
+  <!-- Percorso guidato (solo per una ricetta nuova): un passo per schermata, con i pallini come nel menu -->
+  <div class="wiz" id="rWiz"><button type="button" class="icon" id="rBackTop" aria-label="Indietro" style="visibility:hidden">←</button><div class="wmid"><div class="wdots" id="rDots"></div><div class="meta" id="rStepLbl"></div></div><span class="icon" style="visibility:hidden"></span></div>
+  <div id="srcStep" class="step">
+    <h3>Da dove viene la ricetta?</h3>
     <div class="srcGrid">
       <button type="button" class="srcCard" data-src="link"><b>🔗 Da un link</b><span>TikTok, Instagram, YouTube, Facebook o un sito di ricette</span></button>
       <button type="button" class="srcCard" data-src="manual"><b>✍️ La scrivo io</b><span>Titolo, ingredienti e procedimento scritti a mano</span></button>
       <button type="button" class="srcCard" data-src="photo"><b>📷 La fotografo</b><span>Un quaderno, un libro, una rivista: l'AI la trascrive</span></button>
       <button type="button" class="srcCard" data-src="file"><b>📄 Da un file</b><span>Un testo (.txt) o un'immagine già salvata</span></button>
     </div>
-    <div class="row" style="justify-content:flex-end;margin-top:10px"><button type="button" class="btn" id="srcCancel">Annulla</button></div>
+    <div class="row" style="justify-content:flex-end;margin-top:0"><button type="button" class="btn" id="srcCancel">Annulla</button></div>
   </div>
-  <input type="file" id="ocrIn" accept="image/*" capture="environment" hidden><input type="file" id="fileIn" accept=".txt,.md,.text,.rtf,.html,.htm,image/*" hidden>
+  <input type="file" id="ocrIn" accept="image/*" capture="environment" hidden><input type="file" id="galIn" accept="image/*" hidden><input type="file" id="fileIn" accept=".txt,.md,.text,.rtf,.html,.htm,image/*" hidden>
   <form id="f">
-    <p class="meta" id="srcBar" hidden style="margin:0 0 8px"><span id="srcLbl"></span> · <a href="#" id="srcBack">cambia</a></p>
-    <label id="urlL">Link del video o della ricetta<span class="inl" style="margin:0"><input name="url" type="url" required placeholder="Incolla qui il link…"><button type="button" class="btn pri" id="analyzeBtn">Analizza</button></span></label>
-    <label id="capL" hidden>Descrizione del post <span class="meta" style="font-weight:400">— se l'app non la legge da sola: tieni premuto il testo del post, copialo e incollalo qui</span>
-      <span class="inl" style="margin:0;align-items:flex-start"><textarea name="caption" rows="3" placeholder="Ingredienti, dosi, procedimento…"></textarea><button type="button" class="btn" id="pasteCap">📋 Incolla</button></span></label>
     <div class="pv" id="pv"></div>
-    <label>Titolo<input name="title" placeholder="Es. Carbonara cremosa"></label>
-    <label>Tipo di piatto<select name="cat" id="catSel"></select></label>
-    <div class="two">
-      <label>Persone (dosi originali)<input name="servings" type="number" min="1" max="100" inputmode="numeric"></label>
-      <label>Tempo (minuti)<input name="time" type="number" min="0" inputmode="numeric"></label>
-    </div>
-    <label>Diete e intolleranze<div class="checks" id="dietChecks"></div></label>
-    <div class="two">
-      <label>Paese / cucina<input name="country" list="countries" placeholder="Italia"></label>
-      <label>Regione<input name="region" list="regions" placeholder="Lazio"></label>
-    </div>
-    <label>Valutazione<div class="rate" id="fRateIn"></div></label>
-    <label>Ingredienti (uno per riga)<textarea name="ingredients" rows="5"></textarea></label>
-    <label>Procedimento (un passaggio per riga)<textarea name="steps" rows="5"></textarea></label>
-    <label>Etichette (separate da virgola)<input name="tags" placeholder="veloce, festa"></label>
-    <label>Note<textarea name="note" rows="2"></textarea></label>
-    <label>Il tuo video (su YouTube)<span class="inl" style="margin:0"><input name="video" type="url" placeholder="Link YouTube del video caricato"><button type="button" class="btn" id="pasteVid">📋 Incolla</button></span></label>
-    <div class="row" style="margin:-4px 0 10px;justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn" id="recVid">🎥 Registra un video</button><button type="button" class="btn" id="pickVid">Scegli dal telefono</button></div>
-    <p class="meta" id="vidHint" style="margin:-4px 0 12px"></p>
-    <input type="file" id="vidRec" accept="video/*" capture="environment" hidden><input type="file" id="vidPick" accept="video/*" hidden>
-    <div class="row">
+    <section class="step" data-s="src">
+      <h3 id="srcH"></h3>
+      <label id="urlL">Link del video o della ricetta<span class="inl" style="margin:0"><input name="url" type="url" placeholder="Incolla qui il link…"><button type="button" class="btn" id="pasteUrl">📋 Incolla</button></span></label>
+      <div class="row hint" id="urlRow" style="justify-content:flex-start;margin:0;align-items:center;gap:12px"><button type="button" class="btn pri" id="analyzeBtn">🔍 Analizza il link</button><span class="meta">Appena c'è il link, Gnamina legge la ricetta da sola. Poi premi «Avanti» e controlla.</span></div>
+      <label id="capL" hidden>Descrizione del post <span class="meta" style="font-weight:400">— se l'app non la legge da sola: tieni premuto il testo del post, copialo e incollalo qui</span>
+        <span class="inl" style="margin:0;align-items:flex-start"><textarea name="caption" rows="3" placeholder="Ingredienti, dosi, procedimento…"></textarea><button type="button" class="btn" id="pasteCap">📋 Incolla</button></span></label>
+      <div class="srcGrid hint" id="photoL" hidden><button type="button" class="srcCard" id="shootBtn"><b>📷 Scatta la foto</b><span>Inquadra bene la pagina con la ricetta, con buona luce</span></button><button type="button" class="srcCard" id="galBtn"><b>🖼 Scegli dalla galleria</b><span>Una foto che hai già fatto</span></button></div>
+      <div class="hint" id="fileL" hidden><button type="button" class="btn pri" id="fileBtn">📄 Scegli il file</button><p class="meta" style="margin:8px 0 0">Un file di testo (.txt) o un'immagine: Gnamina legge la ricetta e compila i campi, poi tu la controlli.</p></div>
+      <p class="meta hint" id="srcAfter">Quando i dati sono stati letti, premi «Avanti» per controllarli. Se la lettura non riesce, puoi scrivere tutto tu nei passi seguenti.</p>
+    </section>
+    <section class="step" data-s="base">
+      <h3>Come si chiama il piatto?</h3>
+      <label>Titolo<input name="title" placeholder="Es. Carbonara cremosa"></label>
+      <label>Tipo di piatto<select name="cat" id="catSel"></select></label>
+      <div class="two">
+        <label>Persone (dosi originali)<input name="servings" type="number" min="1" max="100" inputmode="numeric"></label>
+        <label>Tempo (minuti)<input name="time" type="number" min="0" inputmode="numeric"></label>
+      </div>
+    </section>
+    <section class="step" data-s="ing">
+      <h3>Gli ingredienti</h3>
+      <p class="meta hint" style="margin:-6px 0 0">Scrivi un ingrediente per riga, con la quantità: ad esempio «200 g di farina». Vai a capo dopo ognuno.</p>
+      <label>Ingredienti (uno per riga)<textarea name="ingredients" rows="5" placeholder="200 g di farina&#10;2 uova&#10;un pizzico di sale"></textarea></label>
+    </section>
+    <section class="step" data-s="steps">
+      <h3>Il procedimento</h3>
+      <p class="meta hint" style="margin:-6px 0 0">Un passaggio per riga, nell'ordine in cui si fa. Nella scheda diventeranno una lista numerata.</p>
+      <label>Procedimento (un passaggio per riga)<textarea name="steps" rows="5" placeholder="Sbatti le uova con il sale&#10;Aggiungi la farina poco alla volta&#10;Cuoci 10 minuti"></textarea></label>
+    </section>
+    <section class="step" data-s="more">
+      <h3>Qualche dettaglio in più <small class="meta" style="font-weight:400">(tutto facoltativo)</small></h3>
+      <label>Diete e intolleranze<div class="checks" id="dietChecks"></div></label>
+      <div class="two">
+        <label>Paese / cucina<input name="country" list="countries" placeholder="Italia"></label>
+        <label>Regione<input name="region" list="regions" placeholder="Lazio"></label>
+      </div>
+      <label>Valutazione<div class="rate" id="fRateIn"></div></label>
+      <label>Etichette (separate da virgola)<input name="tags" placeholder="veloce, festa"></label>
+      <label>Note<textarea name="note" rows="2"></textarea></label>
+    </section>
+    <section class="step" data-s="end">
+      <h3>Un video e il salvataggio</h3>
+      <p class="sum hint" id="endSum"></p>
+      <label>Il tuo video (su YouTube)<span class="inl" style="margin:0"><input name="video" type="url" placeholder="Link YouTube del video caricato"><button type="button" class="btn" id="pasteVid">📋 Incolla</button></span></label>
+      <div class="row" style="margin:-4px 0 0;justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn" id="recVid">🎥 Registra un video</button><button type="button" class="btn" id="pickVid">Scegli dal telefono</button></div>
+      <p class="meta" id="vidHint" style="margin:-4px 0 0"></p>
+      <input type="file" id="vidRec" accept="video/*" capture="environment" hidden><input type="file" id="vidPick" accept="video/*" hidden>
+    </section>
+    <div class="row" id="editNav">
       <button type="button" class="btn" id="del" hidden>Elimina</button>
       <button type="button" class="btn" id="reanalyze">↻ Rianalizza</button><span class="sp"></span>
       <button type="button" class="btn" id="cancel">Annulla</button>
       <button class="btn pri">Salva</button>
     </div>
+    <div class="row" id="wizNav" hidden style="justify-content:space-between;flex-wrap:nowrap;gap:8px"><button type="button" class="btn" id="rBack">← Indietro</button><span style="display:flex;gap:6px"><button type="button" class="btn pri" id="rNext">Avanti →</button><button class="btn pri" id="rSave" hidden>💾 Salva la ricetta</button></span></div>
   </form>
 </dialog>
 <datalist id="countries"></datalist><datalist id="regions"></datalist>
@@ -717,7 +747,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=77; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=78; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1593,25 +1623,64 @@ function openForm(data={}){
   extra={image:data.image||'',author:data.author||'',caption:data.caption||'',videoId:data.videoId||'',videoEmbed:data.videoEmbed||'',finalUrl:data.finalUrl||''};
   $('#dlgT').textContent=editing?'Modifica ricetta':'Nuova ricetta';
   $('#del').hidden=!editing;
+  // Modifica: tutti i campi insieme, come un modulo normale. Nuova ricetta: percorso guidato, un passo alla volta
+  f.classList.toggle('all',!!editing);$('#rWiz').hidden=!!editing;$('#wizNav').hidden=!!editing;$('#editNav').hidden=!editing;f.noValidate=!editing;
   showPv();
-  // primo passo: da dove viene la ricetta (saltato quando si modifica o arriva già un link)
-  if(editing)setMode(data.url?'link':'manual');else if(data.url)setMode('link');else{$('#srcStep').hidden=false;f.hidden=true}
+  if(editing)setMode(data.url?'link':'manual');else if(data.url)setMode('link');else{rSteps=stepsFor('link');rGo(-1)}
   if(!$('#dlg').open)$('#dlg').showModal();
+  $('#dlg').scrollTop=0;
   if(!editing&&data.url)runAnalysis(data.url,false);
 }
 // Nuova ricetta passo per passo: link, scritta a mano, fotografata (trascritta dall'AI) o da un file
 let addMode='link';
 const SRC_LBL={link:'🔗 Da un link',manual:'✍️ Scritta da te',photo:'📷 Dalla foto di una ricetta',file:'📄 Da un file'};
+const SRC_H={link:'Incolla il link della ricetta',photo:'Fotografa la ricetta',file:'Scegli il file con la ricetta'};
 function setMode(m,fromUser){
   addMode=m;const f=$('#f');
-  $('#srcStep').hidden=true;f.hidden=false;$('#srcBar').hidden=!!editing;$('#srcLbl').textContent=SRC_LBL[m];
-  $('#urlL').hidden=m!=='link';f.url.required=m==='link';
-  if(fromUser){if(m==='link')f.url.focus();if(m==='manual')f.title.focus();if(m==='photo')$('#ocrIn').click();if(m==='file')$('#fileIn').click()}
+  $('#urlL').hidden=$('#urlRow').hidden=m!=='link';f.url.required=!!editing&&m==='link';
+  $('#photoL').hidden=m!=='photo';$('#fileL').hidden=m!=='file';$('#srcAfter').hidden=m==='link';$('#srcH').textContent=SRC_H[m]||'';
+  if(editing){$('#srcStep').hidden=true;f.hidden=false;f.querySelectorAll('.step').forEach(st=>st.hidden=false);return}
+  rSteps=stepsFor(m);rGo(0);
+  if(fromUser){if(m==='link'&&DESK)f.url.focus();if(m==='photo')$('#ocrIn').click();if(m==='file')$('#fileIn').click()}
 }
+/* ---------- Percorso guidato della nuova ricetta: un passo per schermata (pensato anche per chi non ha dimestichezza col telefono) ---------- */
+const DESK=matchMedia('(hover:hover) and (pointer:fine)').matches; // su computer si mette il cursore nel campo; sul telefono no, la tastiera coprirebbe lo schermo
+let rSteps=[],rStep=-1; // -1 = scelta della fonte
+const stepsFor=m=>m==='manual'?['base','ing','steps','more','end']:['src','base','ing','steps','more','end'];
+function rGo(k){
+  const f=$('#f');rStep=Math.max(-1,Math.min(rSteps.length-1,k));
+  const N=rSteps.length+1,i=rStep+1,key=rSteps[rStep];
+  $('#srcStep').hidden=rStep>=0;f.hidden=rStep<0;
+  f.querySelectorAll('.step').forEach(st=>st.hidden=st.dataset.s!==key);
+  $('#rDots').innerHTML=Array.from({length:N},(_,j)=>`<i class="${j===i?'on':j<i?'done':''}"></i>`).join('');
+  $('#rStepLbl').textContent=`Passo ${i+1} di ${N}`;
+  $('#rBackTop').style.visibility=rStep>=0?'visible':'hidden';
+  const last=rStep===rSteps.length-1;$('#rNext').hidden=last;$('#rSave').hidden=!last;
+  if(last)endSum();
+  $('#dlg').scrollTop=0;
+  if(DESK){const el={base:f.title,ing:f.ingredients,steps:f.steps}[key];if(el)el.focus()}
+}
+// Controlli prima di andare avanti: servono solo il link (se la ricetta viene da un link) e il nome del piatto
+function rValid(){
+  const f=$('#f'),key=rSteps[rStep];
+  if(key==='src'&&addMode==='link'){const u=extractUrl(f.url.value);if(!u){toast('Incolla prima il link della ricetta');f.url.focus();return false}f.url.value=u}
+  if(key==='base'&&!f.title.value.trim()){toast('Scrivi il nome del piatto');f.title.focus();return false}
+  // dopo gli ingredienti, tipo di piatto, paese e diete si deducono da soli se l'utente non li ha messi
+  if(key==='ing'){const c=classify({title:f.title.value,ingredients:lines(f.ingredients.value),caption:extra.caption});if(c.cat&&f.cat.value==='Altro')f.cat.value=c.cat;if(c.country&&!f.country.value)f.country.value=c.country;if(c.region&&!f.region.value)f.region.value=c.region;setDiets([...new Set([...getDiets(),...c.diets])])}
+  return true;
+}
+function endSum(){
+  const f=$('#f'),n=lines(f.ingredients.value).length,st=lines(f.steps.value).length;
+  $('#endSum').innerHTML=`<b>${esc(f.title.value.trim()||'Senza titolo')}</b> · ${esc(f.cat.value)}${n?` · ${n} ingredient${n===1?'e':'i'}`:''}${st?` · ${st} passagg${st===1?'io':'i'}`:''}${f.time.value?` · ${esc(f.time.value)} min`:''}<br><span class="meta">${n&&st?'È tutto pronto: se vuoi aggiungi un video, altrimenti premi «Salva la ricetta».':'Puoi salvare anche così e completare la ricetta in un altro momento con «Modifica».'}</span>`;
+}
+$('#rNext').onclick=()=>{if(rValid())rGo(rStep+1)};
+$('#rBack').onclick=$('#rBackTop').onclick=()=>rGo(rStep-1);
 $('#srcStep').onclick=e=>{const c=e.target.closest('.srcCard');if(c)setMode(c.dataset.src,true)};
 $('#srcCancel').onclick=()=>$('#dlg').close();
-$('#srcBack').onclick=e=>{e.preventDefault();$('#srcStep').hidden=false;$('#f').hidden=true};
-$('#ocrIn').onchange=e=>{const file=e.target.files[0];e.target.value='';if(file)ocrFill(file)};
+$('#pasteUrl').onclick=async()=>{let t='';try{t=await navigator.clipboard.readText()}catch{}
+  const u=extractUrl(t||'');if(u){$('#f').url.value=u;$('#capL').hidden=!['Facebook','Instagram'].includes(sourceOf(u))&&!$('#f').caption.value;runAnalysis(u,false)}else toast(t?'Negli appunti non c\'è un link':'Tieni premuto nel campo e scegli Incolla')};
+$('#shootBtn').onclick=()=>$('#ocrIn').click();$('#galBtn').onclick=()=>$('#galIn').click();$('#fileBtn').onclick=()=>$('#fileIn').click();
+$('#ocrIn').onchange=$('#galIn').onchange=e=>{const file=e.target.files[0];e.target.value='';if(file)ocrFill(file)};
 $('#fileIn').onchange=e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(file.type.startsWith('image/'))ocrFill(file);else textFill(file)};
 function fillFrom(r,label){
   const f=$('#f');if(!r||r.is_recipe===false){showPv('Non trovo una ricetta leggibile: compila tu i campi');return}
@@ -1621,6 +1690,7 @@ function fillFrom(r,label){
   f.cat.value=cats.includes(r.cat)?r.cat:(c.cat||f.cat.value);put(f.country,c.country);put(f.region,c.region);
   setDiets([...new Set([...getDiets(),...(r.diets||[]),...c.diets])]);
   showPv(`${label}: ${(r.ingredients||[]).length} ingredienti e ${(r.steps||[]).length} passaggi. Controlla, correggi se serve e salva.`);
+  if(!editing&&rSteps[rStep]==='src')rGo(rStep+1); // nel percorso guidato si passa da soli al controllo del titolo
 }
 async function ocrFill(file){
   if(!aiOn()){toast('Lettura da foto non attiva');return}
