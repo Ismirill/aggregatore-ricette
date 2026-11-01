@@ -32,6 +32,38 @@ async function aiJson(env, prompt, image) {
 const lastJson = t => { const m = String(t).replace(/```json|```/g, '').match(/\{[\s\S]*\}/); return m ? JSON.parse(m[0]) : null; };
 const str = (v, n) => String(v ?? '').slice(0, n);
 
+// Cache su D1 delle letture dei post (/preview) e delle analisi AI (/analyze): la stessa ricetta virale la salvano in tanti,
+// così la lettura esterna, la trascrizione del video e la chiamata al modello si pagano una volta sola. La chiave è
+// l'impronta del link (o del testo): nel database non si vede da chi arriva la richiesta. Si salvano solo i risultati utili.
+const CACHE_V = 1; // aumentare quando cambiano prompt o formato della risposta: le voci vecchie non valgono più
+const DAY = 86_400_000;
+async function cached(env, kind, key, ttl, make, worth = () => true) {
+  if (!env.SYNC) return make();
+  const k = await hexSha(`${kind}:${CACHE_V}:${key}`);
+  try {
+    const row = await env.SYNC.prepare('SELECT v FROM cache WHERE k = ?1 AND exp > ?2').bind(k, Date.now()).first();
+    if (row) return { ...JSON.parse(row.v), cached: true };
+  } catch (e) { console.log('cache lettura', e.message); }
+  const v = await make();
+  try {
+    const s = JSON.stringify(v);
+    if (worth(v) && s.length < 200_000) await env.SYNC.prepare('INSERT OR REPLACE INTO cache (k,v,exp) VALUES (?1,?2,?3)').bind(k, s, Date.now() + ttl).run();
+  } catch (e) { console.log('cache scrittura', e.message); }
+  return v;
+}
+// Link senza parametri di tracciamento (utm_*, igsh, srtk, mibextid, fbclid…): lo stesso post condiviso da persone diverse ha la stessa chiave
+function cacheUrl(u) {
+  try {
+    const x = new URL(u); x.hash = '';
+    for (const p of [...x.searchParams.keys()]) if (/^(igsh|srtk|mibextid|fbclid|gclid|ref|_t|_r|si|s|feature)$/i.test(p) || /^utm_/i.test(p)) x.searchParams.delete(p);
+    return x.href.replace(/\/+$/, ''); // il percorso resta com'è: i codici dei post Instagram distinguono maiuscole e minuscole
+  } catch { return String(u); }
+}
+const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : ''), 3 * DAY, () => preview(env, b),
+  r => !!(r.transcript || /ld\+json/.test(r.html) || /content="[^"]{60,}"/.test(r.html))); // niente pagina di accesso o vuota in cache
+const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([str(b.caption || b.title, 6000), str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
+  () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length));
+
 // Scarica la copertina del post (lato server non ci sono blocchi CORS)
 async function imagePart(url) {
   try {
@@ -568,6 +600,7 @@ export default {
   // Aggiornamento automatico dei prezzi: un lotto di province ogni giorno
   async scheduled(event, env, ctx) {
     ctx.waitUntil(refreshBatch(env).then(r => console.log('prezzi', r.period, 'aggiornate', r.updated.length, 'restano', r.remaining), e => console.log('prezzi non aggiornati:', e.message)));
+    if (env.SYNC) ctx.waitUntil(env.SYNC.prepare('DELETE FROM cache WHERE exp < ?1').bind(Date.now()).run().catch(e => console.log('pulizia cache', e.message)));
   },
   async fetch(req, env, ctx) {
     const origin = req.headers.get('Origin') || '';
@@ -633,7 +666,7 @@ export default {
     }
     try {
       const body = await req.json();
-      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/ocr' ? await ocr(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await preview(env, body) : path === '/translate-recipe' ? await translateRecipe(env, body) : await analyze(env, body));
+      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/ocr' ? await ocr(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await previewCached(env, body) : path === '/translate-recipe' ? await translateRecipe(env, body) : await analyzeCached(env, body));
     } catch (e) {
       // Quota giornaliera gratuita esaurita o errore del modello
       const limit = e.status === 429 || /neuron|quota|limit|4006/i.test(e.message);

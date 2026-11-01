@@ -5,5 +5,7 @@ CREATE INDEX IF NOT EXISTS docs_ks ON docs (k, s);
 
 -- Account (Firebase Authentication): ogni utente ha il suo codice ricettario, cifrato con una chiave del server
 CREATE TABLE IF NOT EXISTS users (uid TEXT PRIMARY KEY, email TEXT, name TEXT, provider TEXT, code TEXT NOT NULL, created INTEGER, seen INTEGER);
+-- Cache delle letture dei post (/preview) e delle analisi AI (/analyze): k = impronta del link o del testo, v = risposta JSON, exp = scadenza (ms)
+CREATE TABLE IF NOT EXISTS cache (k TEXT PRIMARY KEY, v TEXT NOT NULL, exp INTEGER NOT NULL);
 -- Passaggio dell'accesso dal sito all'app Android: codice a 6 cifre valido 10 minuti
 CREATE TABLE IF NOT EXISTS handoff (code TEXT PRIMARY KEY, data TEXT NOT NULL, exp INTEGER NOT NULL);

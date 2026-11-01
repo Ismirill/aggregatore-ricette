@@ -6,6 +6,7 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-01
 
+- Server: cache delle letture dei post e delle analisi AI (tabella `cache` su D1). La stessa ricetta condivisa da più persone costa una sola lettura esterna, una sola trascrizione del video e una sola chiamata al modello: la seconda volta la risposta arriva in un decimo di secondo. Chiave = impronta del link (senza parametri di tracciamento) o del testo; si salvano solo i risultati utili (niente pagine di accesso o analisi vuote); letture valide 3 giorni, analisi 30; pulizia notturna. Stimato –30/50% di quota AI con molti utenti
 - Versione 75: ricette dai siti web che prima «non si trovavano». Cucchiaio d'Argento e Buonissimo (e chiunque usi lo stesso sistema editoriale) scrivono i dati schema.org con a capo letterali dentro le stringhe: il lettore JSON rifiutava l'intero blocco e la ricetta sembrava assente. Ora la lettura è tollerante (a capo, virgole finali, commenti HTML). GialloZafferano, Fatto in casa da Benedetta, Misya, Tavolartegusto, Ricette della Nonna leggevano già bene. Sul server il nome del sito non si tronca più all'apostrofo
 
 ## 2026-10-31
