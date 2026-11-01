@@ -13,7 +13,15 @@ const cors = origin => ({
 const reply = (origin, body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...cors(origin) } });
 
-async function ai(env, prompt, image) {
+// Catena di fornitori AI, ognuno con il proprio piano gratuito e la propria chiave: Workers AI (Cloudflare) per primo e, quando
+// ha esaurito la quota del giorno o non risponde, Gemini (Google AI Studio) e poi Groq. Le chiavi sono segreti del worker
+// (`npx wrangler secret put GEMINI_KEY` / `GROQ_KEY`): senza chiavi resta il solo Workers AI, come prima.
+// Il piano gratuito di Gemini può usare ciò che riceve per migliorare i modelli (anche con revisione umana): va bene per i post
+// pubblici, non per le foto personali (quaderni, libri, piatti): per quelle (personal) Gemini si salta e resta Groq.
+const GEMINI_MODEL = 'gemini-3.5-flash-lite', GROQ_MODEL = 'qwen/qwen3.8-27b'; // entrambi leggono le immagini e rispondono in JSON
+const quotaErr = e => e.status === 429 || e.status >= 500 || /neuron|quota|limit|4006|RESOURCE_EXHAUSTED|capacity/i.test(e.message);
+const dataUrl = u => { const m = /^data:([^;,]+);base64,([\s\S]*)$/.exec(u || ''); return m ? { mime: m[1], data: m[2] } : null; };
+async function aiCf(env, prompt, image) {
   const content = [...(image ? [{ type: 'image_url', image_url: { url: image } }] : []), { type: 'text', text: prompt }];
   // Senza ragionamento: risponde subito in JSON e consuma meno quota gratuita
   const r = await env.AI.run(MODEL, {
@@ -22,10 +30,40 @@ async function ai(env, prompt, image) {
   });
   return typeof r.response === 'string' ? r.response : r.choices?.[0]?.message?.content || JSON.stringify(r.response ?? '');
 }
-// Chiede il JSON al modello; se la risposta non è valida riprova una volta
-async function aiJson(env, prompt, image) {
+async function aiGemini(env, prompt, image) {
+  const d = dataUrl(image);
+  const body = { contents: [{ parts: [...(d ? [{ inline_data: { mime_type: d.mime, data: d.data } }] : []), { text: prompt }] }],
+    generationConfig: { temperature: 0.2, maxOutputTokens: 4000, responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: 'minimal' } } };
   for (let i = 0; i < 2; i++) {
-    try { const j = lastJson(await ai(env, prompt, image)); if (j) return j; } catch (e) { if (i || e.status) throw e; }
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_KEY }, body: JSON.stringify(body) });
+    if (r.ok) { const j = await r.json(); return (j.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join(''); }
+    const msg = str(await r.text(), 300);
+    if (r.status === 400 && !i && /thinking/i.test(msg)) { delete body.generationConfig.thinkingConfig; continue; } // modello senza quel parametro
+    throw Object.assign(new Error('Gemini ' + r.status + ' ' + msg), { status: r.status });
+  }
+}
+async function aiGroq(env, prompt, image) {
+  const content = [...(image ? [{ type: 'image_url', image_url: { url: image } }] : []), { type: 'text', text: prompt }];
+  const r = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + env.GROQ_KEY },
+    body: JSON.stringify({ model: GROQ_MODEL, messages: [{ role: 'user', content }], temperature: 0.2, max_tokens: 2000, response_format: { type: 'json_object' } }) });
+  if (!r.ok) throw Object.assign(new Error('Groq ' + r.status + ' ' + str(await r.text(), 300)), { status: r.status });
+  return (await r.json()).choices?.[0]?.message?.content || '';
+}
+async function ai(env, prompt, image, personal) {
+  const chain = [['Workers AI', () => aiCf(env, prompt, image)]];
+  if (env.GEMINI_KEY && !personal) chain.push(['Gemini', () => aiGemini(env, prompt, image)]);
+  if (env.GROQ_KEY) chain.push(['Groq', () => aiGroq(env, prompt, image)]);
+  let err;
+  for (const [name, run] of chain) {
+    try { return await run(); } catch (e) { err = e; if (!quotaErr(e)) throw e; console.log(name, 'non disponibile:', str(e.message, 200)); }
+  }
+  throw err;
+}
+// Chiede il JSON al modello; se la risposta non è valida riprova una volta
+async function aiJson(env, prompt, image, personal) {
+  for (let i = 0; i < 2; i++) {
+    try { const j = lastJson(await ai(env, prompt, image, personal)); if (j) return j; } catch (e) { if (i || e.status) throw e; }
   }
   return null;
 }
@@ -201,7 +239,7 @@ async function ocr(env, b) {
   if (!data) throw Object.assign(new Error('Foto mancante'), { status: 400 });
   const result = await aiJson(env, `Questa foto mostra una ricetta scritta (a mano, stampata, su un libro, una rivista o uno schermo). Trascrivila fedelmente, senza inventare quello che non c'è. Rispondi SOLO con un oggetto JSON:
 {"is_recipe":true|false,"title":"nome del piatto","servings":numero di persone o null,"time":minuti totali o null,"cat":"Antipasti|Primi|Secondi|Contorni|Piatti unici|Lievitati|Dolci|Altro","ingredients":["quantità e ingrediente, uno per voce, come scritto"],"steps":["un passaggio per voce, in ordine"],"notes":"eventuali note o consigli presenti"}
-Se il testo è in un'altra lingua, traducilo in italiano. Se la foto non contiene una ricetta leggibile, restituisci is_recipe false.`, `data:image/jpeg;base64,${data}`);
+Se il testo è in un'altra lingua, traducilo in italiano. Se la foto non contiene una ricetta leggibile, restituisci is_recipe false.`, `data:image/jpeg;base64,${data}`, true); // foto personale: mai a Gemini
   return { result };
 }
 
@@ -210,7 +248,7 @@ async function photo(env, b) {
   if (!data) throw Object.assign(new Error('Foto mancante'), { status: 400 });
   const result = await aiJson(env, `Riconosci il piatto in questa foto. Rispondi SOLO con un oggetto JSON:
 {"dish":"nome del piatto in italiano, come lo cercheresti su un sito di ricette","description":"una frase su cos'è","confidence":"alta|media|bassa","alternatives":["altri piatti possibili, max 3"],"keywords":["2-4 parole chiave"]}
-Se nella foto non c'è un piatto o del cibo, restituisci dish vuoto.`, `data:image/jpeg;base64,${data}`);
+Se nella foto non c'è un piatto o del cibo, restituisci dish vuoto.`, `data:image/jpeg;base64,${data}`, true); // foto personale: mai a Gemini
   const recipes = result?.dish ? await giallo(result.dish) : [];
   return { result: result && { ...result, recipes } };
 }
@@ -373,9 +411,21 @@ async function transcribe(env, videoUrl, seconds) {
     if (!r.ok) return '';
     const buf = await r.arrayBuffer();
     if (buf.byteLength > 24e6) return '';
-    const out = await env.AI.run('@cf/openai/whisper-large-v3-turbo', { audio: Buffer.from(buf).toString('base64'), language: 'it', task: 'transcribe' });
-    return str(out?.text, 8000).trim();
+    return await whisper(env, buf);
   } catch { return ''; }
+}
+// Whisper: se c'è la chiave si usa prima Groq (piano gratuito con 8 ore di audio al giorno, nessun addestramento sui dati),
+// e Workers AI resta di riserva: la trascrizione è la voce che più consuma la quota di Cloudflare
+async function whisper(env, buf) {
+  if (env.GROQ_KEY) try {
+    const fd = new FormData();
+    fd.append('file', new Blob([buf], { type: 'video/mp4' }), 'video.mp4'); fd.append('model', 'whisper-large-v3-turbo'); fd.append('language', 'it'); fd.append('response_format', 'json');
+    const r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', { method: 'POST', headers: { Authorization: 'Bearer ' + env.GROQ_KEY }, body: fd });
+    if (r.ok) return str((await r.json()).text, 8000).trim();
+    console.log('Groq whisper non disponibile:', r.status, str(await r.text(), 200));
+  } catch (e) { console.log('Groq whisper non disponibile:', e.message); }
+  const out = await env.AI.run('@cf/openai/whisper-large-v3-turbo', { audio: Buffer.from(buf).toString('base64'), language: 'it', task: 'transcribe' });
+  return str(out?.text, 8000).trim();
 }
 
 async function preview(env, b) {

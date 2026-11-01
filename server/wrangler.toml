@@ -27,6 +27,9 @@ binding = "SYNC"
 database_name = "gnamina-sync"
 database_id = "379736d5-8d05-4c1e-b18c-fb3aed808a59"
 
+# Fornitori AI di riserva (facoltativi), con il proprio piano gratuito: le chiavi sono segreti, non stanno qui.
+#   npx wrangler secret put GEMINI_KEY   (Google AI Studio: solo post pubblici, mai foto personali)
+#   npx wrangler secret put GROQ_KEY     (Groq: testo+immagini e Whisper, usato per primo per la trascrizione dei video)
 # Account: ID del progetto Firebase (Authentication). Vuoto finché il progetto non è configurato: gli account restano disattivati.
 [vars]
 FIREBASE_PROJECT = ""
