@@ -389,8 +389,9 @@ async function preview(env, b) {
   if (!page && !embedCaption) throw Object.assign(new Error('Il sito non permette di leggere questo post'), { status: 502 });
   const r = page?.r || { url: u.href }, html = page?.html || '';
   const meta = k => {
-    const m = html.match(new RegExp(`<meta[^>]+(?:property|name)=["']${k}["'][^>]*content=["']([^"']*)["']`, 'i')) || html.match(new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]*(?:property|name)=["']${k}["']`, 'i'));
-    return m ? unescape(m[1]) : '';
+    // le virgolette di apertura e chiusura devono coincidere: «Il Cucchiaio d'Argento» non si tronca all'apostrofo
+    const m = html.match(new RegExp(`<meta[^>]+(?:property|name)=["']${k}["'][^>]*content=(?:"([^"]*)"|'([^']*)')`, 'i')) || html.match(new RegExp(`<meta[^>]+content=(?:"([^"]*)"|'([^']*)')[^>]*(?:property|name)=["']${k}["']`, 'i'));
+    return m ? unescape(m[1] ?? m[2] ?? '') : '';
   };
   const ld = [...html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)].map(m => m[1]).filter(x => /recipe/i.test(x)).slice(0, 3);
   // si restituisce una pagina minima che l'app legge come se l'avesse scaricata lei

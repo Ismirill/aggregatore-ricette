@@ -510,6 +510,13 @@ function findRecipe(o){
   if(t.some(x=>/recipe/i.test(x)))return o;
   return findRecipe(o['@graph'])||findRecipe(o.mainEntity);
 }
+// JSON-LD tollerante: alcuni siti (Cucchiaio d'Argento, Buonissimo) lasciano a capo letterali dentro le stringhe o virgole
+// finali, e JSON.parse rifiuta l'intero blocco: senza questo la ricetta sembrava assente
+function parseLd(t){
+  t=String(t||'').trim().replace(/^<!--|-->$/g,'');
+  try{return JSON.parse(t)}catch{}
+  try{return JSON.parse(t.replace(/[\x00-\x1f]+/g,' ').replace(/,\s*([}\]])/g,'$1'))}catch{return null}
+}
 function stepsOf(ins){
   if(!ins)return [];
   if(typeof ins==='string')return lines(strip(ins.replace(/<\/(p|li)>|<br\s*\/?>/gi,'\n')).replace(/ (?=\d+\. )/g,'\n'));
@@ -525,7 +532,7 @@ function parseHtml(html){
   const caption=[clean(m('og:title')),clean(d.title),clean(m('og:description')),clean(m('description'))].sort((a,b)=>b.length-a.length)[0]||'';
   const out={title:clean(m('og:title'))||clean(m('twitter:title'))||clean(d.title)||'',image:m('og:image')||m('twitter:image')||'',author:m('og:site_name'),caption};
   let r=null;
-  d.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{if(!r)try{r=findRecipe(JSON.parse(s.textContent))}catch{}});
+  d.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{if(!r)r=findRecipe(parseLd(s.textContent))});
   if(r){
     const img=[].concat(r.image||[])[0];
     Object.assign(out,{title:strip(r.name)||out.title,image:(typeof img==='string'?img:img?.url)||out.image,
@@ -706,7 +713,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=74; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=75; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){

@@ -4,6 +4,10 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-01
+
+- Versione 75: ricette dai siti web che prima «non si trovavano». Cucchiaio d'Argento e Buonissimo (e chiunque usi lo stesso sistema editoriale) scrivono i dati schema.org con a capo letterali dentro le stringhe: il lettore JSON rifiutava l'intero blocco e la ricetta sembrava assente. Ora la lettura è tollerante (a capo, virgole finali, commenti HTML). GialloZafferano, Fatto in casa da Benedetta, Misya, Tavolartegusto, Ricette della Nonna leggevano già bene. Sul server il nome del sito non si tronca più all'apostrofo
+
 ## 2026-10-31
 
 - Versione 74: eliminare (o modificare) una tua ricetta direttamente dall'elenco «Le mie»: tieni premuta la scheda, tocca il pulsante ⋯ in alto a destra della foto, o sul computer usa il tasto destro; si apre un menu con Modifica ed Elimina (con conferma). L'eliminazione vale anche per gli altri dispositivi sincronizzati
