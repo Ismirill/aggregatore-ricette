@@ -54,8 +54,11 @@ async function ai(env, prompt, image, personal) {
   const chain = [['Workers AI', () => aiCf(env, prompt, image)]];
   if (env.GEMINI_KEY && !personal) chain.push(['Gemini', () => aiGemini(env, prompt, image)]);
   if (env.GROQ_KEY) chain.push(['Groq', () => aiGroq(env, prompt, image)]);
+  // Prova dell'amministratore (header X-Provider con X-Admin): si usa solo il fornitore indicato, per verificarlo davvero
+  const only = env.FORCE_AI ? chain.filter(([n]) => n.toLowerCase().startsWith(env.FORCE_AI)) : chain;
+  if (!only.length) throw Object.assign(new Error('Fornitore AI non disponibile: ' + env.FORCE_AI), { status: 400 });
   let err;
-  for (const [name, run] of chain) {
+  for (const [name, run] of only) {
     try { return await run(); } catch (e) { err = e; if (!quotaErr(e)) throw e; console.log(name, 'non disponibile:', str(e.message, 200)); }
   }
   throw err;
@@ -76,7 +79,7 @@ const str = (v, n) => String(v ?? '').slice(0, n);
 const CACHE_V = 2; // aumentare quando cambiano prompt o formato della risposta: le voci vecchie non valgono più
 const DAY = 86_400_000;
 async function cached(env, kind, key, ttl, make, worth = () => true) {
-  if (!env.SYNC) return make();
+  if (!env.SYNC || env.FORCE_AI) return make(); // nelle prove dell'amministratore niente cache: si vuole la risposta del fornitore
   const k = await hexSha(`${kind}:${CACHE_V}:${key}`);
   try {
     const row = await env.SYNC.prepare('SELECT v FROM cache WHERE k = ?1 AND exp > ?2').bind(k, Date.now()).first();
@@ -417,11 +420,11 @@ async function transcribe(env, videoUrl, seconds) {
 // Whisper: se c'è la chiave si usa prima Groq (piano gratuito con 8 ore di audio al giorno, nessun addestramento sui dati),
 // e Workers AI resta di riserva: la trascrizione è la voce che più consuma la quota di Cloudflare
 async function whisper(env, buf) {
-  if (env.GROQ_KEY) try {
+  if (env.GROQ_KEY && env.FORCE_AI !== 'cf') try {
     const fd = new FormData();
     fd.append('file', new Blob([buf], { type: 'video/mp4' }), 'video.mp4'); fd.append('model', 'whisper-large-v3-turbo'); fd.append('language', 'it'); fd.append('response_format', 'json');
     const r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', { method: 'POST', headers: { Authorization: 'Bearer ' + env.GROQ_KEY }, body: fd });
-    if (r.ok) return str((await r.json()).text, 8000).trim();
+    if (r.ok) { console.log('Whisper: Groq'); return str((await r.json()).text, 8000).trim(); }
     console.log('Groq whisper non disponibile:', r.status, str(await r.text(), 200));
   } catch (e) { console.log('Groq whisper non disponibile:', e.message); }
   const out = await env.AI.run('@cf/openai/whisper-large-v3-turbo', { audio: Buffer.from(buf).toString('base64'), language: 'it', task: 'transcribe' });
@@ -719,6 +722,9 @@ export default {
         return reply(origin, path === '/sync' ? await sync(env, body) : path === '/account' ? await account(env, req, body) : path === '/handoff' ? await handoffNew(env, req, body) : await handoffTake(env, body));
       } catch (e) { console.log('errore', path, e.message); return reply(origin, { error: e.status ? e.message : 'Operazione non riuscita' }, e.status || 502); }
     }
+    // Prova di un singolo fornitore AI (solo amministratore): header X-Provider = workers | gemini | groq | cf (quest'ultimo solo per Whisper)
+    const force = env.ADMIN_TOKEN && req.headers.get('X-Admin') === env.ADMIN_TOKEN ? str(req.headers.get('X-Provider') || '', 10).toLowerCase() : '';
+    if (force) env = { ...env, FORCE_AI: force };
     try {
       const body = await req.json();
       return reply(origin, path === '/photo' ? await photo(env, body) : path === '/ocr' ? await ocr(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await previewCached(env, body) : path === '/translate-recipe' ? await translateRecipe(env, body) : await analyzeCached(env, body));
