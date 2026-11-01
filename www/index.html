@@ -324,6 +324,10 @@ details summary{cursor:pointer}
     <label>Procedimento (un passaggio per riga)<textarea name="steps" rows="5"></textarea></label>
     <label>Etichette (separate da virgola)<input name="tags" placeholder="veloce, festa"></label>
     <label>Note<textarea name="note" rows="2"></textarea></label>
+    <label>Il tuo video (su YouTube)<span class="inl" style="margin:0"><input name="video" type="url" placeholder="Link YouTube del video caricato"><button type="button" class="btn" id="pasteVid">📋 Incolla</button></span></label>
+    <div class="row" style="margin:-4px 0 10px;justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn" id="recVid">🎥 Registra un video</button><button type="button" class="btn" id="pickVid">Scegli dal telefono</button></div>
+    <p class="meta" id="vidHint" style="margin:-4px 0 12px"></p>
+    <input type="file" id="vidRec" accept="video/*" capture="environment" hidden><input type="file" id="vidPick" accept="video/*" hidden>
     <div class="row">
       <button type="button" class="btn" id="del" hidden>Elimina</button>
       <button type="button" class="btn" id="reanalyze">↻ Rianalizza</button><span class="sp"></span>
@@ -702,7 +706,7 @@ async function repairThumbs(){
 
 /* ---------- Video ---------- */
 function embedOf(i){
-  const u=i.finalUrl||i.url||'';let m;
+  const u=i.video||i.finalUrl||i.url||'';let m; // i.video: il video girato dall'utente, sul suo canale YouTube
   if(m=u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/))return {src:'https://www.youtube-nocookie.com/embed/'+m[1],v:/shorts/.test(u)};
   if(i.source==='TikTok'){const id=i.videoId||(u.match(/video\/(\d+)/)||[])[1];if(id)return {src:'https://www.tiktok.com/embed/v2/'+id,v:true}}
   if(m=u.match(/instagram\.com\/(?:[\w.]+\/)?(p|reels?|tv)\/([\w-]+)/))return {src:`https://www.instagram.com/${m[1]==='reels'?'reel':m[1]}/${m[2]}/embed`,v:true};
@@ -713,7 +717,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=76; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=77; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -884,7 +888,7 @@ function card(i){
       <span class="cat">${esc(i.cat||'Altro')}</span>${i.rating?`<span class="rt">★ ${i.rating}</span>`:''}${vid?'<span class="play">▶ video</span>':''}</div>
     <div class="b"><h3>${esc(i.title||i.url)}</h3>
       <div class="facts">${facts.map(f=>`<span>${f}</span>`).join('')}</div>
-      <div class="meta">${isIntl(i)?flag(ccOf(i))+' ':''}${esc([i.region||i.country,i.source+(i.linked?' · collegata':'')].filter(Boolean).join(' · '))}</div>
+      <div class="meta">${isIntl(i)?flag(ccOf(i))+' ':''}${esc([i.region||i.country,(i.source||'')+(i.linked?' · collegata':'')].filter(Boolean).join(' · '))}</div>
       ${diets.length?`<div class="badges">${diets.map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}</div>`:''}</div></div>`;
 }
 const stars=n=>n?'<span class="stars">'+'★'.repeat(n)+'</span>':'';
@@ -1584,6 +1588,7 @@ function openForm(data={}){
   f.url.value=data.url||'';f.title.value=data.title||'';f.caption.value=data.desc||'';$('#capL').hidden=!(data.desc||['Facebook','Instagram'].includes(sourceOf(data.url||'')));f.tags.value=(data.tags||[]).join(', ');f.note.value=data.note||'';
   f.cat.value=data.cat||(cats.includes(cur)?cur:'Altro');f.time.value=data.time||'';f.servings.value=data.servings||'';f.country.value=data.country||'';f.region.value=data.region||'';
   f.ingredients.value=(data.ingredients||[]).join('\n');f.steps.value=(data.steps||[]).join('\n');
+  f.video.value=data.video||'';vidHint();
   setDiets(data.diets||[]);setRating(data.rating||0);
   extra={image:data.image||'',author:data.author||'',caption:data.caption||'',videoId:data.videoId||'',videoEmbed:data.videoEmbed||'',finalUrl:data.finalUrl||''};
   $('#dlgT').textContent=editing?'Modifica ricetta':'Nuova ricetta';
@@ -1677,13 +1682,38 @@ $('#f').caption.addEventListener('change',()=>{const u=extractUrl($('#f').url.va
 $('#analyzeBtn').onclick=()=>{const u=extractUrl($('#f').url.value);if(!u){toast('Incolla prima un link');return}$('#f').url.value=u;runAnalysis(u,!!editing)};
 $('#reanalyze').onclick=()=>{const u=extractUrl($('#f').url.value);if(u)runAnalysis(u,true);else{
   const f=$('#f'),c=classify({title:f.title.value,ingredients:lines(f.ingredients.value),caption:extra.caption});if(c.cat)f.cat.value=c.cat;setDiets(c.diets);if(c.country)f.country.value=c.country;if(c.region)f.region.value=c.region}};
+/* ---------- Il video dell'utente: registrato o scelto qui, caricato sul SUO canale YouTube (nessuno spazio cloud nostro), qui resta solo il link ---------- */
+const ytId=u=>(String(u||'').match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/)||[])[1]||'';
+const VID_HINT='Il video va sul tuo canale YouTube, anche «Non in elenco» (lo vede solo chi ha il link): Gnamina salva soltanto il link.';
+function vidHint(h){$('#vidHint').innerHTML=h||VID_HINT}
+const vidAfter=()=>vidHint('Quando YouTube ha finito di caricare, apri il video, tocca <b>Condividi → Copia link</b>, torna qui e premi «📋 Incolla».');
+window.onVideoShared=vidAfter; // chiamato dall'app Android dopo aver passato il video a YouTube
+$('#recVid').onclick=()=>{if(window.AndroidShare?.recordVideo){AndroidShare.recordVideo();return}$('#vidRec').click()};
+$('#pickVid').onclick=()=>{if(window.AndroidShare?.pickVideo){AndroidShare.pickVideo();return}$('#vidPick').click()};
+$('#vidRec').onchange=$('#vidPick').onchange=e=>{const file=e.target.files[0];e.target.value='';if(file)vidReady(file)};
+function vidReady(file){
+  const mb=file.size/1048576;
+  vidHint(`Video pronto (${mb<1?Math.round(file.size/1024)+' KB':(mb>=100?Math.round(mb):mb.toFixed(1))+' MB'}). <button type="button" class="btn pri" id="upVid">▶ Carica su YouTube</button>`);
+  $('#upVid').onclick=async()=>{
+    if(navigator.canShare?.({files:[file]})){try{await navigator.share({files:[file],title:'Video della ricetta'});vidAfter();return}catch(e){if(e.name==='AbortError')return}}
+    // Senza menu di condivisione (computer): si apre la pagina di caricamento di YouTube, dove si sceglie lo stesso file
+    window.open('https://www.youtube.com/upload','_blank','noopener');
+    vidHint(`Si è aperta la pagina di caricamento di YouTube: scegli lì il file <b>${esc(file.name||'del video')}</b>. Poi copia il link del video e incollalo qui sopra.`);
+  };
+}
+$('#pasteVid').onclick=async()=>{let t='';try{t=await navigator.clipboard.readText()}catch{}
+  const u=extractUrl(t||'');if(ytId(u)){$('#f').video.value=u;$('#f').video.setCustomValidity('');vidHint('Link del video inserito: salva la ricetta.');toast('Video collegato')}else toast(t?'Negli appunti non c\'è un link YouTube':'Tieni premuto nel campo e scegli Incolla')};
+$('#f').video.oninput=e=>e.target.setCustomValidity('');
 $('#f').onsubmit=e=>{
   e.preventDefault();const f=e.target,url=extractUrl(f.url.value)||f.url.value;
-  const rec={...extra,id:editing?.id||Date.now().toString(36),created:editing?.created||Date.now(),t:Date.now(),url,
+  const video=f.video.value.trim();
+  if(video&&!ytId(video)){f.video.setCustomValidity('Serve il link di un video YouTube (youtube.com o youtu.be)');f.video.reportValidity();return}
+  const rec={...extra,id:editing?.id||Date.now().toString(36),created:editing?.created||Date.now(),t:Date.now(),url,video,
     title:f.title.value.trim(),cat:f.cat.value,time:+f.time.value||null,servings:+f.servings.value||null,diets:getDiets(),country:f.country.value.trim(),region:f.region.value.trim(),
     rating:formRating,ingredients:lines(f.ingredients.value),steps:lines(f.steps.value),
     tags:f.tags.value.split(',').map(s=>s.trim()).filter(Boolean),note:f.note.value.trim(),source:url?sourceOf(url):({photo:'Fotografata',file:'Da file'}[addMode]||'Scritta da te')};
   delete rec._tm;
+  if(!rec.image&&ytId(video))rec.image=`https://i.ytimg.com/vi/${ytId(video)}/hqdefault.jpg`; // senza foto, la copertina è il fotogramma di YouTube
   items=editing?items.map(i=>i.id===rec.id?rec:i):[rec,...items];
   if(editing?.nutrition?.key===rec.ingredients.join('|')+'#'+(rec.servings||4))rec.nutrition=editing.nutrition;
   saveItems();$('#dlg').close();fillSelects();render();toast('Salvata in '+rec.cat);

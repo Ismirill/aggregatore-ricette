@@ -14,7 +14,9 @@ public class MainActivity extends BridgeActivity {
     private String pendingShare;
     // Contenuto del file di backup in attesa che l'utente scelga dove salvarlo
     private String pendingFile;
-    private static final int SAVE_FILE = 7331;
+    private static final int SAVE_FILE = 7331, REC_VIDEO = 7332, PICK_VIDEO = 7333;
+    // File in cui la fotocamera scrive il video della ricetta (cartella cache dell'app, condiviso con YouTube tramite FileProvider)
+    private android.net.Uri pendingVideo;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,23 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REC_VIDEO || requestCode == PICK_VIDEO) {
+            // Video registrato o scelto: lo si passa all'app YouTube (o al menu di condivisione), che lo carica sul canale dell'utente
+            android.net.Uri v = data != null && data.getData() != null ? data.getData() : requestCode == REC_VIDEO ? pendingVideo : null;
+            pendingVideo = null;
+            if (resultCode != RESULT_OK || v == null) return;
+            Intent s = new Intent(Intent.ACTION_SEND);
+            s.setType("video/*");
+            s.putExtra(Intent.EXTRA_STREAM, v);
+            s.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            try { getPackageManager().getPackageInfo("com.google.android.youtube", 0); s.setPackage("com.google.android.youtube"); } catch (Exception ignored) {}
+            try { startActivity(s.getPackage() != null ? s : Intent.createChooser(s, "Carica il video")); } catch (Exception e) {
+                s.setPackage(null);
+                startActivity(Intent.createChooser(s, "Carica il video"));
+            }
+            getBridge().getWebView().post(() -> getBridge().getWebView().evaluateJavascript("window.onVideoShared&&onVideoShared()", null));
+            return;
+        }
         if (requestCode != SAVE_FILE) return;
         String text = pendingFile;
         pendingFile = null;
@@ -88,6 +107,33 @@ public class MainActivity extends BridgeActivity {
             if (url == null || !url.startsWith("https://")) return;
             Intent i = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url));
             runOnUiThread(() -> startActivity(i));
+        }
+
+        // Registra il video di una ricetta con la fotocamera: il file resta nella cache dell'app e dopo viene passato a YouTube
+        @JavascriptInterface
+        public void recordVideo() {
+            try {
+                java.io.File dir = new java.io.File(getCacheDir(), "video");
+                dir.mkdirs();
+                for (java.io.File old : dir.listFiles() != null ? dir.listFiles() : new java.io.File[0]) old.delete(); // un video alla volta
+                java.io.File f = new java.io.File(dir, "ricetta-" + System.currentTimeMillis() + ".mp4");
+                pendingVideo = androidx.core.content.FileProvider.getUriForFile(MainActivity.this, getPackageName() + ".fileprovider", f);
+                Intent i = new Intent(android.provider.MediaStore.ACTION_VIDEO_CAPTURE);
+                i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, pendingVideo);
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                runOnUiThread(() -> startActivityForResult(i, REC_VIDEO));
+            } catch (Exception e) {
+                getBridge().getWebView().post(() -> getBridge().getWebView().evaluateJavascript("window.toast&&toast('Fotocamera non disponibile')", null));
+            }
+        }
+
+        // Sceglie un video già presente sul telefono, da passare a YouTube
+        @JavascriptInterface
+        public void pickVideo() {
+            Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            i.addCategory(Intent.CATEGORY_OPENABLE);
+            i.setType("video/*");
+            runOnUiThread(() -> startActivityForResult(i, PICK_VIDEO));
         }
 
         // Salva un file di testo con il selettore di Android: l'utente sceglie Google Drive, la memoria del telefono o Download
