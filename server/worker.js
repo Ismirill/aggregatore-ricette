@@ -537,6 +537,33 @@ Rispondi SOLO con JSON: {"dish":"nome del piatto in inglese","course":"appetizer
   return { image: r.image, prompt, dish, course };
 }
 
+// Bozze del marchio (solo amministratore): un'immagine da un prompt, con Gemini (modello immagini) o con FLUX di Workers AI
+async function brandImage(env, b) {
+  const prompt = str(b.prompt, 1500).trim(); if (!prompt) throw Object.assign(new Error('Prompt mancante'), { status: 400 });
+  if (b.provider === 'gemini') {
+    if (!env.GEMINI_KEY) throw Object.assign(new Error('Gemini non configurato'), { status: 400 });
+    const model = str(b.model, 60) || 'gemini-2.5-flash-image';
+    const body = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: '1:1' } } };
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_KEY }, body: JSON.stringify(body) });
+    if (!r.ok) throw Object.assign(new Error('Gemini ' + r.status + ' ' + str(await r.text(), 400)), { status: r.status });
+    const parts = (await r.json()).candidates?.[0]?.content?.parts || [];
+    const img = parts.find(p => p.inlineData || p.inline_data); const d = img && (img.inlineData || img.inline_data);
+    if (!d) throw new Error('Gemini: nessuna immagine ' + str(parts.map(p => p.text || '').join(' '), 200));
+    return { image: d.data, mime: d.mimeType || d.mime_type || 'image/png', provider: 'gemini' };
+  }
+  // Modelli di immagini di Workers AI (tutti nel piano gratuito): FLUX restituisce base64, Lucid/Phoenix restituiscono i byte
+  const models = { flux: '@cf/black-forest-labs/flux-1-schnell', lucid: '@cf/leonardo/lucid-origin', phoenix: '@cf/leonardo/phoenix-1.0', sdxl: '@cf/bytedance/stable-diffusion-xl-lightning' };
+  const m = models[b.provider] || models.flux;
+  const r = await env.AI.run(m, b.provider === 'flux' || !models[b.provider] ? { prompt, steps: Math.min(8, +b.steps || 4) } : { prompt, width: 1024, height: 1024, num_steps: b.provider === 'phoenix' ? 25 : 20, guidance: b.provider === 'phoenix' ? 4 : 4.5, negative_prompt: 'blurry, photo, 3d render, text, watermark, letters, words' });
+  if (r?.image) return { image: r.image, mime: 'image/jpeg', provider: b.provider };
+  if (r instanceof ReadableStream || r instanceof ArrayBuffer || r?.byteLength !== undefined) {
+    const buf = r instanceof ReadableStream ? await new Response(r).arrayBuffer() : r;
+    return { image: Buffer.from(buf).toString('base64'), mime: 'image/png', provider: b.provider };
+  }
+  throw new Error('Immagine non generata');
+}
+
 // Verifica che una foto trovata su una banca immagini mostri davvero il piatto (solo GitHub Actions, protetto da segreto).
 // Costa pochi neuroni rispetto a generare l'immagine: si prova prima questa strada.
 async function checkImage(env, b) {
@@ -705,6 +732,10 @@ export default {
         const limit = e.status === 429 || /neuron|quota|limit|4006/i.test(e.message);
         return reply(origin, { error: limit ? 'Limite giornaliero raggiunto' : e.message }, limit ? 429 : e.status === 400 ? 400 : 502);
       }
+    }
+    if (req.method === 'POST' && path === '/brandimg') {
+      if (!env.ADMIN_TOKEN || req.headers.get('X-Admin') !== env.ADMIN_TOKEN) return reply(origin, { error: 'Non autorizzato' }, 403);
+      try { return reply(origin, await brandImage(env, await req.json())); } catch (e) { return reply(origin, { error: e.message }, e.status === 400 ? 400 : e.status === 429 ? 429 : 502); }
     }
     if (req.method === 'POST' && path === '/checkimg') {
       if (!env.ADMIN_TOKEN || req.headers.get('X-Admin') !== env.ADMIN_TOKEN) return reply(origin, { error: 'Non autorizzato' }, 403);
