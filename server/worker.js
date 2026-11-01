@@ -35,7 +35,7 @@ const str = (v, n) => String(v ?? '').slice(0, n);
 // Cache su D1 delle letture dei post (/preview) e delle analisi AI (/analyze): la stessa ricetta virale la salvano in tanti,
 // così la lettura esterna, la trascrizione del video e la chiamata al modello si pagano una volta sola. La chiave è
 // l'impronta del link (o del testo): nel database non si vede da chi arriva la richiesta. Si salvano solo i risultati utili.
-const CACHE_V = 1; // aumentare quando cambiano prompt o formato della risposta: le voci vecchie non valgono più
+const CACHE_V = 2; // aumentare quando cambiano prompt o formato della risposta: le voci vecchie non valgono più
 const DAY = 86_400_000;
 async function cached(env, kind, key, ttl, make, worth = () => true) {
   if (!env.SYNC) return make();
@@ -107,12 +107,13 @@ Estrai i dati in italiano:
 - steps: passaggi del procedimento SOLO se descritti nel post, un passaggio per voce, con le parole del post; altrimenti vuoto.
 - diets: solo tra ${DIETS.map(x => `"${x}"`).join(', ')} e solo se evidente dagli ingredienti elencati; nel dubbio nessuna.
 - country e region: zona d'origine del piatto se chiara dal nome (region solo per regioni italiane), altrimenti stringa vuota.
-- time: minuti totali dall'inizio al piatto pronto. Se il post dichiara un tempo totale ("pronta in 30 minuti", "tempo: 1 ora") usa quello. Altrimenti, se il procedimento indica le durate dei singoli passaggi (riposo dell'impasto, cottura, forno, raffreddamento…), SOMMALE tutte in ordine per avere il totale (es. "lievitare 2 ore" + "cuocere 25 minuti" + "raffreddare un quarto d'ora" = 160); se una durata è un intervallo o un'alternativa ("almeno mezz'ora, anche un'ora") prendi la più lunga. Non prendere mai la durata di un solo passaggio come totale. Se nel post non c'è nessuna durata, metti 0: non stimarlo.
-- time_how: "indicato" se il post dichiara il tempo totale, "sommato" se l'hai ottenuto sommando i passaggi, "" se time è 0.
+- time: minuti totali dall'inizio al piatto pronto, come li vive chi cucina. Se il post dichiara chiaramente il tempo TOTALE di preparazione ("pronta in 30 minuti", "tempo: 1 ora", "tempo di preparazione 45 min") usa quello e basta. Altrimenti RICOSTRUISCILO passaggio per passaggio, in ordine: le durate scritte nel post valgono così come sono (intervalli o alternative: la più lunga); per ogni passaggio SENZA durata scritta stima il tempo di lavoro o di attesa che richiede davvero (es. lessare le patate "finché morbide" ≈ 25, pelare e tagliare verdure ≈ 10, impastare ≈ 10, lasciar intiepidire ≈ 10, formare palline o polpette ≈ 10, soffriggere ≈ 5, montare o mescolare ≈ 5) e somma tutto. La durata di un solo passaggio (es. "cuoci 20 minuti") NON è mai il totale se prima o dopo ci sono altri passaggi: il totale è sempre più alto. Metti 0 solo se il post non descrive nessun passaggio e non dà nessun tempo.
+- time_how: "indicato" se il post dichiara il tempo totale; "sommato" se hai sommato solo durate scritte nel post; "stimato" se hai dovuto stimare almeno un passaggio; "" se time è 0.
+- time_note: se time_how è "stimato" o "sommato", il conto in breve (max 100 caratteri, es. "lessare ≈25 + intiepidire ≈10 + formare ≈10 + friggitrice 20"); altrimenti "".
 - seen: gli ingredienti che hai riconosciuto guardando l'immagine (e non scritti nel post), stessi nomi usati in ingredients.
 - inferred: true solo se gli ingredienti non sono scritti nel post (li hai presi dal nome del piatto o dall'immagine).
 - is_recipe: false se il post non riguarda una ricetta o un piatto.
-Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diets":[],"country":"","region":"","time":0,"time_how":"","inferred":false,"seen":[],"ingredients":[],"steps":[]}`;
+Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diets":[],"country":"","region":"","time":0,"time_how":"","time_note":"","inferred":false,"seen":[],"ingredients":[],"steps":[]}`;
   const img = b.image ? await imagePart(str(b.image, 2000)) : null;
   const r = await aiJson(env, prompt, img);
   return { result: r && faithful(r, text) };
@@ -149,13 +150,17 @@ function faithful(r, text) {
   const nums = numsIn(text), hasList = /ingredient/i.test(text) || /\d+\s?(?:g|gr|kg|ml|cl|l|cucchia|tazz)\b/i.test(text);
   // tempo e porzioni: valgono solo se scritti nel post; se il modello li salta o li inventa, si legge direttamente il testo
   const tm = timesIn(text), sv = servingsIn(text);
-  r.time = Math.round(+r.time) || 0;
-  if (!TIME_RX.test(text)) { r.time = 0; r.time_how = ''; }
-  else if (tm.total) { r.time = tm.total; r.time_how = 'indicato'; } // il post dichiara il totale: vale quello
-  else if (tm.n <= 1) { r.time = tm.max; r.time_how = 'indicato'; } // una sola durata nel post
-  else { // più durate: il totale è la somma dei passaggi; il modello può scendere un po' (passaggi in parallelo) ma mai sotto la durata più lunga né sopra la somma
-    if (!(r.time >= Math.max(tm.max, Math.round(tm.sum * 0.7)) && r.time <= tm.sum)) r.time = tm.sum;
-    r.time_how = 'sommato';
+  r.time = Math.round(+r.time) || 0; r.time_note = str(r.time_note, 120).trim();
+  const steps = Array.isArray(r.steps) ? r.steps.filter(Boolean).length : 0;
+  if (tm.total) { r.time = tm.total; r.time_how = 'indicato'; r.time_note = ''; } // il post dichiara il totale: vale quello e basta
+  else if (!steps && !tm.n) { r.time = 0; r.time_how = ''; r.time_note = ''; } // né passaggi né durate: niente da ricostruire
+  else {
+    // Il totale si ricostruisce dai passaggi: le durate scritte sono un pavimento (mai sotto la loro somma), le stime per i
+    // passaggi senza durata un tetto ragionevole (mezz'ora a passaggio). Dentro questi limiti vale il conto del modello.
+    const floor = tm.sum, ceil = tm.sum + 30 * Math.max(steps, 1) + 30;
+    if (r.time < floor) r.time = floor; else if (r.time > ceil) r.time = ceil;
+    r.time_how = r.time > tm.sum ? 'stimato' : tm.n > 1 ? 'sommato' : 'indicato';
+    if (r.time_how !== 'stimato') r.time_note = '';
   }
   if (!SERV_RX.test(text) || !r.servings || !nums.has(String(r.servings))) r.servings = sv;
   if (!hasList) r.inferred = true;

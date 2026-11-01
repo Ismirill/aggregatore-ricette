@@ -539,7 +539,7 @@ function parseHtml(html){
       ingredients:[].concat(r.recipeIngredient||r.ingredients||[]).map(strip).filter(Boolean),steps:stepsOf(r.recipeInstructions),stepsFromSchema:!!r.recipeInstructions,
       cuisine:[].concat(r.recipeCuisine||[]).join(', '),recipeCategory:[].concat(r.recipeCategory||[]).join(', '),keywords:[].concat(r.keywords||[]).join(', '),
       servings:servingsOf([].concat(r.recipeYield||[]).join(' ')),
-      time:isoMin(r.totalTime)||((isoMin(r.prepTime)||0)+(isoMin(r.cookTime)||0))||null,
+      time:isoMin(r.totalTime)||((isoMin(r.prepTime)||0)+(isoMin(r.cookTime)||0))||null,timeFromSchema:!!(isoMin(r.totalTime)||isoMin(r.prepTime)||isoMin(r.cookTime)),
       calories:Math.round(parseFloat(String(r.nutrition?.calories||'').replace(',','.')))||null,
       schemaDiets:[].concat(r.suitableForDiet||[]).map(x=>({VeganDiet:'Vegano',VegetarianDiet:'Vegetariano',GlutenFreeDiet:'Senza glutine',LowLactoseDiet:'Senza lattosio',LowCalorieDiet:'Ipocalorico'})[String(x).split('/').pop()]).filter(Boolean),
       videoEmbed:[].concat(r.video||[])[0]?.embedUrl||''});
@@ -619,7 +619,7 @@ async function aiAnalyze(d){
   const {result:r}=await server('/analyze',{url:d.url,source:sourceOf(d.url),author:d.author,caption:d.caption||d.title,image:d.image,cats});
   if(!r)throw new Error('Risposta AI non valida');
   return {servings:Math.min(100,Math.max(0,parseInt(r.servings)||0)),is_recipe:r.is_recipe!==false,title:r.title||'',cat:r.cat||'',diets:(r.diets||[]).filter(x=>DIETS.includes(x)),country:r.country||'',region:r.region||'',
-    time:+r.time||0,timeHow:String(r.time_how||''),inferred:r.inferred===true,ingredients:(r.ingredients||[]).map(String),steps:(r.steps||[]).map(String)};
+    time:+r.time||0,timeHow:String(r.time_how||''),timeNote:String(r.time_note||''),inferred:r.inferred===true,ingredients:(r.ingredients||[]).map(String),steps:(r.steps||[]).map(String)};
 }
 
 // Riduce la foto per contenere costi e tempi di invio
@@ -713,7 +713,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=75; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=76; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1663,11 +1663,11 @@ async function runAnalysis(url,overwrite){
       if(r.inferred&&r.ingredients.length)r.ingredients.push('(il post non elenca gli ingredienti: questi sono quelli tipici del piatto, senza dosi; guarda il video e completa)');
       if(r.ingredients.length)f.ingredients.value=r.ingredients.join('\n');
       if(r.steps.length&&(overwrite||!f.steps.value||!(a.stepsFromSchema)))f.steps.value=r.steps.join('\n'); // i passaggi dell'AI (fedeli al testo) vincono sulla divisione a paragrafi della didascalia
-      if(r.time&&(overwrite||!f.time.value))f.time.value=r.time;
+      if(r.time&&(overwrite||!f.time.value||!a.timeFromSchema))f.time.value=r.time; // il tempo ricostruito dall'AI vince sul primo «N minuti» letto nella didascalia; resta quello dichiarato dai siti di ricette (schema.org)
       if(r.servings&&(overwrite||!f.servings.value))f.servings.value=r.servings;
       if(r.country){f.country.value=r.country;f.region.value=r.region}
       setDiets(r.diets);
-      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata${a.transcript?' (didascalia + parlato del video)':''} · ${r.ingredients.length} ingredienti${!r.time?' · tempo non indicato nel post':r.timeHow==='sommato'?` · tempo ≈ ${r.time} min, somma dei passaggi (riposi, cotture, forno)`:''}`);
+      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata${a.transcript?' (didascalia + parlato del video)':''} · ${r.ingredients.length} ingredienti${!r.time?' · tempo non indicato nel post':r.timeHow==='sommato'?` · tempo ≈ ${r.time} min, somma dei passaggi (riposi, cotture, forno)`:r.timeHow==='stimato'?` · tempo ≈ ${r.time} min, stimato dai passaggi${r.timeNote?` (${r.timeNote})`:''}`:` · tempo ${r.time} min, indicato nel post`}`);
     }catch(e){showPv(aiErr(e))}
   }
 }
