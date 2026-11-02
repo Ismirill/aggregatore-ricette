@@ -622,6 +622,9 @@ function sourceOf(url){
     if(/youtu/.test(h))return 'YouTube';if(/facebook|fb\.watch/.test(h))return 'Facebook';
     if(/pinterest|pin\.it/.test(h))return 'Pinterest';return h}catch{return ''}
 }
+// Titolo fasullo: le app social, quando si condivide un post, mandano come titolo solo il proprio nome («Instagram», «TikTok»)
+// o la pagina di accesso; va scartato e sostituito con la didascalia o con il nome dato dall'AI
+const junkTitle=t=>{t=String(t||'').trim();return !t||t.length<40&&/^(instagram|tiktok|facebook|youtube|pinterest|reels?|log ?in|accedi|login|condividi|share|guarda (questo|il) (reel|video|post))\b/i.test(t)};
 const extractUrl=t=>(String(t||'').match(/https?:\/\/[^\s]+/)||[])[0];
 const isoMin=s=>{const m=String(s||'').match(/P(?:\d+D)?T?(?:(\d+)H)?(?:(\d+)M)?/);return m?(+m[1]||0)*60+(+m[2]||0)||null:null};
 const strip=s=>String(s||'').replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
@@ -654,7 +657,7 @@ function parseHtml(html){
     .replace(/^[^:\n]{0,90}\s(?:su|on) instagram\s*:\s*/i,'').replace(/^[\d.,]+\s*[KM]?\s*(?:likes|mi piace)[^:\n]{0,120}:\s*/i,'').replace(/^["“]|["”]\.?$/g,'').trim();
   // la didascalia più completa tra titolo e descrizione (Facebook mette quella intera nel titolo della pagina)
   const caption=[clean(m('og:title')),clean(d.title),clean(m('og:description')),clean(m('description'))].sort((a,b)=>b.length-a.length)[0]||'';
-  const out={title:clean(m('og:title'))||clean(m('twitter:title'))||clean(d.title)||'',image:m('og:image')||m('twitter:image')||'',author:m('og:site_name'),caption};
+  const out={title:[clean(m('og:title')),clean(m('twitter:title')),clean(d.title)].find(t=>!junkTitle(t))||'',image:m('og:image')||m('twitter:image')||'',author:m('og:site_name'),caption};
   let r=null;
   d.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{if(!r)r=findRecipe(parseLd(s.textContent))});
   if(r){
@@ -717,7 +720,8 @@ async function analyze(url,pasted){
     const pc=parseCaption(out.caption);
     out.ingredients=pc.ingredients;if(!out.steps?.length)out.steps=pc.steps;out.time=out.time||pc.time;out.servings=out.servings||pc.servings;
   }
-  // Nei post social il titolo è la didascalia: tieni solo la prima riga, senza hashtag
+  // Nei post social il titolo è la didascalia: tieni solo la prima riga, senza hashtag (e se il titolo manca, la prima riga della didascalia)
+  if(junkTitle(out.title)&&out.caption)out.title=out.caption;
   if(out.title)out.title=(lines(out.title)[0]||'').replace(/\s*#\S+/g,'').trim().slice(0,140);
   return out;
 }
@@ -837,7 +841,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=90; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=91; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1903,7 +1907,7 @@ async function runAnalysis(url,overwrite){
   if(!a){$('#capL').hidden=false;showPv(social?'Non riesco a leggere il post: copia la sua descrizione e incollala qui sotto':'Non riesco a leggere la pagina: compila tu i dati');if(social)f.caption.focus();return}
   Object.assign(extra,{image:a.image||extra.image,author:a.author||extra.author,caption:a.caption||extra.caption,transcript:a.transcript||'',videoId:a.videoId||extra.videoId,videoEmbed:a.videoEmbed||extra.videoEmbed,finalUrl:a.finalUrl||extra.finalUrl});
   const put=(el,v)=>{if(v&&(overwrite||!el.value))el.value=v};
-  put(f.title,a.title);put(f.time,a.time);put(f.servings,a.servings);
+  if(a.title&&(overwrite||junkTitle(f.title.value)))f.title.value=a.title;put(f.time,a.time);put(f.servings,a.servings);
   put(f.ingredients,(a.ingredients||[]).join('\n'));put(f.steps,(a.steps||[]).join('\n'));
   const c=classify({...a,title:f.title.value,ingredients:lines(f.ingredients.value)});
   if(c.cat&&(overwrite||!editing))f.cat.value=c.cat;
@@ -1920,7 +1924,7 @@ async function runAnalysis(url,overwrite){
       const r=await aiAnalyze({url,title:f.title.value,caption:cap,image:a.image,author:a.author});
       if(f.url.value!==url)return;
       if(!r.is_recipe){showPv('L\'AI non trova una ricetta in questo post');return}
-      if(r.title&&(overwrite||!f.title.value||f.title.value.length>80))f.title.value=r.title;
+      if(r.title&&(overwrite||junkTitle(f.title.value)||f.title.value.length>80))f.title.value=r.title;
       if(cats.includes(r.cat))f.cat.value=BASE_RX.test(f.title.value.trim())?'Altro':r.cat;
       // il post non elenca gli ingredienti: l'AI dà solo i nomi tipici del piatto, senza dosi, e lo si dice
       if(r.inferred&&r.ingredients.length)r.ingredients.push('(il post non elenca gli ingredienti: questi sono quelli tipici del piatto, senza dosi; guarda il video e completa)');
@@ -2252,7 +2256,7 @@ function receive(d){
   if(!url)return;
   const ex=items.find(i=>i.url===url);
   if(ex){toast('Ricetta già salvata');openDetail(ex);return}
-  const title=(d.title&&!extractUrl(d.title))?d.title:'';
+  const title=(d.title&&!extractUrl(d.title)&&!junkTitle(d.title))?d.title:'';
   openForm({url,title,desc:d.desc||''});
 }
 // Android: la pagina chiede il link a AndroidShare.take(); iOS: l'app lo passa direttamente come oggetto
