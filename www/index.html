@@ -454,8 +454,8 @@ details summary{cursor:pointer}
 <dialog id="acct">
   <div class="dhead stk"><h2 id="acctT">Il tuo profilo</h2><button class="icon" id="acctX" aria-label="Chiudi">✕</button></div>
   <div id="acctIntro" hidden>
-    <p class="big">Ogni settimana una sfida in cucina. Chi vuole partecipa con la sua ricetta e un breve video; gli altri la cucinano e la votano; la più votata entra nel Ricettario di Gnamina.</p>
-    <p class="meta" style="margin:0 0 16px">Con un account partecipi, voti e ritrovi le tue ricette su telefono, tablet e computer. Senza account puoi guardare e salvare ricette solo su questo dispositivo.</p>
+    <p class="big">Registrati per salvare le tue ricette e ritrovarle su tutti i tuoi dispositivi, partecipare ai contest e votare le ricette degli altri Gnammers.</p>
+    <p class="meta" style="margin:0 0 16px">Bastano la tua email o il tuo account Google. Se preferisci, puoi anche continuare senza registrarti e farlo più avanti.</p>
     <div class="wact"><button type="button" class="wbtn" id="acctGo"><b>Crea il tuo account o accedi</b><span>Con la tua email o con Google. È gratis.</span></button><button type="button" class="wbtn" id="acctLater" style="border-left-color:var(--bd)"><b>Continua senza account</b><span>Puoi farlo quando vuoi dal tasto in alto a destra</span></button></div>
   </div>
   <section class="sec" id="acctAcc"><h3>Account</h3><div id="accBox"></div></section>
@@ -837,7 +837,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=89; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=90; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
