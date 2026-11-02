@@ -149,6 +149,18 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .hero{width:100%;aspect-ratio:16/10;max-height:340px;object-fit:cover;display:block}
 .heroWrap::after{content:'';position:absolute;inset:auto 0 0;height:40%;background:linear-gradient(transparent,var(--card))}
 .video{width:100%;border:0;border-radius:16px;background:#000;display:block}
+/* Regia: video guidato in tre parti */
+#rec{max-width:520px;padding:14px 14px calc(14px + env(safe-area-inset-bottom))}.rech{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.rech b{font-size:1.15rem}
+.recParts{display:grid;gap:8px;margin:10px 0}.recParts>div{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--fg) 6%,transparent)}.recParts>div>b{font-size:1.5rem;min-width:2rem;text-align:center;color:var(--acc)}.recParts small{display:block;color:var(--mut)}
+.recStage{position:relative;border-radius:18px;overflow:hidden;background:#000;aspect-ratio:3/4;max-height:58dvh}.recStage video{width:100%;height:100%;object-fit:cover;display:block}
+.recTop{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;color:#fff;background:linear-gradient(#000a,#0000);font-weight:700;font-size:.95rem}.recTop>span:first-child{min-width:0;line-height:1.2}.recClock{font-size:2rem;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap;flex:none}.recClock.warn{color:#ffb14a}
+.recBar{position:absolute;left:0;right:0;bottom:0;height:8px;background:#fff3}.recBar i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s linear}.recBar.warn i{background:#ffb14a}
+.recTip{position:absolute;left:10px;right:10px;bottom:16px;margin:0;color:#fff;font-size:1rem;background:#0007;padding:8px 12px;border-radius:12px}
+.recCount{position:absolute;inset:0;display:grid;place-items:center;font-size:7rem;font-weight:800;color:#fff;background:#0005;text-shadow:0 2px 12px #000}
+.recCtl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.recBig{width:88px;height:88px;border-radius:50%;border:4px solid #fff;background:var(--acc);color:#fff;font:inherit;font-size:1rem;font-weight:800;cursor:pointer;box-shadow:0 4px 16px #0006}.recBig.stop{background:#222;border-color:var(--acc)}.recBig:disabled{opacity:.6}
+.recDot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#fff6;margin-right:4px;vertical-align:middle}.recDot.on{background:var(--acc)}.recDot.done{background:#7bd389}
+.clipPl video{width:100%;max-height:70dvh;background:#000;border-radius:16px;display:block}.clipPl .clipLbl{margin:6px 0}
 .video.v{aspect-ratio:9/16;max-height:70vh;max-width:380px;margin:0 auto}
 .video.h{aspect-ratio:16/9}
 .dv ul,.dv ol{padding-left:20px;line-height:1.6;margin:0}
@@ -433,7 +445,7 @@ details summary{cursor:pointer}
       <h3>Un video e il salvataggio</h3>
       <p class="sum hint" id="endSum"></p>
       <label>Il tuo video (su YouTube)<span class="inl" style="margin:0"><input name="video" type="url" placeholder="Link YouTube del video caricato"><button type="button" class="btn" id="pasteVid">📋 Incolla</button></span></label>
-      <div class="row" style="margin:-4px 0 0;justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn" id="recVid">🎥 Registra un video</button><button type="button" class="btn" id="pickVid">Scegli dal telefono</button></div>
+      <div class="row" style="margin:-4px 0 0;justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn pri" id="guideVid">🎬 Registra con la guida (3 parti)</button><button type="button" class="btn" id="recVid">🎥 Registra un video</button><button type="button" class="btn" id="pickVid">Scegli dal telefono</button></div>
       <p class="meta" id="vidHint" style="margin:-4px 0 0"></p>
       <input type="file" id="vidRec" accept="video/*" capture="environment" hidden><input type="file" id="vidPick" accept="video/*" hidden>
     </section>
@@ -450,6 +462,7 @@ details summary{cursor:pointer}
 
 <dialog id="menu"><h3 id="menuT"></h3><button class="btn" id="menuEdit">✏️ Modifica</button><button class="btn danger" id="menuDel">🗑 Elimina</button><button class="btn" id="menuCancel">Annulla</button></dialog>
 <dialog id="photo"><button class="dclose" id="phX" aria-label="Chiudi">✕</button><div id="phv"></div></dialog>
+<dialog id="rec"><div class="rech"><b>🎬 Il video della ricetta</b><button type="button" class="dclose" id="recX" aria-label="Chiudi" style="float:none;margin:0">✕</button></div><div id="recBody"></div></dialog>
 
 <dialog id="acct">
   <div class="dhead stk"><h2 id="acctT">Il tuo profilo</h2><button class="icon" id="acctX" aria-label="Chiudi">✕</button></div>
@@ -847,7 +860,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=94; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=95; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1757,7 +1770,8 @@ function openDetail(i){
   const e=embedOf(i);
   const [em,c1,c2]=look(i),tm=(i.ingredients?.length||i.steps?.length)?timing(i):null;
   $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button><div class="dcols"><div class="dmain">
-    ${e?`<iframe class="video ${e.v?'v':'h'}" src="${esc(e.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
+    ${i.clips?.length?`<div class="clipPl" id="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p></div>`
+      :e?`<iframe class="video ${e.v?'v':'h'}" src="${esc(e.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
       :i.image?`<div class="heroWrap"><img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;hero&quot; style=&quot;display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)&quot;>${em}</div>'"></div>`
       :`<div class="heroWrap"><div class="hero" style="display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)">${em}</div></div>`}
     <h2 style="margin-top:12px">${esc(i.title||i.url)}</h2>
@@ -1797,6 +1811,7 @@ function openDetail(i){
     draw();
   }
   $('#dClose').onclick=$('#dX').onclick=()=>$('#det').close();
+  if(i.clips?.length)clipPlayer(i.clipKey,i.clips,$('#clipPl'));
   if($('#dEdit'))$('#dEdit').onclick=()=>{$('#det').close();openForm(i)};
   if($('#dSave'))$('#dSave').onclick=()=>{saveFromBook(i);$('#det').close()};
   $('#det').showModal();
@@ -1816,9 +1831,10 @@ function openForm(data={}){
   f.url.value=data.url||'';f.title.value=data.title||'';f.caption.value=data.desc||'';$('#capL').hidden=!(data.desc||['Facebook','Instagram'].includes(sourceOf(data.url||'')));f.tags.value=(data.tags||[]).join(', ');f.note.value=data.note||'';
   f.cat.value=data.cat||(cats.includes(cur)?cur:'Altro');f.time.value=data.time||'';f.servings.value=data.servings||'';f.country.value=data.country||'';f.region.value=data.region||'';
   f.ingredients.value=(data.ingredients||[]).join('\n');f.steps.value=(data.steps||[]).join('\n');
-  f.video.value=data.video||'';vidHint();
+  f.video.value=data.video||'';
   setDiets(data.diets||[]);setRating(data.rating||0);
-  extra={image:data.image||'',author:data.author||'',caption:data.caption||'',videoId:data.videoId||'',videoEmbed:data.videoEmbed||'',finalUrl:data.finalUrl||'',contest:data.contest||''};
+  extra={image:data.image||'',author:data.author||'',caption:data.caption||'',videoId:data.videoId||'',videoEmbed:data.videoEmbed||'',finalUrl:data.finalUrl||'',contest:data.contest||'',clips:data.clips||[],clipKey:data.clipKey||''};
+  vidHint();
   $('#dlgT').textContent=editing?'Modifica ricetta':'Nuova ricetta';
   $('#del').hidden=!editing;
   // Modifica: tutti i campi insieme, come un modulo normale. Nuova ricetta: percorso guidato, un passo alla volta
@@ -1953,9 +1969,10 @@ $('#reanalyze').onclick=()=>{const u=extractUrl($('#f').url.value);if(u)runAnaly
 /* ---------- Il video dell'utente: registrato o scelto qui, caricato sul SUO canale YouTube (nessuno spazio cloud nostro), qui resta solo il link ---------- */
 const ytId=u=>(String(u||'').match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/)||[])[1]||'';
 const VID_HINT='Il video va sul tuo canale YouTube, anche «Non in elenco» (lo vede solo chi ha il link): Gnamina salva soltanto il link.';
-function vidHint(h){$('#vidHint').innerHTML=h||VID_HINT}
+function vidHint(h){$('#vidHint').innerHTML=h||(extra.clips?.length?clipsStatus():VID_HINT)}
 const vidAfter=()=>vidHint('Quando YouTube ha finito di caricare, apri il video, tocca <b>Condividi → Copia link</b>, torna qui e premi «📋 Incolla».');
 window.onVideoShared=vidAfter; // chiamato dall'app Android dopo aver passato il video a YouTube
+$('#guideVid').onclick=recOpen;
 $('#recVid').onclick=()=>{if(window.AndroidShare?.recordVideo){AndroidShare.recordVideo();return}$('#vidRec').click()};
 $('#pickVid').onclick=()=>{if(window.AndroidShare?.pickVideo){AndroidShare.pickVideo();return}$('#vidPick').click()};
 $('#vidRec').onchange=$('#vidPick').onchange=e=>{const file=e.target.files[0];e.target.value='';if(file)vidReady(file)};
@@ -1968,6 +1985,143 @@ function vidReady(file){
     window.open('https://www.youtube.com/upload','_blank','noopener');
     vidHint(`Si è aperta la pagina di caricamento di YouTube: scegli lì il file <b>${esc(file.name||'del video')}</b>. Poi copia il link del video e incollalo qui sopra.`);
   };
+}
+/* ---------- Regia: il video della ricetta in tre parti, con i tempi scanditi dall'app ----------
+   Il video del contest dura al massimo 3 minuti ed è fatto di tre parti: gli ingredienti, la preparazione, il piatto pronto.
+   L'app accende la fotocamera, dice cosa riprendere, conta i secondi di ogni parte e ferma da sola la registrazione;
+   ogni parte si può rifare. Le clip restano sul telefono (IndexedDB), la ricetta ricorda solo durata e formato. */
+const REC_PARTS=[
+  {name:'Gli ingredienti',sec:30,tip:'Mostra gli ingredienti uno per uno e di’ cosa sono e quanto ne serve.'},
+  {name:'La preparazione',sec:120,tip:'Fai vedere i passaggi principali. Se finisci prima, premi Stop.'},
+  {name:'Il piatto pronto',sec:30,tip:'Il piatto finito, impiattato: una bella inquadratura da vicino.'}];
+const REC_OK=()=>!!(navigator.mediaDevices?.getUserMedia&&window.MediaRecorder);
+const FAKECAM=/fakecam/.test(location.search); // solo per le prove senza fotocamera (simulatore): un'immagine disegnata e un suono
+const recMime=()=>['video/mp4;codecs=avc1,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m))||'';
+const fmtSec=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+const clipExt=t=>/mp4/.test(t)?'mp4':'webm';
+let REC=null;
+function fakeStream(){
+  const c=document.createElement('canvas');c.width=480;c.height=640;const x=c.getContext('2d');let n=0;
+  const draw=()=>{x.fillStyle=`hsl(${(n*3)%360} 50% 35%)`;x.fillRect(0,0,480,640);x.fillStyle='#fff';x.font='bold 40px sans-serif';x.fillText('Prova '+n,40,320);n++};
+  draw();setInterval(draw,100);const s=c.captureStream(15);
+  try{const ac=new AudioContext(),o=ac.createOscillator(),d=ac.createMediaStreamDestination();o.frequency.value=330;o.connect(d);o.start();s.addTrack(d.stream.getAudioTracks()[0])}catch{}
+  return s;
+}
+async function recOpen(){
+  if(!REC_OK()&&!FAKECAM){toast('Questo dispositivo non permette di registrare dall\'app: usa «Registra un video»');return}
+  REC={facing:'environment',part:0,clips:[],state:'intro',many:false};
+  recUI();$('#rec').showModal();
+}
+async function recCam(){
+  if(REC.stream)REC.stream.getTracks().forEach(t=>t.stop());
+  try{
+    REC.stream=FAKECAM?fakeStream():await navigator.mediaDevices.getUserMedia({video:{facingMode:REC.facing,width:{ideal:1280},height:{ideal:720}},audio:true});
+    try{REC.many=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput').length>1}catch{}
+    return true;
+  }catch(e){
+    toast(e.name==='NotAllowedError'?'Serve il permesso di usare fotocamera e microfono: controlla le impostazioni del telefono':'Fotocamera non disponibile');
+    return false;
+  }
+}
+function recUI(){
+  const r=REC;if(!r)return;const p=REC_PARTS[r.part],b=$('#recBody');
+  const dots=REC_PARTS.map((_,j)=>`<i class="recDot${j===r.part?' on':j<r.part?' done':''}"></i>`).join('');
+  if(r.state==='intro'){
+    b.innerHTML=`<p class="big">Il video dura al massimo <b>3 minuti</b> ed è fatto di tre parti. Gnamina ti dice cosa riprendere e conta i secondi: quando il tempo finisce, si ferma da sola. Ogni parte si può rifare.</p>
+      <div class="recParts">${REC_PARTS.map((q,j)=>`<div><b>${j+1}</b><span>${q.name} · <b style="font-size:1rem;color:var(--fg)">${fmtSec(q.sec)}</b><small>${q.tip}</small></span></div>`).join('')}</div>
+      <p class="meta">Tieni il telefono fermo, con buona luce, e parla chiaro. Il video resta sul tuo telefono finché non lo condividi.</p>
+      <div class="recCtl"><button type="button" class="btn pri" id="recOn" style="font-size:1.05rem;padding:14px 24px">📷 Accendi la fotocamera</button></div>`;
+    $('#recOn').onclick=async()=>{if(await recCam()){r.state='ready';recUI()}};
+    return;
+  }
+  if(r.state==='done'){
+    const tot=r.clips.reduce((a,c)=>a+c.ms,0)/1000;
+    b.innerHTML=`<p class="big">Fatto! Il tuo video dura <b>${fmtSec(tot)}</b>.</p>
+      <div class="recParts">${REC_PARTS.map((q,j)=>`<div><b>✓</b><span>${q.name}<small>${fmtSec(r.clips[j].ms/1000)}</small></span></div>`).join('')}</div>
+      <div class="recCtl"><button type="button" class="btn" id="recRedoAll">↺ Rifai tutto</button><button type="button" class="btn pri" id="recUse" style="font-size:1.05rem;padding:14px 24px">✓ Usa questo video</button></div>`;
+    $('#recRedoAll').onclick=()=>{r.part=0;r.clips=[];r.state='ready';recUI()};
+    $('#recUse').onclick=recFinish;
+    return;
+  }
+  const review=r.state==='review';
+  b.innerHTML=`<div class="recStage"><video id="recV" autoplay playsinline ${review?'controls':'muted'}></video>
+      <div class="recTop"><span>${dots} Parte ${r.part+1} di 3 · ${p.name}</span><span class="recClock" id="recClock">${review?fmtSec(r.clips[r.part].ms/1000):fmtSec(p.sec)}</span></div>
+      ${review?'':`<div class="recBar" id="recBar"><i></i></div><p class="recTip" id="recTip">${r.state==='rec'?p.tip:'Inquadra, poi premi Registra. Hai '+fmtSec(p.sec)+'.'}</p>`}
+      <div class="recCount" id="recCount" hidden></div></div>
+    <div class="recCtl">${review
+      ?`<button type="button" class="btn" id="recRedo">↺ Rifai questa parte</button><button type="button" class="btn pri" id="recNext" style="font-size:1.05rem;padding:14px 24px">${r.part<2?'Va bene, avanti →':'Va bene, fine ✓'}</button>`
+      :r.state==='rec'?`<button type="button" class="recBig stop" id="recStopB">■ Stop</button>`
+      :`${r.many&&!FAKECAM?'<button type="button" class="btn" id="recFlip">🔄 Gira</button>':''}<button type="button" class="recBig" id="recGo">● Registra</button>${r.part>0?'<button type="button" class="btn" id="recPrev">← Parte prima</button>':'<span style="width:84px"></span>'}`}</div>`;
+  const v=$('#recV');
+  if(review){v.src=r.clips[r.part].url;v.muted=false}else{v.srcObject=r.stream;v.muted=true}
+  if(review){$('#recRedo').onclick=()=>{URL.revokeObjectURL(r.clips[r.part].url);r.clips[r.part]=null;r.state='ready';recUI()};$('#recNext').onclick=()=>{if(r.part<2){r.part++;r.state='ready'}else r.state='done';recUI()}}
+  else if(r.state==='rec')$('#recStopB').onclick=recStop;
+  else{$('#recGo').onclick=recCountdown;if($('#recFlip'))$('#recFlip').onclick=async()=>{r.facing=r.facing==='environment'?'user':'environment';if(await recCam())recUI()};if($('#recPrev'))$('#recPrev').onclick=()=>{r.part--;r.state='review';recUI()}}
+}
+// Tre secondi per mettersi in posa, poi parte la registrazione
+function recCountdown(){
+  const r=REC,c=$('#recCount');let n=3;c.hidden=false;c.textContent=n;$('#recGo').disabled=true;
+  r.tick=setInterval(()=>{n--;if(n>0){c.textContent=n;return}clearInterval(r.tick);c.hidden=true;recBegin()},1000);
+}
+function recBegin(){
+  const r=REC,p=REC_PARTS[r.part];
+  try{r.mr=new MediaRecorder(r.stream,{mimeType:recMime()||undefined,videoBitsPerSecond:2_000_000})}catch(e){toast('Registrazione non disponibile su questo dispositivo');return}
+  r.chunks=[];r.mr.ondataavailable=e=>{if(e.data&&e.data.size)r.chunks.push(e.data)};
+  r.mr.onstop=()=>{
+    const type=r.mr.mimeType||recMime()||'video/webm',blob=new Blob(r.chunks,{type}),ms=Math.min(Date.now()-r.t0,p.sec*1000);
+    r.clips[r.part]={blob,ms,type,url:URL.createObjectURL(blob)};r.state='review';recUI();
+  };
+  r.mr.start(1000);r.t0=Date.now();r.state='rec';r.warned=false;recUI();
+  r.tick=setInterval(()=>{
+    const left=Math.max(0,p.sec-(Date.now()-r.t0)/1000),bar=$('#recBar'),ck=$('#recClock');
+    if(ck)ck.textContent=fmtSec(Math.ceil(left));if(bar)bar.firstElementChild.style.width=(100*(1-left/p.sec))+'%';
+    if(left<=10&&!r.warned){r.warned=true;ck?.classList.add('warn');bar?.classList.add('warn');$('#recTip').textContent='Ultimi dieci secondi: concludi.';try{navigator.vibrate?.(200)}catch{}}
+    if(left<=0)recStop();
+  },200);
+}
+function recStop(){const r=REC;if(!r)return;clearInterval(r.tick);if(r.mr&&r.mr.state!=='inactive'){try{r.mr.stop()}catch{}}}
+async function recFinish(){
+  const r=REC;if(!extra.clipKey)extra.clipKey='c'+Date.now().toString(36);
+  try{
+    for(let n=0;n<r.clips.length;n++)await clipPut(`${extra.clipKey}:${n}`,{blob:r.clips[n].blob,type:r.clips[n].type,ms:r.clips[n].ms});
+    extra.clips=r.clips.map(c=>({ms:c.ms,type:c.type,size:c.blob.size}));
+  }catch(e){toast('Non riesco a salvare il video sul telefono (spazio esaurito?)');return}
+  recClose();vidHint();toast('Video registrato: ora salva la ricetta');
+}
+function recClose(){const r=REC;if(!r)return;clearInterval(r.tick);try{if(r.mr&&r.mr.state!=='inactive')r.mr.stop()}catch{}r.stream?.getTracks().forEach(t=>t.stop());r.clips.forEach(c=>c&&c.url&&URL.revokeObjectURL(c.url));REC=null;$('#recBody').innerHTML='';if($('#rec').open)$('#rec').close()}
+$('#recX').onclick=recClose;$('#rec').oncancel=e=>{e.preventDefault();recClose()};
+// Le clip stanno in IndexedDB: localStorage non regge decine di MB
+const idb=()=>new Promise((ok,ko)=>{const q=indexedDB.open('gnamina',1);q.onupgradeneeded=()=>q.result.createObjectStore('clips');q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error)});
+const idbRun=(mode,fn)=>idb().then(d=>new Promise((ok,ko)=>{const t=d.transaction('clips',mode),q=fn(t.objectStore('clips'));t.oncomplete=()=>ok(q&&q.result);t.onerror=()=>ko(t.error)}));
+const clipPut=(k,v)=>idbRun('readwrite',s=>s.put(v,k));
+const clipGet=k=>idbRun('readonly',s=>s.get(k));
+const clipsDrop=key=>key&&idbRun('readwrite',s=>{for(let n=0;n<3;n++)s.delete(`${key}:${n}`)}).catch(()=>{});
+const clipsTotal=cl=>fmtSec((cl||[]).reduce((a,c)=>a+(c.ms||0),0)/1000);
+// Stato del video registrato, nel passo finale del modulo
+const clipsStatus=()=>`🎬 Video registrato con la guida in ${extra.clips.length} parti (${clipsTotal(extra.clips)}): resta su questo telefono. <button type="button" class="btn" data-c="play">▶ Guarda</button> <button type="button" class="btn" data-c="redo">↺ Rifai</button> <button type="button" class="btn" data-c="share">📤 Condividi</button>`;
+$('#vidHint').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;
+  if(b.dataset.c==='redo')recOpen();else if(b.dataset.c==='share')clipsShare(extra.clipKey,extra.clips,$('#f').title.value);else clipsPlay(extra.clipKey,extra.clips,$('#f').title.value)};
+// Riproduzione delle parti una dopo l'altra, nella scheda della ricetta o dal modulo
+async function clipPlayer(key,clips,root){
+  const v=root.querySelector('video'),lbl=root.querySelector('.clipLbl');let n=0,urls=[];
+  try{for(let j=0;j<clips.length;j++){const c=await clipGet(`${key}:${j}`);if(!c)throw 0;urls.push(URL.createObjectURL(c.blob))}}
+  catch{lbl.textContent='Il video è stato registrato su un altro dispositivo: le clip restano sul telefono che le ha girate.';v.hidden=true;return}
+  const show=j=>{n=j;v.src=urls[j];lbl.textContent=`Parte ${j+1} di ${clips.length} · ${REC_PARTS[j]?.name||''} · ${fmtSec((clips[j].ms||0)/1000)}`};
+  v.onended=()=>{if(n+1<urls.length){show(n+1);v.play().catch(()=>{})}};
+  show(0);
+}
+function clipsPlay(key,clips,title){
+  $('#phv').innerHTML=`<h3 style="margin:0 0 8px">${esc(title||'Il tuo video')}</h3><div class="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p></div>`;
+  $('#photo').showModal();clipPlayer(key,clips,$('#phv'));
+}
+// Condivisione: i file delle parti (per YouTube, WhatsApp, la galleria); senza menu di condivisione si scaricano
+async function clipsShare(key,clips,title){
+  const files=[];const slug=String(title||'ricetta').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'ricetta';
+  try{for(let j=0;j<clips.length;j++){const c=await clipGet(`${key}:${j}`);if(!c)throw 0;files.push(new File([c.blob],`gnamina-${slug}-${j+1}.${clipExt(c.type)}`,{type:c.type}))}}
+  catch{toast('Il video non è su questo dispositivo');return}
+  if(navigator.canShare?.({files})){try{await navigator.share({files,title:'Video della ricetta'})}catch(e){if(e.name!=='AbortError')toast('Condivisione non riuscita')}return}
+  files.forEach(f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000)});
+  toast(files.length>1?'Scaricati i file del video':'Scaricato il file del video');
 }
 $('#pasteVid').onclick=async()=>{let t='';try{t=await navigator.clipboard.readText()}catch{}
   const u=extractUrl(t||'');if(ytId(u)){$('#f').video.value=u;$('#f').video.setCustomValidity('');vidHint('Link del video inserito: salva la ricetta.');toast('Video collegato')}else toast(t?'Negli appunti non c\'è un link YouTube':'Tieni premuto nel campo e scegli Incolla')};
@@ -1991,7 +2145,7 @@ $('#f').onsubmit=e=>{
 $('#cancel').onclick=$('#dlgX').onclick=()=>$('#dlg').close();
 $('#phX').onclick=()=>$('#photo').close();
 // Elimina una tua ricetta (la «lapide» serve alla sincronizzazione: così non torna dagli altri dispositivi)
-function deleteRecipe(id){const tb=load('tomb',{});tb[id]=Date.now();save('tomb',tb);items=items.filter(i=>i.id!==id);saveItems();fillSelects();render();toast('Ricetta eliminata')}
+function deleteRecipe(id){const it=items.find(i=>i.id===id);if(it?.clipKey)clipsDrop(it.clipKey);const tb=load('tomb',{});tb[id]=Date.now();save('tomb',tb);items=items.filter(i=>i.id!==id);saveItems();fillSelects();render();toast('Ricetta eliminata')}
 $('#del').onclick=()=>{if(confirm('Eliminare questa ricetta?')){deleteRecipe(editing.id);$('#dlg').close()}};
 // Menu rapido su una tua ricetta: dal pulsante ⋯, tenendo premuta la scheda o con il tasto destro
 function openItemMenu(id){
