@@ -76,7 +76,7 @@ td b{font-family:var(--display)}
   <div class="loop">
     <div class="step"><b>Lunedì: il tema</b><span>«La miglior carbonara». Un piatto che tutti conoscono, con regole brevi: ingredienti liberi, video massimo 3 minuti.</span></div>
     <div class="step"><b>Da lunedì a domenica: si partecipa</b><span>Ricetta con la procedura guidata e video caricato sul proprio YouTube: Gnamina tiene solo il link, zero costi di spazio.</span></div>
-    <div class="step"><b>Settimana dopo: si assaggia</b><span>Chi vuole cucina la ricetta degli altri e vota da 1 a 5 stelle. Chi allega la foto del piatto conta di più: ha cucinato davvero.</span></div>
+    <div class="step"><b>Settimana dopo: si assaggia</b><span>Chi vuole cucina la ricetta degli altri e vota da 1 a 5 stelle. Il voto pesa secondo il livello del Gnammer e di più se c'è la foto del piatto: ha cucinato davvero.</span></div>
     <div class="step"><b>Domenica: la vincitrice</b><span>Entra nel Ricettario di Gnamina con nome dell'autore e video. L'autore diventa «Gnammer della settimana» e ha il distintivo sul profilo.</span></div>
     <div class="step"><b>Si riparte</b><span>Il tema successivo è già annunciato: chi ha perso riprova, chi ha vinto difende il titolo. Con più temi insieme il ricettario cresce più in fretta.</span></div>
   </div>
@@ -106,6 +106,13 @@ td b{font-family:var(--display)}
       <li>Chi partecipa concede a Gnamina una licenza perpetua e non esclusiva su testo, foto e link al video, con il nome dell'autore sempre indicato. Si accetta con una spunta chiara, scritta in italiano semplice.</li>
       <li>Informativa privacy, termini e cancellazione dell'account sono obbligatori per gli store.</li>
       <li>Moderazione: controllo automatico (AI) su testi e foto, pulsante «Segnala», una coda che approvi tu. Un voto per account, niente voti da account appena creati per il primo contest.</li>
+    </ul></div>
+    <div class="card"><small>Reputazione</small><h3>Il voto di chi contribuisce pesa di più</h3><ul>
+      <li>Ogni Gnammer ha un livello, visibile sul profilo come distintivo, che cresce con quello che porta alla comunità: ricette pubblicate nei contest, assaggi con foto, vittorie.</li>
+      <li><b>Novizio</b> (iscritto, nessun contributo): voto con peso 1. <b>Cuoco</b> (almeno una ricetta in un contest, oppure tre assaggi con foto): peso 2. <b>Chef</b> (tre ricette, oppure una vittoria): peso 3. <b>Maestro</b> (tre vittorie): peso 4.</li>
+      <li>L'assaggio con la foto del piatto vale sempre un gradino in più del voto senza foto, a qualunque livello.</li>
+      <li>Il peso massimo è il quadruplo di quello minimo: chi contribuisce conta di più, ma nessuno decide da solo. Non si vota la propria ricetta.</li>
+      <li>I livelli si guadagnano solo con i contenuti, mai con il tempo o con il denaro: così non si comprano e non si gonfiano.</li>
     </ul></div>
     <div class="card"><small>Ricavi, più avanti</small><h3>Gratis il cuore, a pagamento il resto</h3><ul>
       <li>Per sempre gratis: contest, voti, Ricettario di Gnamina, profilo.</li>
@@ -156,7 +163,8 @@ const PLAN=[
  {phase:'2 · Il contest (MVP)', tasks:[
    ['Server: tabelle contest, partecipazioni, voti, segnalazioni su D1; API','2026-11-17','2026-11-28','io'],
    ['Partecipare: ricetta con la procedura guidata + video YouTube + spunta dei diritti','2026-11-24','2026-12-04','io'],
-   ['Assaggiare e votare: stelle, foto del piatto (R2), un voto per account','2026-12-01','2026-12-11','io'],
+   ['Assaggiare e votare: stelle, foto del piatto (R2), un voto per account, peso del voto per livello del Gnammer','2026-12-01','2026-12-11','io'],
+   ['Livelli dei Gnammers (Novizio, Cuoco, Chef, Maestro) e distintivi sul profilo','2026-12-04','2026-12-11','io'],
    ['Vincitrice nel Ricettario di Gnamina, «Gnammer della settimana», link «Vota la mia ricetta» per WhatsApp','2026-12-08','2026-12-14','io'],
    ['Moderazione: controllo AI, pulsante Segnala, coda di approvazione per te','2026-12-08','2026-12-14','noi'],
    ['Regolamento dei contest, informativa privacy e termini (bozza mia, revisione tua)','2026-12-01','2026-12-12','noi'],
