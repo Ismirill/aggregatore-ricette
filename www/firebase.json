@@ -1,8 +1,8 @@
 {
-  "_nota": "Configurazione web del progetto Firebase (console Firebase → Impostazioni progetto → Le tue app → app web). Questi valori sono pubblici per natura: l'accesso è protetto dalle regole di Firebase, non dalla loro segretezza. Finché apiKey è vuota gli account restano disattivati e l'app funziona con il solo codice ricettario. Nel worker va impostato anche FIREBASE_PROJECT in wrangler.toml con lo stesso projectId.",
-  "apiKey": "",
-  "authDomain": "",
-  "projectId": "",
-  "appId": "",
+  "_nota": "Configurazione web del progetto Firebase «Gnamina» (console Firebase → Impostazioni progetto → Le tue app). Valori pubblici per natura: l'accesso è protetto dalle regole di Firebase, non dalla loro segretezza. Il worker ha lo stesso projectId in FIREBASE_PROJECT (server/wrangler.toml).",
+  "apiKey": "AIzaSyB8PpCr8OrYUEZkyFlbN_0X60JCU1vG00U",
+  "authDomain": "gnamina-3ca3d.firebaseapp.com",
+  "projectId": "gnamina-3ca3d",
+  "appId": "1:514268217148:web:8d9d8610e44f1468dc2839",
   "providers": ["google"]
 }
