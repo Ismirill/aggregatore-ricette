@@ -581,7 +581,10 @@ function classify(d){
   if(d.calories&&d.calories<=450)diets.add('Ipocalorico');
   // Zona geografica
   let country='',region='';
-  for(const [re,c,r] of ZONES)if(re.test(all)){country=c;region=r;break}
+  // Il paese si riconosce dal nome del piatto e dagli ingredienti, non da tutta la didascalia: «puoi aggiungere curry…»
+  // in una ricetta di patate non la rende indiana
+  const zone=[d.title,lines(d.caption||'')[0],ingText,d.keywords,d.recipeCategory].join('\n').toLowerCase();
+  for(const [re,c,r] of ZONES)if(re.test(zone)){country=c;region=r;break}
   if(!country&&d.cuisine){const cu=String(d.cuisine).toLowerCase();country=CUISINE_MAP[cu]||Object.entries(CUISINE_MAP).find(([k])=>cu.includes(k))?.[1]||d.cuisine}
   if(!region)region=REGIONS.find(r=>all.includes(r.toLowerCase()))||'';
   if(region&&!country)country='Italia';
@@ -624,6 +627,9 @@ function sourceOf(url){
 }
 // Titolo fasullo: le app social, quando si condivide un post, mandano come titolo solo il proprio nome («Instagram», «TikTok»)
 // o la pagina di accesso; va scartato e sostituito con la didascalia o con il nome dato dall'AI
+// Titolo pulito: via hashtag, emoji e punteggiatura ai bordi; i titoli urlati in maiuscolo diventano normali
+const tidyTitle=t=>{t=String(t||'').replace(/\s*#\S+/g,'').replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu,'').replace(/^[\s\p{P}\p{S}]+|[\s!¡.:;,\-–—]+$/gu,'').replace(/\s{2,}/g,' ').trim().slice(0,140);
+  if(t.length>3&&!/\p{Ll}/u.test(t))t=t.charAt(0)+t.slice(1).toLowerCase();return t};
 const junkTitle=t=>{t=String(t||'').trim();return !t||t.length<40&&/^(instagram|tiktok|facebook|youtube|pinterest|reels?|log ?in|accedi|login|condividi|share|guarda (questo|il) (reel|video|post))\b/i.test(t)};
 const extractUrl=t=>(String(t||'').match(/https?:\/\/[^\s]+/)||[])[0];
 const isoMin=s=>{const m=String(s||'').match(/P(?:\d+D)?T?(?:(\d+)H)?(?:(\d+)M)?/);return m?(+m[1]||0)*60+(+m[2]||0)||null:null};
@@ -722,7 +728,7 @@ async function analyze(url,pasted){
   }
   // Nei post social il titolo è la didascalia: tieni solo la prima riga, senza hashtag (e se il titolo manca, la prima riga della didascalia)
   if(junkTitle(out.title)&&out.caption)out.title=out.caption;
-  if(out.title)out.title=(lines(out.title)[0]||'').replace(/\s*#\S+/g,'').trim().slice(0,140);
+  if(out.title)out.title=tidyTitle(lines(out.title)[0]||'');
   return out;
 }
 
@@ -841,7 +847,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=91; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=92; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
