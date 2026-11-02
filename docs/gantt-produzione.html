@@ -1,0 +1,148 @@
+<title>Gnamina verso la produzione</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: intestazione compatta, poi il Gantt a tutta larghezza (scorre in orizzontale sul telefono), sotto le note per fase. */
+:root{
+  --bg:#f7f2ea;--card:#fffdf9;--fg:#2a231d;--mut:#8a7e71;--bd:#e8dfd1;--grid:#efe7da;
+  --acc:#c2502f;--acc2:#e9a23b;--ok:#5f7a35;--io:#c2502f;--tu:#3b6ea5;--noi:#7a5c9e;--today:#e0a526;
+  --display:'Fredoka',system-ui,sans-serif;--sans:'Source Sans 3',system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#15120e;--card:#221d17;--fg:#f2ebe1;--mut:#a89c8c;--bd:#352e25;--grid:#1d1914;--acc:#e6734d;--acc2:#f0b24f;--ok:#a3bd6f;--io:#e6734d;--tu:#6ea2dc;--noi:#b08ad8;--today:#f0b24f;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#15120e;--card:#221d17;--fg:#f2ebe1;--mut:#a89c8c;--bd:#352e25;--grid:#1d1914;--acc:#e6734d;--acc2:#f0b24f;--ok:#a3bd6f;--io:#e6734d;--tu:#6ea2dc;--noi:#b08ad8;--today:#f0b24f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.45;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(1.6rem,3vw,2.3rem);margin:0 0 6px;text-wrap:balance;letter-spacing:-.01em}
+.lead{color:var(--mut);margin:0 0 18px;max-width:70ch}
+.kpis{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 22px}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px 14px;min-width:150px}
+.kpi b{display:block;font-family:var(--display);font-size:1.35rem;line-height:1.1}.kpi span{font-size:.8rem;color:var(--mut)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.82rem;color:var(--mut);margin:0 0 10px;align-items:center}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px}
+.legend .ms{width:0;height:0;border:7px solid transparent;border-bottom:12px solid var(--acc2);border-top:0;border-radius:0;transform:translateY(2px)}
+.scroll{overflow-x:auto;border:1px solid var(--bd);border-radius:16px;background:var(--card)}
+.gantt{display:grid;grid-template-columns:260px 1fr;min-width:980px}
+.labels{border-right:1px solid var(--bd)}
+.chart{position:relative}
+.row{height:36px;display:flex;align-items:center;border-bottom:1px solid var(--grid)}
+.labels .row{padding:0 14px;gap:8px;font-size:.9rem}
+.labels .ph{font-family:var(--display);font-weight:700;font-size:.95rem;background:color-mix(in srgb,var(--acc) 8%,transparent)}
+.labels .ms{font-weight:600;color:color-mix(in srgb,var(--acc2) 70%,var(--fg))}
+.labels .who{margin-left:auto;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;color:#fff}
+.who.io{background:var(--io)}.who.tu{background:var(--tu)}.who.noi{background:var(--noi)}
+.head{height:44px;display:grid;align-items:end;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--card);z-index:2}
+.labels .head{padding:0 14px 8px;font-size:.75rem;color:var(--mut);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.weeks{display:grid;height:100%}
+.weeks div{font-size:.72rem;color:var(--mut);border-left:1px solid var(--grid);padding:4px 0 6px 6px;display:flex;flex-direction:column;justify-content:flex-end;line-height:1.2}
+.weeks div b{color:var(--fg);font-weight:600}
+.weeks div.m{border-left-color:var(--bd)}
+.chart .row{position:relative}
+.chart .row.ph{background:color-mix(in srgb,var(--acc) 8%,transparent)}
+.chart .row::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(to right,var(--grid) 0 1px,transparent 1px calc(100%/var(--w)));background-size:100% 100%;pointer-events:none;opacity:.9}
+.bar{position:absolute;top:8px;height:20px;border-radius:7px;background:var(--io);color:#fff;font-size:.74rem;font-weight:600;display:flex;align-items:center;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 6px #0002}
+.bar.tu{background:var(--tu)}.bar.noi{background:var(--noi)}.bar.done{opacity:.55}
+.bar.phase{top:12px;height:12px;border-radius:999px;background:color-mix(in srgb,var(--acc) 55%,var(--bd));box-shadow:none}
+.mark{position:absolute;top:9px;width:0;height:0;border:9px solid transparent;border-bottom:16px solid var(--acc2);border-top:0;transform:translateX(-9px);filter:drop-shadow(0 1px 1px #0003)}
+.mark+.ml{position:absolute;top:10px;font-size:.76rem;font-weight:700;color:color-mix(in srgb,var(--acc2) 70%,var(--fg));white-space:nowrap}
+.today{position:absolute;top:0;bottom:0;width:2px;background:var(--today);z-index:1;opacity:.9}
+.today::after{content:'oggi';position:absolute;top:2px;left:4px;font-size:.68rem;font-weight:700;color:var(--today)}
+h2{font-family:var(--display);font-weight:700;font-size:1.25rem;margin:30px 0 8px}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.note{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;min-width:0}
+.note h3{margin:0 0 6px;font-family:var(--display);font-size:1.02rem}
+.note p,.note li{margin:0;font-size:.92rem;color:var(--fg)}.note ul{margin:6px 0 0;padding-left:18px}
+.note small{color:var(--mut);display:block;margin-bottom:6px;font-size:.8rem}
+.foot{margin-top:22px;color:var(--mut);font-size:.82rem}
+@media (max-width:620px){.gantt{grid-template-columns:200px 1fr;min-width:900px}.labels .row{font-size:.84rem}}
+</style>
+<div class="wrap">
+  <h1>Gnamina verso la produzione</h1>
+  <p class="lead">Piano dei lavori dal 3 novembre 2026 alla pubblicazione sugli store, a fine gennaio 2027. Tre pietre miliari: la beta chiusa prima di Natale, l'invio agli store a metà gennaio, la messa in produzione. Le barre rosse le faccio io, le blu dipendono da te (account, pagamenti, prove sui tuoi telefoni), le viola le facciamo insieme.</p>
+  <div class="kpis" id="kpis"></div>
+  <div class="legend"><span><i style="background:var(--io)"></i>Claude</span><span><i style="background:var(--tu)"></i>Geronimo</span><span><i style="background:var(--noi)"></i>insieme</span><span><i class="ms"></i>pietra miliare</span><span><i style="background:var(--today)"></i>oggi</span></div>
+  <div class="scroll"><div class="gantt" id="gantt"></div></div>
+  <h2>Le fasi, in breve</h2>
+  <div class="notes" id="notes"></div>
+  <p class="foot">Le settimane partono dal lunedì. Le durate sono stime di lavoro effettivo e includono i tempi di attesa esterni (revisione degli store, tempi di approvazione degli account sviluppatore). Il piano è un punto di partenza da rivedere insieme.</p>
+</div>
+<script>
+// Dati del piano: fasi con compiti (inizio, fine, chi) e pietre miliari. Le date sono AAAA-MM-GG.
+const START='2026-11-02', END='2027-02-01';
+const PLAN=[
+ {phase:'1 · Consolidamento di quello che c\'è', note:'Chiudere le cose già fatte ma mai provate su telefoni veri, e sistemare il marchio in modo definitivo.',
+  tasks:[
+   ['Icona in vettoriale e materiali del marchio (store, sito)','2026-11-03','2026-11-07','io'],
+   ['Prove su telefoni veri: APK sul Samsung, app su iPhone','2026-11-03','2026-11-09','tu'],
+   ['Correzioni da quelle prove (video, testo grande, barra laterale)','2026-11-09','2026-11-16','io'],
+   ['Vista tablet e computer: rifinitura su dispositivi veri','2026-11-10','2026-11-16','noi'],
+  ]},
+ {phase:'2 · Qualità e robustezza', note:'L\'app deve reggere l\'uso quotidiano di persone non esperte: errori chiari, niente stati vuoti muti, avvio rapido.',
+  tasks:[
+   ['Messaggi d\'errore e stati vuoti rivisti in tutta l\'app','2026-11-10','2026-11-20','io'],
+   ['Prestazioni: avvio, immagini, cache, memoria sul telefono','2026-11-17','2026-11-27','io'],
+   ['Sincronizzazione del ricettario: prova fra due dispositivi','2026-11-17','2026-11-24','noi'],
+   ['Procedura guidata e caratteri grandi: prova con due persone anziane','2026-11-24','2026-11-30','tu'],
+  ]},
+ {phase:'3 · Server e costi', note:'Restare dentro i piani gratuiti anche con qualche centinaio di utenti, senza sorprese.',
+  tasks:[
+   ['Monitoraggio della quota AI e della catena di riserva (Gemini, Groq)','2026-11-17','2026-11-24','io'],
+   ['Limiti d\'uso per utente e protezione da abusi','2026-11-24','2026-12-01','io'],
+   ['Sito su Cloudflare Pages (facoltativo, se il traffico cresce)','2026-11-24','2026-12-05','io'],
+  ]},
+ {phase:'4 · Legale e account', note:'Senza informativa sulla privacy e cancellazione dei dati gli store non pubblicano.',
+  tasks:[
+   ['Informativa privacy e termini d\'uso (bozza mia, revisione tua)','2026-11-24','2026-12-01','noi'],
+   ['Accesso con Google, Apple e Facebook attivo (Apple richiede l\'account a pagamento)','2026-12-01','2026-12-12','noi'],
+   ['Cancellazione account e dati dall\'app (richiesta da Google e Apple)','2026-12-08','2026-12-12','io'],
+  ]},
+ {phase:'5 · Store', note:'Qui i tempi li dettano Google e Apple: account, revisione, beta. Le festività rallentano.',
+  tasks:[
+   ['Account sviluppatore Google Play (25 $) e Apple (99 €/anno)','2026-12-01','2026-12-05','tu'],
+   ['Firma di rilascio, bundle Android (AAB), build iOS firmata','2026-12-08','2026-12-12','noi'],
+   ['Schede store: testi, screenshot, video di presentazione','2026-12-08','2026-12-19','io'],
+   ['Beta chiusa: Play test interno e TestFlight con 5-10 persone','2026-12-15','2027-01-09','noi'],
+   ['Correzioni dalla beta','2027-01-05','2027-01-12','io'],
+   ['Revisione degli store e risposte alle richieste','2027-01-12','2027-01-23','noi'],
+  ]},
+ {phase:'6 · Lancio', note:'Pubblicazione, sito aggiornato con i link agli store, primo annuncio.',
+  tasks:[
+   ['Pubblicazione su Play e App Store, sito aggiornato, annuncio','2027-01-26','2027-01-30','noi'],
+  ]},
+];
+const MILESTONES=[['Beta pronta','2026-12-15'],['Invio agli store','2027-01-12'],['In produzione','2027-01-30']];
+
+const day=d=>Math.round((new Date(d)-new Date(START))/864e5);
+const totalDays=day(END);
+const fmt=d=>new Date(d).toLocaleDateString('it-IT',{day:'numeric',month:'short'});
+const todayStr=new Date().toISOString().slice(0,10);
+const today=Math.min(Math.max(day(todayStr),0),totalDays);
+const WHO={io:'Claude',tu:'Geronimo',noi:'insieme'};
+
+// testata settimane
+const weeks=[];for(let d=new Date(START);d<new Date(END);d.setDate(d.getDate()+7))weeks.push(new Date(d));
+let L=`<div class="head">Fase · compito</div>`,C=`<div class="head"><div class="weeks" style="grid-template-columns:repeat(${weeks.length},1fr)">${weeks.map((w,i)=>`<div class="${w.getDate()<=7?'m':''}">${w.getDate()<=7||i===0?`<b>${w.toLocaleDateString('it-IT',{month:'long'})}</b>`:''}<span>${w.getDate()} ${w.toLocaleDateString('it-IT',{month:'short'}).replace('.','')}</span></div>`).join('')}</div></div>`;
+const pct=d=>(day(d)/totalDays*100).toFixed(3)+'%';
+const width=(a,b)=>((day(b)-day(a)+1)/totalDays*100).toFixed(3)+'%';
+let nTasks=0,nIo=0,nTu=0;
+for(const ph of PLAN){
+  const s=ph.tasks.reduce((m,t)=>t[1]<m?t[1]:m,ph.tasks[0][1]),e=ph.tasks.reduce((m,t)=>t[2]>m?t[2]:m,ph.tasks[0][2]);
+  L+=`<div class="row ph">${ph.phase}</div>`;
+  C+=`<div class="row ph" style="--w:${weeks.length}"><div class="bar phase" style="left:${pct(s)};width:${width(s,e)}"></div></div>`;
+  for(const [name,a,b,who] of ph.tasks){
+    nTasks++;if(who==='io')nIo++;if(who==='tu')nTu++;
+    const done=b<todayStr;
+    L+=`<div class="row" title="${name}"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span><span class="who ${who}">${WHO[who]}</span></div>`;
+    C+=`<div class="row" style="--w:${weeks.length}"><div class="bar ${who}${done?' done':''}" style="left:${pct(a)};width:${width(a,b)}" title="${name}: ${fmt(a)} – ${fmt(b)} (${WHO[who]})">${fmt(a)} – ${fmt(b)}</div></div>`;
+  }
+}
+L+=`<div class="row ms">Pietre miliari</div>`;
+C+=`<div class="row" style="--w:${weeks.length}">${MILESTONES.map(([n,d])=>`<div class="mark" style="left:${pct(d)}" title="${n}: ${fmt(d)}"></div><div class="ml" style="left:calc(${pct(d)} + 6px)">${n} · ${fmt(d)}</div>`).join('')}</div>`;
+document.getElementById('gantt').innerHTML=`<div class="labels">${L}</div><div class="chart">${C}<div class="today" style="left:${(today/totalDays*100).toFixed(3)}%"></div></div>`;
+document.getElementById('kpis').innerHTML=[
+  [`${Math.round(totalDays/7)} settimane`,'dal 3 novembre al 30 gennaio'],
+  [`${PLAN.length} fasi`,`${nTasks} compiti`],
+  [`${nTu} compiti tuoi`,'account, pagamenti, prove sui tuoi telefoni'],
+  [`${MILESTONES.length} pietre miliari`,'beta · invio agli store · produzione'],
+].map(([b,s])=>`<div class="kpi"><b>${b}</b><span>${s}</span></div>`).join('');
+document.getElementById('notes').innerHTML=PLAN.map(ph=>`<div class="note"><h3>${ph.phase}</h3><small>${fmt(ph.tasks[0][1])} → ${fmt(ph.tasks.reduce((m,t)=>t[2]>m?t[2]:m,ph.tasks[0][2]))}</small><p>${ph.note}</p><ul>${ph.tasks.map(t=>`<li>${t[0]} <span style="color:var(--mut)">(${WHO[t[3]]})</span></li>`).join('')}</ul></div>`).join('');
+</script>
