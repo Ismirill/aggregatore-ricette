@@ -254,6 +254,12 @@ details summary{cursor:pointer}
 .hlinks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10rem),1fr));gap:10px;margin-top:22px}
 .hlinks .wbtn{border-left-width:4px}
 @media (min-width:900px){#home{max-width:820px;margin:0}}
+/* ---------- Profilo Gnammer: nome, avatar e livello (Novizio, Cuoco, Chef, Maestro) ---------- */
+.who{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:10px 14px;margin:0 0 14px;cursor:pointer;box-shadow:var(--sh)}
+.who .av{width:46px;height:46px;border-radius:50%;background:color-mix(in srgb,var(--acc) 12%,var(--bg2));display:grid;place-items:center;font-size:1.5rem;flex:none}
+.who b{display:block;font-size:1.02rem}.who span{font-size:.84rem;color:var(--mut)}.who .lvl{margin-left:auto;flex:none;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc)}
+.avs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}.avs button{font-size:1.5rem;width:46px;height:46px;border-radius:50%;border:2px solid var(--bd);background:var(--card);cursor:pointer}.avs button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--card))}
+.lvls{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,8rem),1fr));gap:6px;margin-top:8px}.lvls div{border:1px solid var(--bd);border-radius:12px;padding:8px 10px;font-size:.82rem;color:var(--mut)}.lvls div b{display:block;color:var(--fg);font-size:.9rem}.lvls div.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 9%,var(--card))}
 /* ---------- Tablet (schede in basso, ma più respiro e profondità) ---------- */
 @media (min-width:620px) and (max-width:899px){
   .list{gap:16px}.tab{font-size:.8rem}dialog#det{max-width:760px}#ingList{columns:2;column-gap:24px}#ingList li{break-inside:avoid}
@@ -440,6 +446,7 @@ details summary{cursor:pointer}
 
 <dialog id="set">
   <div class="dhead stk"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi">✕</button></div>
+  <section class="sec"><h3>Il tuo profilo Gnammer</h3><div id="profBox"></div></section>
   <section class="sec"><h3>Account</h3><div id="accBox"></div></section>
   <section class="sec"><h3>Aspetto</h3><div class="seg" id="styleSeg" style="margin-bottom:8px"><label><input type="radio" name="style" value="trattoria"><span>Trattoria</span></label><label><input type="radio" name="style" value="crema"><span>Crema</span></label></div><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div></section>
   <section class="sec"><h3>Tipi di piatto</h3><div class="badges" id="catList"></div>
@@ -814,7 +821,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=85; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=86; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -922,6 +929,23 @@ function goView(v){
   if(view==='book')loadBook();fillSelects();render()}
 $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(t)goView(t.dataset.v)};
 
+/* ---------- Profilo Gnammer: nome e avatar scelti dall'utente (locali; con l'account verranno dal profilo online); livello calcolato dai contributi ---------- */
+let PROF=load('gnammer',{name:'',avatar:'🍅'});
+const AVATARS=['🍅','🧑‍🍳','👩‍🍳','👨‍🍳','👵','👴','🍝','🥘','🥖','🫒','🧀','🍋'];
+const LEVELS=[['Novizio',1,'Appena iscritto'],['Cuoco',2,'Una ricetta in un contest, oppure tre assaggi con foto'],['Chef',3,'Tre ricette, oppure una vittoria'],['Maestro',4,'Tre vittorie']];
+function gnammerLevel(){const ric=items.filter(i=>i.contest).length,ass=load('tastings',[]).length,win=+load('wins',0)||0;
+  const k=win>=3?3:(ric>=3||win>=1)?2:(ric>=1||ass>=3)?1:0;return {k,name:LEVELS[k][0],weight:LEVELS[k][1],ric,ass,win}}
+const profName=()=>PROF.name||ACC?.name||'';
+function saveProf(){save('gnammer',PROF);if(view==='home')renderHome()}
+function profUI(){const box=$('#profBox');if(!box)return;const L=gnammerLevel();
+  box.innerHTML=`<p class="meta">Il nome e l'immagine che gli altri Gnammers vedono accanto alle tue ricette e ai tuoi voti.</p>
+  <label>Il tuo nome da Gnammer<input id="profName" maxlength="30" placeholder="Es. Nonna Pina" value="${esc(profName())}"></label>
+  <div class="avs">${AVATARS.map(a=>`<button type="button" data-av="${a}" class="${a===PROF.avatar?'on':''}" aria-label="Avatar ${a}">${a}</button>`).join('')}</div>
+  <p class="meta">Sei <b>${L.name}</b>: il tuo voto vale ${L.weight}. ${L.ric?`Ricette in gara: ${L.ric}.`:'Partecipa a un contest per salire di livello.'}</p>
+  <div class="lvls">${LEVELS.map((l,i)=>`<div class="${i===L.k?'on':''}"><b>${l[0]} · voto ×${l[1]}</b>${l[2]}</div>`).join('')}</div>`;
+  $('#profName').oninput=e=>{PROF.name=e.target.value.trim();saveProf()};
+  box.querySelectorAll('[data-av]').forEach(b=>b.onclick=()=>{PROF.avatar=b.dataset.av;saveProf();profUI()})}
+
 /* ---------- Casa: il contest della settimana. I dati vengono da contest.json (tema, date, regole); lo stato si deduce dalle date ---------- */
 let CONTEST={id:'2026-w46',tema:'La miglior carbonara',descrizione:'Il piatto che tutti conoscono e nessuno fa uguale.',regole:['Un video della preparazione, massimo 3 minuti','Una sola ricetta a testa'],inizio:'2026-11-09',fine_partecipazione:'2026-11-15',fine_assaggio:'2026-11-22',prossimo:''};
 fetch('contest.json?'+Math.floor(Date.now()/36e5)).then(r=>r.ok?r.json():null).then(c=>{if(c&&c.id){CONTEST=c;if(view==='home')renderHome()}}).catch(()=>{});
@@ -931,7 +955,9 @@ function renderHome(){
   const c=CONTEST,ph=contestPhase(c),mine=items.find(i=>i.contest===c.id);
   const state={soon:`<span class="pill soon">Prossimamente</span> Si parte ${dIt(c.inizio)}`,join:`<span class="pill">Si partecipa</span> fino a ${dIt(c.fine_partecipazione)}`,taste:`<span class="pill taste">Si assaggia e si vota</span> fino a ${dIt(c.fine_assaggio)}`,done:`<span class="pill soon">Concluso</span> la vincitrice arriva nel Ricettario di Gnamina`}[ph];
   const btn={soon:mine?'✏️ Rivedi la tua ricetta':'Prepara la tua ricetta',join:mine?'✏️ Rivedi la tua ricetta in gara':'Partecipa con la tua ricetta',taste:'Assaggia e vota',done:'Vedi la vincitrice'}[ph];
+  const L=gnammerLevel(),nm=profName();
   $('#home').innerHTML=`
+    <div class="who" id="whoBar"><span class="av">${PROF.avatar||'🍅'}</span><div>${nm?`<b>Ciao, ${esc(nm)}</b><span>${L.name} · il tuo voto vale ${L.weight}${L.ric?` · ${L.ric} ricett${L.ric===1?'a':'e'} in gara`:''}</span>`:`<b>Come ti chiami?</b><span>Scegli il tuo nome da Gnammer: lo vedranno gli altri accanto alle tue ricette</span>`}</div><span class="lvl">${L.name}</span></div>
     <div class="contest">
       <p class="eyebrow">Il contest della settimana</p>
       <h2>${esc(c.tema)}</h2>
@@ -960,6 +986,7 @@ function renderHome(){
     openForm({contest:c.id,tags:['In gara']});
   };
   if($('#cMine'))$('#cMine').onclick=()=>openDetail(mine);
+  $('#whoBar').onclick=()=>{$('#setBtn').click();setTimeout(()=>{const n=$('#profName');if(n){n.scrollIntoView({block:'center'});if(!PROF.name)n.focus()}},150)};
   $('#home').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>goView(b.dataset.goto));
 }
 
@@ -1951,7 +1978,7 @@ const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${e
 const setTheme=t=>{try{localStorage.setItem('theme',t||'auto')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme;themeColor()}; // predefinito: Trattoria scura; Automatico solo se scelto
 $('#themeSeg').onchange=e=>setTheme(e.target.value);
 $('#styleSeg').onchange=e=>{try{localStorage.setItem('style',e.target.value)}catch{}document.documentElement.dataset.style=e.target.value};
-$('#setBtn').onclick=()=>{const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();accUI();syncUI();if(aiOn())initZone();$('#set').showModal()};
+$('#setBtn').onclick=()=>{profUI();const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();accUI();syncUI();if(aiOn())initZone();$('#set').showModal()};
 $('#camBtn').onclick=()=>$('#camIn').click();
 $('#camIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)photoSearch(f)};
 $('#setClose').onclick=()=>$('#set').close();
@@ -2068,7 +2095,8 @@ setInterval(()=>SY?.code&&document.visibilityState==='visible'&&doSync(),5*60000
 // Email e password parlano direttamente con le API REST di Firebase (poco codice, funziona anche nell'APK); l'SDK web viene
 // caricato solo per la finestra di accesso di Google/Apple/Facebook. La sessione (refresh token) è conservata qui.
 // Il server (/account) verifica il token e dà il codice ricettario dell'account: da lì in poi vale la sincronizzazione normale.
-const FB=load('fbCfg',null)||{apiKey:'',authDomain:'',projectId:'',appId:'',providers:['google']}; // dal progetto Firebase (console → impostazioni → app web)
+const FB=load('fbCfg',null)||{apiKey:'',authDomain:'',projectId:'',appId:'',providers:['google']}; // dal progetto Firebase (console → impostazioni → app web), oppure da www/firebase.json
+if(!FB.apiKey)fetch('firebase.json?'+Math.floor(Date.now()/36e5)).then(r=>r.ok?r.json():null).then(c=>{if(c?.apiKey){Object.assign(FB,{apiKey:c.apiKey,authDomain:c.authDomain||'',projectId:c.projectId||'',appId:c.appId||'',providers:c.providers||['google']});accUI();syncUI();if(view==='home')renderHome()}}).catch(()=>{});
 const FB_API=(()=>{try{return localStorage.getItem('fbUrl')}catch{}})()||'https://identitytoolkit.googleapis.com/v1';
 const FB_TOKEN=(()=>{try{return localStorage.getItem('fbTok')}catch{}})()||'https://securetoken.googleapis.com/v1/token';
 const FB_SDK='https://www.gstatic.com/firebasejs/11.10.0/';
