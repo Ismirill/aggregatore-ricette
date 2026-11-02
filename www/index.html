@@ -141,7 +141,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .rate button:active{transform:scale(1.2)}.rate button.on{color:var(--star)}
 
 /* ---------- Scheda ricetta ---------- */
-.dv{position:relative}
+.dv{position:relative}.dcols{display:contents}
 .dclose{position:sticky;top:0;float:right;z-index:3;margin:-6px -6px 0 0;width:38px;height:38px;border-radius:50%;border:none;background:color-mix(in srgb,var(--card) 85%,transparent);color:var(--fg);font-size:1.1rem;cursor:pointer;box-shadow:var(--sh);backdrop-filter:blur(8px)}
 .heroWrap{margin:-20px -20px 14px;position:relative}
 @media (max-width:620px){.heroWrap{margin:-18px -16px 14px}}
@@ -254,8 +254,12 @@ details summary{cursor:pointer}
   .top,.searchbar,.chips,.filters,main{max-width:1240px}
   .list{grid-template-columns:repeat(auto-fill,minmax(min(100%,15rem),1fr));gap:20px}
   .item{border-radius:20px;box-shadow:var(--sh),0 0 0 1px color-mix(in srgb,var(--bd) 50%,transparent)}
-  dialog#det{max-width:900px}dialog#dlg{max-width:720px}
-  .hero{max-height:380px}.video{max-height:440px}
+  dialog#det{max-width:1080px;padding:24px 28px}dialog#dlg{max-width:720px}
+  .dcols{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:32px;align-items:start}
+  .dmain{position:sticky;top:-24px;padding-top:4px}.dside{padding-top:4px}.dside h3:first-child{margin-top:0}
+  .dmain .heroWrap{margin:0 0 14px;border-radius:18px;overflow:hidden;box-shadow:var(--sh2)}.dmain .heroWrap::after{display:none}.dmain .hero{aspect-ratio:4/3;max-height:none}
+  .dmain .video{max-height:none}.dmain .video.h{aspect-ratio:16/9;height:auto}.dmain .video.v{aspect-ratio:9/16;height:auto;max-height:70dvh;width:auto;margin:0 auto}
+  .dmain h2{font-size:1.7rem;margin-top:14px}.dside .row{margin-top:24px}
   #ingList{columns:2;column-gap:28px}#ingList li{break-inside:avoid}
   .toast{bottom:28px;left:calc(50% + 134px)}
 }
@@ -777,7 +781,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=82; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=83; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1589,7 +1593,7 @@ function sourceLine(i){
 function openDetail(i){
   const e=embedOf(i);
   const [em,c1,c2]=look(i),tm=(i.ingredients?.length||i.steps?.length)?timing(i):null;
-  $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button>
+  $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button><div class="dcols"><div class="dmain">
     ${e?`<iframe class="video ${e.v?'v':'h'}" src="${esc(e.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
       :i.image?`<div class="heroWrap"><img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;hero&quot; style=&quot;display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)&quot;>${em}</div>'"></div>`
       :`<div class="heroWrap"><div class="hero" style="display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)">${em}</div></div>`}
@@ -1604,6 +1608,7 @@ function openDetail(i){
     ${i.artusi?`<details class="meta" style="margin-top:6px"><summary>Testo originale di Artusi: «${esc(i.origTitle)}» (n. ${i.num}, ${esc(i.chapter)})</summary><p class="cap" style="margin-top:6px">${esc(i.text)}</p></details>`:''}
     ${i.book&&!i.linked?`<p class="lic" style="margin-top:8px">${sourceLine(i)}</p>`:''}
     <div class="rate" id="dRate" style="margin-top:8px${i.book?';display:none':''}">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n<=(i.rating||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}</div>
+    </div><div class="dside">
     ${i.linked?`<div class="kv"><span>Costo ${esc(i.cost||'n.d.')}</span></div><h3>Ingredienti principali</h3><ul>${i.ingredients.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
       <p class="meta">Dosi e procedimento sono sulla pagina originale. <a class="btn pri" style="margin-top:8px" href="${esc(i.url)}" target="_blank" rel="noopener">Apri su GialloZafferano</a></p>
       <p class="lic">Dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a> (Fossemò, Mignosi, Raggioli, Spezialetti, D'Asaro, 2022), licenza CC BY 4.0 · ricetta di GialloZafferano</p>`
@@ -1615,7 +1620,7 @@ function openDetail(i){
     ${i.imgFile?`<p class="lic">Foto: <a href="${esc(i.imgFile)}" target="_blank" rel="noopener">Wikimedia Commons</a> (licenza libera, autore e licenza nella pagina della foto)</p>`:i.imgCredit?`<p class="lic">${esc(i.imgCredit)}${i.imgLink?` · <a href="${esc(i.imgLink)}" target="_blank" rel="noopener">pagina della foto</a>`:''}</p>`:''}
     <div class="row">${i.url&&i.source!=='Gnamina'&&i.source!=='Aggregatore Ricette'?`<a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">Apri originale</a>`:''}
       <a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">▶ Cerca su YouTube</a><span class="sp"></span>
-      ${i.pronto||i.colazione?'':i.book?'<button class="btn pri" id="dSave">Salva nelle mie</button>':'<button class="btn" id="dEdit">Modifica</button>'}<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button></div>`;
+      ${i.pronto||i.colazione?'':i.book?'<button class="btn pri" id="dSave">Salva nelle mie</button>':'<button class="btn" id="dEdit">Modifica</button>'}<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button></div></div></div>`;
   $('#dRate').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n;i.rating=i.rating===n?0:n;i.t=Date.now();saveItems();render();
     $('#dRate').querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.n<=i.rating))};
   if(i.ingredients?.length&&!i.linked){
