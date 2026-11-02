@@ -43,9 +43,9 @@ header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88
   padding:calc(10px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid color-mix(in srgb,var(--bd) 70%,transparent)}
 .top{display:flex;align-items:center;gap:10px;max-width:1100px;margin:0 auto}
 .brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-.brand svg{flex:none;width:34px;height:34px}.brand .logo{flex:none;width:auto;height:34px;display:block}.brandSep{width:1px;height:30px;background:var(--bd);flex:none}
-.brand h1{margin:0;font-size:1.15rem;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand small{display:block;font-family:var(--sans);font-size:.72rem;color:var(--mut);font-weight:500;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.brand>div{min-width:0}
+.brand .mark{flex:none;width:42px;height:42px;border-radius:12px;display:block;box-shadow:var(--sh)}
+.brand h1{margin:0;font-size:1.35rem;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand>div{min-width:0}
 .icon{background:var(--card);border:1px solid var(--bd);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--fg);cursor:pointer;padding:0;box-shadow:var(--sh)}
 .icon svg{width:20px;height:20px}
 .searchbar{max-width:1100px;margin:10px auto 0;display:flex;gap:8px}
@@ -226,7 +226,6 @@ details summary{cursor:pointer}
 @font-face{font-family:'Fredoka';src:url(fonts/fredoka.woff2) format('woff2');font-weight:500 700;font-display:swap}
 /* scritte della testata e delle schede in basso nello stesso carattere del logo Gnamina */
 .brand h1{font-family:'Fredoka',var(--sans);font-weight:700;letter-spacing:0;color:#3a2416}
-.brand small{font-family:'Fredoka',var(--sans);font-weight:500;letter-spacing:.01em}
 #tabs .tab{font-family:'Fredoka',var(--sans);font-weight:600;letter-spacing:.01em}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .brand h1{color:var(--fg)}}:root[data-theme=dark] .brand h1{color:var(--fg)}
 </style>
@@ -234,7 +233,7 @@ details summary{cursor:pointer}
 <body>
 <header>
   <div class="top">
-    <div class="brand"><img class="logo" src="logo.svg" alt="Gnamina" width="402" height="128"><span class="brandSep" aria-hidden="true"></span><div><h1 id="vTitle">Le mie ricette</h1><small id="vSub">Le tue ricette salvate</small></div></div>
+    <div class="brand"><img class="mark" src="icon-192.png" alt="Gnamina" width="192" height="192"><div><h1 id="vTitle">Le mie ricette</h1></div></div>
     <button class="icon" id="camBtn" aria-label="Trova ricette da una foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden>
     <button class="icon" id="setBtn" aria-label="Impostazioni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </div>
@@ -747,7 +746,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=78; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=79; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -848,7 +847,7 @@ $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;view=t.data
 
   $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
   const bud=view==='budget';['#sbar','#chips','#list','#add'].forEach(x=>$(x).hidden=bud);if(bud)$('#chips2').hidden=true;if(bud)$('#chips2').hidden=true;if(bud)$('.filters').hidden=true;$('#budget').hidden=!bud;filtUI();
-  $('#vTitle').textContent={mine:'Le mie ricette',book:'Ricettario',budget:'Il mio menu'}[view];$('#vSub').textContent={mine:'Le tue ricette salvate',book:'Italia e dal mondo',budget:'Settimana o pasto, nel tuo budget'}[view];window.scrollTo(0,0);
+  $('#vTitle').textContent={mine:'Le mie ricette',book:'Ricettario',budget:'Il mio menu'}[view];window.scrollTo(0,0);
   if(bud){loadBook();loadPT();initBudget();return}
   $('#q').placeholder=view==='book'?'Cerca tra le ricette del ricettario…':'Cerca titolo, ingrediente, etichetta…';
   if(view==='book')loadBook();fillSelects();render()};
