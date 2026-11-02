@@ -847,7 +847,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=93; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=94; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2274,12 +2274,14 @@ if(p.has('codice')){const c=normCode(p.get('codice'));history.replaceState(null,
 
 // Pulizia una tantum (versione 93): fino alla 91 il paese si riconosceva da tutta la didascalia («puoi aggiungerci curry…» → India);
 // le ricette salvate il cui paese viene solo da quella regola si ricontrollano con la regola nuova
-if(!load('zoneFix93',0)){let ch=0;items.forEach(i=>{if(i.book||!i.country||!i.caption)return;
-  const all=[i.title,i.caption,(i.ingredients||[]).join('\n')].join('\n').toLowerCase(),old=ZONES.find(([re])=>re.test(all));
+// Qualunque errore qui dentro non deve fermare l'avvio dell'app (versione 94: una ricetta in formato vecchio lo bloccava)
+if(!load('zoneFix93',0)){let ch=0;items.forEach(i=>{try{if(i.book||!i.country||typeof i.caption!=='string'||!i.caption)return;
+  const ing=Array.isArray(i.ingredients)?i.ingredients.map(String):lines(i.ingredients);
+  const all=[i.title,i.caption,ing.join('\n')].join('\n').toLowerCase(),old=ZONES.find(([re])=>re.test(all));
   if(!old||old[1]!==i.country)return; // paese messo a mano, dall'AI o da un sito: resta
-  const c=classify({title:i.title,caption:i.caption,ingredients:i.ingredients||[]});
-  if(c.country!==i.country){i.country=c.country;i.region=c.region;i.t=Date.now();ch++}});
-  save('zoneFix93',1);if(ch){saveItems();render()}}
+  const c=classify({title:String(i.title||''),caption:i.caption,ingredients:ing});
+  if(c.country!==i.country){i.country=c.country;i.region=c.region;i.t=Date.now();ch++}}catch(e){console.warn('pulizia paese',e)}});
+  save('zoneFix93',1);try{if(ch){saveItems();render()}}catch(e){console.warn('pulizia paese',e)}}
 fillSelects();goView('home');userBtnUI();refreshVerified();
 if(!ACC&&!load('accAsked',0))setTimeout(()=>{if(!$('#dlg').open&&!$('#det').open)openAcct(true)},900);
 if(SY?.code)setTimeout(()=>doSync(),800);
