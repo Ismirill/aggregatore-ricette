@@ -114,6 +114,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px}
 .tab{flex:1;max-width:160px;border:none;background:none;color:var(--mut);font:inherit;font-size:.72rem;font-weight:600;padding:6px 4px;border-radius:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
 .tab svg{width:24px;height:24px}
 .tab.on{color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,transparent)}
+.nbrand,.nsec,#ntools,.nfoot,.tab .cnt,.icon .lbl{display:none}
 
 /* ---------- Finestre ---------- */
 dialog{border:none;border-radius:24px;max-width:640px;width:calc(100% - 24px);max-height:calc(100dvh - 24px);margin:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:var(--card);color:var(--fg);padding:20px;box-shadow:var(--sh2)}
@@ -238,14 +239,22 @@ details summary{cursor:pointer}
 /* ---------- Computer e tablet grandi: barra laterale con l'icona e le sezioni, «Nuova ricetta» in basso nella barra, contenuto largo ---------- */
 @media (min-width:900px){
   body{padding-left:268px;padding-bottom:40px;background-image:radial-gradient(1000px 560px at 22% -12%,color-mix(in srgb,var(--acc) 13%,transparent),transparent 70%),var(--pattern,none)}
-  .nav{top:0;bottom:0;right:auto;width:268px;box-sizing:border-box;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:4px;padding:calc(24px + env(safe-area-inset-top)) 16px 100px;border-top:none;border-right:1px solid var(--bd);
-    background:linear-gradient(180deg,color-mix(in srgb,var(--card) 94%,var(--acc)),var(--card) 38%);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:12px 0 40px -24px #0004}
-  .nav::before{content:'';display:block;width:58px;height:58px;margin:2px 0 28px 8px;border-radius:17px;background:url(icon-192.png) center/cover;box-shadow:0 10px 24px color-mix(in srgb,var(--acc) 38%,transparent)}
-  .tab{flex:none;max-width:none;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;font-size:1rem;font-weight:600;border-radius:14px;transition:background .15s,color .15s}
+  .nav{top:0;bottom:0;right:auto;width:272px;box-sizing:border-box;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:3px;padding:calc(22px + env(safe-area-inset-top)) 16px 18px;border-top:none;border-right:1px solid var(--bd);overflow-y:auto;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--card) 93%,var(--acc)),var(--card) 36%);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:12px 0 40px -24px #0004}
+  .nbrand{display:flex;align-items:center;gap:12px;padding:4px 6px 0;margin-bottom:18px}
+  .nbrand img{width:54px;height:54px;border-radius:15px;box-shadow:0 8px 20px color-mix(in srgb,var(--acc) 38%,transparent)}
+  .nbrand b{display:block;font-family:'Fredoka',var(--sans);font-weight:700;font-size:1.45rem;line-height:1.05;color:var(--fg)}.nbrand small{display:block;color:var(--mut);font-size:.8rem;margin-top:2px}
+  .nav .fab{position:static;width:100%;height:3rem;margin:0 0 18px;border-radius:14px;font-size:1rem}
+  .nsec{display:block;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);padding:8px 14px 4px}
+  .tab{flex:none;max-width:none;flex-direction:row;justify-content:flex-start;gap:12px;padding:11px 14px;font-size:1rem;font-weight:600;border-radius:14px;transition:background .15s,color .15s}
   .tab svg{width:22px;height:22px}
   .tab:hover{background:color-mix(in srgb,var(--fg) 6%,transparent);color:var(--fg)}
   .tab.on{color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent);box-shadow:inset 3px 0 0 var(--acc)}
-  .fab{left:16px;right:auto;bottom:28px;width:236px;border-radius:14px;z-index:7;height:3.1rem}
+  .tab .cnt{display:inline-block;margin-left:auto;font-size:.74rem;font-weight:700;color:var(--mut);background:color-mix(in srgb,var(--fg) 7%,transparent);border-radius:999px;padding:2px 8px;min-width:1.2em;text-align:center}.tab .cnt:empty{display:none}.tab.on .cnt{color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent)}
+  #ntools{display:flex;flex-direction:column;gap:3px}
+  #ntools .icon{width:100%;height:auto;border-radius:14px;display:flex;align-items:center;justify-content:flex-start;gap:12px;padding:11px 14px;background:none;border:none;box-shadow:none;color:var(--mut);font:inherit;font-size:1rem;font-weight:600;transition:background .15s,color .15s}
+  #ntools .icon svg{width:22px;height:22px}#ntools .icon .lbl{display:inline}#ntools .icon:hover{background:color-mix(in srgb,var(--fg) 6%,transparent);color:var(--fg)}
+  .nfoot{display:block;margin-top:auto;padding:16px 14px 0;font-size:.74rem;color:var(--mut)}
   .brand .mark{display:none}.brand h1{font-size:1.7rem}
   header{padding:22px 36px 10px}
   .sw input,#fBtn{box-shadow:var(--sh)}
@@ -269,8 +278,8 @@ details summary{cursor:pointer}
 <header>
   <div class="top">
     <div class="brand"><img class="mark" src="icon-192.png" alt="Gnamina" width="192" height="192"><div><h1 id="vTitle">Le mie ricette</h1></div></div>
-    <button class="icon" id="camBtn" aria-label="Trova ricette da una foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden>
-    <button class="icon" id="setBtn" aria-label="Impostazioni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    <button class="icon" id="camBtn" aria-label="Trova ricette da una foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg><span class="lbl">Foto di un piatto</span></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden>
+    <button class="icon" id="setBtn" aria-label="Impostazioni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="lbl">Impostazioni</span></button>
   </div>
   <div class="searchbar" id="sbar"><div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Cerca titolo, ingrediente, etichetta…"></div><button id="fBtn" type="button" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filtri</button></div>
   <div class="chips" id="chips"></div>
@@ -285,7 +294,7 @@ details summary{cursor:pointer}
     <select id="fSort"><option value="new">In evidenza / più recenti</option><option value="fast">Più veloci</option><option value="easy">Più facili</option><option value="cheap">Più economiche</option><option value="rate">Più votate</option><option value="az">A–Z</option></select>
   </div>
 </header>
-<nav class="nav" id="tabs"><button class="tab on" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario</button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v7M10 3v7M17 3c-2 2-3 4-3 7h3v11"/></svg>Il mio menu</button></nav>
+<nav class="nav" id="tabs"><div class="nbrand"><img src="icon-192.png" alt="" width="192" height="192"><div><b>Gnamina</b><small>La tua app di cucina</small></div></div><div class="nsec" id="secLbl">Sezioni</div><button class="tab on" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie<span class="cnt"></span></button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario<span class="cnt"></span></button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v7M10 3v7M17 3c-2 2-3 4-3 7h3v11"/></svg>Il mio menu</button><div class="nsec">Strumenti</div><div id="ntools"></div><div class="nfoot">Versione <span id="navVer"></span></div></nav>
 <main><div class="list" id="list"></div>
 <section id="budget" hidden>
   <div class="bhead"><h2>Il menu giusto per il tuo budget</h2><p>Rispondi a sei domande: preparo un menu con i piatti italiani di tutti i giorni, bilanciato e con frutta e verdura di stagione. Alla fine puoi variarlo quante volte vuoi.</p></div>
@@ -781,7 +790,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=83; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=84; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -966,6 +975,7 @@ function fillSelects(){
   $('#regions').innerHTML=REGIONS.map(c=>`<option value="${esc(c)}">`).join('');
 }
 function render(){
+  navCounts();
   const q=$('#q').value.trim().toLowerCase(),fd=$('#fDiet').value,fz=$('#fZone').value,fr=+$('#fRate').value,ft=+$('#fTime').value,fdf=+$('#fDiff').value,fc=+$('#fCost').value,fs=$('#fSort').value;
   // «Italiane»: vista di partenza del Ricettario, tutte le ricette italiane con i tipi di piatto nella seconda riga; cercando si cerca in tutto il ricettario
   const showIntl=view==='book'&&cur==='Internazionali',showBk=view==='book'&&cur==='Colazione',showIta=view==='book'&&cur==='Italiane'&&!q;
@@ -1853,6 +1863,13 @@ $('#list').addEventListener('contextmenu',e=>{const it=e.target.closest('.item')
 
 /* ---------- Eventi generali ---------- */
 $('#add').onclick=()=>openForm();
+// Barra laterale (schermi larghi): «Nuova ricetta» sotto l'intestazione e gli strumenti (foto, impostazioni) in basso; sul telefono tornano al loro posto
+const deskQ=matchMedia('(min-width:900px)'),addHome=$('#add').nextSibling;
+function placeDesk(){const d=deskQ.matches,nav=$('#tabs');
+  if(d){nav.insertBefore($('#add'),$('#secLbl'));$('#ntools').append($('#camBtn'),$('#setBtn'))}
+  else{document.body.insertBefore($('#add'),addHome);$('.top').append($('#camBtn'),$('#setBtn'))}}
+deskQ.addEventListener('change',placeDesk);placeDesk();$('#navVer').textContent=APP_VERSION;
+function navCounts(){const m=$('#tabs [data-v=mine] .cnt'),b=$('#tabs [data-v=book] .cnt');if(m)m.textContent=items.length||'';if(b)b.textContent=book?book.length+BK.length:''}
 ['#q','#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate','#fSort'].forEach(s=>$(s).addEventListener('input',()=>{render();filtUI()}));
 // Filtri nascosti dietro un pulsante; il pulsante si colora se ce n'è qualcuno attivo
 const filtUI=()=>{const n=['#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate'].filter(x=>$(x).value&&$(x).value!=='0').length;$('#fBtn').classList.toggle('on',n>0||!$('.filters').hidden);$('#fBtn').lastChild.textContent=n?`Filtri · ${n}`:'Filtri'};
