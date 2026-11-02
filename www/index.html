@@ -8,9 +8,11 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-180.png">
-<meta name="theme-color" content="#f7f2ea" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#15120e" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" id="themeColor" content="#15120e">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>try{const t=localStorage.getItem("theme")||"light";if(t!=="auto")document.documentElement.dataset.theme=t;document.documentElement.dataset.style=localStorage.getItem("style")||"trattoria"}catch{document.documentElement.dataset.theme="light";document.documentElement.dataset.style="trattoria"}</script>
+<script>try{const t=localStorage.getItem("theme")||"dark";if(t!=="auto")document.documentElement.dataset.theme=t;document.documentElement.dataset.style=localStorage.getItem("style")||"trattoria"}catch{document.documentElement.dataset.theme="dark";document.documentElement.dataset.style="trattoria"}
+// colore della barra di stato coerente con il tema (scuro predefinito; «Automatico» segue il sistema)
+function themeColor(){const t=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.getElementById("themeColor").content=t==="dark"?"#15120e":"#f7f2ea"}themeColor();matchMedia("(prefers-color-scheme:dark)").addEventListener("change",themeColor);</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -28,12 +30,12 @@
 :root[data-theme=dark]{--bg:#15120e;--bg2:#1d1914;--card:#221d17;--fg:#f2ebe1;--mut:#a89c8c;--acc:#e6734d;--acc2:#f0b24f;--ok:#a3bd6f;--bd:#352e25;
   --sh:0 1px 2px #0006,0 6px 20px #0004;--sh2:0 10px 30px #0008;--pattern:none;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip}
-body{margin:0;overflow-x:clip;font-family:var(--sans);background:var(--bg);background-image:var(--pattern,none);background-attachment:fixed;color:var(--fg);padding-bottom:calc(84px + env(safe-area-inset-bottom));line-height:1.45}
+html{font:-apple-system-body;font-family:var(--sans);-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip} /* su iPhone il testo segue «Dimensione testo» delle Impostazioni; tutte le misure sotto sono in rem, così l'interfaccia cresce insieme */
+body{margin:0;overflow-x:clip;font-family:var(--sans);background:var(--bg);background-image:var(--pattern,none);background-attachment:fixed;color:var(--fg);padding-bottom:calc(5.6rem + env(safe-area-inset-bottom));line-height:1.45}
 a{color:var(--acc)}
 h1,h2,h3,.ttl{font-family:var(--serif);letter-spacing:-.01em}
 button,input:not([type=checkbox]),select,textarea{-webkit-appearance:none;appearance:none}
-input,select,textarea{font:inherit;font-size:16px;width:100%;padding:11px 14px;border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--fg);outline:none;transition:border-color .15s,box-shadow .15s}
+input,select,textarea{font:inherit;font-size:max(16px,1rem);width:100%;padding:11px 14px;border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--fg);outline:none;transition:border-color .15s,box-shadow .15s}
 input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 18%,transparent)}
 input[type=checkbox]{accent-color:var(--acc);width:18px;height:18px}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23998'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px}
@@ -43,10 +45,10 @@ header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88
   padding:calc(10px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid color-mix(in srgb,var(--bd) 70%,transparent)}
 .top{display:flex;align-items:center;gap:10px;max-width:1100px;margin:0 auto}
 .brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-.brand .mark{flex:none;width:42px;height:42px;border-radius:12px;display:block;box-shadow:var(--sh)}
-.brand h1{margin:0;font-size:1.35rem;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand .mark{flex:none;width:2.7rem;height:2.7rem;border-radius:12px;display:block;box-shadow:var(--sh)}
+.brand h1{margin:0;font-size:1.35rem;line-height:1.05;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .brand>div{min-width:0}
-.icon{background:var(--card);border:1px solid var(--bd);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--fg);cursor:pointer;padding:0;box-shadow:var(--sh)}
+.icon{background:var(--card);border:1px solid var(--bd);width:2.5rem;height:2.5rem;border-radius:50%;display:grid;place-items:center;color:var(--fg);cursor:pointer;padding:0;box-shadow:var(--sh)}
 .icon svg{width:20px;height:20px}
 .searchbar{max-width:1100px;margin:10px auto 0;display:flex;gap:8px}
 .sw{position:relative;flex:1}.sw svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--mut);pointer-events:none}
@@ -58,14 +60,14 @@ header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88
 .chip{flex:none;border:1px solid var(--bd);background:var(--card);color:var(--fg);padding:7px 14px;border-radius:999px;font:inherit;font-size:.88rem;font-weight:500;cursor:pointer;transition:all .15s}
 .chip small{color:var(--mut);font-weight:500;margin-left:3px}
 .chip.on{background:var(--fg);border-color:var(--fg);color:var(--bg)}.chip.on small{color:color-mix(in srgb,var(--bg) 70%,transparent)}
-.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:1100px;margin:10px auto 0}
-.filters select{padding:9px 28px 9px 12px;font-size:16px;border-radius:12px}
-@media (max-width:620px){.filters{grid-template-columns:1fr 1fr}.filters select:first-child{grid-column:1/-1}}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10rem),1fr));gap:8px;max-width:1100px;margin:10px auto 0}
+.filters select{padding:9px 28px 9px 12px;font-size:max(16px,1rem);border-radius:12px}
+@media (max-width:620px){.filters select:first-child{grid-column:1/-1}}
 
 /* ---------- Elenco a schede ---------- */
 main{max-width:1100px;margin:0 auto;padding:14px 16px}
-.list{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
-@media (max-width:620px){.list{grid-template-columns:1fr 1fr;gap:10px}}
+.list{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,16rem),1fr))}
+@media (max-width:620px){.list{grid-template-columns:repeat(auto-fill,minmax(min(100%,10rem),1fr));gap:10px}} /* due schede per riga sul telefono, una sola quando il testo è grande */
 .list>.lic,.list>.meta,.list>.empty,.list>.warn{grid-column:1/-1}
 .item{display:flex;flex-direction:column;background:var(--card);border-radius:var(--r);overflow:hidden;cursor:pointer;box-shadow:var(--sh);border:1px solid color-mix(in srgb,var(--bd) 60%,transparent);transition:transform .15s,box-shadow .15s}
 .item:hover{transform:translateY(-2px);box-shadow:var(--sh2)}.item:active{transform:scale(.985)}
@@ -104,7 +106,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px}
 .btn.pri{background:var(--acc);border-color:var(--acc);color:#fff;box-shadow:0 4px 14px color-mix(in srgb,var(--acc) 35%,transparent)}
 .btn.pri:hover{filter:brightness(1.06)}
 .btn:disabled{opacity:.4}
-.fab{position:fixed;right:18px;bottom:calc(86px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:20px;border:none;background:var(--acc);color:#fff;font-size:2rem;line-height:1;box-shadow:0 8px 24px color-mix(in srgb,var(--acc) 45%,transparent);cursor:pointer;z-index:4}
+.fab{position:fixed;right:18px;bottom:calc(5.7rem + env(safe-area-inset-bottom));width:3.6rem;height:3.6rem;border-radius:20px;border:none;background:var(--acc);color:#fff;font-size:2rem;line-height:1;box-shadow:0 8px 24px color-mix(in srgb,var(--acc) 45%,transparent);cursor:pointer;z-index:4}
 
 /* ---------- Navigazione in basso ---------- */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;justify-content:center;gap:4px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));
@@ -125,7 +127,7 @@ dialog h2{margin:0 0 10px;font-size:1.45rem;line-height:1.2}
 dialog h3{font-size:1.1rem;margin:20px 0 8px}
 form{display:grid;gap:12px}
 label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10rem),1fr));gap:10px}
 .checks{display:flex;flex-wrap:wrap;gap:6px}
 .checks label{display:flex;align-items:center;gap:7px;font-size:.86rem;color:var(--fg);border:1px solid var(--bd);border-radius:999px;padding:7px 12px;background:var(--card);cursor:pointer}
 .checks label:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 9%,var(--card))}
@@ -166,7 +168,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid2 .btn{width:100%}
 .srv{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
 .srv .btn{width:40px;height:40px;padding:0;font-size:1.2rem;line-height:1}.srv b{min-width:1.5em;text-align:center;font-size:1.25rem;font-family:var(--serif)}
-.nbox{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 10px}
+.nbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,7rem),1fr));gap:8px;margin:4px 0 10px}
 .nbox div{border-radius:14px;padding:10px 8px;text-align:center;background:var(--bg2)}
 .nbox b{display:block;font-size:1.05rem;font-family:var(--serif)}.nbox span{font-size:.72rem;color:var(--mut)}
 .nut details{margin-bottom:10px}.nut details ul{margin:6px 0}
@@ -176,7 +178,7 @@ details summary{cursor:pointer}
 .wact{display:grid;gap:10px}.wbtn{font:inherit;text-align:left;background:var(--card);border:1px solid var(--bd);border-left:5px solid var(--acc);border-radius:14px;padding:12px 14px;cursor:pointer;color:var(--fg);box-shadow:var(--sh)}.wbtn b{display:block;font-size:1.02rem;margin-bottom:3px}.wbtn span{font-size:.82rem;color:var(--mut);line-height:1.4;display:block}.wbtn:active{transform:scale(.985)}
 .wsteps{margin:0;padding-left:22px;line-height:1.6;color:var(--fg)}.wsteps li{margin:2px 0}
 .hscroll{display:grid;grid-auto-flow:column;grid-auto-columns:68%;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 10px;-webkit-overflow-scrolling:touch}.hscroll .item{scroll-snap-align:start}@media(min-width:700px){.hscroll{grid-auto-columns:32%}}
-.srcGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.srcCard{font:inherit;text-align:left;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:12px;cursor:pointer;color:var(--fg)}.srcCard b{display:block;font-size:1rem;margin-bottom:4px}.srcCard span{font-size:.78rem;color:var(--mut);line-height:1.35;display:block}.srcCard:active{transform:scale(.98)}
+.srcGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11rem),1fr));gap:10px}.srcCard{font:inherit;text-align:left;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:12px;cursor:pointer;color:var(--fg)}.srcCard b{display:block;font-size:1rem;margin-bottom:4px}.srcCard span{font-size:.78rem;color:var(--mut);line-height:1.35;display:block}.srcCard:active{transform:scale(.98)}
 .shopBox{margin:4px 0 12px}.shopBox summary{list-style:none;cursor:pointer;background:var(--acc);color:#fff;font-weight:700;font-size:1.05rem;padding:14px 16px;border-radius:14px;text-align:center;box-shadow:var(--sh)}.shopBox summary::-webkit-details-marker{display:none}.shopBox summary span{font-weight:500;opacity:.85}.shopBox[open] summary{border-radius:14px 14px 0 0}.shopBox #shopList{background:var(--card);border:1px solid var(--bd);border-top:none;border-radius:0 0 14px 14px;padding:10px 14px 14px}
 #bOut .dish{font-size:1rem}#bOut .dish small{font-size:.82rem}#bOut .dish .r{font-size:.72rem}#bOut .meal>.meta{font-size:.85rem}#bOut .nbox span{font-size:.78rem}#bOut .bdg{font-size:.76rem}#bOut .fonti p{text-align:left;margin:8px 0 0;font-size:.82rem}.aiTag{position:absolute;right:8px;bottom:8px;z-index:2;font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:center}.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
 .kv{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
@@ -186,7 +188,7 @@ details summary{cursor:pointer}
 .wiz{display:flex;align-items:center;justify-content:space-between}.wdots{display:flex;gap:6px}.wdots i{width:10px;height:10px;border-radius:50%;background:var(--bd);display:block}.wdots i.on{background:var(--acc)}.wdots i.done{background:color-mix(in srgb,var(--acc) 45%,var(--bd))}
 .step h3{margin:0 0 10px;font-size:1.25rem}.step{display:grid;gap:12px}
 #f.all .step h3,#f.all .hint{display:none}#f.all .step{margin-bottom:2px}#srcStep h3{margin-bottom:0}
-#f:not(.all) textarea[name=ingredients],#f:not(.all) textarea[name=steps]{min-height:34dvh;font-size:17px;line-height:1.5}#f:not(.all) input,#f:not(.all) select{font-size:17px}#f:not(.all) .step>label{font-size:.9rem}
+#f:not(.all) textarea[name=ingredients],#f:not(.all) textarea[name=steps]{min-height:34dvh;font-size:max(17px,1.05rem);line-height:1.5}#f:not(.all) input,#f:not(.all) select{font-size:max(17px,1.05rem)}#f:not(.all) .step>label{font-size:.9rem}
 .sum{margin:-4px 0 0;font-size:1rem;background:var(--bg2);border-radius:14px;padding:12px 14px;line-height:1.45}
 .bform{display:grid;gap:14px;margin-bottom:18px;background:var(--card);padding:16px;border-radius:var(--r);box-shadow:var(--sh)}
 .bhead{margin:4px 0 14px}.bhead h2{margin:0;font-size:1.6rem}.bhead p{margin:4px 0 0;color:var(--mut);font-size:.9rem}
@@ -221,13 +223,35 @@ details summary{cursor:pointer}
 :root[data-style=trattoria][data-theme=dark] .item h3,:root[data-style=trattoria][data-theme=dark] .brand h1{color:var(--fg)}
 :root[data-style=trattoria][data-theme=dark] .nbox div{background:var(--bg2)}
 #chips2{padding-top:6px}#chips2 .chip{font-size:.82rem;padding:5px 11px}
-.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:.9rem;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:9;box-shadow:var(--sh2);max-width:calc(100% - 32px)}
+.toast{position:fixed;left:50%;bottom:calc(6.4rem + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:.9rem;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:9;box-shadow:var(--sh2);max-width:calc(100% - 32px)}
 .toast.on{opacity:1;transform:translateX(-50%)}
 @font-face{font-family:'Fredoka';src:url(fonts/fredoka.woff2) format('woff2');font-weight:500 700;font-display:swap}
 /* scritte della testata e delle schede in basso nello stesso carattere del logo Gnamina */
 .brand h1{font-family:'Fredoka',var(--sans);font-weight:700;letter-spacing:0;color:#3a2416}
 #tabs .tab{font-family:'Fredoka',var(--sans);font-weight:600;letter-spacing:.01em}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .brand h1{color:var(--fg)}}:root[data-theme=dark] .brand h1{color:var(--fg)}
+/* ---------- Tablet (schede in basso, ma più respiro) ---------- */
+@media (min-width:620px) and (max-width:899px){
+  .list{gap:16px}.tab{font-size:.8rem}dialog#det{max-width:760px}#ingList{columns:2;column-gap:24px}#ingList li{break-inside:avoid}
+}
+/* ---------- Computer e tablet grandi: barra laterale con le sezioni e «Nuova ricetta», contenuto largo su più colonne, scheda ricetta più ampia ---------- */
+@media (min-width:900px){
+  body{padding-left:232px;padding-bottom:32px}
+  .nav{top:0;bottom:0;right:auto;width:232px;box-sizing:border-box;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:6px;padding:calc(18px + env(safe-area-inset-top)) 14px 24px;border-top:none;border-right:1px solid var(--bd)}
+  .nav::before{content:'';display:block;height:42px;margin:4px 6px 20px;background:url(logo.svg) left center/auto 100% no-repeat}
+  .tab{flex:none;max-width:none;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;font-size:1rem;border-radius:14px}
+  .tab svg{width:22px;height:22px}
+  .fab{left:14px;right:auto;bottom:26px;width:204px;height:50px;border-radius:14px;font-size:1.6rem;display:flex;align-items:center;justify-content:center;gap:8px}
+  .fab::after{content:'Nuova ricetta';font-size:1rem;font-weight:700}
+  header{padding-left:28px;padding-right:28px}
+  main{padding:18px 28px}
+  .top,.searchbar,.chips,.filters,main{max-width:1200px}
+  .list{grid-template-columns:repeat(auto-fill,minmax(min(100%,17rem),1fr));gap:18px}
+  dialog#det{max-width:900px}dialog#dlg{max-width:720px}
+  .hero{max-height:380px}.video{max-height:440px}
+  #ingList{columns:2;column-gap:28px}#ingList li{break-inside:avoid}
+  .toast{bottom:28px;left:calc(50% + 116px)}
+}
 </style>
 </head>
 <body>
@@ -283,7 +307,7 @@ details summary{cursor:pointer}
       <label>Cucina<select name="cuisine"><option value="quotidiana">Italiana di tutti i giorni (consigliata)</option><option value="italiana">Italiana, anche piatti regionali rari</option><option value="mondo">Anche ricette dal mondo</option></select></label>
       <div class="two"><label>Periodo<select name="month" id="bMonth"></select></label>
       <label>Ricette da usare<select name="pool"><option value="all">Ricettario + le mie</option><option value="book">Solo ricettario</option><option value="mine">Solo le mie</option></select></label></div></section>
-    <div class="row" style="justify-content:space-between;flex-wrap:nowrap;gap:8px"><span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn" id="wBack">← Indietro</button> <button type="button" class="btn" id="wCancel" hidden>✕ Annulla</button></span><span><button type="button" class="btn pri" id="wNext">Avanti →</button><button class="btn pri" id="wGo" hidden>✨ Crea il menu</button></span></div>
+    <div class="row" style="justify-content:space-between;gap:8px"><span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn" id="wBack">← Indietro</button> <button type="button" class="btn" id="wCancel" hidden>✕ Annulla</button></span><span><button type="button" class="btn pri" id="wNext">Avanti →</button><button class="btn pri" id="wGo" hidden>✨ Crea il menu</button></span></div>
   </form>
   <div id="bOut"></div>
 </section></main>
@@ -362,7 +386,7 @@ details summary{cursor:pointer}
       <button type="button" class="btn" id="cancel">Annulla</button>
       <button class="btn pri">Salva</button>
     </div>
-    <div class="row" id="wizNav" hidden style="justify-content:space-between;flex-wrap:nowrap;gap:8px"><button type="button" class="btn" id="rBack">← Indietro</button><span style="display:flex;gap:6px"><button type="button" class="btn pri" id="rNext">Avanti →</button><button class="btn pri" id="rSave" hidden>💾 Salva la ricetta</button></span></div>
+    <div class="row" id="wizNav" hidden style="justify-content:space-between;gap:8px"><button type="button" class="btn" id="rBack">← Indietro</button><span style="display:flex;gap:6px"><button type="button" class="btn pri" id="rNext">Avanti →</button><button class="btn pri" id="rSave" hidden>💾 Salva la ricetta</button></span></div>
   </form>
 </dialog>
 <datalist id="countries"></datalist><datalist id="regions"></datalist>
@@ -746,7 +770,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=79; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=80; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1828,7 +1852,7 @@ $('#list').onclick=e=>{if(lpFired){lpFired=false;return} // il tocco che chiude 
   const w=e.target.closest('.wbtn');if(w){if(w.dataset.w==='add')openForm();else $(`#tabs .tab[data-v=${w.dataset.w}]`).click();return}const it=e.target.closest('.item');if(it)openDetail([...src(),...BK,...(book||[])].find(i=>i.id===it.dataset.id))};
 const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${esc(c)}</span>`).join('')};
 // Tema: Automatico segue il sistema, Chiaro e Scuro restano fissi
-const setTheme=t=>{try{localStorage.setItem('theme',t||'auto')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme}; // predefinito: Trattoria chiara; Automatico solo se scelto
+const setTheme=t=>{try{localStorage.setItem('theme',t||'auto')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme;themeColor()}; // predefinito: Trattoria scura; Automatico solo se scelto
 $('#themeSeg').onchange=e=>setTheme(e.target.value);
 $('#styleSeg').onchange=e=>{try{localStorage.setItem('style',e.target.value)}catch{}document.documentElement.dataset.style=e.target.value};
 $('#setBtn').onclick=()=>{const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();accUI();syncUI();if(aiOn())initZone();$('#set').showModal()};
