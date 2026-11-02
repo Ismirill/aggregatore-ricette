@@ -847,7 +847,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=92; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=93; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2272,6 +2272,14 @@ if(p.has('url')||p.has('text')){receive({url:p.get('url'),text:p.get('text'),tit
 window.onShared();
 if(p.has('codice')){const c=normCode(p.get('codice'));history.replaceState(null,'',location.pathname);if(c.length===16&&SY?.code!==c&&confirm('Collegare questo dispositivo al ricettario con il codice '+fmtCode(c)+'?'))linkCode(c)}
 
+// Pulizia una tantum (versione 93): fino alla 91 il paese si riconosceva da tutta la didascalia («puoi aggiungerci curry…» → India);
+// le ricette salvate il cui paese viene solo da quella regola si ricontrollano con la regola nuova
+if(!load('zoneFix93',0)){let ch=0;items.forEach(i=>{if(i.book||!i.country||!i.caption)return;
+  const all=[i.title,i.caption,(i.ingredients||[]).join('\n')].join('\n').toLowerCase(),old=ZONES.find(([re])=>re.test(all));
+  if(!old||old[1]!==i.country)return; // paese messo a mano, dall'AI o da un sito: resta
+  const c=classify({title:i.title,caption:i.caption,ingredients:i.ingredients||[]});
+  if(c.country!==i.country){i.country=c.country;i.region=c.region;i.t=Date.now();ch++}});
+  save('zoneFix93',1);if(ch){saveItems();render()}}
 fillSelects();goView('home');userBtnUI();refreshVerified();
 if(!ACC&&!load('accAsked',0))setTimeout(()=>{if(!$('#dlg').open&&!$('#det').open)openAcct(true)},900);
 if(SY?.code)setTimeout(()=>doSync(),800);
