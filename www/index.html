@@ -254,6 +254,10 @@ details summary{cursor:pointer}
 .hlinks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10rem),1fr));gap:10px;margin-top:22px}
 .hlinks .wbtn{border-left-width:4px}
 @media (min-width:900px){#home{max-width:820px;margin:0}}
+/* ---------- Tasto utente in testata: foto dell'account, avatar scelto o sagoma anonima ---------- */
+.icon.user{overflow:hidden;padding:0;border-color:color-mix(in srgb,var(--acc) 40%,var(--bd))}.icon.user img{width:100%;height:100%;object-fit:cover;display:block}.icon.user .em{font-size:1.3rem;line-height:1}.icon.user svg{width:20px;height:20px}
+#acct .intro p{margin:4px 0 14px;font-size:1rem;line-height:1.5}
+#acct .sec h3{margin-top:14px}
 /* ---------- Profilo Gnammer: nome, avatar e livello (Novizio, Cuoco, Chef, Maestro) ---------- */
 .who{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:10px 14px;margin:0 0 14px;cursor:pointer;box-shadow:var(--sh)}
 .who .av{width:46px;height:46px;border-radius:50%;background:color-mix(in srgb,var(--acc) 12%,var(--bg2));display:grid;place-items:center;font-size:1.5rem;flex:none}
@@ -308,6 +312,7 @@ details summary{cursor:pointer}
   <div class="top">
     <div class="brand"><img class="mark" src="icon-192.png" alt="Gnamina" width="192" height="192"><div><h1 id="vTitle">Le mie ricette</h1></div></div>
     <button class="icon" id="camBtn" aria-label="Trova ricette da una foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg><span class="lbl">Foto di un piatto</span></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden>
+    <button class="icon user" id="userBtn" aria-label="Il tuo profilo"><span id="userAv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span></button>
     <button class="icon" id="setBtn" aria-label="Impostazioni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="lbl">Impostazioni</span></button>
   </div>
   <div class="searchbar" id="sbar"><div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Cerca titolo, ingrediente, etichetta…"></div><button id="fBtn" type="button" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filtri</button></div>
@@ -444,10 +449,15 @@ details summary{cursor:pointer}
 <dialog id="menu"><h3 id="menuT"></h3><button class="btn" id="menuEdit">✏️ Modifica</button><button class="btn danger" id="menuDel">🗑 Elimina</button><button class="btn" id="menuCancel">Annulla</button></dialog>
 <dialog id="photo"><button class="dclose" id="phX" aria-label="Chiudi">✕</button><div id="phv"></div></dialog>
 
-<dialog id="set">
-  <div class="dhead stk"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi">✕</button></div>
+<dialog id="acct">
+  <div class="dhead stk"><h2 id="acctT">Il tuo profilo</h2><button class="icon" id="acctX" aria-label="Chiudi">✕</button></div>
+  <div class="intro" id="acctIntro" hidden><p>Gnamina è la cucina di casa che si gioca una sfida alla settimana. Scegli il nome con cui gli altri Gnammers ti conosceranno e, se vuoi, crea un account: le tue ricette ti seguiranno su telefono, tablet e computer.</p></div>
   <section class="sec"><h3>Il tuo profilo Gnammer</h3><div id="profBox"></div></section>
   <section class="sec"><h3>Account</h3><div id="accBox"></div></section>
+  <div class="row" id="acctSkip" hidden style="justify-content:center"><button type="button" class="btn" id="acctLater">Continua senza account</button></div>
+</dialog>
+<dialog id="set">
+  <div class="dhead stk"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi">✕</button></div>
   <section class="sec"><h3>Aspetto</h3><div class="seg" id="styleSeg" style="margin-bottom:8px"><label><input type="radio" name="style" value="trattoria"><span>Trattoria</span></label><label><input type="radio" name="style" value="crema"><span>Crema</span></label></div><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div></section>
   <section class="sec"><h3>Tipi di piatto</h3><div class="badges" id="catList"></div>
     <form id="catF" class="inl"><input name="c" placeholder="Nuovo tipo, es. Lievitati" aria-label="Nuovo tipo di piatto"><button class="btn pri">Aggiungi</button></form></section>
@@ -821,7 +831,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=87; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=88; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -936,7 +946,16 @@ const LEVELS=[['Novizio',1,'Appena iscritto'],['Cuoco',2,'Una ricetta in un cont
 function gnammerLevel(){const ric=items.filter(i=>i.contest).length,ass=load('tastings',[]).length,win=+load('wins',0)||0;
   const k=win>=3?3:(ric>=3||win>=1)?2:(ric>=1||ass>=3)?1:0;return {k,name:LEVELS[k][0],weight:LEVELS[k][1],ric,ass,win}}
 const profName=()=>PROF.name||ACC?.name||'';
-function saveProf(){save('gnammer',PROF);if(view==='home')renderHome()}
+function saveProf(){save('gnammer',PROF);userBtnUI();if(view==='home')renderHome()}
+const ANON_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+function userBtnUI(){const b=$('#userAv');if(!b)return;if(ACC?.photo)b.innerHTML=`<img src="${esc(ACC.photo)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML=ANON_SVG">`;else if(PROF.name||ACC)b.innerHTML=`<span class="em">${PROF.avatar||'🍅'}</span>`;else b.innerHTML=ANON_SVG;
+  $('#userBtn').setAttribute('aria-label',ACC?'Il tuo profilo: '+(profName()||ACC.email):'Il tuo profilo')}
+// Il pannello Profilo + Account: dal tasto in alto a destra, dalla striscia della Casa e, la prima volta, da solo
+function openAcct(first){profUI();accUI();$('#acctIntro').hidden=!first;$('#acctSkip').hidden=!first;$('#acctT').textContent=first?'Benvenuto in Gnamina':'Il tuo profilo';if(!$('#acct').open)$('#acct').showModal();$('#acct').scrollTop=0}
+$('#userBtn').onclick=()=>openAcct(false);
+$('#acctX').onclick=()=>$('#acct').close();
+$('#acctLater').onclick=()=>{save('accAsked',1);$('#acct').close();toast('Puoi creare l\'account quando vuoi dal tasto in alto a destra')};
+$('#acct').addEventListener('close',()=>{save('accAsked',1);userBtnUI();if(view==='home')renderHome()});
 function profUI(){const box=$('#profBox');if(!box)return;const L=gnammerLevel();
   box.innerHTML=`<p class="meta">Il nome e l'immagine che gli altri Gnammers vedono accanto alle tue ricette e ai tuoi voti.</p>
   <label>Il tuo nome da Gnammer<input id="profName" maxlength="30" placeholder="Es. Nonna Pina" value="${esc(profName())}"></label>
@@ -986,7 +1005,7 @@ function renderHome(){
     openForm({contest:c.id,tags:['In gara']});
   };
   if($('#cMine'))$('#cMine').onclick=()=>openDetail(mine);
-  $('#whoBar').onclick=()=>{$('#setBtn').click();setTimeout(()=>{const n=$('#profName');if(n){n.scrollIntoView({block:'center'});if(!PROF.name)n.focus()}},150)};
+  $('#whoBar').onclick=()=>{openAcct(false);setTimeout(()=>{const n=$('#profName');if(n&&!PROF.name&&DESK)n.focus()},150)};
   $('#home').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>goView(b.dataset.goto));
 }
 
@@ -1978,7 +1997,7 @@ const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${e
 const setTheme=t=>{try{localStorage.setItem('theme',t||'auto')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme;themeColor()}; // predefinito: Trattoria scura; Automatico solo se scelto
 $('#themeSeg').onchange=e=>setTheme(e.target.value);
 $('#styleSeg').onchange=e=>{try{localStorage.setItem('style',e.target.value)}catch{}document.documentElement.dataset.style=e.target.value};
-$('#setBtn').onclick=()=>{profUI();const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();accUI();syncUI();if(aiOn())initZone();$('#set').showModal()};
+$('#setBtn').onclick=()=>{const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();accUI();syncUI();if(aiOn())initZone();$('#set').showModal()};
 $('#camBtn').onclick=()=>$('#camIn').click();
 $('#camIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)photoSearch(f)};
 $('#setClose').onclick=()=>$('#set').close();
@@ -2117,8 +2136,8 @@ async function fbRefresh(rt){
 }
 async function setSession(d){
   ACC={uid:d.localId,it:d.idToken,rt:d.refreshToken,exp:Date.now()+((+d.expiresIn||3600)-60)*1000,email:d.email||'',name:'',verified:false,provider:'password'};
-  try{const u=(await fbRest('lookup',{idToken:ACC.it})).users?.[0];if(u){ACC.email=u.email||ACC.email;ACC.name=u.displayName||'';ACC.verified=!!u.emailVerified;ACC.provider=u.providerUserInfo?.[0]?.providerId||ACC.provider}}catch{}
-  save('acc',ACC);
+  try{const u=(await fbRest('lookup',{idToken:ACC.it})).users?.[0];if(u){ACC.email=u.email||ACC.email;ACC.name=u.displayName||'';ACC.photo=u.photoUrl||'';ACC.verified=!!u.emailVerified;ACC.provider=u.providerUserInfo?.[0]?.providerId||ACC.provider}}catch{}
+  save('acc',ACC);save('accAsked',1);
 }
 async function idToken(){
   if(!ACC)throw Object.assign(new Error('Accesso richiesto'),{status:401});
@@ -2174,6 +2193,7 @@ async function handoffTake(code){
   await accRun(async()=>{const {rt}=await server('/handoff/take',{code});const d=await fbRefresh(rt);await setSession({idToken:d.id_token,refreshToken:d.refresh_token||rt,expiresIn:d.expires_in,localId:d.user_id});await accountLink()},'Accesso effettuato');
 }
 function accUI(status){
+  userBtnUI();
   const box=$('#accBox');if(!box)return;
   if(!accOn()){box.innerHTML='<p class="meta">L\'accesso con account non è ancora attivo. Nel frattempo le ricette si allineano tra i dispositivi con il codice ricettario, più in basso.</p>';return}
   if(ACC){
@@ -2211,10 +2231,11 @@ if(p.has('url')||p.has('text')){receive({url:p.get('url'),text:p.get('text'),tit
 window.onShared();
 if(p.has('codice')){const c=normCode(p.get('codice'));history.replaceState(null,'',location.pathname);if(c.length===16&&SY?.code!==c&&confirm('Collegare questo dispositivo al ricettario con il codice '+fmtCode(c)+'?'))linkCode(c)}
 
-fillSelects();goView('home');
+fillSelects();goView('home');userBtnUI();
+if(!ACC&&!load('accAsked',0))setTimeout(()=>{if(!$('#dlg').open&&!$('#det').open)openAcct(true)},900);
 if(SY?.code)setTimeout(()=>doSync(),800);
 // Accesso per l'app Android aperto nel browser (?accedi=google|apple|facebook): finestra di accesso, poi codice da scrivere nell'app
-if(p.has('accedi')){const pr=p.get('accedi');history.replaceState(null,'',location.pathname);if(accOn()&&PROV_NAME[pr]){$('#setBtn').click();$('#accBox').innerHTML=`<p class="meta">Accesso per l'app Gnamina: tocca il pulsante per continuare con ${PROV_NAME[pr]}.</p><div class="grid2"><button class="btn pri" id="hoGo">Continua con ${PROV_NAME[pr]}</button></div><p class="meta" id="accStat"></p>`;$('#hoGo').onclick=()=>accRun(async()=>{if(!ACC)await accSocial(pr);if(ACC)await handoffShow()})}}
+if(p.has('accedi')){const pr=p.get('accedi');history.replaceState(null,'',location.pathname);if(accOn()&&PROV_NAME[pr]){openAcct(false);$('#accBox').innerHTML=`<p class="meta">Accesso per l'app Gnamina: tocca il pulsante per continuare con ${PROV_NAME[pr]}.</p><div class="grid2"><button class="btn pri" id="hoGo">Continua con ${PROV_NAME[pr]}</button></div><p class="meta" id="accStat"></p>`;$('#hoGo').onclick=()=>accRun(async()=>{if(!ACC)await accSocial(pr);if(ACC)await handoffShow()})}}
 accRedirectResult();
 loadPT().then(()=>PT&&render());
 setTimeout(repairThumbs,1500);
