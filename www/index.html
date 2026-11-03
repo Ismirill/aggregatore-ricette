@@ -191,6 +191,7 @@ details summary{cursor:pointer}
 .wact{display:grid;gap:10px}.wbtn{font:inherit;text-align:left;background:var(--card);border:1px solid var(--bd);border-left:5px solid var(--acc);border-radius:14px;padding:12px 14px;cursor:pointer;color:var(--fg);box-shadow:var(--sh)}.wbtn b{display:block;font-size:1.02rem;margin-bottom:3px}.wbtn span{font-size:.82rem;color:var(--mut);line-height:1.4;display:block}.wbtn:active{transform:scale(.985)}
 .wsteps{margin:0;padding-left:22px;line-height:1.6;color:var(--fg)}.wsteps li{margin:2px 0}
 .hscroll{display:grid;grid-auto-flow:column;grid-auto-columns:68%;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 10px;-webkit-overflow-scrolling:touch}.hscroll .item{scroll-snap-align:start}@media(min-width:700px){.hscroll{grid-auto-columns:32%}}
+.warnTxt{color:var(--acc);font-weight:600}
 .srcGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11rem),1fr));gap:10px}.srcCard{font:inherit;text-align:left;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:12px;cursor:pointer;color:var(--fg)}.srcCard b{display:block;font-size:1rem;margin-bottom:4px}.srcCard span{font-size:.78rem;color:var(--mut);line-height:1.35;display:block}.srcCard:active{transform:scale(.98)}
 .shopBox{margin:4px 0 12px}.shopBox summary{list-style:none;cursor:pointer;background:var(--acc);color:#fff;font-weight:700;font-size:1.05rem;padding:14px 16px;border-radius:14px;text-align:center;box-shadow:var(--sh)}.shopBox summary::-webkit-details-marker{display:none}.shopBox summary span{font-weight:500;opacity:.85}.shopBox[open] summary{border-radius:14px 14px 0 0}.shopBox #shopList{background:var(--card);border:1px solid var(--bd);border-top:none;border-radius:0 0 14px 14px;padding:10px 14px 14px}
 #bOut .dish{font-size:1rem}#bOut .dish small{font-size:.82rem}#bOut .dish .r{font-size:.72rem}#bOut .meal>.meta{font-size:.85rem}#bOut .nbox span{font-size:.78rem}#bOut .bdg{font-size:.76rem}#bOut .fonti p{text-align:left;margin:8px 0 0;font-size:.82rem}.aiTag{position:absolute;right:8px;bottom:8px;z-index:2;font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:center}.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
@@ -400,10 +401,12 @@ details summary{cursor:pointer}
   </div>
   <div id="garaStep" class="step" hidden>
     <h3>Da dove partiamo?</h3>
-    <p class="meta">Nel contest conta quello che fai tu: la ricetta la scrivi tu e il video lo giri tu con l'app. Niente link, niente ricette prese da internet.</p>
+    <p class="meta">In gara va una ricetta originale, creata da te, con persone, dosi precise e tempi; il video lo giri tu con l'app. Niente link, niente ricette prese da internet.</p>
     <div class="srcGrid">
-      <button type="button" class="srcCard" id="garaWrite"><b>✍️ La scrivo adesso</b><span>Nome del piatto, ingredienti e procedimento; alla fine il video con la guida</span></button>
-      <button type="button" class="srcCard" id="garaPick"><b>📖 Una mia ricetta già scritta</b><span>Tra quelle che hai scritto tu, con ingredienti e procedimento</span></button>
+      <button type="button" class="srcCard" id="garaWrite"><b>✍️ La scrivo adesso</b><span>Nome del piatto, persone, tempi, ingredienti con le dosi e procedimento</span></button>
+      <button type="button" class="srcCard" id="garaPhoto"><b>📷 La fotografo dal mio quaderno</b><span>La tua ricetta scritta a mano: l'AI la trascrive, poi la controlli</span></button>
+      <button type="button" class="srcCard" id="garaFile"><b>📄 Da un mio file</b><span>Un testo o un'immagine della tua ricetta già salvati sul telefono</span></button>
+      <button type="button" class="srcCard" id="garaPick"><b>📖 Una mia ricetta già salvata</b><span>Tra quelle scritte, fotografate o da file, con ingredienti e procedimento</span></button>
     </div>
     <div id="garaList" class="srcGrid" style="margin-top:10px" hidden></div>
     <div class="row" style="justify-content:flex-end;margin-top:0"><button type="button" class="btn" id="garaCancel">Annulla</button></div>
@@ -457,6 +460,7 @@ details summary{cursor:pointer}
       <label id="ytL">Il tuo video (su YouTube)<span class="inl" style="margin:0"><input name="video" type="url" placeholder="Link YouTube del video caricato"><button type="button" class="btn" id="pasteVid">📋 Incolla</button></span></label>
       <div class="row" style="margin:-4px 0 0;justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn pri" id="guideVid">🎬 Registra con la guida (3 parti)</button><button type="button" class="btn" id="recVid">🎥 Registra un video</button><button type="button" class="btn" id="pickVid">Scegli dal telefono</button></div>
       <p class="meta" id="vidHint" style="margin:-4px 0 0"></p>
+      <div class="checks" id="origL" hidden><label><input type="checkbox" name="orig">È una mia ricetta originale: l'ho creata io, non l'ho presa da internet, da un libro o da una rivista</label></div>
       <input type="file" id="vidRec" accept="video/*" capture="environment" hidden><input type="file" id="vidPick" accept="video/*" hidden>
     </section>
     <div class="row" id="editNav">
@@ -870,7 +874,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=97; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=98; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1029,7 +1033,7 @@ async function refreshVerified(){if(!ACC||ACC.verified||ACC.provider!=='password
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshVerified()});
 
 /* ---------- Casa: il contest della settimana. I dati vengono da contest.json (tema, date, regole); lo stato si deduce dalle date ---------- */
-let CONTEST={id:'2026-w46',tema:'La miglior carbonara',descrizione:'Il piatto che tutti conoscono e nessuno fa uguale.',regole:['La ricetta la scrivi tu e il video lo giri tu con l\'app: niente link o ricette prese da internet','Un video della preparazione, massimo 3 minuti','Una sola ricetta a testa'],inizio:'2026-11-09',fine_partecipazione:'2026-11-15',fine_assaggio:'2026-11-22',prossimo:''};
+let CONTEST={id:'2026-w46',tema:'La miglior carbonara',descrizione:'Il piatto che tutti conoscono e nessuno fa uguale.',regole:['Una ricetta originale, creata da te, con persone, dosi precise e tempi: scritta, fotografata dal tuo quaderno o da un tuo file, mai da un link','Il video lo giri tu con l\'app','Un video della preparazione, massimo 3 minuti','Una sola ricetta a testa'],inizio:'2026-11-09',fine_partecipazione:'2026-11-15',fine_assaggio:'2026-11-22',prossimo:''};
 fetch('contest.json?'+Math.floor(Date.now()/36e5)).then(r=>r.ok?r.json():null).then(c=>{if(c&&c.id){CONTEST=c;if(view==='home')renderHome()}}).catch(()=>{});
 const dIt=d=>new Date(d+'T12:00:00').toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
 function contestPhase(c){const t=new Date().toISOString().slice(0,10);return t<c.inizio?'soon':t<=c.fine_partecipazione?'join':t<=c.fine_assaggio?'taste':'done'}
@@ -1048,7 +1052,7 @@ function renderHome(){
       <button type="button" class="cbtn" id="cAct"${ph==='done'?' disabled':''}>${btn}</button>
       ${c.regole?.length?`<ul class="rules">${c.regole.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>`:''}
       <details class="how"><summary>Come funziona</summary><ol>
-        <li>Ogni settimana c'è un tema. Chi vuole partecipa con una ricetta scritta di suo pugno e un breve video della preparazione girato con l'app.</li>
+        <li>Ogni settimana c'è un tema. Chi vuole partecipa con una sua ricetta originale (persone, dosi precise e tempi) e un breve video della preparazione girato con l'app.</li>
         <li>La settimana dopo tutti possono cucinare le ricette degli altri e votarle con le stelle. Chi allega la foto del piatto vale di più: ha cucinato davvero.</li>
         <li>La ricetta più votata entra nel Ricettario di Gnamina, con il nome e il video di chi l'ha fatta.</li>
         <li>Chi partecipa e assaggia sale di livello: Novizio, Cuoco, Chef, Maestro. Il voto di chi contribuisce pesa di più.</li>
@@ -1847,7 +1851,7 @@ function openForm(data={}){
   vidHint();
   $('#dlgT').textContent=editing?(data.contest?'La tua ricetta in gara':'Modifica ricetta'):(data.contest?'La tua ricetta in gara':'Nuova ricetta');
   // In gara conta quello che fa la persona: niente link da internet, il video si gira con l'app (guida o fotocamera)
-  $('#ytL').hidden=$('#pickVid').hidden=!!data.contest;$('#garaStep').hidden=true;
+  $('#ytL').hidden=$('#pickVid').hidden=!!data.contest;$('#origL').hidden=!data.contest;f.orig.checked=!!data.orig;$('#garaStep').hidden=true;
   $('#del').hidden=!editing;
   // Modifica: tutti i campi insieme, come un modulo normale. Nuova ricetta: percorso guidato, un passo alla volta
   f.classList.toggle('all',!!editing);$('#rWiz').hidden=!!editing;$('#wizNav').hidden=!!editing;$('#editNav').hidden=!editing;f.noValidate=!editing;
@@ -1891,25 +1895,41 @@ function rValid(){
   const f=$('#f'),key=rSteps[rStep];
   if(key==='src'&&addMode==='link'){const u=extractUrl(f.url.value);if(!u){toast('Incolla prima il link della ricetta');f.url.focus();return false}f.url.value=u}
   if(key==='base'&&!f.title.value.trim()){toast('Scrivi il nome del piatto');f.title.focus();return false}
+  if(extra.contest&&(key==='base'||key==='ing')){const m=garaMissing(f,key);if(m.length){toast(garaMsg(m));(key==='base'?(+f.servings.value>0?f.time:f.servings):f.ingredients).focus();return false}}
   // dopo gli ingredienti, tipo di piatto, paese e diete si deducono da soli se l'utente non li ha messi
   if(key==='ing'){const c=classify({title:f.title.value,ingredients:lines(f.ingredients.value),caption:extra.caption});if(c.cat&&f.cat.value==='Altro')f.cat.value=c.cat;if(c.country&&!f.country.value)f.country.value=c.country;if(c.region&&!f.region.value)f.region.value=c.region;setDiets([...new Set([...getDiets(),...c.diets])])}
   return true;
 }
 function endSum(){
   const f=$('#f'),n=lines(f.ingredients.value).length,st=lines(f.steps.value).length;
-  $('#endSum').innerHTML=`<b>${esc(f.title.value.trim()||'Senza titolo')}</b> · ${esc(f.cat.value)}${n?` · ${n} ingredient${n===1?'e':'i'}`:''}${st?` · ${st} passagg${st===1?'io':'i'}`:''}${f.time.value?` · ${esc(f.time.value)} min`:''}<br><span class="meta">${extra.contest?'Ricetta in gara: il video lo giri tu, qui sotto, con la guida in tre parti (ingredienti, preparazione, piatto pronto).':n&&st?'È tutto pronto: se vuoi aggiungi un video, altrimenti premi «Salva la ricetta».':'Puoi salvare anche così e completare la ricetta in un altro momento con «Modifica».'}</span>`;
+  $('#endSum').innerHTML=`<b>${esc(f.title.value.trim()||'Senza titolo')}</b> · ${esc(f.cat.value)}${n?` · ${n} ingredient${n===1?'e':'i'}`:''}${st?` · ${st} passagg${st===1?'io':'i'}`:''}${f.time.value?` · ${esc(f.time.value)} min`:''}<br><span class="meta">${extra.contest?(m=>m.length?`<span class="warnTxt">${esc(garaMsg(m))}.</span> `:'')(garaMissing(f).filter(x=>!x.startsWith('la conferma')))+'Ricetta in gara: il video lo giri tu, qui sotto, con la guida in tre parti (ingredienti, preparazione, piatto pronto), poi conferma che la ricetta è tua.':n&&st?'È tutto pronto: se vuoi aggiungi un video, altrimenti premi «Salva la ricetta».':'Puoi salvare anche così e completare la ricetta in un altro momento con «Modifica».'}</span>`;
 }
 $('#rNext').onclick=()=>{if(rValid())rGo(rStep+1)};
 $('#rBack').onclick=$('#rBackTop').onclick=()=>rGo(rStep-1);
 $('#srcStep').onclick=e=>{const c=e.target.closest('.srcCard');if(c)setMode(c.dataset.src,true)};
 $('#srcCancel').onclick=()=>$('#dlg').close();
 /* ---------- Ricetta in gara: la scrive la persona (adesso, o una sua già scritta) e il video lo gira con l'app ---------- */
-const garaOk=i=>!i.book&&!i.url&&!i.contest&&!/fotograf|da file/i.test(i.source||'')&&(Array.isArray(i.ingredients)?i.ingredients.length:0)>0&&(Array.isArray(i.steps)?i.steps.length:0)>0;
+const garaOk=i=>!i.book&&!i.url&&!i.contest&&(Array.isArray(i.ingredients)?i.ingredients.length:0)>0&&(Array.isArray(i.steps)?i.steps.length:0)>0;
+// Una dose c'è se nella riga dell'ingrediente compare un numero (o «q.b.», «un pizzico»)
+const hasDose=l=>/\d|[½¼¾⅓⅔]|q\.?\s?b\.?|quanto basta|a piacere|un pizzico|una presa|una noce/i.test(l);
+// Cosa manca a una ricetta in gara: persone, tempo, dosi, procedimento, dichiarazione di originalità
+function garaMissing(f,upTo){
+  const m=[],ing=lines(f.ingredients.value),st=lines(f.steps.value);
+  if(!(+f.servings.value>0))m.push('il numero di persone');if(!(+f.time.value>0))m.push('il tempo in minuti');
+  if(upTo==='base')return m;
+  if(!ing.length)m.push('gli ingredienti');else{const nd=ing.find(l=>!hasDose(l));if(nd)m.push(`la dose di «${nd.slice(0,30)}»`)}
+  if(upTo==='ing')return m;
+  if(!st.length)m.push('il procedimento');
+  if(!f.orig.checked)m.push('la conferma che è una tua ricetta originale');
+  return m;
+}
+const garaMsg=m=>'Per la gara manca '+m.join(', ');
 function garaUI(){const l=$('#garaList');l.hidden=true;l.innerHTML='';$('#garaPick').hidden=!items.some(garaOk)}
 $('#garaCancel').onclick=()=>$('#dlg').close();
 $('#garaWrite').onclick=()=>rGo(0);
+$('#garaPhoto').onclick=()=>setMode('photo',true);$('#garaFile').onclick=()=>setMode('file',true);
 $('#garaPick').onclick=()=>{const l=$('#garaList'),ok=items.filter(garaOk);
-  l.innerHTML=ok.map(i=>`<button type="button" class="srcCard" data-id="${esc(i.id)}"><b>${esc(i.title||'Senza titolo')}</b><span>${i.ingredients.length} ingredient${i.ingredients.length===1?'e':'i'} · ${i.steps.length} passagg${i.steps.length===1?'io':'i'}</span></button>`).join('');
+  l.innerHTML=ok.map(i=>`<button type="button" class="srcCard" data-id="${esc(i.id)}"><b>${esc(i.title||'Senza titolo')}</b><span>${esc(i.source||'Scritta da te')} · ${i.ingredients.length} ingredient${i.ingredients.length===1?'e':'i'} · ${i.steps.length} passagg${i.steps.length===1?'io':'i'}</span></button>`).join('');
   l.hidden=false;l.querySelector('button')?.scrollIntoView({block:'nearest'})};
 $('#garaList').onclick=e=>{const b=e.target.closest('[data-id]');if(!b)return;const it=items.find(i=>i.id===b.dataset.id);if(!it)return;
   openForm({...it,contest:extra.contest,tags:[...new Set([...(it.tags||[]),'In gara'])]})};
@@ -2158,7 +2178,7 @@ $('#f').onsubmit=e=>{
     rating:formRating,ingredients:lines(f.ingredients.value),steps:lines(f.steps.value),
     tags:f.tags.value.split(',').map(s=>s.trim()).filter(Boolean),note:f.note.value.trim(),source:url?sourceOf(url):({photo:'Fotografata',file:'Da file'}[addMode]||'Scritta da te')};
   delete rec._tm;
-  if(rec.contest){if(!rec.ingredients.length||!rec.steps.length){toast('Per la gara servono gli ingredienti e il procedimento scritti da te');return}rec.url='';rec.source='Scritta da te';rec.videoId='';rec.videoEmbed='';rec.finalUrl=''}
+  if(rec.contest){const m=garaMissing(f);if(m.length){toast(garaMsg(m));return}rec.orig=true;rec.url='';rec.videoId='';rec.videoEmbed='';rec.finalUrl=''}
   if(!rec.image&&ytId(video))rec.image=`https://i.ytimg.com/vi/${ytId(video)}/hqdefault.jpg`; // senza foto, la copertina è il fotogramma di YouTube
   items=editing?items.map(i=>i.id===rec.id?rec:i):[rec,...items];
   if(editing?.nutrition?.key===rec.ingredients.join('|')+'#'+(rec.servings||4))rec.nutrition=editing.nutrition;
