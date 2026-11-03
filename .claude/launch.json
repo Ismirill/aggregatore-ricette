@@ -1,1 +1,1 @@
-{"version":"0.0.1","configurations":[{"name":"web","runtimeExecutable":"npx","runtimeArgs":["-y","http-server","www","-p","8080","-c-1"],"port":8080}]}
+{"version": "0.0.1", "configurations": [{"name": "web", "runtimeExecutable": "npx", "runtimeArgs": ["-y", "http-server", "www", "-p", "8080", "-c-1"], "port": 8080}, {"name": "worker", "runtimeExecutable": "npx", "runtimeArgs": ["wrangler", "dev", "--config", "server/wrangler.toml", "--port", "8787"], "port": 8787}]}

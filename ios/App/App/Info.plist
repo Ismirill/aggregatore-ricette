@@ -36,7 +36,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Gnamina usa la fotocamera per fotografare una ricetta scritta e leggerne il testo, e per registrare il video di una tua ricetta.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Gnamina usa il microfono per registrare l'audio del video di una tua ricetta.</string>
+	<string>Gnamina usa il microfono per registrare l'audio del video di una tua ricetta e per scrivere una ricetta che detti a voce.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Gnamina usa la tua posizione per mostrarti i piatti e i prodotti tipici della tua zona.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

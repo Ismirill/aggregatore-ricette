@@ -159,6 +159,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .recCount{position:absolute;inset:0;display:grid;place-items:center;font-size:7rem;font-weight:800;color:#fff;background:#0005;text-shadow:0 2px 12px #000}
 .recCtl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
 .recBig{width:88px;height:88px;border-radius:50%;border:4px solid #fff;background:var(--acc);color:#fff;font:inherit;font-size:1rem;font-weight:800;cursor:pointer;box-shadow:0 4px 16px #0006}.recBig.stop{background:#222;border-color:var(--acc)}.recBig:disabled{opacity:.6}
+.btn.pri.recOn{background:#c0392b;color:#fff;animation:recPulse .9s infinite alternate}@keyframes recPulse{to{opacity:.7}}
 .recDot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#fff6;margin-right:4px;vertical-align:middle}.recDot.on{background:var(--acc)}.recDot.done{background:#7bd389}
 .clipPl video{width:100%;max-height:70dvh;background:#000;border-radius:16px;display:block}.clipPl .clipLbl{margin:6px 0}
 .video.v{aspect-ratio:9/16;max-height:70vh;max-width:380px;margin:0 auto}
@@ -394,6 +395,7 @@ details summary{cursor:pointer}
     <div class="srcGrid">
       <button type="button" class="srcCard" data-src="link"><b>🔗 Da un link</b><span>TikTok, Instagram, YouTube, Facebook o un sito di ricette</span></button>
       <button type="button" class="srcCard" data-src="manual"><b>✍️ La scrivo io</b><span>Titolo, ingredienti e procedimento scritti a mano</span></button>
+      <button type="button" class="srcCard" data-src="voice"><b>🎤 La detto</b><span>Racconta la ricetta a voce: Gnamina la scrive, poi la controlli</span></button>
       <button type="button" class="srcCard" data-src="photo"><b>📷 La fotografo</b><span>Un quaderno, un libro, una rivista: l'AI la trascrive</span></button>
       <button type="button" class="srcCard" data-src="file"><b>📄 Da un file</b><span>Un testo (.txt) o un'immagine già salvata</span></button>
     </div>
@@ -401,9 +403,10 @@ details summary{cursor:pointer}
   </div>
   <div id="garaStep" class="step" hidden>
     <h3>Da dove partiamo?</h3>
-    <p class="meta">In gara va una ricetta originale, creata da te, con persone, dosi precise e tempi; il video lo giri tu con l'app. Niente link, niente ricette prese da internet.</p>
+    <p class="meta">In gara va una ricetta originale, creata da te, con persone, dosi precise e tempi; il video lo giri tu con l'app. Scritta, dettata, fotografata o da un tuo file: niente link, niente ricette prese da internet.</p>
     <div class="srcGrid">
       <button type="button" class="srcCard" id="garaWrite"><b>✍️ La scrivo adesso</b><span>Nome del piatto, persone, tempi, ingredienti con le dosi e procedimento</span></button>
+      <button type="button" class="srcCard" id="garaVoice"><b>🎤 La detto a voce</b><span>Racconti nome, persone, tempi, ingredienti con le dosi e procedimento: Gnamina la scrive, poi la controlli</span></button>
       <button type="button" class="srcCard" id="garaPhoto"><b>📷 La fotografo dal mio quaderno</b><span>La tua ricetta scritta a mano: l'AI la trascrive, poi la controlli</span></button>
       <button type="button" class="srcCard" id="garaFile"><b>📄 Da un mio file</b><span>Un testo o un'immagine della tua ricetta già salvati sul telefono</span></button>
       <button type="button" class="srcCard" id="garaPick"><b>📖 Una mia ricetta già salvata</b><span>Tra quelle scritte, fotografate o da file, con ingredienti e procedimento</span></button>
@@ -422,6 +425,7 @@ details summary{cursor:pointer}
         <span class="inl" style="margin:0;align-items:flex-start"><textarea name="caption" rows="3" placeholder="Ingredienti, dosi, procedimento…"></textarea><button type="button" class="btn" id="pasteCap">📋 Incolla</button></span></label>
       <div class="srcGrid hint" id="photoL" hidden><button type="button" class="srcCard" id="shootBtn"><b>📷 Scatta la foto</b><span>Inquadra bene la pagina con la ricetta, con buona luce</span></button><button type="button" class="srcCard" id="galBtn"><b>🖼 Scegli dalla galleria</b><span>Una foto che hai già fatto</span></button></div>
       <div class="hint" id="fileL" hidden><button type="button" class="btn pri" id="fileBtn">📄 Scegli il file</button><p class="meta" style="margin:8px 0 0">Un file di testo (.txt) o un'immagine: Gnamina legge la ricetta e compila i campi, poi tu la controlli.</p></div>
+      <div class="hint" id="voiceL" hidden><button type="button" class="btn pri" id="dictBtn" style="font-size:1.1rem;padding:14px 18px;width:100%">🎤 Inizia a dettare</button><p class="meta" style="margin:8px 0 0">Di' il nome del piatto, per quante persone, quanto tempo ci vuole, gli ingredienti con le dosi e poi come si prepara, con calma, come se la raccontassi a un'amica. Hai fino a 3 minuti: quando hai finito premi «Ho finito» e Gnamina scrive tutto nei campi, che poi controlli.</p></div>
       <p class="meta hint" id="srcAfter">Quando i dati sono stati letti, premi «Avanti» per controllarli. Se la lettura non riesce, puoi scrivere tutto tu nei passi seguenti.</p>
     </section>
     <section class="step" data-s="base">
@@ -874,7 +878,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=99; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=100; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1033,7 +1037,7 @@ async function refreshVerified(){if(!ACC||ACC.verified||ACC.provider!=='password
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshVerified()});
 
 /* ---------- Casa: il contest della settimana. I dati vengono da contest.json (tema, date, regole); lo stato si deduce dalle date ---------- */
-let CONTEST={id:'2026-w46',tema:'La miglior carbonara',descrizione:'Il piatto che tutti conoscono e nessuno fa uguale.',regole:['Una ricetta originale, creata da te, con persone, dosi precise e tempi: scritta, fotografata dal tuo quaderno o da un tuo file, mai da un link','Il video lo giri tu con l\'app','Un video della preparazione, massimo 3 minuti','Una sola ricetta a testa'],inizio:'2026-11-09',fine_partecipazione:'2026-11-15',fine_assaggio:'2026-11-22',prossimo:''};
+let CONTEST={id:'2026-w46',tema:'La miglior carbonara',descrizione:'Il piatto che tutti conoscono e nessuno fa uguale.',regole:['Una ricetta originale, creata da te, con persone, dosi precise e tempi: scritta, dettata, fotografata dal tuo quaderno o da un tuo file, mai da un link','Il video lo giri tu con l\'app','Un video della preparazione, massimo 3 minuti','Una sola ricetta a testa'],inizio:'2026-11-09',fine_partecipazione:'2026-11-15',fine_assaggio:'2026-11-22',prossimo:''};
 fetch('contest.json?'+Math.floor(Date.now()/36e5)).then(r=>r.ok?r.json():null).then(c=>{if(c&&c.id){CONTEST=c;if(view==='home')renderHome()}}).catch(()=>{});
 const dIt=d=>new Date(d+'T12:00:00').toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
 function contestPhase(c){const t=new Date().toISOString().slice(0,10);return t<c.inizio?'soon':t<=c.fine_partecipazione?'join':t<=c.fine_assaggio?'taste':'done'}
@@ -1863,12 +1867,12 @@ function openForm(data={}){
 }
 // Nuova ricetta passo per passo: link, scritta a mano, fotografata (trascritta dall'AI) o da un file
 let addMode='link';
-const SRC_LBL={link:'🔗 Da un link',manual:'✍️ Scritta da te',photo:'📷 Dalla foto di una ricetta',file:'📄 Da un file'};
-const SRC_H={link:'Incolla il link della ricetta',photo:'Fotografa la ricetta',file:'Scegli il file con la ricetta'};
+const SRC_LBL={link:'🔗 Da un link',manual:'✍️ Scritta da te',voice:'🎤 Dettata',photo:'📷 Dalla foto di una ricetta',file:'📄 Da un file'};
+const SRC_H={link:'Incolla il link della ricetta',voice:'Detta la ricetta',photo:'Fotografa la ricetta',file:'Scegli il file con la ricetta'};
 function setMode(m,fromUser){
   addMode=m;const f=$('#f');
   $('#urlL').hidden=$('#urlRow').hidden=m!=='link';f.url.required=!!editing&&m==='link';
-  $('#photoL').hidden=m!=='photo';$('#fileL').hidden=m!=='file';$('#srcAfter').hidden=m==='link';$('#srcH').textContent=SRC_H[m]||'';
+  $('#photoL').hidden=m!=='photo';$('#fileL').hidden=m!=='file';$('#voiceL').hidden=m!=='voice';if(m!=='voice')dictStop(true);$('#srcAfter').hidden=m==='link';$('#srcH').textContent=SRC_H[m]||'';
   if(editing){$('#srcStep').hidden=true;f.hidden=false;f.querySelectorAll('.step').forEach(st=>st.hidden=false);return}
   rSteps=stepsFor(m);rGo(0);
   if(fromUser){if(m==='link'&&DESK)f.url.focus();if(m==='photo')$('#ocrIn').click();if(m==='file')$('#fileIn').click()}
@@ -1927,7 +1931,7 @@ const garaMsg=m=>'Per la gara manca '+m.join(', ');
 function garaUI(){const l=$('#garaList');l.hidden=true;l.innerHTML='';$('#garaPick').hidden=!items.some(garaOk)}
 $('#garaCancel').onclick=()=>$('#dlg').close();
 $('#garaWrite').onclick=()=>rGo(0);
-$('#garaPhoto').onclick=()=>setMode('photo',true);$('#garaFile').onclick=()=>setMode('file',true);
+$('#garaVoice').onclick=()=>setMode('voice',true);$('#garaPhoto').onclick=()=>setMode('photo',true);$('#garaFile').onclick=()=>setMode('file',true);
 $('#garaPick').onclick=()=>{const l=$('#garaList'),ok=items.filter(garaOk);
   l.innerHTML=ok.map(i=>`<button type="button" class="srcCard" data-id="${esc(i.id)}"><b>${esc(i.title||'Senza titolo')}</b><span>${esc(i.source||'Scritta da te')} · ${i.ingredients.length} ingredient${i.ingredients.length===1?'e':'i'} · ${i.steps.length} passagg${i.steps.length===1?'io':'i'}</span></button>`).join('');
   l.hidden=false;l.querySelector('button')?.scrollIntoView({block:'nearest'})};
@@ -1938,6 +1942,43 @@ $('#pasteUrl').onclick=async()=>{let t='';try{t=await navigator.clipboard.readTe
 $('#shootBtn').onclick=()=>$('#ocrIn').click();$('#galBtn').onclick=()=>$('#galIn').click();$('#fileBtn').onclick=()=>$('#fileIn').click();
 $('#ocrIn').onchange=$('#galIn').onchange=e=>{const file=e.target.files[0];e.target.value='';if(file)ocrFill(file)};
 $('#fileIn').onchange=e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(file.type.startsWith('image/'))ocrFill(file);else textFill(file)};
+/* ---------- Ricetta dettata a voce: si registra l'audio (fino a 3 minuti), il server lo trascrive e compila i campi ---------- */
+const DICT={};
+const dictMime=()=>['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus'].find(m=>MediaRecorder.isTypeSupported(m))||'';
+const dictFmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+async function dictStart(){
+  if(!aiOn()){toast('Dettatura non attiva');return}
+  if(!REC_OK()&&!FAKECAM){toast('Questo dispositivo non permette di dettare dall\'app: usa il microfono della tastiera');return}
+  try{DICT.stream=FAKECAM?fakeStream():await navigator.mediaDevices.getUserMedia({audio:true})}
+  catch(e){toast(e?.name==='NotAllowedError'?'Permesso del microfono negato: attivalo nelle impostazioni del telefono':'Microfono non disponibile');return}
+  DICT.chunks=[];
+  try{DICT.mr=new MediaRecorder(DICT.stream,{mimeType:dictMime()||undefined,audioBitsPerSecond:48000})}catch{toast('Registrazione non disponibile su questo dispositivo');dictStop(true);return}
+  DICT.mr.ondataavailable=e=>{if(e.data.size)DICT.chunks.push(e.data)};
+  DICT.mr.onstop=dictDone;
+  DICT.t0=Date.now();DICT.mr.start(1000);
+  DICT.tm=setInterval(()=>{const s=Math.floor((Date.now()-DICT.t0)/1000);$('#dictBtn').textContent=`⏹ Ho finito (${dictFmt(s)})`;if(s>=180)dictStop()},250);
+  $('#dictBtn').textContent='⏹ Ho finito (0:00)';$('#dictBtn').classList.add('recOn');showPv('Ti ascolto: parla con calma, quando hai finito premi «Ho finito»');
+}
+function dictStop(abort){
+  clearInterval(DICT.tm);DICT.tm=null;const mr=DICT.mr;DICT.mr=null;
+  if(mr&&mr.state!=='inactive'){if(abort)mr.onstop=null;try{mr.stop()}catch{}}
+  DICT.stream?.getTracks().forEach(t=>t.stop());DICT.stream=null;
+  const b=$('#dictBtn');b.textContent='🎤 Inizia a dettare';b.classList.remove('recOn');
+}
+const blobB64=b=>new Promise((ok,ko)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]||'');r.onerror=ko;r.readAsDataURL(b)});
+async function dictDone(){
+  const type=(DICT.chunks[0]?.type||dictMime()||'audio/webm').split(';')[0],blob=new Blob(DICT.chunks,{type});DICT.chunks=[];
+  if(blob.size<2000){showPv('Non ho sentito niente: riprova tenendo il telefono vicino alla bocca');return}
+  showPv('Trascrivo quello che hai detto… qualche secondo');
+  try{
+    const {result,transcript}=await server('/dictate',{audio:await blobB64(blob),mime:type});
+    if(result&&result.is_recipe!==false)fillFrom(result,'Dettata');
+    else if(transcript){const f=$('#f');if(!f.steps.value)f.steps.value=transcript;showPv('Non ho riconosciuto una ricetta: ho scritto quello che hai detto nel procedimento, sistema i campi nei passi seguenti')}
+    else showPv('Non ho capito le parole: riprova parlando più vicino al telefono, oppure scrivi la ricetta nei passi seguenti');
+  }catch(e){showPv(aiErr(e))}
+}
+$('#dictBtn').onclick=()=>DICT.mr?dictStop():dictStart();
+$('#dlg').addEventListener('close',()=>dictStop(true));
 function fillFrom(r,label){
   const f=$('#f');if(!r||r.is_recipe===false){showPv('Non trovo una ricetta leggibile: compila tu i campi');return}
   const put=(el,v)=>{if(v&&!el.value)el.value=v};
@@ -2176,7 +2217,7 @@ $('#f').onsubmit=e=>{
   const rec={...extra,id:editing?.id||Date.now().toString(36),created:editing?.created||Date.now(),t:Date.now(),url,video,
     title:f.title.value.trim(),cat:f.cat.value,time:+f.time.value||null,servings:+f.servings.value||null,diets:getDiets(),country:f.country.value.trim(),region:f.region.value.trim(),
     rating:formRating,ingredients:lines(f.ingredients.value),steps:lines(f.steps.value),
-    tags:f.tags.value.split(',').map(s=>s.trim()).filter(Boolean),note:f.note.value.trim(),source:url?sourceOf(url):({photo:'Fotografata',file:'Da file'}[addMode]||'Scritta da te')};
+    tags:f.tags.value.split(',').map(s=>s.trim()).filter(Boolean),note:f.note.value.trim(),source:url?sourceOf(url):({photo:'Fotografata',file:'Da file',voice:'Dettata'}[addMode]||'Scritta da te')};
   delete rec._tm;
   if(rec.contest){const m=garaMissing(f);if(m.length){toast(garaMsg(m));return}rec.orig=true;rec.url='';rec.videoId='';rec.videoEmbed='';rec.finalUrl=''}
   if(!rec.image&&ytId(video))rec.image=`https://i.ytimg.com/vi/${ytId(video)}/hqdefault.jpg`; // senza foto, la copertina è il fotogramma di YouTube

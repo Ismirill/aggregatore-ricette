@@ -246,6 +246,25 @@ Se il testo è in un'altra lingua, traducilo in italiano. Se la foto non contien
   return { result };
 }
 
+// Ricetta dettata a voce: Whisper trascrive l'audio, poi il modello ricava i campi dal testo (audio personale: mai a Gemini)
+async function dictate(env, b) {
+  const data = str(b.audio, 8e6);
+  if (!data) throw Object.assign(new Error('Audio mancante'), { status: 400 });
+  const buf = Buffer.from(data, 'base64');
+  if (buf.byteLength < 1000) throw Object.assign(new Error('Audio troppo corto'), { status: 400 });
+  const transcript = await whisper(env, buf, str(b.mime, 40).toLowerCase());
+  if (!transcript) return { result: null, transcript: '' };
+  const result = await aiJson(env, `Questo è il testo di una ricetta dettata a voce da chi la cucina, trascritto automaticamente (può avere errori di ascolto, parole in dialetto, numeri scritti in lettere). Ricava i dati della ricetta restando fedele a quello che è stato detto: non inventare dosi, tempi o passaggi non detti; correggi solo gli errori evidenti di trascrizione e scrivi le quantità in cifre (es. «due etti di farina» → «200 g farina», «mezzo litro» → «500 ml»). Rispondi SOLO con un oggetto JSON:
+{"is_recipe":true|false,"title":"nome del piatto","servings":numero di persone o null,"time":minuti totali o null,"cat":"Antipasti|Primi|Secondi|Contorni|Piatti unici|Lievitati|Dolci|Altro","ingredients":["quantità e ingrediente, uno per voce, come detto"],"steps":["un passaggio per voce, in ordine, scritto in modo chiaro"],"notes":"consigli o note dette a parte"}
+Se il testo non descrive una ricetta, restituisci is_recipe false.
+
+Testo dettato:
+---
+${transcript}
+---`, null, true);
+  return { result, transcript };
+}
+
 async function photo(env, b) {
   const data = str(b.image, 6e6);
   if (!data) throw Object.assign(new Error('Foto mancante'), { status: 400 });
@@ -419,10 +438,11 @@ async function transcribe(env, videoUrl, seconds) {
 }
 // Whisper: se c'è la chiave si usa prima Groq (piano gratuito con 8 ore di audio al giorno, nessun addestramento sui dati),
 // e Workers AI resta di riserva: la trascrizione è la voce che più consuma la quota di Cloudflare
-async function whisper(env, buf) {
+async function whisper(env, buf, mime = 'video/mp4') {
+  const ext = { 'audio/mp4': 'm4a', 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/wav': 'wav', 'audio/mpeg': 'mp3' }[mime] || 'mp4';
   if (env.GROQ_KEY && env.FORCE_AI !== 'cf') try {
     const fd = new FormData();
-    fd.append('file', new Blob([buf], { type: 'video/mp4' }), 'video.mp4'); fd.append('model', 'whisper-large-v3-turbo'); fd.append('language', 'it'); fd.append('response_format', 'json');
+    fd.append('file', new Blob([buf], { type: ext === 'mp4' ? 'video/mp4' : mime }), 'audio.' + ext); fd.append('model', 'whisper-large-v3-turbo'); fd.append('language', 'it'); fd.append('response_format', 'json');
     const r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', { method: 'POST', headers: { Authorization: 'Bearer ' + env.GROQ_KEY }, body: fd });
     if (r.ok) { console.log('Whisper: Groq'); return str((await r.json()).text, 8000).trim(); }
     console.log('Groq whisper non disponibile:', r.status, str(await r.text(), 200));
@@ -744,7 +764,7 @@ export default {
         return reply(origin, { error: limit ? 'Limite giornaliero raggiunto' : e.message }, limit ? 429 : e.status === 400 ? 400 : 502);
       }
     }
-    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/nutrition', '/preview', '/translate-recipe', '/sync', '/account', '/handoff', '/handoff/take'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
+    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/dictate', '/nutrition', '/preview', '/translate-recipe', '/sync', '/account', '/handoff', '/handoff/take'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';
     if (env.LIMITER && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
     if (path === '/sync' || path === '/account' || path === '/handoff' || path === '/handoff/take') {
@@ -758,7 +778,7 @@ export default {
     if (force) env = { ...env, FORCE_AI: force };
     try {
       const body = await req.json();
-      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/ocr' ? await ocr(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await previewCached(env, body) : path === '/translate-recipe' ? await translateRecipe(env, body) : await analyzeCached(env, body));
+      return reply(origin, path === '/photo' ? await photo(env, body) : path === '/ocr' ? await ocr(env, body) : path === '/dictate' ? await dictate(env, body) : path === '/nutrition' ? await nutrition(env, body, req) : path === '/preview' ? await previewCached(env, body) : path === '/translate-recipe' ? await translateRecipe(env, body) : await analyzeCached(env, body));
     } catch (e) {
       // Quota giornaliera gratuita esaurita o errore del modello
       const limit = e.status === 429 || /neuron|quota|limit|4006/i.test(e.message);
