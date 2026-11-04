@@ -825,7 +825,9 @@
     "bietole",
     "bieta",
     "erbette",
-    "coste"
+    "coste",
+    "coste ripassate",
+    "bietole lesse"
    ]
   },
   {
@@ -834,7 +836,9 @@
    "area": "tutta",
    "pop": 4,
    "match": [
-    "fagiolini"
+    "fagiolini",
+    "fagiolini all'agro",
+    "patate e fagiolini"
    ]
   },
   {
@@ -847,7 +851,9 @@
     "cavolfiore",
     "broccoletti",
     "cavolo",
-    "verza"
+    "verza",
+    "cime di rapa",
+    "cavolo cappuccio"
    ]
   },
   {
@@ -860,7 +866,9 @@
     "cicoria",
     "friarielli",
     "catalogna",
-    "ripassat"
+    "ripassat",
+    "cime di rapa",
+    "scarola"
    ]
   },
   {
@@ -905,7 +913,8 @@
    "reg": "Lazio",
    "pop": 3,
    "match": [
-    "carciofi"
+    "carciofi",
+    "carciofi in padella"
    ]
   },
   {
@@ -948,7 +957,8 @@
    "pop": 3,
    "match": [
     "piselli",
-    "piselli in umido"
+    "piselli in umido",
+    "piselli in padella"
    ]
   },
   {
@@ -957,7 +967,8 @@
    "area": "tutta",
    "pop": 2,
    "match": [
-    "carote"
+    "carote",
+    "carote lesse"
    ]
   },
   {
@@ -1006,6 +1017,68 @@
    "pop": 2,
    "match": [
     "polenta"
+   ]
+  },
+  {
+   "n": "Verdura lessa all'agro",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 4,
+   "match": [
+    "all'agro",
+    "lessi all",
+    "lesse all",
+    "lessa all",
+    "lesso all"
+   ]
+  },
+  {
+   "n": "Puntarelle",
+   "cat": "Contorni",
+   "area": "centro",
+   "reg": "Lazio",
+   "pop": 3,
+   "match": [
+    "puntarelle"
+   ]
+  },
+  {
+   "n": "Fagioli piattoni o taccole",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 2,
+   "match": [
+    "piattoni",
+    "taccole",
+    "fagioli corallo"
+   ]
+  },
+  {
+   "n": "Asparagi",
+   "cat": "Contorni",
+   "area": "nord",
+   "pop": 2,
+   "match": [
+    "asparagi"
+   ]
+  },
+  {
+   "n": "Finocchi lessi o in insalata",
+   "cat": "Contorni",
+   "area": "tutta",
+   "pop": 2,
+   "match": [
+    "finocchi lessi",
+    "finocchi all"
+   ]
+  },
+  {
+   "n": "Verza ripassata",
+   "cat": "Contorni",
+   "area": "nord",
+   "pop": 2,
+   "match": [
+    "verza"
    ]
   }
  ]
