@@ -17,6 +17,72 @@ public class MainActivity extends BridgeActivity {
     private static final int SAVE_FILE = 7331, REC_VIDEO = 7332, PICK_VIDEO = 7333;
     // File in cui la fotocamera scrive il video della ricetta (cartella cache dell'app, condiviso con YouTube tramite FileProvider)
     private android.net.Uri pendingVideo;
+    // Video con il marchio ricevuto dalla pagina a pezzi (base64) in un file della cache: poi si condivide o si salva nella Galleria
+    private java.io.File vidFile;
+    private java.io.OutputStream vidOut;
+    private String vidMime = "video/mp4";
+
+    private void js(String code) {
+        getBridge().getWebView().post(() -> getBridge().getWebView().evaluateJavascript(code, null));
+    }
+
+    private void closeVid() {
+        try { if (vidOut != null) vidOut.close(); } catch (Exception ignored) {}
+        vidOut = null;
+    }
+
+    private static void copy(java.io.File f, java.io.OutputStream os) throws java.io.IOException {
+        try (java.io.InputStream in = new java.io.FileInputStream(f); java.io.OutputStream o = os) {
+            byte[] b = new byte[65536];
+            int n;
+            while ((n = in.read(b)) > 0) o.write(b, 0, n);
+        }
+    }
+
+    // Salva il video nella Galleria (cartella Movies/Gnamina): dalla Android 10 con MediaStore senza permessi, prima scrivendo nella memoria condivisa
+    private boolean saveToGallery(java.io.File f, String mime) {
+        try {
+            android.content.ContentValues v = new android.content.ContentValues();
+            v.put(android.provider.MediaStore.Video.Media.DISPLAY_NAME, f.getName());
+            v.put(android.provider.MediaStore.Video.Media.MIME_TYPE, mime);
+            if (android.os.Build.VERSION.SDK_INT < 29) {
+                java.io.File dir = new java.io.File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_MOVIES), "Gnamina");
+                dir.mkdirs();
+                java.io.File dst = new java.io.File(dir, f.getName());
+                copy(f, new java.io.FileOutputStream(dst));
+                android.media.MediaScannerConnection.scanFile(this, new String[]{dst.getAbsolutePath()}, new String[]{mime}, null);
+                return true;
+            }
+            v.put(android.provider.MediaStore.Video.Media.RELATIVE_PATH, android.os.Environment.DIRECTORY_MOVIES + "/Gnamina");
+            v.put(android.provider.MediaStore.Video.Media.IS_PENDING, 1);
+            android.net.Uri u = getContentResolver().insert(android.provider.MediaStore.Video.Media.getContentUri(android.provider.MediaStore.VOLUME_EXTERNAL_PRIMARY), v);
+            if (u == null) return false;
+            copy(f, getContentResolver().openOutputStream(u));
+            v.clear();
+            v.put(android.provider.MediaStore.Video.Media.IS_PENDING, 0);
+            getContentResolver().update(u, v, null, null);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // Passa il video al menu di condivisione (TikTok, Instagram, Facebook, YouTube, WhatsApp…) con la didascalia come testo
+    private boolean shareVideoFile(java.io.File f, String mime, String caption) {
+        try {
+            android.net.Uri u = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", f);
+            Intent s = new Intent(Intent.ACTION_SEND);
+            s.setType(mime);
+            s.putExtra(Intent.EXTRA_STREAM, u);
+            if (caption != null && !caption.isEmpty()) s.putExtra(Intent.EXTRA_TEXT, caption);
+            s.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent ch = Intent.createChooser(s, "Pubblica il video");
+            runOnUiThread(() -> startActivity(ch));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -134,6 +200,41 @@ public class MainActivity extends BridgeActivity {
             i.addCategory(Intent.CATEGORY_OPENABLE);
             i.setType("video/*");
             runOnUiThread(() -> startActivityForResult(i, PICK_VIDEO));
+        }
+
+        // Video con il marchio: inizio (nome e tipo), pezzi in base64, fine con l'azione «share» (menu di condivisione) o «save» (Galleria)
+        @JavascriptInterface
+        public void videoBegin(String name, String mime) {
+            closeVid();
+            try {
+                java.io.File dir = new java.io.File(getCacheDir(), "video");
+                dir.mkdirs();
+                for (java.io.File old : dir.listFiles() != null ? dir.listFiles() : new java.io.File[0]) old.delete(); // un video alla volta
+                String n = name == null || name.isEmpty() ? "gnamina.mp4" : name.replaceAll("[^A-Za-z0-9._-]", "-");
+                vidFile = new java.io.File(dir, n);
+                vidOut = new java.io.BufferedOutputStream(new java.io.FileOutputStream(vidFile));
+                vidMime = mime == null || mime.isEmpty() ? "video/mp4" : mime;
+            } catch (Exception e) {
+                vidOut = null;
+            }
+        }
+
+        @JavascriptInterface
+        public void videoChunk(String b64) {
+            if (vidOut == null) return;
+            try { vidOut.write(android.util.Base64.decode(b64, android.util.Base64.DEFAULT)); } catch (Exception e) { closeVid(); }
+        }
+
+        @JavascriptInterface
+        public void videoEnd(String action, String caption) {
+            final boolean ready = vidOut != null && vidFile != null;
+            closeVid();
+            final java.io.File f = vidFile;
+            final String a = "save".equals(action) ? "save" : "share", m = vidMime, c = caption;
+            new Thread(() -> {
+                boolean ok = ready && (a.equals("save") ? saveToGallery(f, m) : shareVideoFile(f, m, c));
+                js("window.onVideoDone&&onVideoDone(" + ok + ",'" + a + "')");
+            }).start();
         }
 
         // Salva un file di testo con il selettore di Android: l'utente sceglie Google Drive, la memoria del telefono o Download

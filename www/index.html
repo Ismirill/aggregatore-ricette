@@ -878,7 +878,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=103; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=104; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2281,17 +2281,26 @@ async function clipFiles(key,clips,title){
   return files;
 }
 const dlFile=f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000)};
+// Nell'app Android il file passa al ponte nativo a pezzi (base64 da 768 KB): poi Android lo condivide o lo salva nella Galleria, album Gnamina
+async function androidVideo(action,file,caption){
+  AndroidShare.videoBegin(file.name,(file.type||'video/mp4').split(';')[0]);
+  const CH=768*1024;for(let o=0;o<file.size;o+=CH)AndroidShare.videoChunk(await blobB64(file.slice(o,o+CH)));
+  AndroidShare.videoEnd(action,caption||'');
+}
+window.onVideoDone=(ok,action)=>toast(ok?(action==='save'?'Video salvato nella Galleria, album Gnamina':'Didascalia copiata: nella descrizione tieni premuto e scegli Incolla'):(action==='save'?'Non sono riuscita a salvare nella Galleria: prova «Pubblica» e scegli Foto o File':'Condivisione non riuscita'));
 // Pubblica: il menù di condivisione del telefono (TikTok, Instagram, Facebook, YouTube, WhatsApp…) con la didascalia già negli appunti; sul computer si scarica il file
 async function clipsShare(key,clips,title){
   let files;try{files=await clipFiles(key,clips,title)}catch{toast('Il video non è su questo dispositivo');return}
   const cap=`${title||'La mia ricetta'} 🍅 Ricetta su Gnamina ${SITE}\n#gnamina #ricetta #cucinaitaliana`;
   let copied=false;try{await navigator.clipboard.writeText(cap);copied=true}catch{}
+  if(window.AndroidShare?.videoBegin){toast('Preparo il video…');for(const f of files)await androidVideo('share',f,cap);return}
   if(navigator.canShare?.({files})){try{await navigator.share({files,title:title||'Video della ricetta',text:cap});if(copied)toast('Didascalia copiata: nella descrizione tieni premuto e scegli Incolla')}catch(e){if(e.name!=='AbortError')toast('Condivisione non riuscita')}return}
   files.forEach(dlFile);toast('Video scaricato: caricalo su TikTok, Instagram, Facebook o YouTube dal computer');
 }
 // Salva nel rullino: su iPhone dal menù di condivisione («Salva video»), altrove come file scaricato (la galleria lo trova da sola)
 async function clipsSave(key,clips,title){
   let files;try{files=await clipFiles(key,clips,title)}catch{toast('Il video non è su questo dispositivo');return}
+  if(window.AndroidShare?.videoBegin){toast('Salvo il video nella Galleria…');for(const f of files)await androidVideo('save',f,'');return}
   if(/iPhone|iPad/.test(navigator.userAgent)&&navigator.canShare?.({files})){toast('Nel menù scegli «Salva video» per metterlo nel rullino');try{await navigator.share({files,title:'Salva il video'})}catch(e){if(e.name!=='AbortError')toast('Salvataggio non riuscito')}return}
   files.forEach(dlFile);toast(files.length>1?'Video scaricati: li trovi nei download e nella galleria':'Video scaricato: lo trovi nei download e nella galleria');
 }
