@@ -63,14 +63,13 @@ Non si fa: conversione sul server (il worker Cloudflare non esegue ffmpeg, il PC
 
 Il rullino e il menù di condivisione funzionano con qualunque account, senza revisioni, quote o costi. Le API restano un'idea di fase 2 per il solo canale ufficiale di Gnamina (le vincitrici della settimana).
 
-## Il punto aperto: «Rifai questa parte» nella regia
+## La regia: tre parti rifacibili, unite alla fine (deciso il 4/11/2026)
 
-Oggi ogni parte della regia è un file a sé, e per questo si può rifare da sola. Con il marchio impresso in diretta e **un solo file da salvare nel rullino** ci sono due strade:
+Ogni parte della regia resta un file a sé, **già con il marchio impresso**, così «Rifai questa parte» continua a funzionare come oggi. Su «Usa questo video» l'app **unisce le tre parti in un solo file**: rilegge le clip una dopo l'altra in un `<video>` nascosto, le ridisegna sullo stesso canvas (senza aggiungere di nuovo l'icona, c'è già) con l'audio che passa da un `AudioContext`, e registra il risultato. L'unione dura quanto il video (fino a 3 minuti) con la barra «Sto unendo le tre parti, non chiudere l'app»; alla fine il file unico va nel rullino e in IndexedDB, e le tre clip si buttano. Se l'app va in sfondo durante l'unione (iPhone sospende la pagina), si riparte con un avviso. Le etichette delle parti si disegnano durante la ripresa, come il marchio.
 
-- **A. Una registrazione continua** con `pausa` tra una parte e l'altra (`MediaRecorder.pause/resume`): un solo file, nessun montaggio, pronto in un attimo. Ma una parte sbagliata non si può più rifare da sola: si rifà il video dall'inizio (al massimo 3 minuti). Più semplice da capire e da costruire.
-- **B. Tre file con il marchio, uniti alla fine** in un passaggio di ri-codifica (si rileggono le tre clip e si registra il risultato): si tiene «Rifai questa parte», ma l'unione dura quanto il video (fino a 3 minuti di attesa) e consuma batteria.
+Scartata l'alternativa della registrazione continua con pausa tra le parti (un solo file subito, ma senza «Rifai questa parte»): l'utente preferisce l'attesa finale.
 
-Proposta: **A**, con un tasto «↺ Rifai da capo» e la possibilità di tornare indietro solo prima di iniziare la parte successiva (cioè, finita una parte, la si rivede e si sceglie «Va bene, avanti» oppure «Rifai tutto»). Da decidere con l'utente.
+Il modo libero («Registra un video») non ha parti: il file esce dal registratore già completo, senza unione.
 
 ## Rischi e come li gestiamo
 
@@ -85,7 +84,7 @@ Proposta: **A**, con un tasto «↺ Rifai da capo» e la possibilità di tornare
 
 | Tappa | Cosa esce | Versione |
 |---|---|---|
-| A | Fotocamera dentro l'app su canvas con icona (regia e modo libero), scheda iniziale ed etichette, salvataggio in IndexedDB, «Pubblica» e «Salva nel rullino» con quello che il telefono sa fare oggi (`navigator.share`), icona con trasparenza, «Registra un video» che apre la fotocamera dell'app | 102 |
+| A | Fotocamera dentro l'app su canvas con icona (regia e modo libero), scheda iniziale ed etichette, unione finale delle tre parti con barra di avanzamento, salvataggio in IndexedDB, «Pubblica» e «Salva nel rullino» con quello che il telefono sa fare oggi (`navigator.share`), icona con trasparenza, «Registra un video» che apre la fotocamera dell'app | 102 |
 | B | Rullino nativo: `saveVideo`/`shareVideo` nell'APK, plugin o ponte su iPhone con la descrizione d'uso; prova su telefoni veri (formato prodotto, fluidità, orientamento) | 103 |
 | C | Se Android dà solo WebM: WebCodecs + muxer MP4 | 104 |
 | D | Didascalia negli appunti con link e hashtag; «Come funziona» del contest aggiornato; eventuale marchio su file esistenti (vedi 2) | con B |
