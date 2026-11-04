@@ -83,7 +83,8 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px}
 .thumb .play{position:absolute;left:8px;bottom:8px;font-size:.7rem;font-weight:600;background:#000b;color:#fff;border-radius:999px;padding:3px 8px;backdrop-filter:blur(6px)}
 .thumb .cat{position:absolute;left:8px;top:8px;font-size:.68rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;background:color-mix(in srgb,var(--card) 88%,transparent);color:var(--fg);border-radius:999px;padding:3px 8px;backdrop-filter:blur(6px)}
 .thumb .rt{position:absolute;right:8px;top:8px;font-size:.72rem;background:#000a;color:#ffd166;border-radius:999px;padding:2px 7px}
-.sv{position:absolute;right:8px;bottom:8px;font-size:.74rem;font-weight:700;background:#000b;color:#ffd166;border-radius:999px;padding:3px 8px;backdrop-filter:blur(6px)}.sv small{font-weight:500;color:#fffa}.sv.big{position:static;font-size:1.15rem;background:none;color:var(--star);padding:0;backdrop-filter:none}.sv.big small{color:var(--mut);font-size:.85rem}.svRow{display:flex;gap:10px;align-items:baseline;margin-top:12px;flex-wrap:wrap}
+.sv{position:absolute;right:8px;bottom:8px;font-size:.74rem;font-weight:700;background:#000b;color:#ffd166;border-radius:999px;padding:3px 8px;backdrop-filter:blur(6px);display:inline-flex;align-items:center;gap:4px;z-index:2}.sv small{font-weight:600;color:#fffd}.sv.big{position:static;font-size:1.25rem;background:none;color:var(--star);padding:0;backdrop-filter:none}.sv.big small{color:var(--mut);font-size:.85rem;font-weight:500}.sv.hero{right:14px;bottom:14px;font-size:.95rem;padding:5px 11px}
+.st5{position:relative;display:inline-block;line-height:1;letter-spacing:1px;color:#ffffff66;white-space:nowrap}.st5 i{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:#ffd166;font-style:normal}.sv.big .st5{color:var(--bd)}.sv.big .st5 i{color:var(--star)}.svRow{display:flex;gap:10px;align-items:baseline;margin-top:12px;flex-wrap:wrap}
 .item .b{padding:11px 13px 13px;flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
 .item h3{margin:0;font-size:1.02rem;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 @media (max-width:620px){.item h3{font-size:.95rem}.item .b{padding:9px 10px 11px}.thumb{font-size:2.1rem}}
@@ -775,8 +776,9 @@ const DEV=(()=>{let d=load('dev','');if(!d){d=Array.from(crypto.getRandomValues(
 const pubId=i=>i?.book&&!i.pronto&&!i.colazione?i.id:i?.bookId||'';
 const STARS={}; // id -> [media, voti, mio voto, letto quando]
 const fmtAvg=a=>String(a).replace('.',',');
-const starsHtml=(id,big)=>{const v=STARS[id];if(!v||!v[1])return big?'<span class="meta">ancora nessun voto</span>':'';const w=v[1]===1?'voto':'voti';return big?`<span class="sv big">★ ${fmtAvg(v[0])}<small> su 5 · ${v[1]} ${w}</small></span>`:`<span class="sv" title="${fmtAvg(v[0])} su 5, ${v[1]} ${w}">★ ${fmtAvg(v[0])} <small>(${v[1]})</small></span>`};
-function starsPaint(){document.querySelectorAll('.item[data-pub]').forEach(el=>{const id=el.dataset.pub,v=STARS[id];if(!v||!v[1])return;const h=starsHtml(id),b=el.querySelector('.sv');if(b)b.outerHTML=h;else el.querySelector('.thumb')?.insertAdjacentHTML('beforeend',h)});const d=$('#dStars');if(d?.dataset.id)starsBlock(d.dataset.id)}
+const st5=(a,t)=>`<span class="st5" title="${esc(t||'')}"><i style="width:${Math.max(0,Math.min(5,+a||0))/5*100}%">★★★★★</i>★★★★★</span>`;
+const starsHtml=(id,big)=>{const v=STARS[id]||[0,0,0];const n=v[1],w=n===1?'voto':'voti',t=n?`${fmtAvg(v[0])} su 5, ${n} ${w}`:'ancora nessun voto';return big?`<span class="sv big">${st5(v[0],t)}<small>${n?` ${fmtAvg(v[0])} su 5 · ${n} ${w}`:' ancora nessun voto: dai il tuo'}</small></span>`:`<span class="sv">${st5(v[0],t)}<small>${n?` ${n}`:''}</small></span>`};
+function starsPaint(){document.querySelectorAll('.item[data-pub]').forEach(el=>{const id=el.dataset.pub;if(!STARS[id])return;const h=starsHtml(id),b=el.querySelector('.sv');if(b)b.outerHTML=h;else el.querySelector('.thumb')?.insertAdjacentHTML('beforeend',h)});const d=$('#dStars');if(d?.dataset.id)starsBlock(d.dataset.id);const hv=$('#heroStars');if(hv?.dataset.id)hv.innerHTML=starsHtml(hv.dataset.id)}
 async function starsToken(){try{return ACC?await idToken():null}catch{return null}}
 async function starsFetch(ids,force){const want=[...new Set(ids.filter(Boolean))].filter(id=>force||!STARS[id]||Date.now()-(STARS[id][3]||0)>6e5).slice(0,80);if(!want.length)return;
   try{const r=await server('/stars',{ids:want,dev:DEV},await starsToken());for(const id of want)STARS[id]=[...(r.stars[id]||[0,0,0]),Date.now()];starsPaint()}catch{}}
@@ -897,7 +899,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=117; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=118; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1165,7 +1167,7 @@ function card(i){
   const diets=(i.diets||[]).filter(d=>MAIN_DIETS.includes(d));if(i.pseudo)diets.unshift('Italo-americano');const gara=i.contest?`<span class="bdg gara">🏆 In gara</span>`:'';
   return `<div class="item" data-id="${i.id}"${pubId(i)?` data-pub="${esc(pubId(i))}"`:''}>
     <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${!i.book&&!i.pronto&&!i.colazione?'<button type="button" class="more" aria-label="Altre azioni">⋯</button>':''}${i.imgGen?'<span class="aiTag" title="Immagine generata con l\'AI">AI</span>':''}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
-      <span class="cat">${esc(i.cat||'Altro')}</span>${i.rating?`<span class="rt">★ ${i.rating}</span>`:''}${vid?'<span class="play">▶ video</span>':''}</div>
+      <span class="cat">${esc(i.cat||'Altro')}</span>${pubId(i)?starsHtml(pubId(i)):i.rating?`<span class="sv">${st5(i.rating,i.rating+' stelle, il tuo voto')}</span>`:''}${vid?'<span class="play">▶ video</span>':''}</div>
     <div class="b"><h3>${esc(i.title||i.url)}</h3>
       <div class="facts">${facts.map(f=>`<span>${f}</span>`).join('')}</div>
       <div class="meta">${isIntl(i)?flag(ccOf(i))+' ':''}${esc([i.region||i.country,(i.source||'')+(i.linked?' · collegata':'')].filter(Boolean).join(' · '))}</div>
@@ -1824,7 +1826,7 @@ function openDetail(i){
   $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button><div class="dcols"><div class="dmain">
     ${i.clips?.length?`<div class="clipPl" id="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p><p class="row" style="justify-content:flex-start;gap:8px;margin:0 0 10px"><button type="button" class="btn pri" data-vc="share">📤 Pubblica</button><button type="button" class="btn" data-vc="save">💾 Salva nel rullino</button></p></div>`
       :e?`<iframe class="video ${e.v?'v':'h'}" src="${esc(e.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
-      :i.image?`<div class="heroWrap"><img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;hero&quot; style=&quot;display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)&quot;>${em}</div>'"></div>`
+      :i.image?`<div class="heroWrap">${pubId(i)?`<span class="sv hero" id="heroStars" data-id="${esc(pubId(i))}">${starsHtml(pubId(i))}</span>`:i.rating?`<span class="sv hero">${st5(i.rating,i.rating+' stelle, il tuo voto')}</span>`:''}<img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;hero&quot; style=&quot;display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)&quot;>${em}</div>'"></div>`
       :`<div class="heroWrap"><div class="hero" style="display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)">${em}</div></div>`}
     <h2 style="margin-top:12px">${esc(i.title||i.url)}</h2>
     ${i.pseudo?`<div class="warn" style="margin:8px 0">Piatto <b>italo-americano</b>: nato all'estero e spesso presentato come italiano, non fa parte della cucina italiana di tutti i giorni.</div>`:''}
