@@ -274,9 +274,9 @@ details summary{cursor:pointer}
 #acct .big{margin:4px 0 10px;font-size:1.08rem;line-height:1.5}
 #acct .sec h3{margin-top:14px}
 .avs button{position:relative;overflow:hidden;display:grid;place-items:center}.avs button img{width:100%;height:100%;object-fit:cover}.avs button.ph{font-size:1.1rem}
-.avs button.tomb{padding:2px}.avs button svg.tom,.icon.user svg.tom,.who .av svg.tom{width:100%;height:100%;display:block}.lvls div svg.tom{width:36px;height:36px;float:right;margin:0 0 4px 8px}
+.avs button.tomb{padding:0}.avs button .tom,.icon.user .tom,.who .av .tom{width:100%;height:100%;display:block;object-fit:cover;border-radius:50%}.lvls div .tom{width:40px;height:40px;float:right;margin:0 0 4px 8px;border-radius:50%}
 .fine{margin-top:14px;width:100%;justify-content:center;font-size:1.05rem;padding:13px}
-/* ---------- Profilo Gnammer: nome, avatar e livello (Novizio, Cuoco, Chef, Maestro) ---------- */
+/* ---------- Profilo Gnammer: nome, avatar e livello (Novizio, Cuoco, Sous chef, Chef, Maestro) ---------- */
 .who{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:10px 14px;margin:0 0 14px;cursor:pointer;box-shadow:var(--sh)}
 .who .av{width:46px;height:46px;border-radius:50%;background:color-mix(in srgb,var(--acc) 12%,var(--bg2));display:grid;place-items:center;font-size:1.5rem;flex:none;overflow:hidden}.who .av img{width:100%;height:100%;object-fit:cover}.who .av svg{width:22px;height:22px;color:var(--mut)}
 .who b{display:block;font-size:1.02rem}.who span{font-size:.84rem;color:var(--mut)}.who .lvl{margin-left:auto;flex:none;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc)}
@@ -879,7 +879,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=110; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=111; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -990,29 +990,19 @@ $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(t)goView(t.dataset.v)
 /* ---------- Profilo Gnammer: nome e avatar scelti dall'utente (locali; con l'account verranno dal profilo online); livello calcolato dai contributi ---------- */
 let PROF=load('gnammer',{name:'',avatar:'',photo:''});
 const AVATARS=['🧑‍🍳','👩‍🍳','👨‍🍳','👵','👴','🍝','🥘','🥖','🫒','🧀','🍋'];
-/* Avatar pomodoro di Gnamina: Gnammera (f) o Gnammer (m); il cappello cambia da solo con il livello (0 Novizio: senza, 1 Cuoco: cuffia, 2 Chef: toque alta, 3 Maestro: tocco di laurea) */
-function tomatoSvg(sex,k){
-  const f=sex==='f',ink='#2a1a16';
-  const hat=['',
-    `<path d="M24 32 q26 -24 52 0 l-1 7 h-50 z" fill="#fff" stroke="#d8d2c4" stroke-width="1.5" stroke-linejoin="round"/><path d="M25 38 h50" stroke="#e6e0d3" stroke-width="2"/>`,
-    `<path d="M27 38 v-15 q-1 -13 12 -11 q4 -9 12 -5 q8 -4 12 5 q13 -2 12 11 v15 z" fill="#fff" stroke="#d8d2c4" stroke-width="1.5" stroke-linejoin="round"/><rect x="26" y="35" width="48" height="8" rx="3" fill="#f3efe6" stroke="#d8d2c4" stroke-width="1.5"/>`,
-    `<path d="M50 10 l36 11 l-36 11 l-36 -11 z" fill="#2b2b2b"/><path d="M34 27 v7 q16 9 32 0 v-7 q-16 8 -32 0 z" fill="#1c1c1c"/><path d="M86 21 v14" stroke="#e8b84a" stroke-width="2" stroke-linecap="round"/><circle cx="86" cy="37" r="3" fill="#e8b84a"/>`][k]||'';
-  const face=f
-    ?`<path d="M31 50 l-3 -3 M34 48 l-2 -4 M37 47 l-1 -4 M69 50 l3 -3 M66 48 l2 -4 M63 47 l1 -4" stroke="${ink}" stroke-width="1.6" stroke-linecap="round"/><circle cx="29" cy="67" r="4.5" fill="#ff9a8a" opacity=".75"/><circle cx="71" cy="67" r="4.5" fill="#ff9a8a" opacity=".75"/><path d="M40 73 q10 9 20 0" stroke="#8c1f1f" stroke-width="3.2" fill="none" stroke-linecap="round"/>${k?'':'<path d="M30 30 l9 4 l-9 4 z M46 30 l-9 4 l9 4 z" fill="#ff8fb1"/><circle cx="38" cy="34" r="2.3" fill="#ff5d8a"/>'}`
-    :`<path d="M31 47 l12 -3 M69 47 l-12 -3" stroke="${ink}" stroke-width="2.6" stroke-linecap="round"/><path d="M50 69 q-6 -4 -12 1 q6 -1 12 3 q6 -4 12 -3 q-6 -5 -12 -1 z" fill="#4a2b22"/><path d="M38 77 q12 8 24 0" stroke="#8c1f1f" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
-  return `<svg class="tom" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="58" r="37" fill="#e2452c"/><ellipse cx="36" cy="41" rx="9" ry="6" fill="#fff" opacity=".28"/><path d="M50 24 l-10 -6 l5 9 l-12 -1 l10 6 l-6 7 l13 -5 l13 5 l-6 -7 l10 -6 l-12 1 l5 -9 z" fill="#3f9b3a"/><rect x="48" y="13" width="4" height="12" rx="2" fill="#2f7a2c"/>${hat}<ellipse cx="38" cy="57" rx="6.5" ry="7.5" fill="#fff"/><ellipse cx="62" cy="57" rx="6.5" ry="7.5" fill="#fff"/><circle cx="39.5" cy="58.5" r="3.4" fill="${ink}"/><circle cx="63.5" cy="58.5" r="3.4" fill="${ink}"/><circle cx="40.8" cy="56.8" r="1.1" fill="#fff"/><circle cx="64.8" cy="56.8" r="1.1" fill="#fff"/>${face}</svg>`;
-}
 const isTom=a=>/^tom:[fm]$/.test(a||'');
-const LEVELS=[['Novizio',1,'Appena iscritto'],['Cuoco',2,'Una ricetta in un contest, oppure tre assaggi con foto'],['Chef',3,'Tre ricette, oppure una vittoria'],['Maestro',4,'Tre vittorie']];
+// Avatar in plastilina generati con MiniMax H3 (www/avatar/<livello>-<f|m>.png): il cappello segue il livello
+const avatarImg=(sex,k)=>`<img class="tom" src="avatar/${k}-${sex}.jpg" alt="" width="320" height="320">`;
+const LEVELS=[['Novizio',1,'Appena iscritto'],['Cuoco',2,'Una ricetta in un contest, oppure tre assaggi con foto'],['Sous chef',3,'Due ricette in gara, oppure sei assaggi con foto'],['Chef',4,'Tre ricette, oppure una vittoria'],['Maestro',5,'Tre vittorie']];
 function gnammerLevel(){const ric=items.filter(i=>i.contest).length,ass=load('tastings',[]).length,win=+load('wins',0)||0;
-  const k=win>=3?3:(ric>=3||win>=1)?2:(ric>=1||ass>=3)?1:0;return {k,name:LEVELS[k][0],weight:LEVELS[k][1],ric,ass,win}}
+  const k=win>=3?4:(ric>=3||win>=1)?3:(ric>=2||ass>=6)?2:(ric>=1||ass>=3)?1:0;return {k,name:LEVELS[k][0],weight:LEVELS[k][1],ric,ass,win}}
 const profName=()=>PROF.name||'';
 const profPic=()=>PROF.photo||'';           // foto scelta (caricata o quella di Google)
 const profDone=()=>!!(PROF.name&&(PROF.avatar||PROF.photo));   // nome + immagine: obbligatori per chi ha l'account
 function saveProf(){save('gnammer',PROF);userBtnUI();if(view==='home')renderHome()}
 // Immagine del Gnammer come HTML: foto o avatar; sagoma anonima se non si è presentati
 const ANON_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
-function picHtml(cls){return profPic()?`<img src="${esc(profPic())}" alt="" referrerpolicy="no-referrer">`:isTom(PROF.avatar)?tomatoSvg(PROF.avatar.slice(4),gnammerLevel().k):PROF.avatar?`<span class="${cls||'em'}">${PROF.avatar}</span>`:ANON_SVG}
+function picHtml(cls){return profPic()?`<img src="${esc(profPic())}" alt="" referrerpolicy="no-referrer">`:isTom(PROF.avatar)?avatarImg(PROF.avatar.slice(4),gnammerLevel().k):PROF.avatar?`<span class="${cls||'em'}">${PROF.avatar}</span>`:ANON_SVG}
 function userBtnUI(){const b=$('#userAv');if(!b)return;b.innerHTML=picHtml('em');$('#userBtn').setAttribute('aria-label',PROF.name?'Il tuo profilo: '+PROF.name:'Il tuo profilo')}
 // Foto caricata dall'utente: ritagliata quadrata e ridotta a 192 px, salvata come immagine nella ricetta del profilo
 function profPhotoFile(file){return new Promise((ok,ko)=>{const img=new Image();img.onload=()=>{const m=Math.min(img.width,img.height),c=document.createElement('canvas');c.width=c.height=192;c.getContext('2d').drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,192,192);URL.revokeObjectURL(img.src);ok(c.toDataURL('image/jpeg',.82))};img.onerror=ko;img.src=URL.createObjectURL(file)})}
@@ -1023,10 +1013,10 @@ function profUI(required){const box=$('#profBox');if(!box)return;acctReq=!!requi
   box.innerHTML=`<p class="meta">${required?'Scegli il nome e l\'immagine con cui gli altri Gnammers ti vedranno accanto alle tue ricette e ai tuoi voti. Servono entrambi.':'Il nome e l\'immagine che gli altri Gnammers vedono accanto alle tue ricette e ai tuoi voti.'}</p>
   <label>Il tuo nome da Gnammer<input id="profName" maxlength="30" placeholder="Es. Nonna Pina" value="${esc(PROF.name||ACC?.name||'')}"></label>
   <p class="meta" style="margin:10px 0 0">La tua immagine</p>
-  <div class="avs">${['f','m'].map(x=>`<button type="button" data-av="tom:${x}" class="tomb ${PROF.avatar==='tom:'+x&&!PROF.photo?'on':''}" aria-label="${x==='f'?'Pomodoro Gnammera':'Pomodoro Gnammer'}">${tomatoSvg(x,L.k)}</button>`).join('')}${ACC?.photo?`<button type="button" data-av="google" class="${PROF.photo===ACC.photo?'on':''}" aria-label="La foto del tuo account Google"><img src="${esc(ACC.photo)}" alt="" referrerpolicy="no-referrer"></button>`:''}<button type="button" class="ph ${PROF.photo&&PROF.photo!==ACC?.photo?'on':''}" data-av="file" aria-label="Carica una tua foto">${PROF.photo&&PROF.photo!==ACC?.photo?`<img src="${esc(PROF.photo)}" alt="">`:'📷'}</button>${AVATARS.map(a=>`<button type="button" data-av="${a}" class="${a===PROF.avatar&&!PROF.photo?'on':''}" aria-label="Avatar ${a}">${a}</button>`).join('')}</div>
+  <div class="avs">${['f','m'].map(x=>`<button type="button" data-av="tom:${x}" class="tomb ${PROF.avatar==='tom:'+x&&!PROF.photo?'on':''}" aria-label="${x==='f'?'Pomodoro Gnammera':'Pomodoro Gnammer'}">${avatarImg(x,L.k)}</button>`).join('')}${ACC?.photo?`<button type="button" data-av="google" class="${PROF.photo===ACC.photo?'on':''}" aria-label="La foto del tuo account Google"><img src="${esc(ACC.photo)}" alt="" referrerpolicy="no-referrer"></button>`:''}<button type="button" class="ph ${PROF.photo&&PROF.photo!==ACC?.photo?'on':''}" data-av="file" aria-label="Carica una tua foto">${PROF.photo&&PROF.photo!==ACC?.photo?`<img src="${esc(PROF.photo)}" alt="">`:'📷'}</button>${AVATARS.map(a=>`<button type="button" data-av="${a}" class="${a===PROF.avatar&&!PROF.photo?'on':''}" aria-label="Avatar ${a}">${a}</button>`).join('')}</div>
   <p class="meta" style="margin:0 0 6px">I due pomodori sono la Gnammera e il Gnammer di Gnamina: il cappello cambia da solo quando sali di livello. Oppure 📷 carica una tua foto${ACC?.photo?' (la foto del tuo account Google è già lì)':''} o scegli un simbolo.</p>
   ${required?`<button type="button" class="btn pri fine" id="profFine" disabled>Fine</button>`:`<p class="meta">Sei <b>${L.name}</b>: il tuo voto vale ${L.weight}. ${L.ric?`Ricette in gara: ${L.ric}.`:'Partecipa a un contest per salire di livello.'}</p>
-  <div class="lvls">${LEVELS.map((l,i)=>`<div class="${i===L.k?'on':''}">${tomatoSvg(PROF.avatar==='tom:m'?'m':'f',i)}<b>${l[0]} · voto ×${l[1]}</b>${l[2]}</div>`).join('')}</div>`}`;
+  <div class="lvls">${LEVELS.map((l,i)=>`<div class="${i===L.k?'on':''}">${avatarImg(PROF.avatar==='tom:m'?'m':'f',i)}<b>${l[0]} · voto ×${l[1]}</b>${l[2]}</div>`).join('')}</div>`}`;
   const fine=$('#profFine'),upd=()=>{if(fine)fine.disabled=!profDone()};
   if(!PROF.name&&ACC?.name){PROF.name=ACC.name;saveProf()} // il nome dell'account come proposta, modificabile
   $('#profName').oninput=e=>{PROF.name=e.target.value.trim();saveProf();upd()};
@@ -1073,7 +1063,7 @@ function renderHome(){
         <li>Ogni settimana c'è un tema. Chi vuole partecipa con una sua ricetta originale (persone, dosi precise e tempi) e un breve video della preparazione girato con l'app.</li>
         <li>La settimana dopo tutti possono cucinare le ricette degli altri e votarle con le stelle. Chi allega la foto del piatto vale di più: ha cucinato davvero.</li>
         <li>La ricetta più votata entra nel Ricettario di Gnamina, con il nome e il video di chi l'ha fatta.</li>
-        <li>Chi partecipa e assaggia sale di livello: Novizio, Cuoco, Chef, Maestro. Il voto di chi contribuisce pesa di più.</li>
+        <li>Chi partecipa e assaggia sale di livello: Novizio, Cuoco, Sous chef, Chef, Maestro. Il voto di chi contribuisce pesa di più.</li>
       </ol></details>
     </div>
     ${mine?`<div class="hsec"><h3>La tua ricetta in gara</h3></div><div class="mine-gara" id="cMine"><div class="th">${mine.image?`<img src="${esc(mine.image)}" alt="">`:look(mine)[0]}</div><div><b>${esc(mine.title||'Senza titolo')}</b><span>${mine.video||mine.clips?.length?'Con il video ✓':'Manca il video della preparazione'}${ph==='join'?' · puoi modificarla fino a '+dIt(c.fine_partecipazione):''}</span></div></div>`:''}
