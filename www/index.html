@@ -897,7 +897,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=114; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=115; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2516,7 +2516,7 @@ setInterval(()=>SY?.code&&document.visibilityState==='visible'&&doSync(),5*60000
 // caricato solo per la finestra di accesso di Google/Apple/Facebook. La sessione (refresh token) è conservata qui.
 // Il server (/account) verifica il token e dà il codice ricettario dell'account: da lì in poi vale la sincronizzazione normale.
 const FB=load('fbCfg',null)||{apiKey:'',authDomain:'',projectId:'',appId:'',providers:['google']}; // dal progetto Firebase (console → impostazioni → app web), oppure da www/firebase.json
-if(!FB.apiKey)fetch('firebase.json?'+Math.floor(Date.now()/36e5)).then(r=>r.ok?r.json():null).then(c=>{if(c?.apiKey){Object.assign(FB,{apiKey:c.apiKey,authDomain:c.authDomain||'',projectId:c.projectId||'',appId:c.appId||'',providers:c.providers||['google']});accUI();syncUI();if(view==='home')renderHome()}}).catch(()=>{});
+if(!FB.apiKey)fetch('firebase.json?'+Math.floor(Date.now()/36e5)).then(r=>r.ok?r.json():null).then(c=>{if(c?.apiKey){Object.assign(FB,{apiKey:c.apiKey,authDomain:c.authDomain||'',projectId:c.projectId||'',appId:c.appId||'',providers:c.providers||['google']});accUI();syncUI();if(view==='home')renderHome();if(typeof accediFromApp==='function')accediFromApp()}}).catch(()=>{});
 const FB_API=(()=>{try{return localStorage.getItem('fbUrl')}catch{}})()||'https://identitytoolkit.googleapis.com/v1';
 const FB_TOKEN=(()=>{try{return localStorage.getItem('fbTok')}catch{}})()||'https://securetoken.googleapis.com/v1/token';
 const FB_SDK='https://www.gstatic.com/firebasejs/11.10.0/';
@@ -2582,12 +2582,13 @@ async function accSocial(p){
   }
   await fromSdkUser(f,res.user);
 }
-async function accRedirectResult(){let p;try{p=sessionStorage.getItem('fbRedirect');sessionStorage.removeItem('fbRedirect')}catch{}if(!p||!accOn())return;try{const f=await fbSdk();const r=await f.getRedirectResult(f.auth);if(r?.user){await fromSdkUser(f,r.user);toast('Accesso effettuato')}}catch(e){toast(fbSocialMsg(e))}}
+async function accRedirectResult(){let p,ho;try{p=sessionStorage.getItem('fbRedirect');ho=sessionStorage.getItem('fbHandoff');sessionStorage.removeItem('fbRedirect');sessionStorage.removeItem('fbHandoff')}catch{}if(!p||!accOn())return;try{const f=await fbSdk();const r=await f.getRedirectResult(f.auth);if(r?.user){await fromSdkUser(f,r.user);toast('Accesso effettuato');if(ho){openAcct(false);await handoffShow()}}}catch(e){toast(fbSocialMsg(e))}}
 // Passaggio dell'accesso dal sito all'app Android: codice a 6 cifre (vale 10 minuti) e link gnamina://accedi
 async function handoffShow(){
   const r=await server('/handoff',{rt:ACC.rt},await idToken()),link='gnamina://accedi?codice='+r.code;
   $('#accBox').innerHTML=`<p class="meta">Accesso effettuato. Torna nell'app Gnamina e scrivi questo codice (vale 10 minuti):</p><div class="syCode">${r.code.slice(0,3)} ${r.code.slice(3)}</div><div class="grid2"><a class="btn pri" href="${link}">Apri l'app</a><button class="btn" id="hoCopy">Copia</button></div>`;
   $('#hoCopy').onclick=()=>navigator.clipboard?.writeText(r.code).then(()=>toast('Codice copiato'),()=>{});
+  setTimeout(()=>{try{location.href=link}catch{}},400); // torna da sola nell'app; se il browser lo blocca resta il tasto «Apri l'app»
   setTimeout(()=>{location.href=link},400);
 }
 async function handoffTake(code){
@@ -2659,7 +2660,13 @@ fillSelects();goView('mine');userBtnUI();refreshVerified(); // si parte da «Le 
 if(!ACC&&!load('accAsked',0))setTimeout(()=>{if(!$('#dlg').open&&!$('#det').open)openAcct(true)},900);
 if(SY?.code)setTimeout(()=>doSync(),800);
 // Accesso per l'app Android aperto nel browser (?accedi=google|apple|facebook): finestra di accesso, poi codice da scrivere nell'app
-if(p.has('accedi')){const pr=p.get('accedi');history.replaceState(null,'',location.pathname);if(accOn()&&PROV_NAME[pr]){openAcct(false);$('#accBox').innerHTML=`<p class="meta">Accesso per l'app Gnamina: tocca il pulsante per continuare con ${PROV_NAME[pr]}.</p><div class="grid2"><button class="btn pri" id="hoGo">Continua con ${PROV_NAME[pr]}</button></div><p class="meta" id="accStat"></p>`;$('#hoGo').onclick=()=>accRun(async()=>{if(!ACC)await accSocial(pr);if(ACC)await handoffShow()})}}
+// Accesso con Google/Apple/Facebook chiesto dall'APK (?accedi=google): parte da solo appena la configurazione Firebase è caricata
+let pendingAccedi=p.has('accedi')?p.get('accedi'):'';if(pendingAccedi)history.replaceState(null,'',location.pathname);
+function accediFromApp(){const pr=pendingAccedi;if(!pr||!accOn()||!PROV_NAME[pr])return;pendingAccedi='';openAcct(false);
+  const manual=e=>{$('#accBox').innerHTML=`<p class="meta">${e?esc(fbSocialMsg(e))+'. ':''}Accesso per l'app Gnamina: tocca per continuare con ${PROV_NAME[pr]}.</p><div class="grid2"><button class="btn pri" id="hoGo">Continua con ${PROV_NAME[pr]}</button></div><p class="meta" id="accStat"></p>`;$('#hoGo').onclick=()=>accRun(async()=>{if(!ACC)await accSocial(pr);if(ACC)await handoffShow()})};
+  $('#accBox').innerHTML=`<p class="meta">Accesso per l'app Gnamina con ${PROV_NAME[pr]}: un momento…</p><p class="meta" id="accStat"></p>`;
+  (async()=>{try{if(ACC){await handoffShow();return}try{sessionStorage.setItem('fbRedirect',pr);sessionStorage.setItem('fbHandoff','1')}catch{}const f=await fbSdk();await f.signInWithRedirect(f.auth,fbProvider(f,pr))}catch(e){manual(e)}})()}
+accediFromApp();
 accRedirectResult();
 loadPT().then(()=>PT&&render());
 setTimeout(repairThumbs,1500);
@@ -2667,8 +2674,11 @@ $('#verInfo').textContent='Versione '+APP_VERSION;
 // Nell'APK: avvisa se sul sito c'è una versione più recente da installare
 if(inApp)fetch(SITE+'version.json?t='+Date.now()).then(r=>r.json()).then(v=>{if(v.version>APP_VERSION){
   const b=document.createElement('div');b.className='warn';b.style.margin='8px 16px';
-  b.innerHTML=`È disponibile la versione ${v.version} dell'app (questa è la ${APP_VERSION}). <a class="btn pri" href="${esc(v.apk)}" target="_blank" rel="noopener">Scarica e installa</a><br><small>Finito il download apri il file «${esc(v.apk.split('/').pop())}» e tocca Aggiorna. Se compare «App non installata», libera un po' di spazio sul telefono e riprova.</small>`;
-  document.querySelector('main').prepend(b);$('#verInfo').textContent+=` · disponibile la ${v.version}`}}).catch(()=>{});
+  const nat=!!window.AndroidShare?.updateApk,name=v.apk.split('/').pop();
+  b.innerHTML=`È disponibile la versione ${v.version} dell'app (questa è la ${APP_VERSION}). <button type="button" class="btn pri" id="updGo">Aggiorna adesso</button><br><small id="updMsg">${nat?'Il download parte dentro l\'app; alla fine si apre l\'installazione di Android: tocca «Aggiorna».':`Si scarica il file «${esc(name)}»: aprilo e tocca Aggiorna.`} Se compare «App non installata», libera un po' di spazio sul telefono e riprova.</small>`;
+  document.querySelector('main').prepend(b);$('#verInfo').textContent+=` · disponibile la ${v.version}`;
+  $('#updGo').onclick=()=>{if(nat){AndroidShare.updateApk(v.apk,name);$('#updMsg').textContent='Download in corso… quando finisce si apre l\'installazione: tocca «Aggiorna».'}else window.open(v.apk,'_blank','noopener')};
+  window.onApkState=(st,msg)=>{const m=$('#updMsg');if(!m)return;m.textContent=st==='started'?'Download in corso… quando finisce si apre l\'installazione: tocca «Aggiorna».':st==='done'?'Download finito: nel pannello di Android tocca «Aggiorna». Se non lo vedi, apri le notifiche e tocca il file scaricato.':'Download non riuscito'+(msg?' ('+msg+')':'')+': controlla la connessione e riprova.'}}}).catch(()=>{});
 if('serviceWorker' in navigator&&location.protocol==='https:'&&location.hostname!=='localhost')navigator.serviceWorker.register('sw.js');
 </script>
 </body>

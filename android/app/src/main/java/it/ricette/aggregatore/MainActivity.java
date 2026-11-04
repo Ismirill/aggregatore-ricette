@@ -22,6 +22,24 @@ public class MainActivity extends BridgeActivity {
     private java.io.OutputStream vidOut;
     private String vidMime = "video/mp4";
 
+    // Aggiornamento dell'app: l'APK nuovo si scarica dentro l'app (DownloadManager) e alla fine si apre l'installazione di Android
+    private long apkDl = -1;
+    private android.content.BroadcastReceiver apkRx;
+
+    private void installApk(long id) {
+        try {
+            android.app.DownloadManager dm = (android.app.DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+            android.net.Uri u = dm.getUriForDownloadedFile(id);
+            if (u == null) { js("window.onApkState&&onApkState('error','download non riuscito')"); return; }
+            Intent i = new Intent(Intent.ACTION_VIEW).setDataAndType(u, "application/vnd.android.package-archive")
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            js("window.onApkState&&onApkState('done')");
+            startActivity(i);
+        } catch (Exception e) {
+            js("window.onApkState&&onApkState('error','" + String.valueOf(e.getMessage()).replace("'", "") + "')");
+        }
+    }
+
     private void js(String code) {
         getBridge().getWebView().post(() -> getBridge().getWebView().evaluateJavascript(code, null));
     }
@@ -165,6 +183,39 @@ public class MainActivity extends BridgeActivity {
             i.putExtra(Intent.EXTRA_SUBJECT, title);
             i.putExtra(Intent.EXTRA_TEXT, text);
             runOnUiThread(() -> startActivity(Intent.createChooser(i, title)));
+        }
+
+        // Scarica l'APK della versione nuova dentro l'app e, finito il download, apre l'installazione (niente browser)
+        @JavascriptInterface
+        public void updateApk(String url, String name) {
+            if (url == null || !url.startsWith("https://")) return;
+            runOnUiThread(() -> {
+                try {
+                    android.app.DownloadManager dm = (android.app.DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                    String fn = (name == null || name.isEmpty() ? "Gnamina.apk" : name).replaceAll("[^\\w.-]", "_");
+                    java.io.File old = new java.io.File(getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS), fn);
+                    if (old.exists()) old.delete();
+                    android.app.DownloadManager.Request r = new android.app.DownloadManager.Request(android.net.Uri.parse(url))
+                        .setTitle(fn).setMimeType("application/vnd.android.package-archive")
+                        .setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                        .setDestinationInExternalFilesDir(MainActivity.this, android.os.Environment.DIRECTORY_DOWNLOADS, fn);
+                    if (apkRx == null) {
+                        apkRx = new android.content.BroadcastReceiver() {
+                            @Override public void onReceive(android.content.Context c, Intent i) {
+                                long id = i.getLongExtra(android.app.DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                                if (id == apkDl) installApk(id);
+                            }
+                        };
+                        android.content.IntentFilter f = new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+                        if (android.os.Build.VERSION.SDK_INT >= 33) registerReceiver(apkRx, f, android.content.Context.RECEIVER_EXPORTED);
+                        else registerReceiver(apkRx, f);
+                    }
+                    apkDl = dm.enqueue(r);
+                    js("window.onApkState&&onApkState('started')");
+                } catch (Exception e) {
+                    js("window.onApkState&&onApkState('error','" + String.valueOf(e.getMessage()).replace("'", "") + "')");
+                }
+            });
         }
 
         // Apre un indirizzo nel browser di sistema (l'accesso Google/Apple/Facebook non è permesso dentro la WebView)
