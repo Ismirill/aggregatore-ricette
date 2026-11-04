@@ -83,6 +83,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px}
 .thumb .play{position:absolute;left:8px;bottom:8px;font-size:.7rem;font-weight:600;background:#000b;color:#fff;border-radius:999px;padding:3px 8px;backdrop-filter:blur(6px)}
 .thumb .cat{position:absolute;left:8px;top:8px;font-size:.68rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;background:color-mix(in srgb,var(--card) 88%,transparent);color:var(--fg);border-radius:999px;padding:3px 8px;backdrop-filter:blur(6px)}
 .thumb .rt{position:absolute;right:8px;top:8px;font-size:.72rem;background:#000a;color:#ffd166;border-radius:999px;padding:2px 7px}
+.sv{position:absolute;right:8px;bottom:8px;font-size:.74rem;font-weight:700;background:#000b;color:#ffd166;border-radius:999px;padding:3px 8px;backdrop-filter:blur(6px)}.sv small{font-weight:500;color:#fffa}.sv.big{position:static;font-size:1.15rem;background:none;color:var(--star);padding:0;backdrop-filter:none}.sv.big small{color:var(--mut);font-size:.85rem}.svRow{display:flex;gap:10px;align-items:baseline;margin-top:12px;flex-wrap:wrap}
 .item .b{padding:11px 13px 13px;flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
 .item h3{margin:0;font-size:1.02rem;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 @media (max-width:620px){.item h3{font-size:.95rem}.item .b{padding:9px 10px 11px}.thumb{font-size:2.1rem}}
@@ -768,6 +769,23 @@ async function analyze(url,pasted){
 // Indirizzo del server Cloudflare (cartella server/); vuoto = funzioni AI disattivate
 const AI_URL=(()=>{try{return localStorage.getItem('aiUrl')}catch{}})()||'https://ricette-ai.ricettedelcuore.workers.dev';
 const aiOn=()=>!!AI_URL;
+/* ---------- Stelle dei Gnammers: voto da 1 a 5 sulle ricette del ricettario, media e numero di voti visibili a tutti (server: /stars, /stars/vote).
+   Vota l'account se c'è, altrimenti il dispositivo (id casuale salvato qui); un voto per ricetta, si cambia o si toglie toccando di nuovo. ---------- */
+const DEV=(()=>{let d=load('dev','');if(!d){d=Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>b.toString(16).padStart(2,'0')).join('');save('dev',d)}return d})();
+const pubId=i=>i?.book&&!i.pronto&&!i.colazione?i.id:i?.bookId||'';
+const STARS={}; // id -> [media, voti, mio voto, letto quando]
+const fmtAvg=a=>String(a).replace('.',',');
+const starsHtml=(id,big)=>{const v=STARS[id];if(!v||!v[1])return big?'<span class="meta">ancora nessun voto</span>':'';const w=v[1]===1?'voto':'voti';return big?`<span class="sv big">★ ${fmtAvg(v[0])}<small> su 5 · ${v[1]} ${w}</small></span>`:`<span class="sv" title="${fmtAvg(v[0])} su 5, ${v[1]} ${w}">★ ${fmtAvg(v[0])} <small>(${v[1]})</small></span>`};
+function starsPaint(){document.querySelectorAll('.item[data-pub]').forEach(el=>{const id=el.dataset.pub,v=STARS[id];if(!v||!v[1])return;const h=starsHtml(id),b=el.querySelector('.sv');if(b)b.outerHTML=h;else el.querySelector('.thumb')?.insertAdjacentHTML('beforeend',h)});const d=$('#dStars');if(d?.dataset.id)starsBlock(d.dataset.id)}
+async function starsToken(){try{return ACC?await idToken():null}catch{return null}}
+async function starsFetch(ids,force){const want=[...new Set(ids.filter(Boolean))].filter(id=>force||!STARS[id]||Date.now()-(STARS[id][3]||0)>6e5).slice(0,80);if(!want.length)return;
+  try{const r=await server('/stars',{ids:want,dev:DEV},await starsToken());for(const id of want)STARS[id]=[...(r.stars[id]||[0,0,0]),Date.now()];starsPaint()}catch{}}
+function starsBlock(id){const d=$('#dStars');if(!d)return;const v=STARS[id]||[0,0,0];
+  d.innerHTML=`<div class="svRow"><b>Voto dei Gnammers</b>${starsHtml(id,true)}</div><div class="rate" id="dMy">${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" class="${n<=(v[2]||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}<span class="meta" style="align-self:center;margin-left:8px">${v[2]?'il tuo voto':'tocca le stelle per votare'}</span></div>`;
+  $('#dMy').onclick=async ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n,cur=STARS[id]?.[2]||0,s=cur===n?0:n;
+    STARS[id]=[...(STARS[id]||[0,0,0]).slice(0,3),Date.now()];STARS[id][2]=s;starsBlock(id);
+    try{const r=await server('/stars/vote',{id,s,dev:DEV},await starsToken());STARS[id]=[r.avg,r.n,r.my,Date.now()];starsBlock(id);starsPaint();toast(s?'Grazie del voto!':'Voto tolto')}
+    catch(e){toast(e.message||'Voto non inviato: riprova');starsFetch([id],true)}}}
 async function server(path,body,auth){
   const ctl=new AbortController();setTimeout(()=>ctl.abort(),90000);
   let res;
@@ -879,7 +897,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=113; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=114; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -972,7 +990,7 @@ function saveFromBook(i){
   const ex=items.find(x=>x.url===i.url);
   if(ex){toast('Già nelle tue ricette');return ex}
   const {book:_,...r}=i;
-  const rec={...r,id:Date.now().toString(36),created:Date.now(),t:Date.now(),rating:0,
+  const rec={...r,bookId:i.id,id:Date.now().toString(36),created:Date.now(),t:Date.now(),rating:0,
     note:i.artusi?'Ricetta di Pellegrino Artusi, La scienza in cucina (1895), pubblico dominio.':i.libera?`Ricetta da ${i.source} (${i.license}).`:i.world?'Ricetta da UniTools — theunitools.com (CC BY-SA 4.0), tradotta in italiano.':i.source==='Regione Puglia'?'Ricetta tipica dalla Regione Puglia – Pugliapromozione (CC BY 4.0).':`Ricetta da Wikibooks, Libro di cucina (${bookInfo?.license||'CC BY-SA 4.0'}). Autori: cronologia della pagina originale.`};
   items=[rec,...items];saveItems();toast('Salvata in Le mie ricette');return rec;
 }
@@ -1145,7 +1163,7 @@ function card(i){
   const [em,c1,c2]=look(i),pp=perPerson(i),tm=(i.ingredients?.length||i.steps?.length)?timing(i):null,vid=embedOf(i);
   const facts=[tm&&`⏱ <b>${fmtMin(tm.t)}</b>`,tm&&DIFF[tm.d],pp&&`<b>${Math.round(pp.kcal)}</b> kcal`,pp?.eur!=null&&`${i.cov!=null&&i.cov<.85?'circa ':''}<b>${euro(pp.eur)}</b>/pers.`,i.linked&&i.cost&&`costo ${i.cost}`].filter(Boolean);
   const diets=(i.diets||[]).filter(d=>MAIN_DIETS.includes(d));if(i.pseudo)diets.unshift('Italo-americano');const gara=i.contest?`<span class="bdg gara">🏆 In gara</span>`:'';
-  return `<div class="item" data-id="${i.id}">
+  return `<div class="item" data-id="${i.id}"${pubId(i)?` data-pub="${esc(pubId(i))}"`:''}>
     <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${!i.book&&!i.pronto&&!i.colazione?'<button type="button" class="more" aria-label="Altre azioni">⋯</button>':''}${i.imgGen?'<span class="aiTag" title="Immagine generata con l\'AI">AI</span>':''}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
       <span class="cat">${esc(i.cat||'Altro')}</span>${i.rating?`<span class="rt">★ ${i.rating}</span>`:''}${vid?'<span class="play">▶ video</span>':''}</div>
     <div class="b"><h3>${esc(i.title||i.url)}</h3>
@@ -1818,6 +1836,7 @@ function openDetail(i){
     ${i.summary?`<p class="cap" style="color:var(--fg);margin:6px 0 0">${esc(i.summary)}</p>`:''}
     ${i.artusi?`<details class="meta" style="margin-top:6px"><summary>Testo originale di Artusi: «${esc(i.origTitle)}» (n. ${i.num}, ${esc(i.chapter)})</summary><p class="cap" style="margin-top:6px">${esc(i.text)}</p></details>`:''}
     ${i.book&&!i.linked?`<p class="lic" style="margin-top:8px">${sourceLine(i)}</p>`:''}
+    ${pubId(i)?`<div id="dStars" data-id="${esc(pubId(i))}"></div>`:''}
     <div class="rate" id="dRate" style="margin-top:8px${i.book?';display:none':''}">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n<=(i.rating||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}</div>
     </div><div class="dside">
     ${i.linked?`<div class="kv"><span>Costo ${esc(i.cost||'n.d.')}</span></div><h3>Ingredienti principali</h3><ul>${i.ingredients.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
@@ -1834,6 +1853,7 @@ function openDetail(i){
       ${i.pronto||i.colazione?'':i.book?'<button class="btn pri" id="dSave">Salva nelle mie</button>':'<button class="btn" id="dEdit">Modifica</button>'}<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button></div></div></div>`;
   $('#dRate').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n;i.rating=i.rating===n?0:n;i.t=Date.now();saveItems();render();
     $('#dRate').querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.n<=i.rating))};
+  {const pid=pubId(i);if(pid){starsBlock(pid);starsFetch([pid],true)}}
   if(i.ingredients?.length&&!i.linked){
     const base=i.servings||i.s||4;let n=base;
     const draw=()=>{const f=n/base;
@@ -2634,6 +2654,7 @@ if(!load('zoneFix93',0)){let ch=0;items.forEach(i=>{try{if(i.book||!i.country||t
   const c=classify({title:String(i.title||''),caption:i.caption,ingredients:ing});
   if(c.country!==i.country){i.country=c.country;i.region=c.region;i.t=Date.now();ch++}}catch(e){console.warn('pulizia paese',e)}});
   save('zoneFix93',1);try{if(ch){saveItems();render()}}catch(e){console.warn('pulizia paese',e)}}
+{const r0=render;render=function(...a){const out=r0.apply(this,a);setTimeout(()=>starsFetch([...document.querySelectorAll('.item[data-pub]')].map(e=>e.dataset.pub)),0);return out}}
 fillSelects();goView('mine');userBtnUI();refreshVerified(); // si parte da «Le mie»
 if(!ACC&&!load('accAsked',0))setTimeout(()=>{if(!$('#dlg').open&&!$('#det').open)openAcct(true)},900);
 if(SY?.code)setTimeout(()=>doSync(),800);

@@ -9,3 +9,5 @@ CREATE TABLE IF NOT EXISTS users (uid TEXT PRIMARY KEY, email TEXT, name TEXT, p
 CREATE TABLE IF NOT EXISTS cache (k TEXT PRIMARY KEY, v TEXT NOT NULL, exp INTEGER NOT NULL);
 -- Passaggio dell'accesso dal sito all'app Android: codice a 6 cifre valido 10 minuti
 CREATE TABLE IF NOT EXISTS handoff (code TEXT PRIMARY KEY, data TEXT NOT NULL, exp INTEGER NOT NULL);
+-- Stelle dei Gnammers: id = ricetta del ricettario, who = u:<uid> o d:<dispositivo>, s = voto 1-5, t = ora del voto
+CREATE TABLE IF NOT EXISTS stars (id TEXT NOT NULL, who TEXT NOT NULL, s INTEGER NOT NULL, t INTEGER NOT NULL, PRIMARY KEY (id, who));

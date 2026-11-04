@@ -701,6 +701,46 @@ async function handoffTake(env, b) {
   return { rt: await openS(env, 'accesso', row.data) };
 }
 
+// Stelle dei Gnammers: voto da 1 a 5 sulle ricette del ricettario (id stabili), media e numero di voti visibili a tutti.
+// Chi vota: l'account (uid), oppure il dispositivo (id casuale generato dall'app); un voto per ricetta, modificabile o ritirabile.
+let starsReady = false;
+async function starsTable(env) {
+  if (starsReady) return;
+  await env.SYNC.prepare('CREATE TABLE IF NOT EXISTS stars (id TEXT NOT NULL, who TEXT NOT NULL, s INTEGER NOT NULL, t INTEGER NOT NULL, PRIMARY KEY (id, who))').run();
+  starsReady = true;
+}
+async function starsWho(env, req, body) {
+  if (req.headers.get('Authorization')) { try { return 'u:' + (await verifyUser(env, req)).uid; } catch {} }
+  const d = String(body.dev || '').replace(/[^\w-]/g, '').slice(0, 40);
+  if (d.length < 8) throw Object.assign(new Error('Dispositivo non identificato'), { status: 400 });
+  return 'd:' + d;
+}
+async function starsGet(env, req, body) {
+  await starsTable(env);
+  const ids = [...new Set((Array.isArray(body.ids) ? body.ids : []).map(x => String(x).slice(0, 80)).filter(Boolean))].slice(0, 80);
+  if (!ids.length) return { stars: {} };
+  const q = ids.map((_, i) => '?' + (i + 1)).join(',');
+  const agg = await env.SYNC.prepare(`SELECT id, AVG(s) AS a, COUNT(*) AS n FROM stars WHERE id IN (${q}) GROUP BY id`).bind(...ids).all();
+  const out = {};
+  for (const r of agg.results) out[r.id] = [Math.round(r.a * 10) / 10, r.n, 0];
+  let who = null; try { who = await starsWho(env, req, body); } catch {}
+  if (who) {
+    const my = await env.SYNC.prepare(`SELECT id, s FROM stars WHERE who = ?${ids.length + 1} AND id IN (${q})`).bind(...ids, who).all();
+    for (const r of my.results) (out[r.id] ||= [0, 0, 0])[2] = r.s;
+  }
+  return { stars: out };
+}
+async function starsVote(env, req, body) {
+  await starsTable(env);
+  const id = String(body.id || '').slice(0, 80), s = Math.round(+body.s) || 0;
+  if (!id) throw Object.assign(new Error('Ricetta mancante'), { status: 400 });
+  const who = await starsWho(env, req, body);
+  if (s >= 1 && s <= 5) await env.SYNC.prepare('INSERT INTO stars (id,who,s,t) VALUES (?1,?2,?3,?4) ON CONFLICT(id,who) DO UPDATE SET s=excluded.s, t=excluded.t').bind(id, who, s, Date.now()).run();
+  else await env.SYNC.prepare('DELETE FROM stars WHERE id = ?1 AND who = ?2').bind(id, who).run();
+  const r = await env.SYNC.prepare('SELECT AVG(s) AS a, COUNT(*) AS n FROM stars WHERE id = ?1').bind(id).first();
+  return { id, avg: r?.n ? Math.round(r.a * 10) / 10 : 0, n: r?.n || 0, my: s >= 1 && s <= 5 ? s : 0 };
+}
+
 export default {
   // Aggiornamento automatico dei prezzi: un lotto di province ogni giorno
   async scheduled(event, env, ctx) {
@@ -764,9 +804,18 @@ export default {
         return reply(origin, { error: limit ? 'Limite giornaliero raggiunto' : e.message }, limit ? 429 : e.status === 400 ? 400 : 502);
       }
     }
-    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/dictate', '/nutrition', '/preview', '/translate-recipe', '/sync', '/account', '/handoff', '/handoff/take'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
+    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/dictate', '/nutrition', '/preview', '/translate-recipe', '/sync', '/account', '/handoff', '/handoff/take', '/stars', '/stars/vote'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';
     if (env.LIMITER && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
+    // Stelle dei Gnammers (lettura a lotti e voto)
+    if (req.method === 'POST' && (path === '/stars' || path === '/stars/vote')) {
+      if (!env.SYNC) return reply(origin, { error: 'Non disponibile' }, 503);
+      let body; try { body = await req.json(); } catch { return reply(origin, { error: 'Richiesta non valida' }, 400); }
+      try {
+        if (path === '/stars/vote') { const ip = req.headers.get('CF-Connecting-IP') || 'local'; if (env.LIMITER && !(await env.LIMITER.limit({ key: 'stars:' + ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429); }
+        return reply(origin, path === '/stars' ? await starsGet(env, req, body) : await starsVote(env, req, body));
+      } catch (e) { return reply(origin, { error: e.message }, e.status || 500); }
+    }
     if (path === '/sync' || path === '/account' || path === '/handoff' || path === '/handoff/take') {
       try {
         const body = await req.json();
