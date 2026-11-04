@@ -82,6 +82,8 @@ RULES = [
     (r"\brosso dell[’']uovo\b", 'tuorlo'),
     (r"\bchiare delle uova\b", 'albumi'),
     (r"\bdelle chiare\b", 'degli albumi'),
+    (r"\bdalle chiare\b", 'dagli albumi'),
+    (r"\buova: chiare\b", 'uova: albumi'),
     (r"\ble (due|tre|quattro|cinque|sei|otto|dieci) chiare\b", r'i \1 albumi'),
     (r"\ble chiare\b", 'gli albumi'),
     (r"\bchiare montate\b", 'albumi montati'),
