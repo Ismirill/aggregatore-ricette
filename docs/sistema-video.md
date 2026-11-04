@@ -86,7 +86,7 @@ Il modo libero («Registra un video») non ha parti: il file esce dal registrato
 |---|---|---|
 | A | Fotocamera dentro l'app su canvas con icona (regia e modo libero), scheda iniziale ed etichette, unione finale delle tre parti con barra di avanzamento, salvataggio in IndexedDB, «Pubblica» e «Salva nel rullino» con quello che il telefono sa fare oggi (`navigator.share`), icona con trasparenza, «Registra un video» che apre la fotocamera dell'app | **103, fatta il 4/11/2026** (provata nel browser con la fotocamera finta; quadro 720×1280, 2,5 Mbit/s) |
 | B | Rullino nativo: `videoBegin`/`videoChunk`/`videoEnd` nell'APK (MediaStore + FileProvider), descrizione d'uso Foto su iPhone (share con «Salva video»); prova su telefoni veri (formato prodotto, fluidità, orientamento) | **104, codice fatto il 4/11/2026**; provata il 4/11 nel Safari del simulatore iPhone: foglio di condivisione con MP4 (H.264+AAC) e «Salva video» in Foto; prova sui telefoni veri ancora da fare (APK e iPhone vero) |
-| C | Se Android dà solo WebM: WebCodecs + muxer MP4 | 105 |
+| C | Se Android dà solo WebM: WebCodecs + muxer MP4 | 106, solo se la prova sull'APK dice che MediaRecorder non produce MP4 |
 | D | Didascalia negli appunti con link e hashtag; «Come funziona» del contest aggiornato; eventuale marchio su file esistenti (vedi 2) | con B |
 | E (fase 2, forse) | Canale ufficiale Gnamina: pubblicazione automatica delle vincitrici via API YouTube dal workflow GitHub | dopo il 5/12 |
 
