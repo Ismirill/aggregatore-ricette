@@ -84,9 +84,9 @@ Il modo libero («Registra un video») non ha parti: il file esce dal registrato
 
 | Tappa | Cosa esce | Versione |
 |---|---|---|
-| A | Fotocamera dentro l'app su canvas con icona (regia e modo libero), scheda iniziale ed etichette, unione finale delle tre parti con barra di avanzamento, salvataggio in IndexedDB, «Pubblica» e «Salva nel rullino» con quello che il telefono sa fare oggi (`navigator.share`), icona con trasparenza, «Registra un video» che apre la fotocamera dell'app | 102 |
-| B | Rullino nativo: `saveVideo`/`shareVideo` nell'APK, plugin o ponte su iPhone con la descrizione d'uso; prova su telefoni veri (formato prodotto, fluidità, orientamento) | 103 |
-| C | Se Android dà solo WebM: WebCodecs + muxer MP4 | 104 |
+| A | Fotocamera dentro l'app su canvas con icona (regia e modo libero), scheda iniziale ed etichette, unione finale delle tre parti con barra di avanzamento, salvataggio in IndexedDB, «Pubblica» e «Salva nel rullino» con quello che il telefono sa fare oggi (`navigator.share`), icona con trasparenza, «Registra un video» che apre la fotocamera dell'app | **103, fatta il 4/11/2026** (provata nel browser con la fotocamera finta; quadro 720×1280, 2,5 Mbit/s) |
+| B | Rullino nativo: `saveVideo`/`shareVideo` nell'APK, plugin o ponte su iPhone con la descrizione d'uso; prova su telefoni veri (formato prodotto, fluidità, orientamento) | 104 |
+| C | Se Android dà solo WebM: WebCodecs + muxer MP4 | 105 |
 | D | Didascalia negli appunti con link e hashtag; «Come funziona» del contest aggiornato; eventuale marchio su file esistenti (vedi 2) | con B |
 | E (fase 2, forse) | Canale ufficiale Gnamina: pubblicazione automatica delle vincitrici via API YouTube dal workflow GitHub | dopo il 5/12 |
 

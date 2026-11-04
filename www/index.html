@@ -152,7 +152,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 /* Regia: video guidato in tre parti */
 #rec{max-width:520px;padding:14px 14px calc(14px + env(safe-area-inset-bottom))}.rech{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.rech b{font-size:1.15rem}
 .recParts{display:grid;gap:8px;margin:10px 0}.recParts>div{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--fg) 6%,transparent)}.recParts>div>b{font-size:1.5rem;min-width:2rem;text-align:center;color:var(--acc)}.recParts small{display:block;color:var(--mut)}
-.recStage{position:relative;border-radius:18px;overflow:hidden;background:#000;aspect-ratio:3/4;max-height:58dvh}.recStage video{width:100%;height:100%;object-fit:cover;display:block}
+.recStage{position:relative;border-radius:18px;overflow:hidden;background:#000;aspect-ratio:9/16;width:min(100%,calc(58dvh * 9 / 16));margin:0 auto}.recStage video{width:100%;height:100%;object-fit:contain;display:block}
 .recTop{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;color:#fff;background:linear-gradient(#000a,#0000);font-weight:700;font-size:.95rem}.recTop>span:first-child{min-width:0;line-height:1.2}.recClock{font-size:2rem;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap;flex:none}.recClock.warn{color:#ffb14a}
 .recBar{position:absolute;left:0;right:0;bottom:0;height:8px;background:#fff3}.recBar i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s linear}.recBar.warn i{background:#ffb14a}
 .recTip{position:absolute;left:10px;right:10px;bottom:16px;margin:0;color:#fff;font-size:1rem;background:#0007;padding:8px 12px;border-radius:12px}
@@ -878,7 +878,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=102; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=103; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1797,7 +1797,7 @@ function openDetail(i){
   const e=embedOf(i);
   const [em,c1,c2]=look(i),tm=(i.ingredients?.length||i.steps?.length)?timing(i):null;
   $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button><div class="dcols"><div class="dmain">
-    ${i.clips?.length?`<div class="clipPl" id="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p></div>`
+    ${i.clips?.length?`<div class="clipPl" id="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p><p class="row" style="justify-content:flex-start;gap:8px;margin:0 0 10px"><button type="button" class="btn pri" data-vc="share">📤 Pubblica</button><button type="button" class="btn" data-vc="save">💾 Salva nel rullino</button></p></div>`
       :e?`<iframe class="video ${e.v?'v':'h'}" src="${esc(e.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
       :i.image?`<div class="heroWrap"><img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;hero&quot; style=&quot;display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)&quot;>${em}</div>'"></div>`
       :`<div class="heroWrap"><div class="hero" style="display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)">${em}</div></div>`}
@@ -1838,7 +1838,7 @@ function openDetail(i){
     draw();
   }
   $('#dClose').onclick=$('#dX').onclick=()=>$('#det').close();
-  if(i.clips?.length)clipPlayer(i.clipKey,i.clips,$('#clipPl'));
+  if(i.clips?.length){clipPlayer(i.clipKey,i.clips,$('#clipPl'));$('#clipPl').onclick=e=>{const b=e.target.closest('[data-vc]');if(b)(b.dataset.vc==='share'?clipsShare:clipsSave)(i.clipKey,i.clips,i.title)}}
   if($('#dEdit'))$('#dEdit').onclick=()=>{$('#det').close();openForm(i)};
   if($('#dSave'))$('#dSave').onclick=()=>{saveFromBook(i);$('#det').close()};
   $('#det').showModal();
@@ -2063,18 +2063,18 @@ $('#reanalyze').onclick=()=>{const u=extractUrl($('#f').url.value);if(u)runAnaly
   const f=$('#f'),c=classify({title:f.title.value,ingredients:lines(f.ingredients.value),caption:extra.caption});if(c.cat)f.cat.value=c.cat;setDiets(c.diets);if(c.country)f.country.value=c.country;if(c.region)f.region.value=c.region}};
 /* ---------- Il video dell'utente: registrato o scelto qui, caricato sul SUO canale YouTube (nessuno spazio cloud nostro), qui resta solo il link ---------- */
 const ytId=u=>(String(u||'').match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/)||[])[1]||'';
-const VID_HINT='Il video va sul tuo canale YouTube, anche «Non in elenco» (lo vede solo chi ha il link): Gnamina salva soltanto il link.';
-const GARA_HINT='Premi «Registra con la guida»: la fotocamera si accende dentro l\'app e ti scandisce i tempi delle tre parti. Oppure «Registra un video» con la fotocamera del telefono.';
+const VID_HINT='«Registra un video» accende la fotocamera dentro Gnamina: il video esce verticale, con il marchio in basso a destra, pronto per TikTok, Instagram, Facebook e YouTube Shorts. Se lo carichi su YouTube, incolla qui il link.';
+const GARA_HINT='Premi «Registra con la guida»: la fotocamera si accende dentro l\'app, ti scandisce i tempi delle tre parti e mette il marchio Gnamina. Oppure «Registra un video» senza guida, sempre dentro l\'app.';
 function vidHint(h){$('#vidHint').innerHTML=h||(extra.clips?.length?clipsStatus():extra.contest?GARA_HINT:VID_HINT)}
 const vidAfter=()=>vidHint('Quando YouTube ha finito di caricare, apri il video, tocca <b>Condividi → Copia link</b>, torna qui e premi «📋 Incolla».');
 window.onVideoShared=vidAfter; // chiamato dall'app Android dopo aver passato il video a YouTube
 $('#guideVid').onclick=recOpen;
-$('#recVid').onclick=()=>{if(window.AndroidShare?.recordVideo){AndroidShare.recordVideo();return}$('#vidRec').click()};
+$('#recVid').onclick=()=>recOpen(true);
 $('#pickVid').onclick=()=>{if(window.AndroidShare?.pickVideo){AndroidShare.pickVideo();return}$('#vidPick').click()};
 $('#vidRec').onchange=$('#vidPick').onchange=e=>{const file=e.target.files[0];e.target.value='';if(file)vidReady(file)};
 function vidReady(file){
   const mb=file.size/1048576;
-  vidHint(`Video pronto (${mb<1?Math.round(file.size/1024)+' KB':(mb>=100?Math.round(mb):mb.toFixed(1))+' MB'}). <button type="button" class="btn pri" id="upVid">▶ Carica su YouTube</button>`);
+  vidHint(`Video scelto dal telefono (${mb<1?Math.round(file.size/1024)+' KB':(mb>=100?Math.round(mb):mb.toFixed(1))+' MB'}), senza il marchio Gnamina. <button type="button" class="btn pri" id="upVid">▶ Carica su YouTube</button>`);
   $('#upVid').onclick=async()=>{
     if(navigator.canShare?.({files:[file]})){try{await navigator.share({files:[file],title:'Video della ricetta'});vidAfter();return}catch(e){if(e.name==='AbortError')return}}
     // Senza menu di condivisione (computer): si apre la pagina di caricamento di YouTube, dove si sceglie lo stesso file
@@ -2082,19 +2082,24 @@ function vidReady(file){
     vidHint(`Si è aperta la pagina di caricamento di YouTube: scegli lì il file <b>${esc(file.name||'del video')}</b>. Poi copia il link del video e incollalo qui sopra.`);
   };
 }
-/* ---------- Regia: il video della ricetta in tre parti, con i tempi scanditi dall'app ----------
-   Il video del contest dura al massimo 3 minuti ed è fatto di tre parti: gli ingredienti, la preparazione, il piatto pronto.
-   L'app accende la fotocamera, dice cosa riprendere, conta i secondi di ogni parte e ferma da sola la registrazione;
-   ogni parte si può rifare. Le clip restano sul telefono (IndexedDB), la ricetta ricorda solo durata e formato. */
+/* ---------- Regia e fotocamera con il marchio: il video della ricetta esce già con l'icona di Gnamina in basso a destra ----------
+   La fotocamera non si registra direttamente: ogni fotogramma passa su un quadro verticale 9:16 (720×1280) su cui l'app disegna
+   l'icona, il nome del piatto (primi 3 secondi) e, nella regia, l'etichetta della parte; il registratore riprende il quadro con l'audio del microfono.
+   Regia (contest): tre parti con i tempi scanditi (ingredienti 30 s, preparazione 120 s, piatto 30 s), ognuna rifacibile, unite alla fine
+   in un solo file (l'unione dura quanto il video). Modo libero («Registra un video»): una ripresa sola, fino a 3 minuti (o 10), senza unione.
+   Il file resta sul telefono (IndexedDB); «Pubblica» lo passa al menù di condivisione (TikTok, Instagram, Facebook, YouTube…), «Salva nel rullino» lo scarica. */
 const REC_PARTS=[
   {name:'Gli ingredienti',sec:30,tip:'Mostra gli ingredienti uno per uno e di’ cosa sono e quanto ne serve.'},
   {name:'La preparazione',sec:120,tip:'Fai vedere i passaggi principali. Se finisci prima, premi Stop.'},
   {name:'Il piatto pronto',sec:30,tip:'Il piatto finito, impiattato: una bella inquadratura da vicino.'}];
-const REC_OK=()=>!!(navigator.mediaDevices?.getUserMedia&&window.MediaRecorder);
+const REC_FREE=sec=>[{name:'Il tuo video',sec,tip:'Mostra e racconta la ricetta come vuoi. Quando hai finito premi Stop.'}];
+const REC_OK=()=>!!(navigator.mediaDevices?.getUserMedia&&window.MediaRecorder&&HTMLCanvasElement.prototype.captureStream);
 const FAKECAM=/fakecam/.test(location.search); // solo per le prove senza fotocamera (simulatore): un'immagine disegnata e un suono
 const recMime=()=>['video/mp4;codecs=avc1,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m))||'';
 const fmtSec=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 const clipExt=t=>/mp4/.test(t)?'mp4':'webm';
+const REC_W=720,REC_H=1280,REC_BPS=2_500_000; // quadro verticale e qualità (2,5 Mbit/s: 3 minuti ≈ 55 MB)
+const MARK=new Image();MARK.src='marchio.png'; // l'icona con lo sfondo trasparente
 let REC=null;
 function fakeStream(){
   const c=document.createElement('canvas');c.width=480;c.height=640;const x=c.getContext('2d');let n=0;
@@ -2103,16 +2108,44 @@ function fakeStream(){
   try{const ac=new AudioContext(),o=ac.createOscillator(),d=ac.createMediaStreamDestination();o.frequency.value=330;o.connect(d);o.start();s.addTrack(d.stream.getAudioTracks()[0])}catch{}
   return s;
 }
-async function recOpen(){
-  if(!REC_OK()&&!FAKECAM){toast('Questo dispositivo non permette di registrare dall\'app: usa «Registra un video»');return}
-  REC={facing:'environment',part:0,clips:[],state:'intro',many:false};
+// Testo in una fascia scura: in alto l'etichetta della parte, in basso il nome del piatto
+function drawBand(x,W,H,text,top){
+  x.save();x.font=`700 ${Math.round(W*.05)}px Fredoka,system-ui,sans-serif`;x.textAlign='center';x.textBaseline='middle';
+  const tw=Math.min(x.measureText(text).width+W*.08,W*.92),th=Math.round(W*.095),y=top?Math.round(H*.07):Math.round(H*.8),l=(W-tw)/2,t=y-th/2,r=th/2;
+  x.fillStyle='rgba(0,0,0,.55)';x.beginPath();x.moveTo(l+r,t);x.arcTo(l+tw,t,l+tw,t+th,r);x.arcTo(l+tw,t+th,l,t+th,r);x.arcTo(l,t+th,l,t,r);x.arcTo(l,t,l+tw,t,r);x.closePath();x.fill();
+  x.fillStyle='#fff';x.fillText(text,W/2,y,W*.86);x.restore();
+}
+// Il compositore: disegna una sorgente video (la fotocamera, o una clip da unire) sul quadro verticale, con il marchio, e dà il flusso da registrare
+function composer(mark){
+  const c=document.createElement('canvas');c.width=REC_W;c.height=REC_H;const x=c.getContext('2d'),W=REC_W,H=REC_H;
+  const v=document.createElement('video');v.muted=true;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');
+  v.style.cssText='position:fixed;left:0;top:0;width:2px;height:2px;opacity:.01;pointer-events:none';document.body.appendChild(v); // fuori vista ma nel documento: altrimenti alcuni browser non decodificano i fotogrammi
+  x.fillStyle='#000';x.fillRect(0,0,W,H);
+  const st={c,v,out:c.captureStream(30),label:'',title:'',t0:0};
+  const draw=()=>{
+    const sw=v.videoWidth,sh=v.videoHeight;
+    if(sw&&sh&&v.readyState>=2){const s=Math.max(W/sw,H/sh),dw=sw*s,dh=sh*s;x.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh)} // riempie il quadro, ritagliando i bordi
+    if(mark&&MARK.naturalWidth){const m=Math.round(W*.13),pad=Math.round(W*.04);x.save();x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=m*.15;x.shadowOffsetY=m*.04;x.drawImage(MARK,W-m-pad,H-m-pad,m,m);x.restore()}
+    const el=st.t0?(performance.now()-st.t0)/1000:99;
+    if(el<3){if(st.label)drawBand(x,W,H,st.label,true);if(st.title)drawBand(x,W,H,st.title,false)}
+  };
+  st.timer=setInterval(draw,1000/30);
+  st.stop=()=>{clearInterval(st.timer);st.out.getTracks().forEach(t=>t.stop());try{v.pause()}catch{}v.srcObject=null;v.removeAttribute('src');v.remove()};
+  return st;
+}
+async function recOpen(free){
+  if(!REC_OK()&&!FAKECAM){toast('Questo dispositivo non permette di registrare dall\'app: scegli un video dal telefono');return}
+  REC={facing:'environment',part:0,clips:[],state:'intro',many:false,free:!!free,parts:free?REC_FREE(180):REC_PARTS,title:$('#f').title.value.trim()};
   recUI();$('#rec').showModal();
 }
 async function recCam(){
-  if(REC.stream)REC.stream.getTracks().forEach(t=>t.stop());
+  const r=REC;if(r.cmp){r.cmp.stop();r.cmp=null}
+  if(r.stream)r.stream.getTracks().forEach(t=>t.stop());
   try{
-    REC.stream=FAKECAM?fakeStream():await navigator.mediaDevices.getUserMedia({video:{facingMode:REC.facing,width:{ideal:1280},height:{ideal:720}},audio:true});
-    try{REC.many=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput').length>1}catch{}
+    r.stream=FAKECAM?fakeStream():await navigator.mediaDevices.getUserMedia({video:{facingMode:r.facing,width:{ideal:1280},height:{ideal:720}},audio:true});
+    try{r.many=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput').length>1}catch{}
+    r.cmp=composer(true);r.cmp.v.srcObject=r.stream;await r.cmp.v.play().catch(()=>{});
+    const a=r.stream.getAudioTracks()[0];if(a)r.cmp.out.addTrack(a);
     return true;
   }catch(e){
     toast(e.name==='NotAllowedError'?'Serve il permesso di usare fotocamera e microfono: controlla le impostazioni del telefono':'Fotocamera non disponibile');
@@ -2120,37 +2153,48 @@ async function recCam(){
   }
 }
 function recUI(){
-  const r=REC;if(!r)return;const p=REC_PARTS[r.part],b=$('#recBody');
-  const dots=REC_PARTS.map((_,j)=>`<i class="recDot${j===r.part?' on':j<r.part?' done':''}"></i>`).join('');
+  const r=REC;if(!r)return;const p=r.parts[r.part],b=$('#recBody'),last=r.parts.length-1;
+  const dots=r.free?'':r.parts.map((_,j)=>`<i class="recDot${j===r.part?' on':j<r.part?' done':''}"></i>`).join('');
   if(r.state==='intro'){
-    b.innerHTML=`<p class="big">Il video dura al massimo <b>3 minuti</b> ed è fatto di tre parti. Gnamina ti dice cosa riprendere e conta i secondi: quando il tempo finisce, si ferma da sola. Ogni parte si può rifare.</p>
-      <div class="recParts">${REC_PARTS.map((q,j)=>`<div><b>${j+1}</b><span>${q.name} · <b style="font-size:1rem;color:var(--fg)">${fmtSec(q.sec)}</b><small>${q.tip}</small></span></div>`).join('')}</div>
-      <p class="meta">Tieni il telefono fermo, con buona luce, e parla chiaro. Il video resta sul tuo telefono finché non lo condividi.</p>
+    b.innerHTML=r.free
+      ?`<p class="big">Riprendi la ricetta come vuoi: Gnamina mette il suo marchio in basso a destra mentre giri, e il video esce verticale, pronto per TikTok, Instagram, Facebook e YouTube Shorts.</p>
+      <div class="recParts"><div><b>⏱</b><span>Fino a <b style="font-size:1rem;color:var(--fg)">3 minuti</b>, il massimo per Shorts e Reels<small><label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="recLong"> Mi serve più tempo: fino a 10 minuti (va bene per TikTok e YouTube)</label></small></span></div></div>
+      <p class="meta">Tieni il telefono dritto e fermo, con buona luce, e parla chiaro. Il video resta sul tuo telefono finché non lo pubblichi.</p>
+      <div class="recCtl"><button type="button" class="btn pri" id="recOn" style="font-size:1.05rem;padding:14px 24px">📷 Accendi la fotocamera</button></div>`
+      :`<p class="big">Il video dura al massimo <b>3 minuti</b> ed è fatto di tre parti. Gnamina ti dice cosa riprendere, conta i secondi e mette il suo marchio in basso a destra: quando il tempo finisce, si ferma da sola. Ogni parte si può rifare.</p>
+      <div class="recParts">${r.parts.map((q,j)=>`<div><b>${j+1}</b><span>${q.name} · <b style="font-size:1rem;color:var(--fg)">${fmtSec(q.sec)}</b><small>${q.tip}</small></span></div>`).join('')}</div>
+      <p class="meta">Tieni il telefono dritto e fermo, con buona luce, e parla chiaro. Il video resta sul tuo telefono finché non lo pubblichi.</p>
       <div class="recCtl"><button type="button" class="btn pri" id="recOn" style="font-size:1.05rem;padding:14px 24px">📷 Accendi la fotocamera</button></div>`;
-    $('#recOn').onclick=async()=>{if(await recCam()){r.state='ready';recUI()}};
+    $('#recOn').onclick=async()=>{if(r.free)r.parts=REC_FREE($('#recLong')?.checked?600:180);if(await recCam()){r.state='ready';recUI()}};
+    return;
+  }
+  if(r.state==='join'){
+    const tot=r.clips.reduce((a,c)=>a+c.ms,0)/1000;
+    b.innerHTML=`<p class="big">Sto unendo le tre parti in un solo video con il marchio: ci vuole circa <b>${fmtSec(tot)}</b>. <b>Non chiudere l'app.</b></p>
+      <div class="recBar" id="joinBar" style="position:static;height:14px;border-radius:7px;background:color-mix(in srgb,var(--fg) 12%,transparent)"><i style="border-radius:7px"></i></div><p class="meta" id="joinPct" style="text-align:center">0%</p>`;
     return;
   }
   if(r.state==='done'){
     const tot=r.clips.reduce((a,c)=>a+c.ms,0)/1000;
-    b.innerHTML=`<p class="big">Fatto! Il tuo video dura <b>${fmtSec(tot)}</b>.</p>
-      <div class="recParts">${REC_PARTS.map((q,j)=>`<div><b>✓</b><span>${q.name}<small>${fmtSec(r.clips[j].ms/1000)}</small></span></div>`).join('')}</div>
-      <div class="recCtl"><button type="button" class="btn" id="recRedoAll">↺ Rifai tutto</button><button type="button" class="btn pri" id="recUse" style="font-size:1.05rem;padding:14px 24px">✓ Usa questo video</button></div>`;
+    b.innerHTML=`<p class="big">Fatto! Il tuo video dura <b>${fmtSec(tot)}</b>${r.free?', con il marchio Gnamina':''}.</p>
+      ${r.free?'':`<div class="recParts">${r.parts.map((q,j)=>`<div><b>✓</b><span>${q.name}<small>${fmtSec(r.clips[j].ms/1000)}</small></span></div>`).join('')}</div><p class="meta">«Monta il video» unisce le tre parti in un solo file: ci vuole quanto il video, tieni l'app aperta.</p>`}
+      <div class="recCtl"><button type="button" class="btn" id="recRedoAll">↺ Rifai tutto</button><button type="button" class="btn pri" id="recUse" style="font-size:1.05rem;padding:14px 24px">${r.free?'✓ Usa questo video':'✓ Monta il video'}</button></div>`;
     $('#recRedoAll').onclick=()=>{r.part=0;r.clips=[];r.state='ready';recUI()};
     $('#recUse').onclick=recFinish;
     return;
   }
   const review=r.state==='review';
   b.innerHTML=`<div class="recStage"><video id="recV" autoplay playsinline ${review?'controls':'muted'}></video>
-      <div class="recTop"><span>${dots} Parte ${r.part+1} di 3 · ${p.name}</span><span class="recClock" id="recClock">${review?fmtSec(r.clips[r.part].ms/1000):fmtSec(p.sec)}</span></div>
+      <div class="recTop"><span>${r.free?'Il tuo video':`${dots} Parte ${r.part+1} di ${r.parts.length} · ${p.name}`}</span><span class="recClock" id="recClock">${review?fmtSec(r.clips[r.part].ms/1000):fmtSec(p.sec)}</span></div>
       ${review?'':`<div class="recBar" id="recBar"><i></i></div><p class="recTip" id="recTip">${r.state==='rec'?p.tip:'Inquadra, poi premi Registra. Hai '+fmtSec(p.sec)+'.'}</p>`}
       <div class="recCount" id="recCount" hidden></div></div>
     <div class="recCtl">${review
-      ?`<button type="button" class="btn" id="recRedo">↺ Rifai questa parte</button><button type="button" class="btn pri" id="recNext" style="font-size:1.05rem;padding:14px 24px">${r.part<2?'Va bene, avanti →':'Va bene, fine ✓'}</button>`
+      ?`<button type="button" class="btn" id="recRedo">↺ Rifai${r.free?'':' questa parte'}</button><button type="button" class="btn pri" id="recNext" style="font-size:1.05rem;padding:14px 24px">${r.part<last?'Va bene, avanti →':'Va bene, fine ✓'}</button>`
       :r.state==='rec'?`<button type="button" class="recBig stop" id="recStopB">■ Stop</button>`
       :`${r.many&&!FAKECAM?'<button type="button" class="btn" id="recFlip">🔄 Gira</button>':''}<button type="button" class="recBig" id="recGo">● Registra</button>${r.part>0?'<button type="button" class="btn" id="recPrev">← Parte prima</button>':'<span style="width:84px"></span>'}`}</div>`;
   const v=$('#recV');
-  if(review){v.src=r.clips[r.part].url;v.muted=false}else{v.srcObject=r.stream;v.muted=true}
-  if(review){$('#recRedo').onclick=()=>{URL.revokeObjectURL(r.clips[r.part].url);r.clips[r.part]=null;r.state='ready';recUI()};$('#recNext').onclick=()=>{if(r.part<2){r.part++;r.state='ready'}else r.state='done';recUI()}}
+  if(review){v.src=r.clips[r.part].url;v.muted=false}else{v.srcObject=r.cmp.out;v.muted=true} // l'anteprima è il quadro composto: quello che vedi è quello che viene registrato
+  if(review){$('#recRedo').onclick=()=>{URL.revokeObjectURL(r.clips[r.part].url);r.clips[r.part]=null;r.state='ready';recUI()};$('#recNext').onclick=()=>{if(r.part<last){r.part++;r.state='ready'}else r.state='done';recUI()}}
   else if(r.state==='rec')$('#recStopB').onclick=recStop;
   else{$('#recGo').onclick=recCountdown;if($('#recFlip'))$('#recFlip').onclick=async()=>{r.facing=r.facing==='environment'?'user':'environment';if(await recCam())recUI()};if($('#recPrev'))$('#recPrev').onclick=()=>{r.part--;r.state='review';recUI()}}
 }
@@ -2160,8 +2204,9 @@ function recCountdown(){
   r.tick=setInterval(()=>{n--;if(n>0){c.textContent=n;return}clearInterval(r.tick);c.hidden=true;recBegin()},1000);
 }
 function recBegin(){
-  const r=REC,p=REC_PARTS[r.part];
-  try{r.mr=new MediaRecorder(r.stream,{mimeType:recMime()||undefined,videoBitsPerSecond:2_000_000})}catch(e){toast('Registrazione non disponibile su questo dispositivo');return}
+  const r=REC,p=r.parts[r.part];
+  try{r.mr=new MediaRecorder(r.cmp.out,{mimeType:recMime()||undefined,videoBitsPerSecond:REC_BPS})}catch(e){toast('Registrazione non disponibile su questo dispositivo');return}
+  r.cmp.label=r.free?'':p.name;r.cmp.title=r.part===0?r.title:'';r.cmp.t0=performance.now(); // etichetta e nome del piatto nei primi 3 secondi
   r.chunks=[];r.mr.ondataavailable=e=>{if(e.data&&e.data.size)r.chunks.push(e.data)};
   r.mr.onstop=()=>{
     const type=r.mr.mimeType||recMime()||'video/webm',blob=new Blob(r.chunks,{type}),ms=Math.min(Date.now()-r.t0,p.sec*1000);
@@ -2176,15 +2221,34 @@ function recBegin(){
   },200);
 }
 function recStop(){const r=REC;if(!r)return;clearInterval(r.tick);if(r.mr&&r.mr.state!=='inactive'){try{r.mr.stop()}catch{}}}
+// Unione delle parti in un solo file: le clip si rileggono una dopo l'altra sul quadro (il marchio c'è già) con il loro audio, e si registra il risultato
+function joinClips(clips){return new Promise((ok,ko)=>{
+  const r=REC,tot=clips.reduce((a,c)=>a+c.ms,0),cmp=composer(false),v=cmp.v;v.muted=false;v.removeAttribute('muted');v.autoplay=false;
+  const AC=window.AudioContext||window.webkitAudioContext;let ac=null;
+  try{ac=new AC();const dest=ac.createMediaStreamDestination();ac.createMediaElementSource(v).connect(dest);cmp.out.addTrack(dest.stream.getAudioTracks()[0])}catch{} // l'audio passa solo nel file, non negli altoparlanti
+  let mr;try{mr=new MediaRecorder(cmp.out,{mimeType:recMime()||undefined,videoBitsPerSecond:REC_BPS})}catch(e){cmp.stop();ko(e);return}
+  const chunks=[];mr.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};
+  let n=0,done=0;
+  const end=()=>{clearInterval(bar);cmp.stop();ac?.close().catch(()=>{});r.abort=null};
+  mr.onstop=()=>{end();const type=mr.mimeType||recMime()||'video/webm';ok({blob:new Blob(chunks,{type}),type,ms:tot})};
+  const bar=setInterval(()=>{const pct=Math.min(99,100*(done+(v.currentTime||0)*1000)/tot),e=$('#joinBar');if(e)e.firstElementChild.style.width=pct+'%';if($('#joinPct'))$('#joinPct').textContent=Math.round(pct)+'%'},250);
+  const next=()=>{if(n>=clips.length){mr.stop();return}v.src=clips[n].url;v.play().catch(e=>{end();ko(e)})};
+  v.onended=()=>{done+=clips[n].ms;n++;next()};v.onerror=()=>{end();try{mr.stop()}catch{}ko(new Error('clip'))};
+  r.abort=()=>{end();try{mr.ondataavailable=null;mr.stop()}catch{}ko(new Error('abort'))};
+  mr.start(1000);next();
+})}
 async function recFinish(){
-  const r=REC;if(!extra.clipKey)extra.clipKey='c'+Date.now().toString(36);
+  const r=REC;if(!extra.clipKey)extra.clipKey='c'+Date.now().toString(36);const key=extra.clipKey;
+  let one=r.clips.length===1?r.clips[0]:null;
+  if(r.clips.length>1){r.state='join';recUI();try{one=await joinClips(r.clips)}catch(e){if(!REC||e.message==='abort')return;one=null}}
   try{
-    for(let n=0;n<r.clips.length;n++)await clipPut(`${extra.clipKey}:${n}`,{blob:r.clips[n].blob,type:r.clips[n].type,ms:r.clips[n].ms});
-    extra.clips=r.clips.map(c=>({ms:c.ms,type:c.type,size:c.blob.size}));
+    if(one){await clipPut(`${key}:0`,{blob:one.blob,type:one.type,ms:one.ms});for(let n=1;n<3;n++)await idbRun('readwrite',s=>s.delete(`${key}:${n}`)).catch(()=>{});extra.clips=[{ms:one.ms,type:one.type,size:one.blob.size,one:true}]}
+    else{for(let n=0;n<r.clips.length;n++)await clipPut(`${key}:${n}`,{blob:r.clips[n].blob,type:r.clips[n].type,ms:r.clips[n].ms});extra.clips=r.clips.map(c=>({ms:c.ms,type:c.type,size:c.blob.size}))}
+    extra.clipsFree=r.free;
   }catch(e){toast('Non riesco a salvare il video sul telefono (spazio esaurito?)');return}
-  recClose();vidHint();toast('Video registrato: ora salva la ricetta');
+  recClose();vidHint();toast(one?'Video pronto, con il marchio Gnamina: ora salva la ricetta':'Non sono riuscita a unire le parti: le ho salvate separate. Ora salva la ricetta');
 }
-function recClose(){const r=REC;if(!r)return;clearInterval(r.tick);try{if(r.mr&&r.mr.state!=='inactive')r.mr.stop()}catch{}r.stream?.getTracks().forEach(t=>t.stop());r.clips.forEach(c=>c&&c.url&&URL.revokeObjectURL(c.url));REC=null;$('#recBody').innerHTML='';if($('#rec').open)$('#rec').close()}
+function recClose(){const r=REC;if(!r)return;clearInterval(r.tick);try{if(r.mr&&r.mr.state!=='inactive')r.mr.stop()}catch{}if(r.abort)r.abort();r.cmp?.stop();r.stream?.getTracks().forEach(t=>t.stop());r.clips.forEach(c=>c&&c.url&&URL.revokeObjectURL(c.url));REC=null;$('#recBody').innerHTML='';if($('#rec').open)$('#rec').close()}
 $('#recX').onclick=recClose;$('#rec').oncancel=e=>{e.preventDefault();recClose()};
 // Le clip stanno in IndexedDB: localStorage non regge decine di MB
 const idb=()=>new Promise((ok,ko)=>{const q=indexedDB.open('gnamina',1);q.onupgradeneeded=()=>q.result.createObjectStore('clips');q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error)});
@@ -2194,15 +2258,15 @@ const clipGet=k=>idbRun('readonly',s=>s.get(k));
 const clipsDrop=key=>key&&idbRun('readwrite',s=>{for(let n=0;n<3;n++)s.delete(`${key}:${n}`)}).catch(()=>{});
 const clipsTotal=cl=>fmtSec((cl||[]).reduce((a,c)=>a+(c.ms||0),0)/1000);
 // Stato del video registrato, nel passo finale del modulo
-const clipsStatus=()=>`🎬 Video registrato con la guida in ${extra.clips.length} parti (${clipsTotal(extra.clips)}): resta su questo telefono. <button type="button" class="btn" data-c="play">▶ Guarda</button> <button type="button" class="btn" data-c="redo">↺ Rifai</button> <button type="button" class="btn" data-c="share">📤 Condividi</button>`;
-$('#vidHint').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;
-  if(b.dataset.c==='redo')recOpen();else if(b.dataset.c==='share')clipsShare(extra.clipKey,extra.clips,$('#f').title.value);else clipsPlay(extra.clipKey,extra.clips,$('#f').title.value)};
-// Riproduzione delle parti una dopo l'altra, nella scheda della ricetta o dal modulo
+const clipsStatus=()=>`🎬 ${extra.clips.length>1?`Video registrato con la guida in ${extra.clips.length} parti`:'Video pronto, con il marchio Gnamina'} (${clipsTotal(extra.clips)}): resta su questo telefono. <button type="button" class="btn" data-c="play">▶ Guarda</button> <button type="button" class="btn" data-c="redo">↺ Rifai</button> <button type="button" class="btn pri" data-c="share">📤 Pubblica</button> <button type="button" class="btn" data-c="save">💾 Salva nel rullino</button>`;
+$('#vidHint').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;const c=b.dataset.c;
+  if(c==='redo')recOpen(!!extra.clipsFree);else if(c==='share')clipsShare(extra.clipKey,extra.clips,$('#f').title.value);else if(c==='save')clipsSave(extra.clipKey,extra.clips,$('#f').title.value);else clipsPlay(extra.clipKey,extra.clips,$('#f').title.value)};
+// Riproduzione (delle parti una dopo l'altra, se il video è ancora in parti), nella scheda della ricetta o dal modulo
 async function clipPlayer(key,clips,root){
   const v=root.querySelector('video'),lbl=root.querySelector('.clipLbl');let n=0,urls=[];
   try{for(let j=0;j<clips.length;j++){const c=await clipGet(`${key}:${j}`);if(!c)throw 0;urls.push(URL.createObjectURL(c.blob))}}
-  catch{lbl.textContent='Il video è stato registrato su un altro dispositivo: le clip restano sul telefono che le ha girate.';v.hidden=true;return}
-  const show=j=>{n=j;v.src=urls[j];lbl.textContent=`Parte ${j+1} di ${clips.length} · ${REC_PARTS[j]?.name||''} · ${fmtSec((clips[j].ms||0)/1000)}`};
+  catch{lbl.textContent='Il video è stato registrato su un altro dispositivo: le clip restano sul telefono che le ha girate.';v.hidden=true;root.querySelectorAll('[data-vc]').forEach(b=>b.hidden=true);return}
+  const show=j=>{n=j;v.src=urls[j];lbl.textContent=clips.length>1?`Parte ${j+1} di ${clips.length} · ${REC_PARTS[j]?.name||''} · ${fmtSec((clips[j].ms||0)/1000)}`:`Il tuo video · ${fmtSec((clips[j].ms||0)/1000)}${clips[j].one?' · con il marchio Gnamina':''}`};
   v.onended=()=>{if(n+1<urls.length){show(n+1);v.play().catch(()=>{})}};
   show(0);
 }
@@ -2210,14 +2274,26 @@ function clipsPlay(key,clips,title){
   $('#phv').innerHTML=`<h3 style="margin:0 0 8px">${esc(title||'Il tuo video')}</h3><div class="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p></div>`;
   $('#photo').showModal();clipPlayer(key,clips,$('#phv'));
 }
-// Condivisione: i file delle parti (per YouTube, WhatsApp, la galleria); senza menu di condivisione si scaricano
+// I file del video (uno solo, o le parti se non sono state unite)
+async function clipFiles(key,clips,title){
+  const files=[],slug=String(title||'ricetta').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'ricetta';
+  for(let j=0;j<clips.length;j++){const c=await clipGet(`${key}:${j}`);if(!c)throw 0;files.push(new File([c.blob],`gnamina-${slug}${clips.length>1?'-'+(j+1):''}.${clipExt(c.type)}`,{type:c.type}))}
+  return files;
+}
+const dlFile=f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000)};
+// Pubblica: il menù di condivisione del telefono (TikTok, Instagram, Facebook, YouTube, WhatsApp…) con la didascalia già negli appunti; sul computer si scarica il file
 async function clipsShare(key,clips,title){
-  const files=[];const slug=String(title||'ricetta').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'ricetta';
-  try{for(let j=0;j<clips.length;j++){const c=await clipGet(`${key}:${j}`);if(!c)throw 0;files.push(new File([c.blob],`gnamina-${slug}-${j+1}.${clipExt(c.type)}`,{type:c.type}))}}
-  catch{toast('Il video non è su questo dispositivo');return}
-  if(navigator.canShare?.({files})){try{await navigator.share({files,title:'Video della ricetta'})}catch(e){if(e.name!=='AbortError')toast('Condivisione non riuscita')}return}
-  files.forEach(f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000)});
-  toast(files.length>1?'Scaricati i file del video':'Scaricato il file del video');
+  let files;try{files=await clipFiles(key,clips,title)}catch{toast('Il video non è su questo dispositivo');return}
+  const cap=`${title||'La mia ricetta'} 🍅 Ricetta su Gnamina ${SITE}\n#gnamina #ricetta #cucinaitaliana`;
+  let copied=false;try{await navigator.clipboard.writeText(cap);copied=true}catch{}
+  if(navigator.canShare?.({files})){try{await navigator.share({files,title:title||'Video della ricetta',text:cap});if(copied)toast('Didascalia copiata: nella descrizione tieni premuto e scegli Incolla')}catch(e){if(e.name!=='AbortError')toast('Condivisione non riuscita')}return}
+  files.forEach(dlFile);toast('Video scaricato: caricalo su TikTok, Instagram, Facebook o YouTube dal computer');
+}
+// Salva nel rullino: su iPhone dal menù di condivisione («Salva video»), altrove come file scaricato (la galleria lo trova da sola)
+async function clipsSave(key,clips,title){
+  let files;try{files=await clipFiles(key,clips,title)}catch{toast('Il video non è su questo dispositivo');return}
+  if(/iPhone|iPad/.test(navigator.userAgent)&&navigator.canShare?.({files})){toast('Nel menù scegli «Salva video» per metterlo nel rullino');try{await navigator.share({files,title:'Salva il video'})}catch(e){if(e.name!=='AbortError')toast('Salvataggio non riuscito')}return}
+  files.forEach(dlFile);toast(files.length>1?'Video scaricati: li trovi nei download e nella galleria':'Video scaricato: lo trovi nei download e nella galleria');
 }
 $('#pasteVid').onclick=async()=>{let t='';try{t=await navigator.clipboard.readText()}catch{}
   const u=extractUrl(t||'');if(ytId(u)){$('#f').video.value=u;$('#f').video.setCustomValidity('');vidHint('Link del video inserito: salva la ricetta.');toast('Video collegato')}else toast(t?'Negli appunti non c\'è un link YouTube':'Tieni premuto nel campo e scegli Incolla')};
