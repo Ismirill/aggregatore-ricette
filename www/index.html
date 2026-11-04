@@ -897,7 +897,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=116; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=117; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2516,7 +2516,7 @@ setInterval(()=>SY?.code&&document.visibilityState==='visible'&&doSync(),5*60000
 // caricato solo per la finestra di accesso di Google/Apple/Facebook. La sessione (refresh token) è conservata qui.
 // Il server (/account) verifica il token e dà il codice ricettario dell'account: da lì in poi vale la sincronizzazione normale.
 const FB=load('fbCfg',null)||{apiKey:'',authDomain:'',projectId:'',appId:'',providers:['google']}; // dal progetto Firebase (console → impostazioni → app web), oppure da www/firebase.json
-if(!FB.apiKey)fetch('firebase.json?'+Math.floor(Date.now()/36e5)).then(r=>r.ok?r.json():null).then(c=>{if(c?.apiKey){Object.assign(FB,{apiKey:c.apiKey,authDomain:c.authDomain||'',projectId:c.projectId||'',appId:c.appId||'',providers:c.providers||['google']});accUI();syncUI();if(view==='home')renderHome();if(typeof accediFromApp==='function')accediFromApp()}}).catch(()=>{});
+if(!FB.apiKey)fetch('firebase.json?'+Math.floor(Date.now()/36e5)).then(r=>r.ok?r.json():null).then(c=>{if(c?.apiKey){Object.assign(FB,{apiKey:c.apiKey,authDomain:c.authDomain||'',projectId:c.projectId||'',appId:c.appId||'',providers:c.providers||['google'],webClientId:c.webClientId||''});accUI();syncUI();if(view==='home')renderHome();if(typeof accediFromApp==='function')accediFromApp()}}).catch(()=>{});
 const FB_API=(()=>{try{return localStorage.getItem('fbUrl')}catch{}})()||'https://identitytoolkit.googleapis.com/v1';
 const FB_TOKEN=(()=>{try{return localStorage.getItem('fbTok')}catch{}})()||'https://securetoken.googleapis.com/v1/token';
 const FB_SDK='https://www.gstatic.com/firebasejs/11.10.0/';
@@ -2571,6 +2571,15 @@ function fbProvider(f,p){if(p==='google')return new f.GoogleAuthProvider();if(p=
 const fbSocialMsg=e=>e.code==='auth/account-exists-with-different-credential'?'Questa email è già registrata con un altro metodo: accedi con quello':e.code==='auth/unauthorized-domain'?'Dominio non autorizzato nel progetto Firebase':e.code==='auth/network-request-failed'?'Servizio non raggiungibile: controlla la connessione':'Accesso non riuscito ('+(e.code||e.message)+')';
 async function fromSdkUser(f,u){await setSession({idToken:await u.getIdToken(),refreshToken:u.refreshToken,expiresIn:3600,localId:u.uid,email:u.email||''});await f.signOut(f.auth).catch(()=>{});await accountLink()}
 async function accSocial(p){
+  // Nell'APK con l'app registrata in Firebase: foglio Google nativo dentro l'app, poi il token ID apre la sessione Firebase; se non è configurato o fallisce, si passa dal browser
+  if(window.AndroidShare?.googleSignIn&&p==='google'&&FB.webClientId){
+    accUI('Scegli il tuo account Google…');
+    await new Promise(res=>{window.onGoogleToken=async(tok,err)=>{window.onGoogleToken=null;
+      if(tok){try{await setSession(await fbRest('signInWithIdp',{postBody:'id_token='+tok+'&providerId=google.com',requestUri:SITE,returnIdpCredential:true,returnSecureToken:true}));await accountLink();accUI();toast('Accesso effettuato')}catch(e){accUI(e.message||'Accesso non riuscito')}}
+      else if(err==='12501')accUI('');
+      else{AndroidShare.open(SITE+'?accedi='+p);accUI('Completa l\'accesso nel browser: poi torna qui')}
+      res()};AndroidShare.googleSignIn(FB.webClientId)});
+    return}
   if(window.AndroidShare?.open){AndroidShare.open(SITE+'?accedi='+p);accUI('Completa l\'accesso nel browser: poi torna qui e tocca «Ho un codice di accesso»');return}
   const f=await fbSdk(),P=fbProvider(f,p);
   let res;

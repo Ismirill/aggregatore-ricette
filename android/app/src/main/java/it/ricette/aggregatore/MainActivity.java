@@ -14,7 +14,7 @@ public class MainActivity extends BridgeActivity {
     private String pendingShare;
     // Contenuto del file di backup in attesa che l'utente scelga dove salvarlo
     private String pendingFile;
-    private static final int SAVE_FILE = 7331, REC_VIDEO = 7332, PICK_VIDEO = 7333;
+    private static final int SAVE_FILE = 7331, REC_VIDEO = 7332, PICK_VIDEO = 7333, GOOGLE_SIGNIN = 7334;
     // File in cui la fotocamera scrive il video della ricetta (cartella cache dell'app, condiviso con YouTube tramite FileProvider)
     private android.net.Uri pendingVideo;
     // Video con il marchio ricevuto dalla pagina a pezzi (base64) in un file della cache: poi si condivide o si salva nella Galleria
@@ -145,6 +145,19 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == GOOGLE_SIGNIN) {
+            // Esito del foglio Google: il token ID va alla pagina, che apre la sessione Firebase; codice 12501 = annullato, 10 = app non registrata in Firebase
+            try {
+                com.google.android.gms.auth.api.signin.GoogleSignInAccount a = com.google.android.gms.auth.api.signin.GoogleSignIn.getSignedInAccountFromIntent(data).getResult(com.google.android.gms.common.api.ApiException.class);
+                String t = a == null ? null : a.getIdToken();
+                js("window.onGoogleToken&&onGoogleToken('" + (t == null ? "" : t) + "','" + (t == null ? "notoken" : "") + "')");
+            } catch (com.google.android.gms.common.api.ApiException e) {
+                js("window.onGoogleToken&&onGoogleToken('','" + e.getStatusCode() + "')");
+            } catch (Exception e) {
+                js("window.onGoogleToken&&onGoogleToken('','x')");
+            }
+            return;
+        }
         if (requestCode == REC_VIDEO || requestCode == PICK_VIDEO) {
             // Video registrato o scelto: lo si passa all'app YouTube (o al menu di condivisione), che lo carica sul canale dell'utente
             android.net.Uri v = data != null && data.getData() != null ? data.getData() : requestCode == REC_VIDEO ? pendingVideo : null;
@@ -193,6 +206,22 @@ public class MainActivity extends BridgeActivity {
             i.putExtra(Intent.EXTRA_SUBJECT, title);
             i.putExtra(Intent.EXTRA_TEXT, text);
             runOnUiThread(() -> startActivity(Intent.createChooser(i, title)));
+        }
+
+        // Accesso con Google dentro l'app: foglio nativo di scelta dell'account (Google Play Services), poi il token ID va a Firebase dalla pagina
+        @JavascriptInterface
+        public void googleSignIn(String webClientId) {
+            if (webClientId == null || webClientId.isEmpty()) { js("window.onGoogleToken&&onGoogleToken('','config')"); return; }
+            runOnUiThread(() -> {
+                try {
+                    com.google.android.gms.auth.api.signin.GoogleSignInOptions o = new com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(webClientId).requestEmail().build();
+                    com.google.android.gms.auth.api.signin.GoogleSignInClient c = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(MainActivity.this, o);
+                    c.signOut().addOnCompleteListener(t -> startActivityForResult(c.getSignInIntent(), GOOGLE_SIGNIN));
+                } catch (Exception e) {
+                    js("window.onGoogleToken&&onGoogleToken('','" + String.valueOf(e.getMessage()).replace("'", "") + "')");
+                }
+            });
         }
 
         // Scarica l'APK della versione nuova dentro l'app e, finito il download, apre l'installazione (niente browser)

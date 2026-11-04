@@ -4,5 +4,9 @@
   "authDomain": "gnamina-3ca3d.firebaseapp.com",
   "projectId": "gnamina-3ca3d",
   "appId": "1:514268217148:web:8d9d8610e44f1468dc2839",
-  "providers": ["google"]
+  "providers": [
+    "google"
+  ],
+  "webClientId": "",
+  "_webClientId": "ID client web OAuth del progetto (console Firebase → Authentication → Metodo di accesso → Google → Configurazione SDK web → ID client web). Serve per l'accesso Google nativo nell'APK; finché è vuoto l'app passa dal browser."
 }
