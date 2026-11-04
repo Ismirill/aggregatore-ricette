@@ -91,3 +91,7 @@ Il modo libero («Registra un video») non ha parti: il file esce dal registrato
 | E (fase 2, forse) | Canale ufficiale Gnamina: pubblicazione automatica delle vincitrici via API YouTube dal workflow GitHub | dopo il 5/12 |
 
 Prima di tutto, una prova veloce sul telefono Android dell'utente: aprire il sito, console, `MediaRecorder.isTypeSupported('video/mp4;codecs=avc1,mp4a.40.2')`. Dalla risposta dipende la tappa C.
+
+## Aggiornamento del 4/11/2026 (versione 106)
+
+Un solo percorso per il video, in tutte le schermate dove si può aggiungere (nuova ricetta, ricetta in gara, modifica): la guida in tre parti, con le istruzioni a ogni passo. 1) Racconta la ricetta e mostra gli ingredienti, 30 s. 2) La preparazione, 2 min. 3) Il piatto pronto, 30 s. Ogni parte si può rifare; alla fine le tre parti si uniscono in un file solo. Via il modo libero (resta nel codice senza tasto) e via «Scegli dal telefono»: i video vanno girati dentro l'app, così sono brevi, verticali e con il marchio. La modifica della ricetta va passo per passo come la nuova; note, fonte e link YouTube stanno chiusi in fondo all'ultimo passo.
