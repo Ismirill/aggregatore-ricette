@@ -80,10 +80,10 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px}
 .thumb{aspect-ratio:4/3;position:relative;display:grid;place-items:center;font-size:2.6rem;overflow:hidden;background:var(--ph,linear-gradient(135deg,#e9a23b33,#c2502f33))}
 .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s}
 .item:hover .thumb img{transform:scale(1.04)}
-.thumb .play{position:absolute;left:8px;bottom:8px;font-size:.7rem;font-weight:600;background:#000b;color:#fff;border-radius:999px;padding:3px 8px;backdrop-filter:blur(6px)}
+.thumb .play{position:absolute;left:8px;bottom:8px;z-index:2;height:24px;min-width:24px;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;background:#000b;color:#fff;border-radius:999px;padding:0 8px;backdrop-filter:blur(6px)}
 .thumb .cat{position:absolute;left:8px;top:8px;font-size:.68rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;background:color-mix(in srgb,var(--card) 88%,transparent);color:var(--fg);border-radius:999px;padding:3px 8px;backdrop-filter:blur(6px)}
 .thumb .rt{position:absolute;right:8px;top:8px;font-size:.72rem;background:#000a;color:#ffd166;border-radius:999px;padding:2px 7px}
-.sv{position:absolute;right:8px;bottom:8px;font-size:.74rem;font-weight:700;background:#000b;color:#ffd166;border-radius:999px;padding:3px 8px;backdrop-filter:blur(6px);display:inline-flex;align-items:center;gap:4px;z-index:2}.sv small{font-weight:600;color:#fffd}.sv.big{position:static;font-size:1.25rem;background:none;color:var(--star);padding:0;backdrop-filter:none}.sv.big small{color:var(--mut);font-size:.85rem;font-weight:500}.sv.hero{right:14px;bottom:14px;font-size:.95rem;padding:5px 11px}
+.sv{position:absolute;right:8px;bottom:8px;height:24px;font-size:.74rem;font-weight:700;background:#000b;color:#ffd166;border-radius:999px;padding:0 9px;backdrop-filter:blur(6px);display:inline-flex;align-items:center;gap:5px;z-index:2}.sv small{font-weight:600;color:#fffd}.sv.big{position:static;font-size:1.25rem;background:none;color:var(--star);padding:0;backdrop-filter:none}.sv.big small{color:var(--mut);font-size:.85rem;font-weight:500}.sv.hero{right:14px;bottom:14px;font-size:.95rem;padding:5px 11px}
 .st5{position:relative;display:inline-block;line-height:1;letter-spacing:1px;color:#ffffff66;white-space:nowrap}.st5 i{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:#ffd166;font-style:normal}.sv.big .st5{color:var(--bd)}.sv.big .st5 i{color:var(--star)}.svRow{display:flex;gap:10px;align-items:baseline;margin-top:12px;flex-wrap:wrap}
 .item .b{padding:11px 13px 13px;flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
 .item h3{margin:0;font-size:1.02rem;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
@@ -198,7 +198,7 @@ details summary{cursor:pointer}
 .warnTxt{color:var(--acc);font-weight:600}
 .srcGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11rem),1fr));gap:10px}.srcCard{font:inherit;text-align:left;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:12px;cursor:pointer;color:var(--fg)}.srcCard b{display:block;font-size:1rem;margin-bottom:4px}.srcCard span{font-size:.78rem;color:var(--mut);line-height:1.35;display:block}.srcCard:active{transform:scale(.98)}
 .shopBox{margin:4px 0 12px}.shopBox summary{list-style:none;cursor:pointer;background:var(--acc);color:#fff;font-weight:700;font-size:1.05rem;padding:14px 16px;border-radius:14px;text-align:center;box-shadow:var(--sh)}.shopBox summary::-webkit-details-marker{display:none}.shopBox summary span{font-weight:500;opacity:.85}.shopBox[open] summary{border-radius:14px 14px 0 0}.shopBox #shopList{background:var(--card);border:1px solid var(--bd);border-top:none;border-radius:0 0 14px 14px;padding:10px 14px 14px}
-#bOut .dish{font-size:1rem}#bOut .dish small{font-size:.82rem}#bOut .dish .r{font-size:.72rem}#bOut .meal>.meta{font-size:.85rem}#bOut .nbox span{font-size:.78rem}#bOut .bdg{font-size:.76rem}#bOut .fonti p{text-align:left;margin:8px 0 0;font-size:.82rem}.aiTag{position:absolute;right:8px;bottom:8px;z-index:2;font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:center}.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
+#bOut .dish{font-size:1rem}#bOut .dish small{font-size:.82rem}#bOut .dish .r{font-size:.72rem}#bOut .meal>.meta{font-size:.85rem}#bOut .nbox span{font-size:.78rem}#bOut .bdg{font-size:.76rem}#bOut .fonti p{text-align:left;margin:8px 0 0;font-size:.82rem}.aiTag{position:absolute;right:8px;top:8px;z-index:2;font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:center}.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
 .kv{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
 .kv span{font-size:.8rem;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--bg2)}
 
@@ -899,7 +899,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=119; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=120; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1163,15 +1163,14 @@ const PROT_EM={pesce:'🐟',legumi:'🫘',uova:'🍳',formaggi:'🧀',verdure:'�
 function look(i){const l=[...(CAT_LOOK[i.cat]||CAT_LOOK.Altro)];if(['Secondi','Piatti unici'].includes(i.cat)&&i.ingredients?.length){i._pr??=protein(i);if(PROT_EM[i._pr]&&i.cat==='Secondi'||['pesce','legumi'].includes(i._pr))l[0]=PROT_EM[i._pr]}return l}
 function card(i){
   const [em,c1,c2]=look(i),pp=perPerson(i),tm=(i.ingredients?.length||i.steps?.length)?timing(i):null,vid=embedOf(i);
-  const facts=[tm&&`⏱ <b>${fmtMin(tm.t)}</b>`,tm&&DIFF[tm.d],pp&&`<b>${Math.round(pp.kcal)}</b> kcal`,pp?.eur!=null&&`${i.cov!=null&&i.cov<.85?'circa ':''}<b>${euro(pp.eur)}</b>/pers.`,i.linked&&i.cost&&`costo ${i.cost}`].filter(Boolean);
-  const diets=(i.diets||[]).filter(d=>MAIN_DIETS.includes(d));if(i.pseudo)diets.unshift('Italo-americano');const gara=i.contest?`<span class="bdg gara">🏆 In gara</span>`:'';
+  // Scheda pulita: sopra la foto il tipo di piatto, il ▶ se c'è un video e le stelline; sotto il titolo e una riga con tempo, difficoltà e costo
+  const facts=[tm&&`⏱ <b>${fmtMin(tm.t)}</b>`,tm&&DIFF[tm.d],pp?.eur!=null&&`${i.cov!=null&&i.cov<.85?'circa ':''}<b>${euro(pp.eur)}</b>/pers.`,i.linked&&i.cost&&`costo ${i.cost}`].filter(Boolean);
+  const gara=i.contest?`<div class="badges"><span class="bdg gara">🏆 In gara</span></div>`:'';
   return `<div class="item" data-id="${i.id}"${pubId(i)?` data-pub="${esc(pubId(i))}"`:''}>
-    <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${!i.book&&!i.pronto&&!i.colazione?'<button type="button" class="more" aria-label="Altre azioni">⋯</button>':''}${i.imgGen?'<span class="aiTag" title="Immagine generata con l\'AI">AI</span>':''}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
-      <span class="cat">${esc(i.cat||'Altro')}</span>${pubId(i)?starsHtml(pubId(i)):i.rating?`<span class="sv">${st5(i.rating,i.rating+' stelle, il tuo voto')}</span>`:''}${vid?'<span class="play">▶ video</span>':''}</div>
+    <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${i.imgGen?'<span class="aiTag" title="Immagine generata con l\'AI">AI</span>':''}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
+      <span class="cat">${esc(i.cat||'Altro')}</span>${vid?'<span class="play" title="Con video">▶</span>':''}${pubId(i)?starsHtml(pubId(i)):i.rating?`<span class="sv">${st5(i.rating,i.rating+' stelle, il tuo voto')}</span>`:''}</div>
     <div class="b"><h3>${esc(i.title||i.url)}</h3>
-      <div class="facts">${facts.map(f=>`<span>${f}</span>`).join('')}</div>
-      <div class="meta">${isIntl(i)?flag(ccOf(i))+' ':''}${esc([i.region||i.country,(i.source||'')+(i.linked?' · collegata':'')].filter(Boolean).join(' · '))}</div>
-      ${diets.length||gara?`<div class="badges">${gara}${diets.map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}</div>`:''}</div></div>`;
+      <div class="facts">${facts.map(f=>`<span>${f}</span>`).join('')}</div>${gara}</div></div>`;
 }
 const stars=n=>n?'<span class="stars">'+'★'.repeat(n)+'</span>':'';
 function fillSelects(){
