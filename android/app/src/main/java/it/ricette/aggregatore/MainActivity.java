@@ -26,6 +26,15 @@ public class MainActivity extends BridgeActivity {
     private long apkDl = -1;
     private android.content.BroadcastReceiver apkRx;
 
+    // Cancella gli APK scaricati per l'aggiornamento: all'avvio (la versione nuova è già installata) e prima di un nuovo download
+    private void cleanApks() {
+        try {
+            java.io.File d = getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS);
+            java.io.File[] fs = d == null ? null : d.listFiles();
+            if (fs != null) for (java.io.File f : fs) if (f.getName().toLowerCase().endsWith(".apk")) f.delete();
+        } catch (Exception ignored) {}
+    }
+
     private void installApk(long id) {
         try {
             android.app.DownloadManager dm = (android.app.DownloadManager) getSystemService(DOWNLOAD_SERVICE);
@@ -106,6 +115,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getBridge().getWebView().addJavascriptInterface(new ShareBridge(), "AndroidShare");
+        cleanApks(); // l'APK dell'aggiornamento appena installato non serve più
         handleShare(getIntent());
     }
 
@@ -193,8 +203,7 @@ public class MainActivity extends BridgeActivity {
                 try {
                     android.app.DownloadManager dm = (android.app.DownloadManager) getSystemService(DOWNLOAD_SERVICE);
                     String fn = (name == null || name.isEmpty() ? "Gnamina.apk" : name).replaceAll("[^\\w.-]", "_");
-                    java.io.File old = new java.io.File(getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS), fn);
-                    if (old.exists()) old.delete();
+                    cleanApks();
                     android.app.DownloadManager.Request r = new android.app.DownloadManager.Request(android.net.Uri.parse(url))
                         .setTitle(fn).setMimeType("application/vnd.android.package-archive")
                         .setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
