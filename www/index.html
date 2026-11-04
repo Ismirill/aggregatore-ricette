@@ -879,7 +879,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=112; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=113; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1026,7 +1026,7 @@ function profUI(required){const box=$('#profBox');if(!box)return;acctReq=!!requi
 // Il pannello: passi «intro» (primo avvio), «account», «profile» (obbligatorio dopo l'accesso) o «all» (profilo e account insieme)
 let acctMode='all';
 function acctStep(m){acctMode=m;$('#acctIntro').hidden=m!=='intro';$('#acctAcc').hidden=!(m==='account'||m==='all');$('#acctProf').hidden=!(m==='profile'||m==='all');
-  $('#acctT').textContent={intro:'Benvenuto in Gnamina',account:'Accedi a Gnamina',profile:ACC?'Presentati':'Il tuo profilo',all:'Il tuo profilo'}[m];
+  $('#acctT').textContent={intro:'Benvenuto in Gnamina',account:'Registrati o accedi',profile:ACC?'Presentati':'Il tuo profilo',all:'Il tuo profilo'}[m];
   $('#acctX').style.visibility=m==='profile'&&ACC?'hidden':'visible'; // dopo l'accesso nome e immagine non si saltano
   if(m!=='intro'){accUI();profUI(m==='profile'&&!!ACC);if(m==='profile'&&!ACC&&accOn()){$('#profBox').insertAdjacentHTML('afterbegin','<p class="meta" style="margin:0 0 10px"><button class="lnk" type="button" id="goAcc">Accedi o crea l\'account</button> per avere le ricette su tutti i tuoi dispositivi.</p>');$('#goAcc').onclick=()=>acctStep('account')}}$('#acct').scrollTop=0}
 // Senza account si vede la schermata di accesso (o il solo profilo, se la persona ha già scelto nome e immagine); con l'account, profilo e account insieme
@@ -2503,7 +2503,7 @@ const FB_SDK='https://www.gstatic.com/firebasejs/11.10.0/';
 const PROV_NAME={google:'Google',apple:'Apple',facebook:'Facebook'};
 let ACC=load('acc',null);
 const accOn=()=>!!FB.apiKey;
-const FB_MSG={EMAIL_EXISTS:'Esiste già un account con questa email: accedi, o usa «Password dimenticata?»',INVALID_LOGIN_CREDENTIALS:'Email o password non corretti',INVALID_PASSWORD:'Password non corretta',EMAIL_NOT_FOUND:'Nessun account con questa email',WEAK_PASSWORD:'Password troppo corta: almeno 6 caratteri',INVALID_EMAIL:'Indirizzo email non valido',MISSING_PASSWORD:'Scrivi la password',TOO_MANY_ATTEMPTS_TRY_LATER:'Troppi tentativi: riprova tra qualche minuto',USER_DISABLED:'Account disabilitato',INVALID_ID_TOKEN:'Sessione scaduta: accedi di nuovo'};
+const FB_MSG={EMAIL_EXISTS:'Con questa email c\'è già un account: vai su «Accedi» (o «Password dimenticata?»)',INVALID_LOGIN_CREDENTIALS:'Email o password non corretti. Se non ti sei ancora registrato, vai su «Registrati»',INVALID_PASSWORD:'Password non corretta',EMAIL_NOT_FOUND:'Nessun account con questa email: vai su «Registrati»',WEAK_PASSWORD:'Password troppo corta: almeno 6 caratteri',INVALID_EMAIL:'Indirizzo email non valido',MISSING_PASSWORD:'Scrivi la password',TOO_MANY_ATTEMPTS_TRY_LATER:'Troppi tentativi: riprova tra qualche minuto',USER_DISABLED:'Account disabilitato',INVALID_ID_TOKEN:'Sessione scaduta: accedi di nuovo'};
 const fbMsg=m=>FB_MSG[String(m||'').split(/[ :]/)[0]]||'Operazione non riuscita, riprova';
 async function fbRest(path,body){
   const r=await fetch(`${FB_API}/accounts:${path}?key=${encodeURIComponent(FB.apiKey)}`,{method:'POST',headers:{'Content-Type':'application/json','X-Firebase-Locale':'it'},body:JSON.stringify(body)}).catch(()=>{throw new Error('Servizio non raggiungibile: controlla la connessione')});
@@ -2536,6 +2536,7 @@ async function accountLink(){
 async function accRun(fn,msg){const s0=$('#accStat');if(s0)s0.textContent='Un momento…';try{await fn();if(msg)toast(msg)}catch(e){const s=$('#accStat');if(s)s.textContent=e.message||'Operazione non riuscita';else toast(e.message||'Operazione non riuscita')}}
 async function accRegister(email,pw){await setSession(await fbRest('signUp',{email,password:pw,returnSecureToken:true}));try{await fbRest('sendOobCode',{requestType:'VERIFY_EMAIL',idToken:ACC.it})}catch{}await accountLink()}
 async function accLogin(email,pw){await setSession(await fbRest('signInWithPassword',{email,password:pw,returnSecureToken:true}));await accountLink()}
+$('#acct').addEventListener('close',()=>{if(ACC)save('accEver',1)});
 const accReset=email=>fbRest('sendOobCode',{requestType:'PASSWORD_RESET',email});
 async function accVerify(){await fbRest('sendOobCode',{requestType:'VERIFY_EMAIL',idToken:await idToken()})}
 function accLogout(){ACC=null;save('acc',null);if(SY?.code){SY=null;try{localStorage.removeItem('sync')}catch{}syKeys=null}accUI();syncUI();toast('Sei uscito: le ricette restano su questo dispositivo')}
@@ -2573,6 +2574,7 @@ async function handoffTake(code){
   code=String(code||'').replace(/\D/g,'');if(code.length!==6){if(code)toast('Il codice di accesso ha 6 cifre');return}
   await accRun(async()=>{const {rt}=await server('/handoff/take',{code});const d=await fbRefresh(rt);await setSession({idToken:d.id_token,refreshToken:d.refresh_token||rt,expiresIn:d.expires_in,localId:d.user_id});await accountLink()},'Accesso effettuato');
 }
+let accTab=load('accEver',0)?'login':'reg';
 function accUI(status){
   userBtnUI();
   const box=$('#accBox');if(!box)return;const hh=$('#accH');if(hh)hh.hidden=!ACC; // fuori dall'account il titolo non serve: la schermata è già «Accedi a Gnamina»
@@ -2582,22 +2584,24 @@ function accUI(status){
     box.innerHTML=`<p class="meta">Sei dentro come <b>${esc(ACC.name||ACC.email)}</b>${ACC.name&&ACC.email?` (${esc(ACC.email)})`:''}: le ricette ti seguono su tutti i dispositivi. <button class="lnk" id="accOut" type="button">Esci</button></p>${ACC.provider==='password'&&!ACC.verified?'<p class="meta">Email non ancora confermata: controlla la posta, anche nello Spam. <button class="lnk" id="accVerify" type="button">Invia di nuovo l\'email</button></p>':''}<p class="meta" id="accStat">${esc(status||'')}</p><p class="meta" style="margin:4px 0 0"><button class="lnk" id="accDel" type="button" style="color:var(--mut)">Elimina l'account</button></p>`;
     $('#accOut').onclick=accLogout;$('#accDel').onclick=()=>accRun(accDelete);const v=$('#accVerify');if(v)v.onclick=()=>accRun(accVerify,'Email inviata');
     return}
-  const socials=(FB.providers||['google']).filter(p=>PROV_NAME[p]).map(p=>`<button class="btn soc" type="button" data-p="${p}">${p==='google'?'<span class="gl">G</span>':''}Continua con ${PROV_NAME[p]}</button>`).join('');
-  box.innerHTML=`<p class="meta" style="margin:0 0 12px">Le tue ricette ti seguono su iPhone, Android e computer.</p>
+  // Due linguette: «Registrati» (prima volta: crea l'account, con Google o con email e password, poi arriva l'email di verifica) e «Accedi»
+  const reg=accTab==='reg',em0=box.querySelector('#accF input[name=email]')?.value||'';
+  const socials=(FB.providers||['google']).filter(p=>PROV_NAME[p]).map(p=>`<button class="btn soc" type="button" data-p="${p}">${p==='google'?'<span class="gl">G</span>':''}${reg?'Registrati':'Accedi'} con ${PROV_NAME[p]}</button>`).join('');
+  box.innerHTML=`<div class="seg" id="accSeg"><label><input type="radio" name="accTab" value="reg"${reg?' checked':''}><span>Registrati</span></label><label><input type="radio" name="accTab" value="login"${reg?'':' checked'}><span>Accedi</span></label></div>
+  <p class="meta" style="margin:12px 0">${reg?'È gratis: le tue ricette ti seguono su iPhone, Android e computer.':'Bentornato: entra con lo stesso modo con cui ti sei registrato.'}</p>
   <div class="socs big">${socials}</div>
   <p class="meta" style="text-align:center;margin:14px 0 8px">oppure con la tua email</p>
-  <form id="accF" class="accF"><input name="email" type="email" autocomplete="email" placeholder="La tua email" required><input name="pw" type="password" autocomplete="current-password" placeholder="Password (almeno 6 caratteri)" minlength="6" required>
-  <button class="btn pri" style="width:100%;justify-content:center;font-size:1.05rem;padding:13px">Avanti</button>
-  <p class="meta" style="margin:10px 0 0;text-align:center"><button class="lnk" type="button" data-a="reset">Password dimenticata?</button> · <button class="lnk" type="button" data-a="noacc">Continua senza account</button>${window.AndroidShare?.open?' · <button class="lnk" type="button" data-a="code">Ho un codice</button>':''}</p></form>
+  <form id="accF" class="accF"><input name="email" type="email" autocomplete="email" placeholder="La tua email" required value="${esc(em0)}"><input name="pw" type="password" autocomplete="${reg?'new-password':'current-password'}" placeholder="${reg?'Scegli una password (almeno 6 caratteri)':'Password'}" minlength="6" required>
+  <button class="btn pri" style="width:100%;justify-content:center;font-size:1.05rem;padding:13px">${reg?'Crea l\'account':'Accedi'}</button>
+  ${reg?'<p class="meta" style="margin:8px 0 0;text-align:center">Ti arriva un\'email per confermare l\'indirizzo.</p>':''}
+  <p class="meta" style="margin:10px 0 0;text-align:center">${reg?'':'<button class="lnk" type="button" data-a="reset">Password dimenticata?</button> · '}<button class="lnk" type="button" data-a="noacc">Continua senza account</button>${window.AndroidShare?.open?' · <button class="lnk" type="button" data-a="code">Ho un codice</button>':''}</p></form>
   <p class="meta" id="accStat" style="margin-top:10px">${esc(status||'')}</p>`;
   const f=$('#accF');
-  // Un solo tasto: prova ad accedere; se l'email non ha un account, propone di crearlo con gli stessi dati
-  f.onsubmit=async e=>{e.preventDefault();const em=f.email.value.trim(),pw=f.pw.value,st=$('#accStat');st.textContent='Un momento…';
-    try{await accLogin(em,pw);toast('Accesso effettuato')}
-    catch(err){const m=err.message||'';
-      if(/non corretti|Nessun account/i.test(m)){st.innerHTML=`Nessun accesso con questi dati. Se è la prima volta: <button class="lnk" type="button" id="accMk">crea l'account con ${esc(em)}</button>. Altrimenti controlla la password.`;$('#accMk').onclick=()=>accRun(()=>accRegister(em,pw),'Account creato: ti abbiamo inviato un\'email per confermarlo')}
-      else st.textContent=m}};
-  f.querySelector('[data-a=reset]').onclick=()=>{const em=f.email.value.trim();if(!em){toast('Scrivi prima la tua email');return}accRun(()=>accReset(em),'Email per reimpostare la password inviata')};
+  box.querySelectorAll('#accSeg input').forEach(r=>r.onchange=()=>{accTab=r.value;accUI()});
+  f.onsubmit=e=>{e.preventDefault();const em=f.email.value.trim(),pw=f.pw.value;
+    if(reg)accRun(()=>accRegister(em,pw),'Account creato: controlla la posta e tocca il link per confermare l\'email');
+    else accRun(()=>accLogin(em,pw),'Accesso effettuato')};
+  const rs=f.querySelector('[data-a=reset]');if(rs)rs.onclick=()=>{const em=f.email.value.trim();if(!em){toast('Scrivi prima la tua email');return}accRun(()=>accReset(em),'Email per reimpostare la password inviata')};
   f.querySelector('[data-a=noacc]').onclick=()=>{save('accAsked',1);acctStep('profile')};
   box.querySelectorAll('.soc').forEach(b=>b.onclick=()=>accRun(()=>accSocial(b.dataset.p)));
   const c=box.querySelector('[data-a=code]');if(c)c.onclick=()=>handoffTake(prompt('Scrivi il codice di accesso a 6 cifre mostrato nel browser:'));
