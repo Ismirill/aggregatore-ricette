@@ -1,6 +1,6 @@
 # Il sistema video di Gnamina
 
-Progetto del 4 novembre 2026. Obiettivo: dal video girato con la regia dell'app (tre parti, al massimo 3 minuti) esce **un solo file verticale 9:16, con l'icona di Gnamina in basso a destra**, pronto da pubblicare su TikTok, Instagram Reels e YouTube Shorts. Vincoli di sempre: semplice per chi non è pratico, nessun costo, nessuno spazio cloud nostro.
+Progetto del 4 novembre 2026. Obiettivo: **ogni video che entra in Gnamina** (girato con la regia, registrato con la fotocamera del telefono o scelto dal rullino, per il contest o per la propria libreria) esce come **un solo file verticale 9:16, con l'icona di Gnamina in basso a destra**, pronto da pubblicare su TikTok, Instagram Reels, Facebook e YouTube Shorts dalla stessa app. Vincoli di sempre: semplice per chi non è pratico, nessun costo, nessuno spazio cloud nostro.
 
 ## Cosa c'è oggi (versione 101)
 
@@ -11,9 +11,19 @@ Progetto del 4 novembre 2026. Obiettivo: dal video girato con la regia dell'app 
 
 ## Le decisioni
 
+### 0. Vale per tutti i video, non solo per la regia
+
+Nel passo finale della ricetta ci sono tre strade: «Registra con la guida» (regia in tre parti), «Registra un video» (fotocamera del telefono) e «Scegli dal telefono». Oggi solo la regia tiene il video nell'app; gli altri due lo passano a YouTube e basta. Con il nuovo sistema **tutte e tre passano dal montaggio**: il file che resta nell'app e che si condivide porta sempre il marchio.
+
+- **Regia**: le tre parti si fondono in un file, con scheda iniziale ed etichette delle parti.
+- **Video registrato o scelto**: un solo file, stessa filigrana, stessa scheda iniziale con il nome del piatto (si può togliere). Se il video è **orizzontale**, va su un fondo 9:16 fatto con lo stesso video ingrandito e sfocato (il look dei Reels), così non si taglia niente; se è verticale riempie il quadro.
+- **Durata**: Shorts e Reels vogliono al massimo 3 minuti. Un video scelto dal telefono più lungo mostra l'avviso «È più lungo di 3 minuti: per Shorts e Reels tengo i primi 3 minuti» con la scelta «Tienilo intero» (va bene per TikTok e YouTube normale, fino a 10 minuti).
+- **Solo video propri**: il marchio si mette su video girati dalla persona, mai su video scaricati; l'avviso nella riga «Scegli dal telefono» lo dice («un video girato da te»).
+- **Spazio**: il file montato resta nel telefono (IndexedDB) come oggi le clip, e sparisce con la ricetta. Un video di 3 minuti pesa circa 50 MB; sopra i 5 minuti l'app propone di salvarlo nel rullino e tenere nell'app solo l'anteprima.
+
 ### 1. Il montaggio si fa sul telefono, senza server
 
-Alla fine della regia, su «Usa questo video», l'app monta le tre parti in un unico video:
+Su «Monta il video» (alla fine della regia, oppure appena si registra o si sceglie un file), l'app costruisce un unico video:
 
 - un `canvas` 1080×1920 (720×1280 sui telefoni lenti o con poca memoria), su cui si disegnano i fotogrammi delle tre clip una dopo l'altra, ritagliati a riempire il formato verticale (`object-fit: cover`);
 - sopra, **l'icona di Gnamina in basso a destra**: circa il 13 % della larghezza, margine 4 % dai bordi, angoli arrotondati e un'ombra morbida perché si legga anche sul bianco; va preparata una versione dell'icona con sfondo trasparente (quella attuale è un PNG RGB su fondo rosso);
@@ -25,7 +35,7 @@ Il montaggio dura quanto il video (fino a 3 minuti): si mostra una barra di avan
 
 ### 2. Il formato: MP4 H.264/AAC, con due ripieghi
 
-TikTok, Reels e Shorts vogliono tutti lo stesso file: **9:16, 1080×1920, MP4 con video H.264 e audio AAC**. Durata: Shorts fino a 3 minuti, Reels fino a 3 minuti (le fonti non ufficiali dicono anche di più), TikTok fino a 10. Il tetto di 3 minuti della regia va bene per tutti.
+TikTok, Reels, Facebook e Shorts vogliono tutti lo stesso file: **9:16, 1080×1920, MP4 con video H.264 e audio AAC**. Durata: Shorts fino a 3 minuti, Reels fino a 3 minuti (le fonti non ufficiali dicono anche di più), TikTok fino a 10. Il tetto di 3 minuti della regia va bene per tutti.
 
 - **iPhone**: `MediaRecorder` produce già MP4 H.264/AAC. Niente da fare.
 - **Android**: il WebView di Chrome dalla versione 126 sa scrivere MP4 (`video/mp4;codecs=avc1,mp4a.40.2`); si controlla con `isTypeSupported` all'avvio del montaggio. **Da verificare sul telefono vero**: finora non lo abbiamo mai provato.
@@ -35,7 +45,7 @@ Non si fa: conversione sul server (il worker Cloudflare non può eseguire ffmpeg
 
 ### 3. La pubblicazione: il menù di condivisione del telefono, non le API
 
-Dopo il montaggio il pulsante grande è **«📤 Pubblica»**: apre il menù di condivisione del telefono con il file; la persona tocca TikTok, Instagram o YouTube e si trova nella schermata di pubblicazione di quell'app, con il video già caricato. Accanto, «💾 Salva nel rullino». Gnamina prepara la **didascalia** (titolo, «Ricetta su Gnamina», `#gnamina #ricetta` e il link alla ricetta) e la copia negli appunti con l'avviso «Nella descrizione tieni premuto e scegli Incolla».
+Dopo il montaggio il pulsante grande è **«📤 Pubblica»**: apre il menù di condivisione del telefono con il file; la persona tocca TikTok, Instagram, Facebook o YouTube e si trova nella schermata di pubblicazione di quell'app, con il video già caricato. Accanto, «💾 Salva nel rullino». Gnamina prepara la **didascalia** (titolo, «Ricetta su Gnamina», `#gnamina #ricetta` e il link alla ricetta) e la copia negli appunti con l'avviso «Nella descrizione tieni premuto e scegli Incolla».
 
 Perché non le API dirette (ricontrollato il 4/11/2026):
 
@@ -43,15 +53,16 @@ Perché non le API dirette (ricontrollato il 4/11/2026):
 |---|---|---|
 | TikTok Content Posting API | revisione dell'app (2–4 settimane, video dimostrativo, privacy policy, dominio verificato); finché non è approvata i post escono **privati** | burocrazia, e un errore lascia i video invisibili |
 | Instagram Graph API | account professionale, app Facebook, App Review per `instagram_content_publish`, pagina collegata | esclude le Gnammers con account normale |
+| Facebook Graph API | pubblica solo su Pagine (non sul profilo personale), app Facebook e App Review | quasi nessuno pubblica su una Pagina |
 | YouTube Data API | OAuth, quota di 10 000 unità al giorno (un caricamento ne costa 1 600, cioè circa 6 video al giorno per tutta l'app), e i video di app non verificate da Google restano **privati** | inutilizzabile per molte persone; forse per il solo canale ufficiale di Gnamina |
 
 Il menù di condivisione funziona con qualunque account, senza revisioni, senza quote e senza costi. Le API restano un'idea per la fase 2, solo per il canale ufficiale (le vincitrici della settimana).
 
 ### 4. Dove sta nell'app
 
-1. Regia come oggi (tre parti, rifacibili).
-2. Schermata «Fatto!» → **«✓ Monta il video»** (al posto di «Usa questo video») → barra di avanzamento → anteprima a tutto schermo con l'icona in basso a destra.
-3. Sotto l'anteprima: «📤 Pubblica», «💾 Salva nel rullino», «↺ Rifai». Nel passo finale della ricetta la riga del video dice «🎬 Video montato (2:40), con il marchio Gnamina» con gli stessi pulsanti.
+1. Regia come oggi (tre parti, rifacibili); «Registra un video» e «Scegli dal telefono» come oggi.
+2. Regia: schermata «Fatto!» → **«✓ Monta il video»** (al posto di «Usa questo video»). Video registrato o scelto: il montaggio parte da solo appena il file è pronto. In entrambi i casi: barra di avanzamento → anteprima a tutto schermo con l'icona in basso a destra.
+3. Sotto l'anteprima: «📤 Pubblica» (TikTok, Instagram, Facebook, YouTube…), «💾 Salva nel rullino», «↺ Rifai». Nel passo finale della ricetta la riga del video dice «🎬 Video pronto (2:40), con il marchio Gnamina» con gli stessi pulsanti; nella scheda della ricetta salvata il video si guarda e si condivide con gli stessi tasti, anche mesi dopo.
 4. Il contest continua a chiedere il link YouTube: dopo la pubblicazione su YouTube si incolla come oggi. Se in seguito il server dei contest (fase 2) terrà i voti, il link potrà essere anche TikTok o Instagram.
 
 ### 5. Le parti native
@@ -73,7 +84,7 @@ Il menù di condivisione funziona con qualunque account, senza revisioni, senza 
 
 | Tappa | Cosa esce | Versione |
 |---|---|---|
-| A | Montaggio delle tre parti in un file 9:16 con icona, scheda iniziale ed etichette; barra di avanzamento; anteprima; «Pubblica» e «Salva nel rullino» con quello che il telefono sa fare oggi; icona con trasparenza | 102 |
+| A | Motore di montaggio (canvas 9:16, icona, scheda iniziale, audio) per la regia **e** per i video registrati o scelti, con fondo sfocato per gli orizzontali e taglio a 3 minuti a scelta; barra di avanzamento; anteprima; «Pubblica» e «Salva nel rullino» con quello che il telefono sa fare oggi, anche dalla scheda della ricetta; icona con trasparenza | 102 |
 | B | Prova su Android e iPhone veri: formato prodotto, condivisione nell'APK (ponte `shareVideo`/`saveVideo`), condivisione in WKWebView | 103 |
 | C | Se Android dà solo WebM: codifica WebCodecs + muxer MP4 | 104 |
 | D | Didascalia pronta negli appunti con link alla ricetta e hashtag; «Come funziona» del contest aggiornato | con A o B |
