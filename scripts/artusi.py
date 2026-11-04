@@ -18,6 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import base_ricette  # noqa: E402
+from artusi_moderno import moderna_rec  # noqa: E402  (nomi di oggi per gli ingredienti del 1895)
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / 'www' / 'artusi.json'
@@ -117,13 +118,13 @@ def main():
     out, new, stop = [], 0, False
     for r in raw:
         if r['id'] in done:
-            out.append(done[r['id']]); continue
+            out.append(moderna_rec(done[r['id']])); continue
         rec = {**r, 'title': r['origTitle'], 'cat': CHAPTERS[next(k for k, v in LABEL.items() if v == r['chapter'])] or 'Altro',
                'servings': r['servings0'], 'ingredients': r['ings'], 'steps': [r['text']], 'diets': [], 'analyzed': False}
         if not stop and new < LIMIT and r['num'] in KEEP:  # la quota AI va solo ai piatti che l'app mostra
             try:
                 a = json.loads(get(AI, {'url': f'https://it.wikisource.org/wiki/{urllib.parse.quote(PREFIX.replace(" ", "_"))}', 'source': 'Artusi 1895',
-                                         'caption': f"{r['origTitle']}\n{r['text']}\n(Testo del 1895 in italiano antico: traduci i nomi in italiano moderno, es. fagiuolini = fagiolini, presciutto = prosciutto, balsamella = besciamella, cazzaruola = casseruola, vitella di latte = vitello.)",
+                                         'caption': f"{r['origTitle']}\n{r['text']}\n(Testo del 1895 in italiano antico: traduci i nomi in italiano moderno, es. fagiuolini = fagiolini, presciutto = prosciutto, balsamella = besciamella, cazzaruola = casseruola, vitella di latte = vitello; e usa i nomi di oggi per i prodotti: farina d'Ungheria = farina 00, uva malaga o passolina = uva passa, lardone o carnesecca = pancetta, zucchero in polvere = zucchero semolato, rhum = rum, vainiglia = vaniglia, rossi d'uovo = tuorli. Preferisci ingredienti di uso comune e facili da trovare.)",
                                          'cats': CATS}))['result'] or {}
                 time.sleep(4.5)
                 new += 1
@@ -144,6 +145,7 @@ def main():
                 print('analisi non riuscita', r['id'], e)
         for f in ('b', 'n', 'cov', 's', 'sub'):
             rec.pop(f, None)
+        moderna_rec(rec)
         res, _ = base_ricette.analyze(rec) if rec['ingredients'] else (None, [])
         if res:
             rec.update(res)
