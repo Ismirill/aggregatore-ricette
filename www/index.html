@@ -178,7 +178,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .dhead.stk{position:sticky;top:-20px;z-index:3;background:var(--card);margin:-20px -20px 8px;padding:14px 20px 8px}
 @media (max-width:620px){.dhead.stk{top:-18px;margin:-18px -16px 8px;padding:12px 16px 8px}}
 .wiz .icon{flex:none;box-shadow:none}.wiz .wmid{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.accF input{margin-bottom:8px}.socs{display:grid;gap:8px}.lnk{background:none;border:0;padding:0;color:var(--acc);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline}.syCode{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.3rem;font-weight:700;letter-spacing:.08em;text-align:center;padding:10px;border:2px dashed var(--bd);border-radius:12px;margin:0 0 8px;user-select:all;-webkit-user-select:all}.sec{border-top:1px solid var(--bd);padding:14px 0 6px}.sec h3{margin:0 0 8px}.sec .meta{margin:0 0 10px}
+.accF input{margin-bottom:8px;font-size:1.02rem}.socs.big{max-width:none;grid-template-columns:1fr}.socs.big .soc{font-size:1.08rem;padding:14px 16px;width:100%}.gl{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#fff;color:#4285f4;font-weight:800;font-size:.95rem;border:1px solid #ddd}.socs{display:grid;gap:8px}.lnk{background:none;border:0;padding:0;color:var(--acc);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline}.syCode{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.3rem;font-weight:700;letter-spacing:.08em;text-align:center;padding:10px;border:2px dashed var(--bd);border-radius:12px;margin:0 0 8px;user-select:all;-webkit-user-select:all}.sec{border-top:1px solid var(--bd);padding:14px 0 6px}.sec h3{margin:0 0 8px}.sec .meta{margin:0 0 10px}
 .inl{display:flex;gap:8px;margin-top:10px;grid-template-columns:none}.inl input{flex:1;min-width:0}.inl .btn{flex:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid2 .btn{width:100%}
 .srv{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
@@ -490,7 +490,7 @@ details summary{cursor:pointer}
     <p class="meta" style="margin:0 0 16px">Bastano la tua email o il tuo account Google. Se preferisci, puoi anche continuare senza registrarti e farlo più avanti.</p>
     <div class="wact"><button type="button" class="wbtn" id="acctGo"><b>Crea il tuo account o accedi</b><span>Con la tua email o con Google. È gratis.</span></button><button type="button" class="wbtn" id="acctLater" style="border-left-color:var(--bd)"><b>Continua senza account</b><span>Puoi farlo quando vuoi dal tasto in alto a destra</span></button></div>
   </div>
-  <section class="sec" id="acctAcc"><h3>Account</h3><div id="accBox"></div></section>
+  <section class="sec" id="acctAcc"><h3 id="accH">Account</h3><div id="accBox"></div></section>
   <section class="sec" id="acctProf"><h3 id="profH">Il tuo profilo Gnammer</h3><div id="profBox"></div></section>
   <input type="file" id="profPhoto" accept="image/*" hidden>
 </dialog>
@@ -879,7 +879,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=111; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=112; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1026,10 +1026,11 @@ function profUI(required){const box=$('#profBox');if(!box)return;acctReq=!!requi
 // Il pannello: passi «intro» (primo avvio), «account», «profile» (obbligatorio dopo l'accesso) o «all» (profilo e account insieme)
 let acctMode='all';
 function acctStep(m){acctMode=m;$('#acctIntro').hidden=m!=='intro';$('#acctAcc').hidden=!(m==='account'||m==='all');$('#acctProf').hidden=!(m==='profile'||m==='all');
-  $('#acctT').textContent={intro:'Benvenuto in Gnamina',account:'Crea l\'account o accedi',profile:'Presentati',all:'Il tuo profilo'}[m];
+  $('#acctT').textContent={intro:'Benvenuto in Gnamina',account:'Accedi a Gnamina',profile:ACC?'Presentati':'Il tuo profilo',all:'Il tuo profilo'}[m];
   $('#acctX').style.visibility=m==='profile'&&ACC?'hidden':'visible'; // dopo l'accesso nome e immagine non si saltano
-  if(m!=='intro'){accUI();profUI(m==='profile')}$('#acct').scrollTop=0}
-function openAcct(first){if(!$('#acct').open)$('#acct').showModal();acctStep(first?'intro':(ACC&&!profDone())?'profile':'all');refreshVerified()}
+  if(m!=='intro'){accUI();profUI(m==='profile'&&!!ACC);if(m==='profile'&&!ACC&&accOn()){$('#profBox').insertAdjacentHTML('afterbegin','<p class="meta" style="margin:0 0 10px"><button class="lnk" type="button" id="goAcc">Accedi o crea l\'account</button> per avere le ricette su tutti i tuoi dispositivi.</p>');$('#goAcc').onclick=()=>acctStep('account')}}$('#acct').scrollTop=0}
+// Senza account si vede la schermata di accesso (o il solo profilo, se la persona ha già scelto nome e immagine); con l'account, profilo e account insieme
+function openAcct(first){if(!$('#acct').open)$('#acct').showModal();acctStep(first?'intro':ACC?(profDone()?'all':'profile'):(profDone()||!accOn())?'profile':'account');refreshVerified()}
 $('#userBtn').onclick=()=>openAcct(false);
 $('#acctX').onclick=()=>$('#acct').close();
 $('#acctGo').onclick=()=>acctStep('account');
@@ -2574,23 +2575,30 @@ async function handoffTake(code){
 }
 function accUI(status){
   userBtnUI();
-  const box=$('#accBox');if(!box)return;
+  const box=$('#accBox');if(!box)return;const hh=$('#accH');if(hh)hh.hidden=!ACC; // fuori dall'account il titolo non serve: la schermata è già «Accedi a Gnamina»
   if(ACC&&$('#acct').open&&acctMode!=='profile'&&!profDone()){acctStep('profile');return}
   if(!accOn()){box.innerHTML='<p class="meta">L\'accesso con account non è ancora attivo. Nel frattempo le ricette si allineano tra i dispositivi con il codice ricettario, più in basso.</p>';return}
   if(ACC){
-    box.innerHTML=`<p class="meta">Sei dentro come <b>${esc(ACC.name||ACC.email)}</b>${ACC.name&&ACC.email?` (${esc(ACC.email)})`:''}. Le ricette si salvano online e compaiono su tutti i dispositivi in cui accedi.</p>${ACC.provider==='password'&&!ACC.verified?'<p class="meta">Email non ancora confermata: controlla la posta, anche nella cartella Spam o Posta indesiderata (il mittente è noreply@gnamina-3ca3d.firebaseapp.com). <button class="lnk" id="accVerify">Invia di nuovo l\'email</button></p>':''}<p class="meta" id="accStat">${esc(status||'')}</p><div class="grid2"><button class="btn" id="accOut">Esci</button><button class="btn" id="accDel">Elimina account</button></div>`;
+    box.innerHTML=`<p class="meta">Sei dentro come <b>${esc(ACC.name||ACC.email)}</b>${ACC.name&&ACC.email?` (${esc(ACC.email)})`:''}: le ricette ti seguono su tutti i dispositivi. <button class="lnk" id="accOut" type="button">Esci</button></p>${ACC.provider==='password'&&!ACC.verified?'<p class="meta">Email non ancora confermata: controlla la posta, anche nello Spam. <button class="lnk" id="accVerify" type="button">Invia di nuovo l\'email</button></p>':''}<p class="meta" id="accStat">${esc(status||'')}</p><p class="meta" style="margin:4px 0 0"><button class="lnk" id="accDel" type="button" style="color:var(--mut)">Elimina l'account</button></p>`;
     $('#accOut').onclick=accLogout;$('#accDel').onclick=()=>accRun(accDelete);const v=$('#accVerify');if(v)v.onclick=()=>accRun(accVerify,'Email inviata');
     return}
-  const socials=(FB.providers||['google']).filter(p=>PROV_NAME[p]).map(p=>`<button class="btn soc" type="button" data-p="${p}">Continua con ${PROV_NAME[p]}</button>`).join('');
-  box.innerHTML=`<p class="meta">Con un account le ricette sono salvate online e ti seguono su iPhone, Android e computer. Gli account sono gestiti da Firebase (Google).</p>
-  <form id="accF" class="accF"><input name="email" type="email" autocomplete="email" placeholder="Email" required><input name="pw" type="password" autocomplete="current-password" placeholder="Password (almeno 6 caratteri)" minlength="6" required>
-  <div class="grid2"><button class="btn pri">Accedi</button><button class="btn" type="button" data-a="reg">Registrati</button></div>
-  <p class="meta" style="margin:8px 0 0"><button class="lnk" type="button" data-a="reset">Password dimenticata?</button></p></form>
-  <p class="meta" style="text-align:center;margin:10px 0 6px">oppure</p><div class="socs">${socials}${window.AndroidShare?.open?'<button class="btn" type="button" data-a="code">Ho un codice di accesso</button>':''}</div><p class="meta" id="accStat" style="margin-top:8px">${esc(status||'')}</p>`;
+  const socials=(FB.providers||['google']).filter(p=>PROV_NAME[p]).map(p=>`<button class="btn soc" type="button" data-p="${p}">${p==='google'?'<span class="gl">G</span>':''}Continua con ${PROV_NAME[p]}</button>`).join('');
+  box.innerHTML=`<p class="meta" style="margin:0 0 12px">Le tue ricette ti seguono su iPhone, Android e computer.</p>
+  <div class="socs big">${socials}</div>
+  <p class="meta" style="text-align:center;margin:14px 0 8px">oppure con la tua email</p>
+  <form id="accF" class="accF"><input name="email" type="email" autocomplete="email" placeholder="La tua email" required><input name="pw" type="password" autocomplete="current-password" placeholder="Password (almeno 6 caratteri)" minlength="6" required>
+  <button class="btn pri" style="width:100%;justify-content:center;font-size:1.05rem;padding:13px">Avanti</button>
+  <p class="meta" style="margin:10px 0 0;text-align:center"><button class="lnk" type="button" data-a="reset">Password dimenticata?</button> · <button class="lnk" type="button" data-a="noacc">Continua senza account</button>${window.AndroidShare?.open?' · <button class="lnk" type="button" data-a="code">Ho un codice</button>':''}</p></form>
+  <p class="meta" id="accStat" style="margin-top:10px">${esc(status||'')}</p>`;
   const f=$('#accF');
-  f.onsubmit=e=>{e.preventDefault();accRun(()=>accLogin(f.email.value.trim(),f.pw.value),'Accesso effettuato')};
-  f.querySelector('[data-a=reg]').onclick=()=>{if(!f.reportValidity())return;accRun(()=>accRegister(f.email.value.trim(),f.pw.value),'Account creato: ti abbiamo inviato un\'email per confermarlo')};
+  // Un solo tasto: prova ad accedere; se l'email non ha un account, propone di crearlo con gli stessi dati
+  f.onsubmit=async e=>{e.preventDefault();const em=f.email.value.trim(),pw=f.pw.value,st=$('#accStat');st.textContent='Un momento…';
+    try{await accLogin(em,pw);toast('Accesso effettuato')}
+    catch(err){const m=err.message||'';
+      if(/non corretti|Nessun account/i.test(m)){st.innerHTML=`Nessun accesso con questi dati. Se è la prima volta: <button class="lnk" type="button" id="accMk">crea l'account con ${esc(em)}</button>. Altrimenti controlla la password.`;$('#accMk').onclick=()=>accRun(()=>accRegister(em,pw),'Account creato: ti abbiamo inviato un\'email per confermarlo')}
+      else st.textContent=m}};
   f.querySelector('[data-a=reset]').onclick=()=>{const em=f.email.value.trim();if(!em){toast('Scrivi prima la tua email');return}accRun(()=>accReset(em),'Email per reimpostare la password inviata')};
+  f.querySelector('[data-a=noacc]').onclick=()=>{save('accAsked',1);acctStep('profile')};
   box.querySelectorAll('.soc').forEach(b=>b.onclick=()=>accRun(()=>accSocial(b.dataset.p)));
   const c=box.querySelector('[data-a=code]');if(c)c.onclick=()=>handoffTake(prompt('Scrivi il codice di accesso a 6 cifre mostrato nel browser:'));
 }
@@ -2622,7 +2630,7 @@ if(!load('zoneFix93',0)){let ch=0;items.forEach(i=>{try{if(i.book||!i.country||t
   const c=classify({title:String(i.title||''),caption:i.caption,ingredients:ing});
   if(c.country!==i.country){i.country=c.country;i.region=c.region;i.t=Date.now();ch++}}catch(e){console.warn('pulizia paese',e)}});
   save('zoneFix93',1);try{if(ch){saveItems();render()}}catch(e){console.warn('pulizia paese',e)}}
-fillSelects();goView('home');userBtnUI();refreshVerified();
+fillSelects();goView('mine');userBtnUI();refreshVerified(); // si parte da «Le mie»
 if(!ACC&&!load('accAsked',0))setTimeout(()=>{if(!$('#dlg').open&&!$('#det').open)openAcct(true)},900);
 if(SY?.code)setTimeout(()=>doSync(),800);
 // Accesso per l'app Android aperto nel browser (?accedi=google|apple|facebook): finestra di accesso, poi codice da scrivere nell'app
