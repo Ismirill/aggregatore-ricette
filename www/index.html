@@ -878,7 +878,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=108; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=109; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1417,11 +1417,13 @@ function protein(r){
   return ING.fish.test(t)?'pesce':/manzo|maiale|vitell|agnell|salsicc|salam|prosciutt|guancial|pancett|macinat/.test(t)?'rossa':/poll|tacchin|conigli/.test(t)?'bianca':LEGUMI.test(t)?'legumi':ING.egg.test(t)?'uova':ING.dairy.test(t)?'formaggi':'verdure';
 }
 // Punteggio di stagionalità: + prodotti di stagione nel mese, − prodotti fuori stagione
+// Non contano come «di stagione» i condimenti e le dispense di tutto l'anno: limone, peperoncino (che altrimenti passa per peperone), patate, carote, cipolle, sedano, basilico
+const SEASON_SKIP=new Set(['limoni','limone','cipolle','cipollotti','patate','patate novelle','carote','sedano','basilico'].map(stem));
 function seasonScore(r,month){
   const all=new Set([...Object.values(SEASON.verdura).flat(),...Object.values(SEASON.frutta).flat()].map(stem));
   const now=new Set([...(SEASON.verdura[month]||[]),...(SEASON.frutta[month]||[])].map(stem));
-  const t=' '+stem((r.ingredients||[]).join(' ')+' '+r.title)+' ';let sc=0;
-  for(const w of all)if(t.includes(' '+w)){sc+=now.has(w)?1:-1.5}
+  const t=' '+stem(((r.ingredients||[]).join(' ')+' '+r.title).replace(/peperoncin\w*/gi,''))+' ';let sc=0;
+  for(const w of all){if(SEASON_SKIP.has(w)||!t.includes(' '+w))continue;sc+=now.has(w)?1:-1.5}
   return sc;
 }
 function allowed(r,diets,avoid){
