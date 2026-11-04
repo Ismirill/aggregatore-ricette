@@ -158,7 +158,7 @@ label{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:500}
 .recTip{position:absolute;left:10px;right:10px;bottom:16px;margin:0;color:#fff;font-size:1rem;background:#0007;padding:8px 12px;border-radius:12px}
 .recCount{position:absolute;inset:0;display:grid;place-items:center;font-size:7rem;font-weight:800;color:#fff;background:#0005;text-shadow:0 2px 12px #000}
 .recCtl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
-.recBig{width:88px;height:88px;border-radius:50%;border:4px solid #fff;background:var(--acc);color:#fff;font:inherit;font-size:1rem;font-weight:800;cursor:pointer;box-shadow:0 4px 16px #0006}.recBig.stop{background:#222;border-color:var(--acc)}.recBig:disabled{opacity:.6}
+.recBig{width:92px;height:92px;padding:0;border-radius:50%;border:4px solid #fff;background:var(--acc);color:#fff;font:inherit;font-size:.92rem;line-height:1.15;font-weight:800;white-space:nowrap;cursor:pointer;box-shadow:0 4px 16px #0006}.recBig.stop{background:#222;border-color:var(--acc)}.recBig:disabled{opacity:.6}
 .btn.pri.recOn{background:#c0392b;color:#fff;animation:recPulse .9s infinite alternate}@keyframes recPulse{to{opacity:.7}}
 .recDot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#fff6;margin-right:4px;vertical-align:middle}.recDot.on{background:var(--acc)}.recDot.done{background:#7bd389}
 .clipPl video{width:100%;max-height:70dvh;background:#000;border-radius:16px;display:block}.clipPl .clipLbl{margin:6px 0}
@@ -878,7 +878,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=104; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=105; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2190,8 +2190,8 @@ function recUI(){
       <div class="recCount" id="recCount" hidden></div></div>
     <div class="recCtl">${review
       ?`<button type="button" class="btn" id="recRedo">↺ Rifai${r.free?'':' questa parte'}</button><button type="button" class="btn pri" id="recNext" style="font-size:1.05rem;padding:14px 24px">${r.part<last?'Va bene, avanti →':'Va bene, fine ✓'}</button>`
-      :r.state==='rec'?`<button type="button" class="recBig stop" id="recStopB">■ Stop</button>`
-      :`${r.many&&!FAKECAM?'<button type="button" class="btn" id="recFlip">🔄 Gira</button>':''}<button type="button" class="recBig" id="recGo">● Registra</button>${r.part>0?'<button type="button" class="btn" id="recPrev">← Parte prima</button>':'<span style="width:84px"></span>'}`}</div>`;
+      :r.state==='rec'?`<button type="button" class="recBig stop" id="recStopB">■<br>Stop</button>`
+      :`${r.many&&!FAKECAM?'<button type="button" class="btn" id="recFlip">🔄 Gira</button>':''}<button type="button" class="recBig" id="recGo">●<br>Registra</button>${r.part>0?'<button type="button" class="btn" id="recPrev">← Parte prima</button>':'<span style="width:84px"></span>'}`}</div>`;
   const v=$('#recV');
   if(review){v.src=r.clips[r.part].url;v.muted=false}else{v.srcObject=r.cmp.out;v.muted=true} // l'anteprima è il quadro composto: quello che vedi è quello che viene registrato
   if(review){$('#recRedo').onclick=()=>{URL.revokeObjectURL(r.clips[r.part].url);r.clips[r.part]=null;r.state='ready';recUI()};$('#recNext').onclick=()=>{if(r.part<last){r.part++;r.state='ready'}else r.state='done';recUI()}}
@@ -2258,7 +2258,7 @@ const clipGet=k=>idbRun('readonly',s=>s.get(k));
 const clipsDrop=key=>key&&idbRun('readwrite',s=>{for(let n=0;n<3;n++)s.delete(`${key}:${n}`)}).catch(()=>{});
 const clipsTotal=cl=>fmtSec((cl||[]).reduce((a,c)=>a+(c.ms||0),0)/1000);
 // Stato del video registrato, nel passo finale del modulo
-const clipsStatus=()=>`🎬 ${extra.clips.length>1?`Video registrato con la guida in ${extra.clips.length} parti`:'Video pronto, con il marchio Gnamina'} (${clipsTotal(extra.clips)}): resta su questo telefono. <button type="button" class="btn" data-c="play">▶ Guarda</button> <button type="button" class="btn" data-c="redo">↺ Rifai</button> <button type="button" class="btn pri" data-c="share">📤 Pubblica</button> <button type="button" class="btn" data-c="save">💾 Salva nel rullino</button>`;
+const clipsStatus=()=>`🎬 ${extra.clips.length>1?`Video registrato con la guida in ${extra.clips.length} parti`:'Video pronto, con il marchio Gnamina'} (${clipsTotal(extra.clips)}): resta su questo telefono.<span style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn" data-c="play">▶ Guarda</button><button type="button" class="btn" data-c="redo">↺ Rifai</button><button type="button" class="btn pri" data-c="share">📤 Pubblica</button><button type="button" class="btn" data-c="save">💾 Salva nel rullino</button></span>`;
 $('#vidHint').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;const c=b.dataset.c;
   if(c==='redo')recOpen(!!extra.clipsFree);else if(c==='share')clipsShare(extra.clipKey,extra.clips,$('#f').title.value);else if(c==='save')clipsSave(extra.clipKey,extra.clips,$('#f').title.value);else clipsPlay(extra.clipKey,extra.clips,$('#f').title.value)};
 // Riproduzione (delle parti una dopo l'altra, se il video è ancora in parti), nella scheda della ricetta o dal modulo
