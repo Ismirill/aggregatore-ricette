@@ -420,7 +420,7 @@ details summary{cursor:pointer}
     <section class="step" data-s="src">
       <h3 id="srcH"></h3>
       <label id="urlL">Link del video o della ricetta<span class="inl" style="margin:0"><input name="url" type="url" placeholder="Incolla qui il link…"><button type="button" class="btn" id="pasteUrl">📋 Incolla</button></span></label>
-      <div class="row hint" id="urlRow" style="justify-content:flex-start;margin:0;align-items:center;gap:12px"><button type="button" class="btn pri" id="analyzeBtn">🔍 Analizza il link</button><span class="meta">Appena c'è il link, Gnamina legge la ricetta da sola. Poi premi «Avanti» e controlla.</span></div>
+      <div class="row hint" id="urlRow" style="justify-content:flex-start;margin:0;align-items:center;gap:12px"><button type="button" class="btn pri" id="analyzeBtn">🔍 Analizza il link</button><span class="meta" id="urlMeta">Appena c'è il link, Gnamina legge la ricetta da sola. Poi premi «Avanti» e controlla.</span></div>
       <label id="capL" hidden>Descrizione del post <span class="meta" style="font-weight:400">— se l'app non la legge da sola: tieni premuto il testo del post, copialo e incollalo qui</span>
         <span class="inl" style="margin:0;align-items:flex-start"><textarea name="caption" rows="3" placeholder="Ingredienti, dosi, procedimento…"></textarea><button type="button" class="btn" id="pasteCap">📋 Incolla</button></span></label>
       <div class="srcGrid hint" id="photoL" hidden><button type="button" class="srcCard" id="shootBtn"><b>📷 Scatta la foto</b><span>Inquadra bene la pagina con la ricetta, con buona luce</span></button><button type="button" class="srcCard" id="galBtn"><b>🖼 Scegli dalla galleria</b><span>Una foto che hai già fatto</span></button></div>
@@ -458,7 +458,7 @@ details summary{cursor:pointer}
       <label>Etichette (separate da virgola)<input name="tags" placeholder="veloce, festa"></label>
     </section>
     <section class="step" data-s="end">
-      <h3>Il video della ricetta</h3>
+      <h3 id="endH">Il video della ricetta</h3>
       <p class="sum hint" id="endSum"></p>
       <button type="button" class="btn pri" id="guideVid" style="font-size:1.05rem;padding:14px 18px;width:100%">🎬 Registra il video con la guida</button>
       <p class="meta" id="vidHint" style="margin:-2px 0 0"></p>
@@ -874,7 +874,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=106; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=107; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1861,11 +1861,11 @@ function openForm(data={}){
   $('#dlgT').textContent=editing?(data.contest?'La tua ricetta in gara':'Modifica ricetta'):(data.contest?'La tua ricetta in gara':'Nuova ricetta');
   // In gara conta quello che fa la persona: niente link da internet, il video si gira con l'app (guida o fotocamera)
   $('#ytL').hidden=!!data.contest;$('#origL').hidden=!data.contest;f.orig.checked=!!data.orig;$('#garaStep').hidden=true;
-  $('#fine').open=false;$('#srcLine').hidden=!data.url;if(data.url)$('#srcLine').innerHTML=`Fonte: <a href="${esc(data.url)}" target="_blank" rel="noopener">${esc(sourceOf(data.url))}</a> <button type="button" class="btn" id="reanalyze" style="margin-left:6px">↻ Rileggi dal link</button>`;
+  $('#fine').open=false;$('#srcLine').hidden=!data.url;if(data.url)$('#srcLine').innerHTML=`Fonte: <a href="${esc(data.url)}" target="_blank" rel="noopener">${esc(sourceOf(data.url))}</a>`;
   // Sia la nuova ricetta sia la modifica vanno passo per passo, un passo per schermata; la modifica parte dal nome del piatto
   $('#rWiz').hidden=false;$('#wizNav').hidden=false;f.noValidate=true;
   showPv();
-  if(editing){addMode=data.url?'link':'manual';rSteps=stepsFor('manual');rGo(0)}else if(data.url&&!data.contest)setMode('link');else if(data.contest){addMode='manual';rSteps=stepsFor('manual');garaUI();rGo(-1)}else{rSteps=stepsFor('link');rGo(-1)}
+  if(editing){if(data.url)setMode('link');else{addMode='manual';rSteps=stepsFor('manual');rGo(0)}}else if(data.url&&!data.contest)setMode('link');else if(data.contest){addMode='manual';rSteps=stepsFor('manual');garaUI();rGo(-1)}else{rSteps=stepsFor('link');rGo(-1)}
   if(!$('#dlg').open)$('#dlg').showModal();
   $('#dlg').scrollTop=0;
   if(!editing&&data.url)runAnalysis(data.url,false);
@@ -1877,7 +1877,9 @@ const SRC_H={link:'Incolla il link della ricetta',voice:'Detta la ricetta',photo
 function setMode(m,fromUser){
   addMode=m;const f=$('#f');
   $('#urlL').hidden=$('#urlRow').hidden=m!=='link';f.url.required=!!editing&&m==='link';
-  $('#photoL').hidden=m!=='photo';$('#fileL').hidden=m!=='file';$('#voiceL').hidden=m!=='voice';if(m!=='voice')dictStop(true);$('#srcAfter').hidden=m==='link';$('#srcH').textContent=SRC_H[m]||'';
+  $('#photoL').hidden=m!=='photo';$('#fileL').hidden=m!=='file';$('#voiceL').hidden=m!=='voice';if(m!=='voice')dictStop(true);$('#srcAfter').hidden=m==='link';
+  // In modifica di una ricetta presa da un link, il primo passo serve a rileggerla dal link se Gnamina l'aveva capita male
+  const rel=!!editing&&m==='link';$('#srcH').textContent=rel?'Da dove viene la ricetta':SRC_H[m]||'';$('#analyzeBtn').textContent=rel?'↻ Rianalizza dal link':'🔍 Analizza il link';$('#urlMeta').textContent=rel?'Se Gnamina l\'ha letta male, premi «Rianalizza»: titolo, ingredienti e procedimento vengono riletti dal link, poi li controlli nei passi seguenti.':'Appena c\'è il link, Gnamina legge la ricetta da sola. Poi premi «Avanti» e controlla.';
   rSteps=stepsFor(m);rGo(0);
   if(fromUser){if(m==='link'&&DESK)f.url.focus();if(m==='photo')$('#ocrIn').click();if(m==='file')$('#fileIn').click()}
 }
@@ -1894,7 +1896,7 @@ function rGo(k){
   $('#rStepLbl').textContent=`Passo ${i+1} di ${N}`;
   $('#rBackTop').style.visibility=$('#rBack').style.visibility=i>0?'visible':'hidden';
   const last=rStep===rSteps.length-1;$('#rNext').hidden=last;$('#rSave').hidden=!last;
-  if(last)endSum();
+  if(key==='end')endUI();if(last)endSum();
   $('#dlg').scrollTop=0;
   if(DESK){const el={base:f.title,ing:f.ingredients,steps:f.steps}[key];if(el)el.focus()}
 }
@@ -1909,9 +1911,11 @@ function rValid(){
   if(key==='ing'){const c=classify({title:f.title.value,ingredients:lines(f.ingredients.value),caption:extra.caption});if(c.cat&&f.cat.value==='Altro')f.cat.value=c.cat;if(c.country&&!f.country.value)f.country.value=c.country;if(c.region&&!f.region.value)f.region.value=c.region;setDiets([...new Set([...getDiets(),...c.diets])])}
   return true;
 }
+// Ricetta presa da un link (YouTube, Instagram, TikTok, Facebook, siti): il video è quello originale, non si registra niente
+function endUI(){const link=addMode==='link';$('#endH').textContent=link?'Controlla e salva':'Il video della ricetta';$('#guideVid').hidden=$('#vidHint').hidden=link;$('#ytL').hidden=link||!!extra.contest}
 function endSum(){
   const f=$('#f'),n=lines(f.ingredients.value).length,st=lines(f.steps.value).length;
-  $('#endSum').innerHTML=`<b>${esc(f.title.value.trim()||'Senza titolo')}</b> · ${esc(f.cat.value)}${n?` · ${n} ingredient${n===1?'e':'i'}`:''}${st?` · ${st} passagg${st===1?'io':'i'}`:''}${f.time.value?` · ${esc(f.time.value)} min`:''}<br><span class="meta">${extra.contest?(m=>m.length?`<span class="warnTxt">${esc(garaMsg(m))}.</span> `:'')(garaMissing(f).filter(x=>!x.startsWith('la conferma')))+'Ricetta in gara: il video lo giri tu, qui sotto, con la guida in tre parti, poi conferma che la ricetta è tua.':n&&st?'È tutto pronto: gira il video con la guida, oppure premi «Salva la ricetta» e lo fai un altro giorno da «Modifica».':'Puoi salvare anche così e completare la ricetta in un altro momento con «Modifica».'}</span>`;
+  $('#endSum').innerHTML=`<b>${esc(f.title.value.trim()||'Senza titolo')}</b> · ${esc(f.cat.value)}${n?` · ${n} ingredient${n===1?'e':'i'}`:''}${st?` · ${st} passagg${st===1?'io':'i'}`:''}${f.time.value?` · ${esc(f.time.value)} min`:''}<br><span class="meta">${extra.contest?(m=>m.length?`<span class="warnTxt">${esc(garaMsg(m))}.</span> `:'')(garaMissing(f).filter(x=>!x.startsWith('la conferma')))+'Ricetta in gara: il video lo giri tu, qui sotto, con la guida in tre parti, poi conferma che la ricetta è tua.':addMode==='link'?'Ricetta presa da '+esc(sourceOf(f.url.value)||'un link')+': il video è quello originale. Se i dati non tornano, torna al primo passo e premi «Rianalizza». Altrimenti premi «Salva la ricetta».':n&&st?'È tutto pronto: gira il video con la guida, oppure premi «Salva la ricetta» e lo fai un altro giorno da «Modifica».':'Puoi salvare anche così e completare la ricetta in un altro momento con «Modifica».'}</span>`;
 }
 $('#rNext').onclick=()=>{if(rValid())rGo(rStep+1)};
 $('#rBack').onclick=$('#rBackTop').onclick=()=>rGo(rStep-1);
@@ -2054,13 +2058,11 @@ $('#f').url.addEventListener('change',e=>{const u=extractUrl(e.target.value);if(
 $('#pasteCap').onclick=async()=>{try{const t=await navigator.clipboard.readText();if(t){$('#f').caption.value=t;const u=extractUrl($('#f').url.value);if(u)runAnalysis(u,true)}else toast('Gli appunti sono vuoti')}catch{toast('Tieni premuto nel campo e scegli Incolla')}};
 $('#f').caption.addEventListener('change',()=>{const u=extractUrl($('#f').url.value);if(u&&$('#f').caption.value.trim().length>20)runAnalysis(u,true)});
 $('#analyzeBtn').onclick=()=>{const u=extractUrl($('#f').url.value);if(!u){toast('Incolla prima un link');return}$('#f').url.value=u;runAnalysis(u,!!editing)};
-$('#srcLine').onclick=e=>{if(!e.target.closest('#reanalyze'))return;const u=extractUrl($('#f').url.value);if(u)runAnalysis(u,true);else{
-  const f=$('#f'),c=classify({title:f.title.value,ingredients:lines(f.ingredients.value),caption:extra.caption});if(c.cat)f.cat.value=c.cat;setDiets(c.diets);if(c.country)f.country.value=c.country;if(c.region)f.region.value=c.region}};
 /* ---------- Il video dell'utente: registrato o scelto qui, caricato sul SUO canale YouTube (nessuno spazio cloud nostro), qui resta solo il link ---------- */
 const ytId=u=>(String(u||'').match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/)||[])[1]||'';
 const VID_HINT='La guida ti porta passo per passo: prima racconti la ricetta e mostri gli ingredienti, poi la preparazione, infine il piatto pronto. La fotocamera si accende dentro Gnamina, il video esce verticale con il marchio in basso a destra, pronto per TikTok, Instagram, Facebook e YouTube Shorts, e resta sul tuo telefono finché non lo pubblichi.';
 const GARA_HINT='Per la gara il video si gira qui, con la guida in tre parti: racconti la ricetta e mostri gli ingredienti, fai vedere la preparazione, poi il piatto pronto. Gnamina scandisce i tempi e mette il suo marchio.';
-function vidHint(h){$('#vidHint').innerHTML=h||(extra.clips?.length?clipsStatus():extra.contest?GARA_HINT:VID_HINT)}
+function vidHint(h){$('#vidHint').innerHTML=h||(extra.clips?.length?clipsStatus():extra.contest?GARA_HINT:VID_HINT);$('#guideVid').textContent=extra.clips?.length?'🎬 Modifica il video con la guida':'🎬 Registra il video con la guida'}
 const vidAfter=()=>vidHint('Quando YouTube ha finito di caricare, apri il video, tocca <b>Condividi → Copia link</b>, torna qui e premi «📋 Incolla».');
 window.onVideoShared=vidAfter; // chiamato dall'app Android dopo aver passato il video a YouTube
 $('#guideVid').onclick=()=>recOpen();
@@ -2240,7 +2242,7 @@ const clipGet=k=>idbRun('readonly',s=>s.get(k));
 const clipsDrop=key=>key&&idbRun('readwrite',s=>{for(let n=0;n<3;n++)s.delete(`${key}:${n}`)}).catch(()=>{});
 const clipsTotal=cl=>fmtSec((cl||[]).reduce((a,c)=>a+(c.ms||0),0)/1000);
 // Stato del video registrato, nel passo finale del modulo
-const clipsStatus=()=>`🎬 ${extra.clips.length>1?`Video registrato con la guida in ${extra.clips.length} parti`:'Video pronto, con il marchio Gnamina'} (${clipsTotal(extra.clips)}): resta su questo telefono.<span style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn" data-c="play">▶ Guarda</button><button type="button" class="btn" data-c="redo">↺ Rifai</button><button type="button" class="btn pri" data-c="share">📤 Pubblica</button><button type="button" class="btn" data-c="save">💾 Salva nel rullino</button></span>`;
+const clipsStatus=()=>`🎬 ${extra.clips.length>1?`Video registrato con la guida in ${extra.clips.length} parti`:'Video pronto, con il marchio Gnamina'} (${clipsTotal(extra.clips)}): resta su questo telefono. Con «Modifica il video» lo rifai da capo con la guida.<span style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn" data-c="play">▶ Guarda</button><button type="button" class="btn pri" data-c="share">📤 Pubblica</button><button type="button" class="btn" data-c="save">💾 Salva nel rullino</button></span>`;
 $('#vidHint').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;const c=b.dataset.c;
   if(c==='redo')recOpen();else if(c==='share')clipsShare(extra.clipKey,extra.clips,$('#f').title.value);else if(c==='save')clipsSave(extra.clipKey,extra.clips,$('#f').title.value);else clipsPlay(extra.clipKey,extra.clips,$('#f').title.value)};
 // Riproduzione (delle parti una dopo l'altra, se il video è ancora in parti), nella scheda della ricetta o dal modulo
