@@ -899,7 +899,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=118; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=119; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1009,7 +1009,7 @@ $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(t)goView(t.dataset.v)
 
 /* ---------- Profilo Gnammer: nome e avatar scelti dall'utente (locali; con l'account verranno dal profilo online); livello calcolato dai contributi ---------- */
 let PROF=load('gnammer',{name:'',avatar:'',photo:''});
-const AVATARS=['🧑‍🍳','👩‍🍳','👨‍🍳','👵','👴','🍝','🥘','🥖','🫒','🧀','🍋'];
+// L'immagine del Gnammer è solo il pomodoro, Gnammera o Gnammer: è quello che cresce di cappello con il livello
 const isTom=a=>/^tom:[fm]$/.test(a||'');
 // Avatar in plastilina generati con MiniMax H3 (www/avatar/<livello>-<f|m>.png): il cappello segue il livello
 const avatarImg=(sex,k)=>`<img class="tom" src="avatar/${k}-${sex}.jpg" alt="" width="320" height="320">`;
@@ -1017,12 +1017,12 @@ const LEVELS=[['Novizio',1,'Appena iscritto'],['Cuoco',2,'Una ricetta in un cont
 function gnammerLevel(){const ric=items.filter(i=>i.contest).length,ass=load('tastings',[]).length,win=+load('wins',0)||0;
   const k=win>=3?4:(ric>=3||win>=1)?3:(ric>=2||ass>=6)?2:(ric>=1||ass>=3)?1:0;return {k,name:LEVELS[k][0],weight:LEVELS[k][1],ric,ass,win}}
 const profName=()=>PROF.name||'';
-const profPic=()=>PROF.photo||'';           // foto scelta (caricata o quella di Google)
-const profDone=()=>!!(PROF.name&&(PROF.avatar||PROF.photo));   // nome + immagine: obbligatori per chi ha l'account
+const profPic=()=>'';           // niente foto: l'immagine è il pomodoro del livello
+const profDone=()=>!!(PROF.name&&isTom(PROF.avatar));   // nome + pomodoro: obbligatori per chi ha l'account
 function saveProf(){save('gnammer',PROF);userBtnUI();if(view==='home')renderHome()}
 // Immagine del Gnammer come HTML: foto o avatar; sagoma anonima se non si è presentati
 const ANON_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
-function picHtml(cls){return profPic()?`<img src="${esc(profPic())}" alt="" referrerpolicy="no-referrer">`:isTom(PROF.avatar)?avatarImg(PROF.avatar.slice(4),gnammerLevel().k):PROF.avatar?`<span class="${cls||'em'}">${PROF.avatar}</span>`:ANON_SVG}
+function picHtml(cls){return isTom(PROF.avatar)?avatarImg(PROF.avatar.slice(4),gnammerLevel().k):ANON_SVG}
 function userBtnUI(){const b=$('#userAv');if(!b)return;b.innerHTML=picHtml('em');$('#userBtn').setAttribute('aria-label',PROF.name?'Il tuo profilo: '+PROF.name:'Il tuo profilo')}
 // Foto caricata dall'utente: ritagliata quadrata e ridotta a 192 px, salvata come immagine nella ricetta del profilo
 function profPhotoFile(file){return new Promise((ok,ko)=>{const img=new Image();img.onload=()=>{const m=Math.min(img.width,img.height),c=document.createElement('canvas');c.width=c.height=192;c.getContext('2d').drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,192,192);URL.revokeObjectURL(img.src);ok(c.toDataURL('image/jpeg',.82))};img.onerror=ko;img.src=URL.createObjectURL(file)})}
@@ -1032,15 +1032,15 @@ function profUI(required){const box=$('#profBox');if(!box)return;acctReq=!!requi
   $('#profH').textContent=required?'Presentati ai Gnammers':'Il tuo profilo Gnammer';
   box.innerHTML=`<p class="meta">${required?'Scegli il nome e l\'immagine con cui gli altri Gnammers ti vedranno accanto alle tue ricette e ai tuoi voti. Servono entrambi.':'Il nome e l\'immagine che gli altri Gnammers vedono accanto alle tue ricette e ai tuoi voti.'}</p>
   <label>Il tuo nome da Gnammer<input id="profName" maxlength="30" placeholder="Es. Nonna Pina" value="${esc(PROF.name||ACC?.name||'')}"></label>
-  <p class="meta" style="margin:10px 0 0">La tua immagine</p>
-  <div class="avs">${['f','m'].map(x=>`<button type="button" data-av="tom:${x}" class="tomb ${PROF.avatar==='tom:'+x&&!PROF.photo?'on':''}" aria-label="${x==='f'?'Pomodoro Gnammera':'Pomodoro Gnammer'}">${avatarImg(x,L.k)}</button>`).join('')}${ACC?.photo?`<button type="button" data-av="google" class="${PROF.photo===ACC.photo?'on':''}" aria-label="La foto del tuo account Google"><img src="${esc(ACC.photo)}" alt="" referrerpolicy="no-referrer"></button>`:''}<button type="button" class="ph ${PROF.photo&&PROF.photo!==ACC?.photo?'on':''}" data-av="file" aria-label="Carica una tua foto">${PROF.photo&&PROF.photo!==ACC?.photo?`<img src="${esc(PROF.photo)}" alt="">`:'📷'}</button>${AVATARS.map(a=>`<button type="button" data-av="${a}" class="${a===PROF.avatar&&!PROF.photo?'on':''}" aria-label="Avatar ${a}">${a}</button>`).join('')}</div>
-  <p class="meta" style="margin:0 0 6px">I due pomodori sono la Gnammera e il Gnammer di Gnamina: il cappello cambia da solo quando sali di livello. Oppure 📷 carica una tua foto${ACC?.photo?' (la foto del tuo account Google è già lì)':''} o scegli un simbolo.</p>
+  <p class="meta" style="margin:10px 0 0">La tua immagine: Gnammera o Gnammer</p>
+  <div class="avs">${['f','m'].map(x=>`<button type="button" data-av="tom:${x}" class="tomb ${PROF.avatar==='tom:'+x?'on':''}" aria-label="${x==='f'?'Pomodoro Gnammera':'Pomodoro Gnammer'}">${avatarImg(x,L.k)}</button>`).join('')}</div>
+  <p class="meta" style="margin:0 0 6px">Il cappello cambia da solo quando sali di livello.</p>
   ${required?`<button type="button" class="btn pri fine" id="profFine" disabled>Fine</button>`:`<p class="meta">Sei <b>${L.name}</b>: il tuo voto vale ${L.weight}. ${L.ric?`Ricette in gara: ${L.ric}.`:'Partecipa a un contest per salire di livello.'}</p>
   <div class="lvls">${LEVELS.map((l,i)=>`<div class="${i===L.k?'on':''}">${avatarImg(PROF.avatar==='tom:m'?'m':'f',i)}<b>${l[0]} · voto ×${l[1]}</b>${l[2]}</div>`).join('')}</div>`}`;
   const fine=$('#profFine'),upd=()=>{if(fine)fine.disabled=!profDone()};
   if(!PROF.name&&ACC?.name){PROF.name=ACC.name;saveProf()} // il nome dell'account come proposta, modificabile
   $('#profName').oninput=e=>{PROF.name=e.target.value.trim();saveProf();upd()};
-  box.querySelectorAll('[data-av]').forEach(b=>b.onclick=()=>{const v=b.dataset.av;if(v==='file'){$('#profPhoto').click();return}if(v==='google'){PROF.photo=ACC.photo;PROF.avatar=''}else{PROF.avatar=v;PROF.photo=''}saveProf();profUI(acctReq)});
+  box.querySelectorAll('[data-av]').forEach(b=>b.onclick=()=>{PROF.avatar=b.dataset.av;PROF.photo='';saveProf();profUI(acctReq)});
   if(fine)fine.onclick=()=>{if(!profDone())return;save('accAsked',1);$('#acct').close();toast(`Benvenuto, ${PROF.name}!`)};
   upd()}
 // Il pannello: passi «intro» (primo avvio), «account», «profile» (obbligatorio dopo l'accesso) o «all» (profilo e account insieme)
