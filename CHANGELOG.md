@@ -6,6 +6,7 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-04
 
+- **Versione 102**: nel menu la frutta e la verdura hanno il loro nome, senza «di stagione»: «Mele», «Kiwi», «Insalata di finocchi e carote» (due verdure crude del mese, diverse da un pasto all'altro), e nelle colazioni «Yogurt con cereali e pere». Si usano solo frutta e verdura di uso comune e facili da trovare (niente melagrane, fichi d'india, ribes, nespole, more, lamponi, mirtilli, castagne, limoni e pompelmi come frutto da tavola); il calendario completo resta per la stagionalità delle ricette. La lista della spesa elenca ogni frutto per nome con i grammi e il prezzo del mese, e le verdure dell'insalata.
 - **Worker pubblicato su Cloudflare**: `/dictate` è attivo in rete; prova con una registrazione di 38 s estratta correttamente in circa 45 s (nessun cambiamento all'app).
 - **Versione 101**: dettatura più chiara. Mentre il server trascrive, «Avanti» e il pulsante del microfono sono disattivati e «Avanti» avvisa di aspettare (o di premere prima «Ho finito»); se il server non risponde o non ha ancora la dettatura (404), l'avviso è esplicito e compare anche come notifica, invece del vecchio «Not found» in piccolo.
 

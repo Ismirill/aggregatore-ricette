@@ -878,7 +878,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=101; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=102; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1465,16 +1465,25 @@ function candidates(o){
   }
   return {list:out,noCost};
 }
-// Contorno di riserva quando il tempo non basta: verdura cruda o insalata di stagione (5 minuti)
-const rawSide=(o,X)=>({r:{id:'raw',title:`Insalata o verdura cruda di stagione`,book:false},role:'contorno',t:0,w:0,d:1,eur:.1*(PT?.eur['insalata']??3.5),kcal:25,p:1,c:2.5,f:1.5,prot:'verdure',season:2});
-// Frutta di stagione e pane come complementi del pasto
+// Contorno di riserva quando il tempo non basta: un'insalata con due verdure crude del mese, chiamate per nome (5 minuti)
+const rawSide=(o,X)=>{const raw=X.raw||['lattuga','carote'],n=X.rawN=(X.rawN||0)+1,a=raw[n%raw.length],b=raw.length>1?raw[(n+1)%raw.length]:null;
+  return {r:{id:'raw',title:b?`Insalata di ${a} e ${b}`:`Insalata di ${a}`,veg:b?[a,b]:[a],book:false},role:'contorno',t:0,w:0,d:1,eur:.1*(PT?.eur['insalata']??3.5),kcal:25,p:1,c:2.5,f:1.5,prot:'verdure',season:2}};
+// Frutta e verdura del mese chiamate per nome nel menu: solo quelle di uso comune e facili da trovare (niente melagrane, fichi d'india, ribes, nespole…); il calendario completo resta per il punteggio di stagionalità delle ricette
+const FRUTTA_COMUNE=['mele','pere','arance','mandarini','clementine','kiwi','fragole','ciliegie','albicocche','pesche','nettarine','susine','melone','anguria','uva','fichi','cachi'];
+const VERDURA_CRUDA=['lattuga','rucola','finocchi','carote','sedano','pomodori','cetrioli','ravanelli','radicchio','cipollotti','peperoni'];
+const cap1=s=>s?s[0].toUpperCase()+s.slice(1):s;
+// Frutta del mese e pane come complementi del pasto
 function extras(o){
-  const fr=(SEASON.frutta[o.month]||[]).filter(x=>!o.avoid.some(w=>x.includes(w))&&!(o.diets.includes('Senza frutta secca')&&/castagn/.test(x)));
+  const okA=x=>!o.avoid.some(w=>x.includes(w));
+  const mf=(SEASON.frutta[o.month]||[]).filter(okA);let fr=mf.filter(x=>FRUTTA_COMUNE.includes(x));if(!fr.length)fr=mf.filter(x=>!/limon|castagn|pompelm/.test(x));
+  const raw=(SEASON.verdura[o.month]||[]).filter(x=>okA(x)&&VERDURA_CRUDA.includes(x));
   const fruitEur=PT?(PT.eur['mele e pere']+PT.eur['agrumi']+PT.eur['frutta'])/3:2.5;
-  return {fruits:fr.length?fr:['frutta di stagione'],fruit:{eur:.15*fruitEur,kcal:75,p:.8,c:18,f:.3},
+  return {fruits:fr.length?fr:['frutta fresca'],raw:raw.length?raw:['lattuga','carote'],rawN:0,fruit:{eur:.15*fruitEur,kcal:75,p:.8,c:18,f:.3},
     bread:o.diets.includes('Senza glutine')||o.bread==='no'?null:{eur:.05*(PT?.eur['pane']??3.8),kcal:135,p:4.5,c:27,f:.8}};
 }
 // Pane a tavola in questo pasto? (mai a colazione; "solo a cena" o "a ogni pasto"; nel pasto singolo solo se non è completo)
+// Nelle colazioni «con frutta» il frutto del giorno è scritto per nome
+const dishTitle=(x,m,X)=>m.m==='breakfast'&&/frutta$/.test(x.title)?x.title.replace(/frutta$/,X.fruits[m.d%X.fruits.length]):x.title;
 const breadAt=(o,X,m)=>!!X.bread&&m.m!=='breakfast'&&(o.bread==='all'||m.m!=='lunch')&&(o.mode==='week'||m.dishes.length<3);
 // Colazioni italiane (per persona): dolci e salate, con grammi per costo e spesa e valori medi indicativi
 const BK_DEF=[
@@ -1488,7 +1497,7 @@ const BK_DEF=[
   ['dolce','Yogurt con cereali e frutta',[['yogurt',125],['cereali',40],['frutta',100]],[300,9,52,5],'Yogurt bianco con cereali o fiocchi d\'avena e frutta fresca a pezzi.'],
   ['dolce','Pane con miele e tè',[['pane',60],['miele',20]],[220,5,48,1],'Pane tostato con miele; tè o caffè.'],
   ['dolce','Pane con ricotta e miele',[['pane',60],['ricotta',50],['miele',15]],[300,11,45,8],'Pane tostato con ricotta e un filo di miele; a piacere cannella.'],
-  ['dolce','Frutta fresca e frutta secca con caffè',[['frutta',150],['frutta secca',20],['caffè',7]],[200,4,25,10],'Frutta di stagione a pezzi con una manciata di frutta secca; caffè.'],
+  ['dolce','Frutta fresca e frutta secca con caffè',[['frutta',150],['frutta secca',20],['caffè',7]],[200,4,25,10],'Frutta fresca a pezzi con una manciata di frutta secca; caffè.'],
   ['dolce','Latte vegetale e cereali',[['latte vegetale',200],['cereali',40]],[260,6,45,5],'Cereali o fiocchi d\'avena con bevanda vegetale (avena, soia, mandorla).'],
   ['dolce','Porridge di avena con frutta',[['cereali',50],['latte',200],['frutta',100],['miele',10]],[380,14,60,8],'Fiocchi d\'avena cotti 5 minuti nel latte, con frutta a pezzi e un filo di miele.'],
   ['dolce','Pane tostato con cioccolato',[['pane',60],['cioccolato',20],['latte',150]],[350,11,50,12],'Pane tostato con cioccolato fuso o crema spalmabile; latte.'],
@@ -1498,7 +1507,7 @@ const BK_DEF=[
   ['salata','Pane, ricotta e pomodorini',[['pane',70],['ricotta',60],['pomodorini',60]],[290,13,38,9],'Pane con ricotta, pomodorini a metà, olio, sale e origano.'],
   ['salata','Yogurt greco con frutta secca',[['yogurt',150],['frutta secca',20]],[230,10,12,15],'Yogurt greco bianco con noci o mandorle.'],
   ['salata','Uovo sodo, pane e pomodoro',[['uova',55],['pane',60],['pomodori',80]],[250,12,32,7],'Uovo sodo (8 minuti), pane e pomodoro a fette con un filo d\'olio.'],
-  ['salata','Pane e formaggio con frutta',[['pane',60],['formaggi',40],['frutta',100]],[320,13,42,11],'Pane con formaggio e un frutto di stagione.'],
+  ['salata','Pane e formaggio con frutta',[['pane',60],['formaggi',40],['frutta',100]],[320,13,42,11],'Pane con formaggio e un frutto fresco.'],
 ];
 const BK=BK_DEF.map(([kind,title,b,[k,p,c,f],prep],i)=>({id:'bk-'+i,title,kind,cat:'Colazione',colazione:true,book:true,source:'Colazione',country:'Italia',region:'',diets:[],tags:[kind],servings:1,
   ingredients:b.map(([n,g])=>`${g} ${/latte|caffè/.test(n)?'ml':'g'} ${n}`),steps:[prep],b,n:{k,p,c,f},cov:1,time:5,_tm:{t:/uov|toast/.test(title)?10:5,w:0,d:1},_q:null}));
@@ -1624,7 +1633,7 @@ $('#bForm').onsubmit=async e=>{
   const C=candidates(o),X=extras(o);
   const res=repair(o.mode==='week'?buildWeek(o,C,X):buildMeal(o,C,X),o,C,X);
   if(!res){$('#bOut').innerHTML='<div class="warn">Non ci sono abbastanza ricette compatibili con queste scelte. Prova ad aumentare il tempo per cucinare, a togliere qualche filtro o a usare anche il ricettario.</div><div class="row"><button class="btn" onclick="budgetView(true,2)">← Modifica scelte</button></div>';return}
-  const plan={o,res:{...res,plan:res.plan.map(m=>({...m,dishes:m.dishes.map(x=>({id:x.r.id,book:!!x.r.book,pronto:!!x.r.pronto,kind:x.r.kind||'',title:x.r.title,role:x.role,eur:x.eur,kcal:x.kcal,prot:x.prot,t:x.t,d:x.d}))}))},X,noCost:C.noCost,n:C.list.length,zone:PT.zone,period:PT.period};
+  const plan={o,res:{...res,plan:res.plan.map(m=>({...m,dishes:m.dishes.map(x=>({id:x.r.id,book:!!x.r.book,pronto:!!x.r.pronto,kind:x.r.kind||'',title:x.r.title,veg:x.r.veg||null,role:x.role,eur:x.eur,kcal:x.kcal,prot:x.prot,t:x.t,d:x.d}))}))},X,noCost:C.noCost,n:C.list.length,zone:PT.zone,period:PT.period};
   save('budgetPlan',plan);showPlan(plan);
 };
 function showPlan(P){
@@ -1652,8 +1661,8 @@ function showPlan(P){
     <div class="badges" style="margin-bottom:8px">${rule(`Proteine ${Math.round(res.macro.p*100)}%`,res.macro.p>=.12&&res.macro.p<=.22)}${rule(`Carboidrati ${Math.round(res.macro.c*100)}%`,res.macro.c>=.42&&res.macro.c<=.62)}${rule(`Grassi ${Math.round(res.macro.f*100)}%`,res.macro.f<=.36)}
       ${week&&res.cnt?`${o.diets.some(d=>/Vege|pesce/.test(d))?'':rule(`Pesce ${res.cnt.pesce}×`,res.cnt.pesce>=2)}${rule(`Legumi ${res.cnt.legumi}×`,res.cnt.legumi>=2)}${o.diets.some(d=>/Vege|Pesce/.test(d))?'':rule(`Carne rossa ${res.cnt.rossa}×`,res.cnt.rossa<=2)}`:''}</div>
     ${days.map(({g,ms})=>`<div class="day"><h3>${g}<span>${euro(ms.reduce((a,m)=>a+m.eur,0)*o.people)}</span></h3>${ms.map(m=>`<div class="meal">${week?`<b>${MEAL[m.m]}</b>`:''}
-      ${m.dishes.map(x=>`<div class="dish" data-id="${esc(x.id)}" data-book="${x.book?1:''}"><span><span class="r">${ROLE[x.role]||(x.kind?x.kind[0].toUpperCase()+x.kind.slice(1):'Colazione')}${x.pronto?' · pronto':''}</span>${esc(x.title)}</span><small>⏱${x.t?x.t+'′':'pochi min'} · ${Math.round(x.kcal)} kcal · ${euro(x.eur)}</small></div>`).join('')}
-      ${m.m==='breakfast'?'':`<div class="dish" style="cursor:default"><span><span class="r">Frutta</span>${esc(X.fruits[(m.d*2+(m.m==='dinner'?1:0))%X.fruits.length])} di stagione</span><small>150 g · ${Math.round(X.fruit.kcal)} kcal · ${euro(X.fruit.eur)}</small></div>`}
+      ${m.dishes.map(x=>`<div class="dish" data-id="${esc(x.id)}" data-book="${x.book?1:''}"><span><span class="r">${ROLE[x.role]||(x.kind?x.kind[0].toUpperCase()+x.kind.slice(1):'Colazione')}${x.pronto?' · pronto':''}</span>${esc(dishTitle(x,m,X))}</span><small>⏱${x.t?x.t+'′':'pochi min'} · ${Math.round(x.kcal)} kcal · ${euro(x.eur)}</small></div>`).join('')}
+      ${m.m==='breakfast'?'':`<div class="dish" style="cursor:default"><span><span class="r">Frutta</span>${esc(cap1(X.fruits[(m.d*2+(m.m==='dinner'?1:0))%X.fruits.length]))}</span><small>150 g · ${Math.round(X.fruit.kcal)} kcal · ${euro(X.fruit.eur)}</small></div>`}
       ${breadAt(o,X,m)?`<div class="dish" style="cursor:default"><span><span class="r">Pane</span>pane</span><small>50 g · ${Math.round(X.bread.kcal)} kcal · ${euro(X.bread.eur)}</small></div>`:''}
       <p class="meta" style="margin:4px 0 0;text-align:right">${m.t?`⏱ circa ${fmtMin(m.t)} in cucina · `:''}${Math.round(m.kcal)} kcal a persona</p></div>`).join('')}</div>`).join('')}
     <details class="meta fonti" style="text-align:left"><summary>Note, prezzi di stagione e fonti</summary><p><b>Avvertenza.</b> I menu proposti da Gnamina sono semplici suggerimenti per organizzare la spesa e i pasti, generati in automatico a partire da ricette, prezzi medi e valori nutrizionali indicativi. Non costituiscono una dieta, un piano alimentare né un consiglio medico, dietetico o nutrizionale, e non tengono conto delle condizioni di salute, delle esigenze o delle intolleranze della singola persona oltre a quanto indicato nei filtri. Ognuno è libero di seguirli, modificarli o ignorarli sotto la propria responsabilità; per esigenze alimentari particolari, allergie, patologie, gravidanza o regimi dietetici rivolgiti al medico o a un professionista della nutrizione. Verifica sempre ingredienti, etichette e allergeni dei prodotti che acquisti: calorie, nutrienti e costi sono stime medie e possono differire da quelli reali.</p>    <p class="meta">🍎 <b>Frutta di stagione a ${MESI[o.month]}</b> (prezzi medi al kg in ${esc(PT?.zone||'Italia')}): ${X.fruits.map(f=>{const k=keyOf(f);return esc(f)+(PT&&k&&PT.eur[k]?` ${euro(PT.eur[k])}`:'')}).join(' · ')}
@@ -1688,22 +1697,22 @@ const SHOP_TERM={'guanciale e pancetta':'guanciale','olio extravergine':'olio ex
 const amazon=k=>`https://www.amazon.it/s?k=${encodeURIComponent(SHOP_TERM[k]||k)}${AMAZON_TAG?'&tag='+encodeURIComponent(AMAZON_TAG):''}`;
 // Lista della spesa: somma i grammi della base di ogni ricetta, scalati al numero di persone
 function shopping(P){
-  const {o,res,X}=P,acc={},extra=[];let fruitKg=0,breadKg=0;
+  const {o,res,X}=P,acc={},extra=[],fruitG={},fruitOf=m=>X.fruits[(m.d*2+(m.m==='dinner'?1:0))%X.fruits.length];let breadKg=0;
   for(const m of res.plan){
-    if(m.m!=='breakfast')fruitKg+=.15*o.people;if(breadAt(o,X,m))breadKg+=.05*o.people;
+    if(m.m!=='breakfast'){const f=fruitOf(m);fruitG[f]=(fruitG[f]||0)+150*o.people}if(breadAt(o,X,m))breadKg+=.05*o.people;
     for(const d of m.dishes){
-      if(d.id==='raw'){acc['insalata']=(acc['insalata']||0)+100*o.people;continue} // 100 g a persona
+      if(d.id==='raw'){for(const v of (d.veg||['insalata'])){const k=keyOf(v)||v;acc[k]=(acc[k]||0)+60*o.people}continue} // 60 g a persona per ogni verdura cruda
       const r=findRec(d.id,d.book);if(!r)continue;const f=o.people/baseS(r);
       if(r.b)for(const [k,g] of r.b)acc[k]=(acc[k]||0)+g*f;
       else extra.push(`<b>${esc(r.title)}</b>: ${r.ingredients.map(x=>esc(scaleLine(x,o.people/(r.servings||4)))).join(', ')}`);
     }
   }
   if(breadKg){acc['pane']=(acc['pane']||0)+breadKg*1000;breadKg=0}
-  if(acc['frutta']){fruitKg+=acc['frutta']/1000;delete acc['frutta']} // la frutta delle colazioni va con quella di stagione
+  if(acc['frutta']){const bf=res.plan.filter(m=>m.m==='breakfast'&&m.dishes.some(x=>/frutta$/.test(x.title)));for(const m of bf){const f=X.fruits[m.d%X.fruits.length];fruitG[f]=(fruitG[f]||0)+acc['frutta']/bf.length}if(!bf.length)fruitG[X.fruits[0]]=(fruitG[X.fruits[0]]||0)+acc['frutta'];delete acc['frutta']} // la frutta delle colazioni va con il frutto del giorno
   // uova intere, tuorli e albumi diventano un unico conteggio di uova
   if(acc['tuorli']||acc['albumi']){acc['uova']=(acc['uova']||0)+(acc['tuorli']||0)/18*60+(acc['albumi']||0)/33*60;delete acc['tuorli'];delete acc['albumi']}
   const goods=Object.entries(acc).filter(([k])=>!['sale','acqua','pepe e spezie'].includes(k)).map(([k,g])=>({k,g,...packOf(k,g)}));
-  goods.push({k:'frutta di stagione',g:fruitKg*1000,...packOf('frutta',fruitKg*1000)});
+  for(const [f,g] of Object.entries(fruitG))goods.push({k:f,g,...packOf(keyOf(f)||'frutta',g)});
   const buy=goods.filter(x=>!x.pantry).sort((a,b)=>b.g-a.g),pantry=goods.filter(x=>x.pantry).sort((a,b)=>b.g-a.g);
   // accorpata per reparto del supermercato, nell'ordine in cui si fa il giro
   const groups=REPARTI.map(([name,rx])=>[name,buy.filter(x=>reparto(x.k)===name)]).filter(([,xs])=>xs.length);
@@ -1755,7 +1764,7 @@ function packOf(k,g){
 let PR_PACK={}; // confezioni dei cibi pronti (www/pronti.json)
 // Reparti del supermercato, nell'ordine del giro: la lista della spesa è accorpata così
 const REPARTI=[
-  ['Frutta e verdura',/^(frutta|patate|insalata|zucchin|finocch|carote|cavol|cipoll|pomodor|melanzan|fagiolini$|peperon|limon|sedano|aglio|erbe arom|agrumi|mele e pere|frutti di bosco|zucca|funghi$|carciofi$|asparag|cetriol|verdure varie|castagne|zenzero)/],
+  ['Frutta e verdura',/^(frutta|mele$|pere$|arance|mandarin|clementin|kiwi|fragol|cilieg|albicocc|pesch|nettarin|susin|melone|anguri|uva$|fichi|cachi|lattuga|rucola|radicchio|ravanell|cipollott|patate|insalata|zucchin|finocch|carote|cavol|cipoll|pomodor|melanzan|fagiolini$|peperon|limon|sedano|aglio|erbe arom|agrumi|mele e pere|frutti di bosco|zucca|funghi$|carciofi$|asparag|cetriol|verdure varie|castagne|zenzero)/],
   ['Pane e forno',/^(pane|biscotti|pasta sfoglia|lievito)/],
   ['Carne e salumi',/^(pollo|coniglio|agnello|maiale|carne macinata|interiora|manzo|guanciale|prosciutto|salumi|strutto|würstel|hamburger|polpette|pollo arrosto)/],
   ['Pesce',/^(salmone|baccal|cozze|crostacei|molluschi|pesce$)/],
