@@ -4,6 +4,10 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-04
+
+- **Versione 101**: dettatura più chiara. Mentre il server trascrive, «Avanti» e il pulsante del microfono sono disattivati e «Avanti» avvisa di aspettare (o di premere prima «Ho finito»); se il server non risponde o non ha ancora la dettatura (404), l'avviso è esplicito e compare anche come notifica, invece del vecchio «Not found» in piccolo.
+
 ## 2026-11-03
 
 - **Versione 100**: la ricetta si può dettare a voce. Nuova strada «🎤 La detto» in «Da dove viene la ricetta?» e «La detto a voce» tra le scelte della gara: si parla fino a 3 minuti (nome, persone, tempo, ingredienti con le dosi, procedimento), il server trascrive con Whisper (nuovo endpoint `/dictate`, audio mai a Gemini) e il modello compila i campi, che poi si controllano come per la foto. Se non riconosce una ricetta, il testo dettato finisce nel procedimento. Fonte «Dettata»; regole del contest e Info.plist (microfono) aggiornati.

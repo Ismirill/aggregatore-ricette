@@ -878,7 +878,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=100; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=101; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1898,6 +1898,7 @@ function rGo(k){
 function rValid(){
   const f=$('#f'),key=rSteps[rStep];
   if(key==='src'&&addMode==='link'){const u=extractUrl(f.url.value);if(!u){toast('Incolla prima il link della ricetta');f.url.focus();return false}f.url.value=u}
+  if(key==='src'&&addMode==='voice'&&(DICT.busy||DICT.mr)){toast(DICT.mr?'Premi prima «Ho finito»':'Un momento: sto ancora scrivendo quello che hai detto');return false}
   if(key==='base'&&!f.title.value.trim()){toast('Scrivi il nome del piatto');f.title.focus();return false}
   if(extra.contest&&(key==='base'||key==='ing')){const m=garaMissing(f,key);if(m.length){toast(garaMsg(m));(key==='base'?(+f.servings.value>0?f.time:f.servings):f.ingredients).focus();return false}}
   // dopo gli ingredienti, tipo di piatto, paese e diete si deducono da soli se l'utente non li ha messi
@@ -1969,13 +1970,15 @@ const blobB64=b=>new Promise((ok,ko)=>{const r=new FileReader();r.onload=()=>ok(
 async function dictDone(){
   const type=(DICT.chunks[0]?.type||dictMime()||'audio/webm').split(';')[0],blob=new Blob(DICT.chunks,{type});DICT.chunks=[];
   if(blob.size<2000){showPv('Non ho sentito niente: riprova tenendo il telefono vicino alla bocca');return}
-  showPv('Trascrivo quello che hai detto… qualche secondo');
+  showPv('Trascrivo quello che hai detto… qualche secondo, non andare avanti');
+  DICT.busy=true;$('#dictBtn').disabled=$('#rNext').disabled=true;
   try{
     const {result,transcript}=await server('/dictate',{audio:await blobB64(blob),mime:type});
     if(result&&result.is_recipe!==false)fillFrom(result,'Dettata');
     else if(transcript){const f=$('#f');if(!f.steps.value)f.steps.value=transcript;showPv('Non ho riconosciuto una ricetta: ho scritto quello che hai detto nel procedimento, sistema i campi nei passi seguenti')}
-    else showPv('Non ho capito le parole: riprova parlando più vicino al telefono, oppure scrivi la ricetta nei passi seguenti');
-  }catch(e){showPv(aiErr(e))}
+    else{showPv('Non ho capito le parole: riprova parlando più vicino al telefono, oppure scrivi la ricetta nei passi seguenti');toast('Non ho capito le parole, riprova')}
+  }catch(e){const m=e?.status===404?'La dettatura non è ancora attiva sul server: riprova più tardi, oppure scrivi la ricetta nei passi seguenti':'Non sono riuscita a trascrivere: '+aiErr(e);showPv(m);toast(m)}
+  finally{DICT.busy=false;$('#dictBtn').disabled=$('#rNext').disabled=false}
 }
 $('#dictBtn').onclick=()=>DICT.mr?dictStop():dictStart();
 $('#dlg').addEventListener('close',()=>dictStop(true));
