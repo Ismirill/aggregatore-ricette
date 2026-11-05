@@ -930,7 +930,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=121; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=122; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -954,6 +954,7 @@ async function loadBook(){
       servings:1,ingredients:x.ing,steps:[x.prep],b:x.b,n:x.n,cov:1,prot:x.prot,time:x.t,_tm:{t:x.t,w:0,d:1},_q:null}));
     const nut=load('bookNut',{});IM=Object.fromEntries(Object.entries(im.items||{}).filter(([,v])=>!v.redo)); // le foto AI sbagliate, in attesa di essere rifatte, non si mostrano
     bookInfo=d;
+    const country=cc=>{if(cc==='MY')return 'Malesia';try{return new Intl.DisplayNames(['it'],{type:'region'}).of(cc)}catch{return cc}}; // il browser dice «Malaysia»
     book=d.recipes.map(r=>{
       const c=classify({title:r.title,ingredients:r.ingredients,caption:[...r.tags,r.region].join(' '),keywords:r.tags.join(' ')});
       const key=x=>x.toLowerCase().replace(/[^a-z]/g,'');
@@ -961,7 +962,7 @@ async function loadBook(){
       const ph=IM[r.id];
       r.tags=(r.tags||[]).filter(t=>!/^(moduli|pagine|libro|stub|ricette|categoria|wikibooks|da (controllare|wikificare|aiutare))/i.test(t));
       const vc=ct.items?.[r.id]; // tipo di piatto verificato incrociando Wikibooks, Wikipedia/Wikidata, nome e ingredienti
-      return {...r,...(ph?{image:ph.img,imgFile:ph.file}:{}),...(vc?{catBy:vc.by,catConf:vc.conf}:{}),book:true,source:'Wikibooks',cat:vc?.cat||c.cat||'Altro',diets:c.diets,country:reg?'Italia':c.country,region:reg||c.region,nutrition:nut[r.id]};
+      return {...r,...(ph?{image:ph.img,imgFile:ph.file}:{}),...(vc?{catBy:vc.by,catConf:vc.conf}:{}),book:true,source:'Wikibooks',cat:vc?.cat||c.cat||'Altro',diets:c.diets,country:reg?'Italia':r.cc?country(r.cc):r.country||c.country,cc:reg?'':r.cc||'',region:reg||(r.cc||r.country?'':c.region),nutrition:nut[r.id]}; // il paese dalle categorie di Wikibooks (ricettario.json), altrimenti dal testo
     });
     // Regione Puglia (CC BY 4.0): ricette tipiche (i prodotti del territorio non sono ricette e restano fuori)
     bookInfo.pu=pu;bookInfo.wo=wo;
@@ -971,7 +972,6 @@ async function loadBook(){
         imgCredit:r.imgAuthor?`Foto: ${r.imgAuthor} · Regione Puglia (CC BY 4.0)`:'Foto: Regione Puglia (CC BY 4.0)',tags:[]});
     }
     // Ricette dal mondo (UniTools, CC BY-SA 4.0), tradotte in italiano
-    const country=cc=>{try{return new Intl.DisplayNames(['it'],{type:'region'}).of(cc)}catch{return cc}};
     for(const r of wo.recipes||[]){
       const c=classify({title:r.title,ingredients:r.ingredients});
       book.push({...r,book:true,world:true,cc:r.country,source:'UniTools',url:'https://theunitools.com/en/data',country:country(r.country),region:r.country==='IT'?c.region:'',

@@ -70,7 +70,9 @@ def parse(title, text, categories):
     regions = [c.split('-', 1)[1] for c in categories if c.startswith('Ricette regionali-')]
     if not ingredients and not steps:
         return None
+    paese = {} if regions else country_of(categories, title)  # ricette estere: il paese dalla categoria «Ricette malesi» ecc.
     return {
+        **paese,
         'id': 'wb-' + re.sub(r'\W+', '-', title.lower()).strip('-'),
         'title': title,
         'url': 'https://it.wikibooks.org/wiki/' + urllib.parse.quote((PREFIX + title).replace(' ', '_')),
@@ -81,6 +83,43 @@ def parse(title, text, categories):
         'ingredients': ingredients[:40],
         'steps': steps[:30],
     }
+
+
+# Categorie di Wikibooks per paese → codice ISO (bandiera e nome nell'app). Senza codice (cucina araba) resta solo il nome
+PAESI = {'argentine': 'AR', 'armene': 'AM', 'australiane': 'AU', 'austriache': 'AT', 'brasiliane': 'BR', 'cinesi': 'CN', 'francesi': 'FR',
+         'giapponesi': 'JP', 'greche': 'GR', 'indiane': 'IN', 'inglesi': 'GB', 'scozzesi': 'GB', 'israeliane': 'IL', 'malesi': 'MY',
+         'messicane': 'MX', 'moldave': 'MD', 'peruviane': 'PE', 'russe': 'RU', 'siriane': 'SY', 'spagnole': 'ES', 'statunitensi': 'US',
+         'svedesi': 'SE', 'svizzere': 'CH', 'tedesche': 'DE', 'tunisine': 'TN', 'ungheresi': 'HU', 'turche': 'TR', 'marocchine': 'MA',
+         'portoghesi': 'PT', 'libanesi': 'LB', 'thailandesi': 'TH', 'vietnamite': 'VN', 'coreane': 'KR', 'egiziane': 'EG', 'iraniane': 'IR',
+         'polacche': 'PL', 'belghe': 'BE', 'olandesi': 'NL', 'danesi': 'DK', 'norvegesi': 'NO', 'finlandesi': 'FI', 'irlandesi': 'IE',
+         'cubane': 'CU', 'cilene': 'CL', 'colombiane': 'CO', 'venezuelane': 'VE', 'canadesi': 'CA', 'indonesiane': 'ID', 'filippine': 'PH',
+         'pakistane': 'PK', 'etiopi': 'ET', 'ucraine': 'UA', 'ceche': 'CZ', 'croate': 'HR', 'serbe': 'RS', 'rumene': 'RO', 'bulgare': 'BG',
+         'albanesi': 'AL', 'maltesi': 'MT', 'cipriote': 'CY', 'georgiane': 'GE'}
+PAESI_NOME = {'arabe': 'Paesi arabi', 'mediorientali': 'Medio Oriente', 'africane': 'Africa', 'asiatiche': 'Asia', 'sudamericane': 'Sud America'}
+
+
+# Piatti esteri senza categoria per paese su Wikibooks: titolo → paese
+PAESE_FIX = {'basler mehlsuppe': 'CH', 'beef in guinness': 'IE', 'crème brûlée': 'FR', 'crepes': 'FR', 'escalope de le petit chevreau': 'FR',
+             'flamenquin de jambon': 'ES', 'frappuccino': 'US', 'fudge al caramello mou': 'GB', 'gravlax': 'SE', 'hamburger': 'US',
+             'khoresh karafs': 'IR', 'pierogi': 'PL', 'runebergintorttu': 'FI', 'salsa bernese': 'FR', 'strawberry sundae': 'US',
+             'tartare de morue': 'FR', 'torta di ciliegie della foresta nera': 'DE', 'torta di prugne alla bretone': 'FR', 'torta sacher': 'AT',
+             'ratatouille': 'FR', 'cookies 2': 'US', 'cookies ai mirtilli rossi': 'US', 'tacchino all\'olandese': 'NL', 'makluba': 'Paesi arabi'}
+
+
+def country_of(categories, title=''):
+    fx = PAESE_FIX.get(title.strip().lower())
+    if fx:
+        return {'cc': fx} if len(fx) == 2 else {'country': fx}
+    for c in categories:
+        m = re.match(r'^Ricette (\w+)$', c)
+        k = m.group(1).lower() if m else ''
+        if k in PAESI:
+            return {'cc': PAESI[k]}
+        if k in PAESI_NOME:
+            return {'country': PAESI_NOME[k]}
+        if c == 'Nonya':  # cucina peranakan (Malesia e Singapore)
+            return {'cc': 'MY'}
+    return {}
 
 
 def main():
