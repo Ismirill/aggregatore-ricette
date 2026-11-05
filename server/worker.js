@@ -77,7 +77,7 @@ const str = (v, n) => String(v ?? '').slice(0, n);
 // Cache su D1 delle letture dei post (/preview) e delle analisi AI (/analyze): la stessa ricetta virale la salvano in tanti,
 // così la lettura esterna, la trascrizione del video e la chiamata al modello si pagano una volta sola. La chiave è
 // l'impronta del link (o del testo): nel database non si vede da chi arriva la richiesta. Si salvano solo i risultati utili.
-const CACHE_V = 4; // aumentare quando cambiano prompt o formato della risposta: le voci vecchie non valgono più
+const CACHE_V = 5; // aumentare quando cambiano prompt o formato della risposta: le voci vecchie non valgono più
 const DAY = 86_400_000;
 async function cached(env, kind, key, ttl, make, worth = () => true) {
   if (!env.SYNC || env.FORCE_AI) return make(); // nelle prove dell'amministratore niente cache: si vuole la risposta del fornitore
@@ -175,7 +175,11 @@ Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diet
   const img = b.image ? await imagePart(str(b.image, 2000)) : null;
   const r0 = await aiJson(env, prompt, img), r = r0 && faithful(r0, text);
   // YouTube: se il procedimento non è scritto né nella descrizione né sul sito del cuoco, Gemini guarda il video
-  // i «capitoli» del video (00:00 Preparazione del sugo…) non sono un procedimento: passaggi veri = almeno due frasi di una certa lunghezza
+  // i «capitoli» del video (00:00 Preparazione del sugo…) non sono un procedimento: si tolgono dai passaggi (sono le righe del testo che iniziano con un orario)
+  const norm = x => String(x).trim().toLowerCase().replace(/[.\s]+$/, '');
+  const chapters = new Set((text.match(/^\s*(?:\d{1,2}:)?\d{1,2}:\d{2}\s*[-–—)]?\s*\S.*$/gm) || []).map(l => norm(l.replace(/^\s*[\d:]+\s*[-–—)]?\s*/, ''))));
+  if (r && chapters.size && Array.isArray(r.steps)) r.steps = r.steps.filter(x => !chapters.has(norm(x)));
+  // passaggi veri = almeno due frasi di una certa lunghezza
   const realSteps = (r?.steps || []).filter(x => String(x).trim().length >= 30).length >= 2;
   const yid = r && r.is_recipe !== false && !b.haveSteps && !realSteps ? ytIdOf(b.url) : '';
   if (yid) try {
