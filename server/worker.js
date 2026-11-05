@@ -18,6 +18,7 @@ const reply = (origin, body, status = 200) =>
 // (`npx wrangler secret put GEMINI_KEY` / `GROQ_KEY`): senza chiavi resta il solo Workers AI, come prima.
 // Il piano gratuito di Gemini può usare ciò che riceve per migliorare i modelli (anche con revisione umana): va bene per i post
 // pubblici, non per le foto personali (quaderni, libri, piatti): per quelle (personal) Gemini si salta e resta Groq.
+const GEMINI_VIDEO_FALLBACK = ['gemini-3.5-flash', 'gemini-2.5-flash']; // riserva per i video, se il modello principale è sovraccarico
 const GEMINI_MODEL = 'gemini-3.5-flash-lite', GROQ_MODEL = 'qwen/qwen3.8-27b'; // entrambi leggono le immagini e rispondono in JSON
 const quotaErr = e => e.status === 429 || e.status >= 500 || /neuron|quota|limit|4006|RESOURCE_EXHAUSTED|capacity/i.test(e.message);
 const dataUrl = u => { const m = /^data:([^;,]+);base64,([\s\S]*)$/.exec(u || ''); return m ? { mime: m[1], data: m[2] } : null; };
@@ -554,13 +555,17 @@ async function ytVideoRecipe(env, id, seconds) {
 servings: per quante persone, solo se detto, altrimenti 0. time: minuti totali dall'inizio al piatto pronto solo se detto o chiaramente deducibile dai tempi detti, altrimenti 0. Non inventare dosi, tempi o passaggi non detti né mostrati. is_recipe false se il video non è una ricetta.`;
   const body = { contents: [{ parts: [{ file_data: { file_uri: `https://www.youtube.com/watch?v=${id}` } }, { text: prompt }] }],
     generationConfig: { temperature: 0.2, maxOutputTokens: 4000, responseMimeType: 'application/json', mediaResolution: 'MEDIA_RESOLUTION_LOW' } };
-  for (let i = 0; i < 2; i++) {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
+  // Modello sovraccarico (503) o quota del minuto (429): si riprova dopo una pausa, poi con i modelli di riserva
+  const models = [...new Set([GEMINI_MODEL, ...GEMINI_VIDEO_FALLBACK])];
+  for (const model of models) for (let i = 0; i < 3; i++) {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
       { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_KEY }, body: JSON.stringify(body), signal: AbortSignal.timeout(80000) });
-    if (r.ok) { const j = await r.json(); console.log('video Gemini: ok', JSON.stringify(j.usageMetadata || {})); return lastJson((j.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('')); }
+    if (r.ok) { const j = await r.json(); console.log('video Gemini: ok', model, JSON.stringify(j.usageMetadata || {})); return lastJson((j.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('')); }
     const msg = str(await r.text(), 300);
-    if (r.status === 400 && !i && /mediaResolution|media_resolution/i.test(msg)) { delete body.generationConfig.mediaResolution; continue; }
-    console.log('video Gemini non disponibile:', r.status, msg); return null;
+    if (r.status === 400 && /mediaResolution|media_resolution/i.test(msg)) { delete body.generationConfig.mediaResolution; continue; }
+    console.log('video Gemini non disponibile:', model, r.status, str(msg.replace(/\s+/g, ' '), 160));
+    if (r.status === 503 || r.status === 429) { if (i < 2) await new Promise(ok => setTimeout(ok, 2500)); continue; }
+    break; // altro errore (404 modello, 400): passa al modello successivo
   }
   return null;
 }
