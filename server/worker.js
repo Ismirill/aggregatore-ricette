@@ -180,6 +180,7 @@ Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diet
     if (v && v.is_recipe !== false) {
       const st = (Array.isArray(v.steps) ? v.steps : []).map(x => str(x, 600).trim()).filter(Boolean).slice(0, 30);
       if (st.length) { r.steps = st; r.from_video = true; }
+      const vt = str(v.title, 120).trim(); if (vt && (!r.title || r.title === r.title.toUpperCase() || r.title.length > 60)) r.title = vt; // «GNOCCHI AI FRUTTI DI MARE: la RICETTA…» → il nome del piatto
       const ing = (Array.isArray(v.ingredients) ? v.ingredients : []).map(x => str(x, 120).trim()).filter(Boolean).slice(0, 40);
       if (ing.length && (r.inferred || !r.ingredients.length || ing.length > r.ingredients.length + 2)) { r.ingredients = ing; r.inferred = false; r.seen = []; r.from_video = true; }
       if (!r.servings && +v.servings > 0 && +v.servings <= 100) r.servings = Math.round(+v.servings);
@@ -591,6 +592,13 @@ async function preview(env, b) {
       else if (/consent\.youtube\.com|consent\.google/.test(r.url) || !html.includes('"videoDetails":')) console.log('YouTube pagina senza dati (consenso o controllo), tentativo', i + 1, str(r.url, 80));
       title = js('title'); desc = js('shortDescription'); author = js('author'); secs = +js('lengthSeconds') || 0;
     }
+    // Con la chiave ufficiale (segreto YOUTUBE_KEY, YouTube Data API v3, gratuita: 10.000 unità al giorno, 1 per video) la descrizione arriva sempre
+    if (!desc && env.YOUTUBE_KEY) try {
+      const j = await (await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${yt}&key=${env.YOUTUBE_KEY}`, { signal: AbortSignal.timeout(8000) })).json();
+      const it = j.items?.[0]; if (it) { title = str(it.snippet?.title, 300); desc = str(it.snippet?.description, 6000); author = str(it.snippet?.channelTitle, 120);
+        const m = String(it.contentDetails?.duration || '').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/); secs = m ? (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0) : 0; console.log('YouTube: Data API'); }
+      else console.log('YouTube Data API:', str(JSON.stringify(j.error || j), 200));
+    } catch (e) { console.log('YouTube Data API', e.message); }
     if (!title) try { const o = await (await fetch(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(`https://www.youtube.com/watch?v=${yt}`)}`)).json(); title = str(o.title, 300); author = str(o.author_name, 120); console.log('YouTube: solo oEmbed'); } catch {}
     if (title || desc) {
       const esc = v => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
