@@ -76,7 +76,7 @@ const str = (v, n) => String(v ?? '').slice(0, n);
 // Cache su D1 delle letture dei post (/preview) e delle analisi AI (/analyze): la stessa ricetta virale la salvano in tanti,
 // così la lettura esterna, la trascrizione del video e la chiamata al modello si pagano una volta sola. La chiave è
 // l'impronta del link (o del testo): nel database non si vede da chi arriva la richiesta. Si salvano solo i risultati utili.
-const CACHE_V = 3; // aumentare quando cambiano prompt o formato della risposta: le voci vecchie non valgono più
+const CACHE_V = 4; // aumentare quando cambiano prompt o formato della risposta: le voci vecchie non valgono più
 const DAY = 86_400_000;
 async function cached(env, kind, key, ttl, make, worth = () => true) {
   if (!env.SYNC || env.FORCE_AI) return make(); // nelle prove dell'amministratore niente cache: si vuole la risposta del fornitore
@@ -101,9 +101,9 @@ function cacheUrl(u) {
   } catch { return String(u); }
 }
 const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : ''), 3 * DAY, () => preview(env, b),
-  r => !!(r.transcript || /ld\+json/.test(r.html) || /content="[^"]{60,}"/.test(r.html))); // niente pagina di accesso o vuota in cache
+  r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html))); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
 const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
-  () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length));
+  () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length && !(r.result.inferred && !r.result.steps?.length))); // le analisi «indovinate» (ingredienti tipici, nessun passaggio) non si salvano: la prossima volta si riprova
 
 // Scarica la copertina del post (lato server non ci sono blocchi CORS)
 async function imagePart(url) {
@@ -497,26 +497,20 @@ async function creatorRecipe(desc, title, timeoutMs = 9000) {
   if (tw.length < 1) return '';
   const links = [...new Set((String(desc).match(/https?:\/\/[^\s)<>"']+/g) || []).map(x => x.replace(/[.,;!?]+$/, '')))]
     .filter(x => !/youtube\.|youtu\.be|instagram\.|facebook\.|tiktok\.|twitter\.|x\.com|amazon|amzn\.|apple\.|spotify\.|telegram|whatsapp|t\.me|linktr|paypal|patreon|pinterest|threads\.net|discord|twitch|onlyfans|play\.google|tidal|deezer/i.test(x)).slice(0, 5);
-  const origins = [];
+  const origins = [], direct = [];
   for (const l of links) { // i link corti (bit.ly…) si seguono per trovare il sito vero
     const r = await fx(l, { method: 'HEAD' }); const u = r && r.url || l;
-    try { const o = new URL(u).origin; if (!origins.includes(o)) origins.push(o); } catch {}
+    try { const x = new URL(u), o = x.origin; if (/youtube\.|youtu\.be|instagram\.|facebook\.|tiktok\.|amazon|google\./i.test(x.hostname)) continue; if (!origins.includes(o)) origins.push(o);
+      const slug = words(decodeURIComponent(x.pathname.split('/').filter(Boolean).pop() || '')); // link diretto alla pagina della ricetta
+      if (tw.filter(w => slug.some(y => y.startsWith(w.slice(0, 5)))).length >= Math.min(2, tw.length)) direct.push(u); } catch {}
     if (origins.length >= 3 || Date.now() > stopAt) break;
   }
   console.log('sito del cuoco: siti', origins.join(' ') || 'nessuno');
   // ingredienti con dose scritti nella descrizione: nome → numero (per il confronto delle dosi)
   const descDose = {};
   for (const line of String(desc).split('\n')) { const m = line.match(/(\d+(?:[.,]\d+)?)/); const w = words(line.replace(/\d+(?:[.,]\d+)?\s*(?:g|gr|grammi|kg|ml|cl|l|cucchia\w*|spicchi?o?|mazz\w*|pizzic\w*|tazz\w*|bicchier\w*)?\b/gi, '')).filter(x => !/^(q\.?b|quanto|basta|piacere|ingredient|preparare|persone|porzioni)/.test(x)); if (m && w.length && line.length < 80) descDose[w[0]] = parseFloat(m[1].replace(',', '.')); }
-  for (const origin of origins) {
-    const sr = await fx(`${origin}/?s=${encodeURIComponent(short)}`); if (!sr || !sr.ok) continue;
-    const html = (await sr.text()).slice(0, 1_500_000), host = new URL(origin).hostname.replace(/^www\./, '');
-    const cand = {};
-    for (const m of html.matchAll(/href="(https?:\/\/[^"]+)"/g)) { const u = m[1].split('#')[0]; if (/[?&]s=|\/page\/\d|\/tag\/|\/category\/|\/categoria\//.test(u)) continue; try { if (new URL(u).hostname.replace(/^www\./, '') !== host) continue; } catch { continue; }
-      const slug = words(decodeURIComponent(u.split('/').filter(Boolean).pop() || '')); const sc = tw.filter(w => slug.some(x => x.startsWith(w.slice(0, 5)))).length; if (sc > (cand[u] || 0)) cand[u] = sc; }
-    const best = Object.entries(cand).sort((a, b) => b[1] - a[1]).filter(([, sc]) => sc >= Math.min(2, tw.length)).slice(0, 2);
-    console.log('sito del cuoco: candidati su', origin, best.map(x => x[0]).join(' ') || 'nessuno');
-    for (const [u] of best) {
-      const pr = await fx(u); if (!pr || !pr.ok) continue;
+  const checkPage = async u => {
+      const pr = await fx(u); if (!pr || !pr.ok) return '';
       const ph = (await pr.text()).slice(0, 1_500_000);
       for (const m of ph.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
         if (!/"Recipe"/.test(m[1])) continue;
@@ -526,13 +520,24 @@ async function creatorRecipe(desc, title, timeoutMs = 9000) {
         // dosi: quelle in comune devono coincidere (altrimenti è un'altra versione del piatto)
         let same = 0, diff = 0;
         for (const line of (rec.recipeIngredient || []).map(String)) { const n = line.match(/(\d+(?:[.,]\d+)?)/); const w = words(line.replace(/\d+(?:[.,]\d+)?/g, '')); const k = w.find(x => descDose[x] != null); if (!n || !k) continue; (parseFloat(n[1].replace(',', '.')) === descDose[k] ? same++ : diff++); }
-        if (diff) { console.log('sito del cuoco: dosi diverse', u); continue; }
+        // stessa ricetta se le dosi coincidono; una sola dose diversa su almeno tre uguali è una piccola variante (6 o 10 pomodorini), accettata
+        if (diff > 1 || (diff && same < 3)) { console.log('sito del cuoco: dosi diverse', u, same, diff); continue; }
         if (Object.keys(descDose).length >= 3 && same < 2) { console.log('sito del cuoco: dosi non confrontabili', u); continue; }
         console.log('sito del cuoco: ricetta trovata', u);
         return `<script type="application/ld+json">${JSON.stringify(rec).replace(/<\//g, '<\\/')}</script><meta property="gn:site" content="${u.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">`;
       }
-      if (Date.now() > stopAt) return '';
-    }
+      return '';
+  };
+  for (const u of direct.slice(0, 2)) { const r = await checkPage(u); if (r) return r; if (Date.now() > stopAt) return ''; }
+  for (const origin of origins) {
+    const sr = await fx(`${origin}/?s=${encodeURIComponent(short)}`); if (!sr || !sr.ok) continue;
+    const html = (await sr.text()).slice(0, 1_500_000), host = new URL(origin).hostname.replace(/^www\./, '');
+    const cand = {};
+    for (const m of html.matchAll(/href="(https?:\/\/[^"]+)"/g)) { const u = m[1].split('#')[0]; if (/[?&]s=|\/page\/\d|\/tag\/|\/category\/|\/categoria\//.test(u)) continue; try { if (new URL(u).hostname.replace(/^www\./, '') !== host) continue; } catch { continue; }
+      const slug = words(decodeURIComponent(u.split('/').filter(Boolean).pop() || '')); const sc = tw.filter(w => slug.some(x => x.startsWith(w.slice(0, 5)))).length; if (sc > (cand[u] || 0)) cand[u] = sc; }
+    const best = Object.entries(cand).sort((a, b) => b[1] - a[1]).filter(([, sc]) => sc >= Math.min(2, tw.length)).slice(0, 2);
+    console.log('sito del cuoco: candidati su', origin, best.map(x => x[0]).join(' ') || 'nessuno');
+    for (const [u] of best) { if (direct.includes(u)) continue; const r = await checkPage(u); if (r) return r; if (Date.now() > stopAt) return ''; }
   }
   return '';
 }
@@ -575,12 +580,15 @@ async function preview(env, b) {
   if (yt && /^[\w-]{11}$/.test(yt)) {
     // YouTube a volte risponde con una pagina senza dati (consenso, controllo): un secondo tentativo, poi almeno titolo e autore da oEmbed
     let html = '', title = '', desc = '', author = '', secs = 0;
-    const js = k => { const m = html.match(new RegExp(`"${k}":"((?:[^"\\\\]|\\\\.)*)"`)); try { return m ? JSON.parse('"' + m[1] + '"') : ''; } catch { return ''; } };
+    // i dati del video stanno in «videoDetails»: si legge da lì, non dal primo "title" della pagina (che può essere di una playlist)
+    const js = k => { const at = html.indexOf('"videoDetails":'), part = at >= 0 ? html.slice(at, at + 60_000) : html; const m = part.match(new RegExp(`"${k}":"((?:[^"\\\\]|\\\\.)*)"`)); try { return m ? JSON.parse('"' + m[1] + '"') : ''; } catch { return ''; } };
     for (let i = 0; i < 2 && !desc; i++) {
       if (i) await new Promise(ok => setTimeout(ok, 800));
-      const r = await fetch(`https://www.youtube.com/watch?v=${yt}&hl=it`, { headers: { 'User-Agent': i ? PREVIEW_UA : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36', 'Accept-Language': 'it-IT,it;q=0.9' } }).catch(() => null);
+      // SOCS=CAI è la scelta «rifiuta i cookie non necessari»: senza, dall'Europa YouTube manda alla pagina del consenso invece del video
+      const r = await fetch(`https://www.youtube.com/watch?v=${yt}&hl=it`, { headers: { 'User-Agent': i ? PREVIEW_UA : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36', 'Accept-Language': 'it-IT,it;q=0.9', Cookie: 'SOCS=CAI' }, redirect: 'follow' }).catch(() => null);
       html = r?.ok ? (await r.text()).slice(0, 3_000_000) : '';
       if (!r?.ok) console.log('YouTube pagina', r ? r.status : 'rete', 'tentativo', i + 1);
+      else if (/consent\.youtube\.com|consent\.google/.test(r.url) || !html.includes('"videoDetails":')) console.log('YouTube pagina senza dati (consenso o controllo), tentativo', i + 1, str(r.url, 80));
       title = js('title'); desc = js('shortDescription'); author = js('author'); secs = +js('lengthSeconds') || 0;
     }
     if (!title) try { const o = await (await fetch(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(`https://www.youtube.com/watch?v=${yt}`)}`)).json(); title = str(o.title, 300); author = str(o.author_name, 120); console.log('YouTube: solo oEmbed'); } catch {}
