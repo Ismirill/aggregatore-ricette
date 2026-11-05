@@ -573,10 +573,17 @@ async function preview(env, b) {
   // I sottotitoli automatici non si leggono da qui (il lettore li chiede con i suoi token): il parlato resta fuori
   const yt = /(^|\.)(youtube\.com|youtu\.be)$/.test(u.hostname) && (u.hostname.endsWith('youtu.be') ? u.pathname.slice(1).split('/')[0] : u.searchParams.get('v') || (u.pathname.match(/\/(?:shorts|embed|live)\/([\w-]{11})/) || [])[1]);
   if (yt && /^[\w-]{11}$/.test(yt)) {
-    const r = await fetch(`https://www.youtube.com/watch?v=${yt}&hl=it`, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36', 'Accept-Language': 'it-IT,it;q=0.9' } }).catch(() => null);
-    const html = r?.ok ? (await r.text()).slice(0, 3_000_000) : '';
+    // YouTube a volte risponde con una pagina senza dati (consenso, controllo): un secondo tentativo, poi almeno titolo e autore da oEmbed
+    let html = '', title = '', desc = '', author = '', secs = 0;
     const js = k => { const m = html.match(new RegExp(`"${k}":"((?:[^"\\\\]|\\\\.)*)"`)); try { return m ? JSON.parse('"' + m[1] + '"') : ''; } catch { return ''; } };
-    const title = js('title'), desc = js('shortDescription'), author = js('author'), secs = +js('lengthSeconds') || 0;
+    for (let i = 0; i < 2 && !desc; i++) {
+      if (i) await new Promise(ok => setTimeout(ok, 800));
+      const r = await fetch(`https://www.youtube.com/watch?v=${yt}&hl=it`, { headers: { 'User-Agent': i ? PREVIEW_UA : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36', 'Accept-Language': 'it-IT,it;q=0.9' } }).catch(() => null);
+      html = r?.ok ? (await r.text()).slice(0, 3_000_000) : '';
+      if (!r?.ok) console.log('YouTube pagina', r ? r.status : 'rete', 'tentativo', i + 1);
+      title = js('title'); desc = js('shortDescription'); author = js('author'); secs = +js('lengthSeconds') || 0;
+    }
+    if (!title) try { const o = await (await fetch(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(`https://www.youtube.com/watch?v=${yt}`)}`)).json(); title = str(o.title, 300); author = str(o.author_name, 120); console.log('YouTube: solo oEmbed'); } catch {}
     if (title || desc) {
       const esc = v => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
       let site = ''; try { site = await creatorRecipe(desc, title); } catch (e) { console.log('sito del cuoco', e.message); }
