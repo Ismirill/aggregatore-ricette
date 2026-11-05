@@ -102,7 +102,7 @@ function cacheUrl(u) {
 }
 const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : ''), 3 * DAY, () => preview(env, b),
   r => !!(r.transcript || /ld\+json/.test(r.html) || /content="[^"]{60,}"/.test(r.html))); // niente pagina di accesso o vuota in cache
-const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([str(b.caption || b.title, 9000), str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
+const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
   () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length));
 
 // Scarica la copertina del post (lato server non ci sono blocchi CORS)
@@ -172,8 +172,21 @@ Estrai i dati in italiano:
 - is_recipe: false se il post non riguarda una ricetta o un piatto.
 Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diets":[],"country":"","region":"","time":0,"time_how":"","time_note":"","inferred":false,"seen":[],"ingredients":[],"steps":[]}`;
   const img = b.image ? await imagePart(str(b.image, 2000)) : null;
-  const r = await aiJson(env, prompt, img);
-  return { result: r && faithful(r, text) };
+  const r0 = await aiJson(env, prompt, img), r = r0 && faithful(r0, text);
+  // YouTube: se il procedimento non è scritto né nella descrizione né sul sito del cuoco, Gemini guarda il video
+  const yid = r && r.is_recipe !== false && !b.haveSteps && !(r.steps || []).length ? ytIdOf(b.url) : '';
+  if (yid) try {
+    const v = await ytVideoRecipe(env, yid, +b.seconds || 0);
+    if (v && v.is_recipe !== false) {
+      const st = (Array.isArray(v.steps) ? v.steps : []).map(x => str(x, 600).trim()).filter(Boolean).slice(0, 30);
+      if (st.length) { r.steps = st; r.from_video = true; }
+      const ing = (Array.isArray(v.ingredients) ? v.ingredients : []).map(x => str(x, 120).trim()).filter(Boolean).slice(0, 40);
+      if (ing.length && (r.inferred || !r.ingredients.length || ing.length > r.ingredients.length + 2)) { r.ingredients = ing; r.inferred = false; r.seen = []; r.from_video = true; }
+      if (!r.servings && +v.servings > 0 && +v.servings <= 100) r.servings = Math.round(+v.servings);
+      if (!r.time && +v.time > 0 && +v.time <= 1440) { r.time = Math.round(+v.time); r.time_how = 'video'; r.time_note = ''; }
+    }
+  } catch (e) { console.log('video Gemini', e.message); }
+  return { result: r };
 }
 
 // Controllo meccanico sul risultato: tutto ciò che è un numero deve stare nel testo del post, altrimenti via.
@@ -468,6 +481,82 @@ async function whisper(env, buf, mime = 'video/mp4') {
   return str(out?.text, 8000).trim();
 }
 
+// Parole significative di un titolo o di una riga di ingredienti (per confronti tolleranti)
+const STOP = new Set(['alla', 'alle', 'allo', 'agli', 'con', 'della', 'delle', 'del', 'dei', 'degli', 'di', 'da', 'il', 'la', 'le', 'lo', 'gli', 'un', 'una', 'per', 'come', 'fatto', 'fatti', 'ricetta', 'ricette', 'facile', 'veloce', 'classico', 'classica', 'grande', 'buono', 'buona', 'perfetto', 'perfetta', 'originale', 'tradizionale', 'cremoso', 'cremosa', 'the', 'and']);
+const words = t => String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').split(' ').filter(w => w.length >= 4 && !STOP.has(w));
+const ytIdOf = url => { try { const u = new URL(url); if (!/(^|\.)(youtube\.com|youtu\.be)$/.test(u.hostname)) return ''; const id = u.hostname.endsWith('youtu.be') ? u.pathname.slice(1).split('/')[0] : u.searchParams.get('v') || (u.pathname.match(/\/(?:shorts|embed|live)\/([\w-]{11})/) || [])[1]; return /^[\w-]{11}$/.test(id || '') ? id : ''; } catch { return ''; } };
+
+// La stessa ricetta sul sito del cuoco: nella descrizione del video c'è quasi sempre il link al sito, e lì la ricetta ha i dati
+// strutturati (schema.org Recipe) con il procedimento scritto. Si cerca sul sito il titolo del video («?s=», WordPress e simili),
+// si legge la pagina più somigliante e la si accetta solo se è davvero la stessa ricetta: titolo sovrapponibile e, quando il
+// video elenca gli ingredienti con le dosi, dosi uguali (lo stesso cuoco ha spesso più versioni dello stesso piatto)
+async function creatorRecipe(desc, title, timeoutMs = 9000) {
+  const stopAt = Date.now() + timeoutMs, left = () => Math.max(500, stopAt - Date.now());
+  const fx = (url, opt = {}) => fetch(url, { ...opt, headers: { 'User-Agent': PREVIEW_UA, 'Accept-Language': 'it-IT,it;q=0.9', ...(opt.headers || {}) }, redirect: 'follow', signal: AbortSignal.timeout(left()) }).catch(() => null);
+  const short = String(title).split(/[:|–—]| - /)[0].trim(), tw = words(short);
+  if (tw.length < 1) return '';
+  const links = [...new Set((String(desc).match(/https?:\/\/[^\s)<>"']+/g) || []).map(x => x.replace(/[.,;!?]+$/, '')))]
+    .filter(x => !/youtube\.|youtu\.be|instagram\.|facebook\.|tiktok\.|twitter\.|x\.com|amazon|amzn\.|apple\.|spotify\.|telegram|whatsapp|t\.me|linktr|paypal|patreon|pinterest|threads\.net|discord|twitch|onlyfans|play\.google|tidal|deezer/i.test(x)).slice(0, 5);
+  const origins = [];
+  for (const l of links) { // i link corti (bit.ly…) si seguono per trovare il sito vero
+    const r = await fx(l, { method: 'HEAD' }); const u = r && r.url || l;
+    try { const o = new URL(u).origin; if (!origins.includes(o)) origins.push(o); } catch {}
+    if (origins.length >= 3 || Date.now() > stopAt) break;
+  }
+  console.log('sito del cuoco: siti', origins.join(' ') || 'nessuno');
+  // ingredienti con dose scritti nella descrizione: nome → numero (per il confronto delle dosi)
+  const descDose = {};
+  for (const line of String(desc).split('\n')) { const m = line.match(/(\d+(?:[.,]\d+)?)/); const w = words(line.replace(/\d+(?:[.,]\d+)?\s*(?:g|gr|grammi|kg|ml|cl|l|cucchia\w*|spicchi?o?|mazz\w*|pizzic\w*|tazz\w*|bicchier\w*)?\b/gi, '')).filter(x => !/^(q\.?b|quanto|basta|piacere|ingredient|preparare|persone|porzioni)/.test(x)); if (m && w.length && line.length < 80) descDose[w[0]] = parseFloat(m[1].replace(',', '.')); }
+  for (const origin of origins) {
+    const sr = await fx(`${origin}/?s=${encodeURIComponent(short)}`); if (!sr || !sr.ok) continue;
+    const html = (await sr.text()).slice(0, 1_500_000), host = new URL(origin).hostname.replace(/^www\./, '');
+    const cand = {};
+    for (const m of html.matchAll(/href="(https?:\/\/[^"]+)"/g)) { const u = m[1].split('#')[0]; if (/[?&]s=|\/page\/\d|\/tag\/|\/category\/|\/categoria\//.test(u)) continue; try { if (new URL(u).hostname.replace(/^www\./, '') !== host) continue; } catch { continue; }
+      const slug = words(decodeURIComponent(u.split('/').filter(Boolean).pop() || '')); const sc = tw.filter(w => slug.some(x => x.startsWith(w.slice(0, 5)))).length; if (sc > (cand[u] || 0)) cand[u] = sc; }
+    const best = Object.entries(cand).sort((a, b) => b[1] - a[1]).filter(([, sc]) => sc >= Math.min(2, tw.length)).slice(0, 2);
+    console.log('sito del cuoco: candidati su', origin, best.map(x => x[0]).join(' ') || 'nessuno');
+    for (const [u] of best) {
+      const pr = await fx(u); if (!pr || !pr.ok) continue;
+      const ph = (await pr.text()).slice(0, 1_500_000);
+      for (const m of ph.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
+        if (!/"Recipe"/.test(m[1])) continue;
+        let rec; try { const j = JSON.parse(m[1]); rec = [j, ...(j['@graph'] || []), ...(Array.isArray(j) ? j : [])].find(x => x && (x['@type'] === 'Recipe' || (Array.isArray(x['@type']) && x['@type'].includes('Recipe')))); } catch { continue; }
+        if (!rec || !rec.recipeInstructions) continue;
+        const rw = words(rec.name || ''); if (tw.filter(w => rw.some(x => x.startsWith(w.slice(0, 5)))).length < Math.min(2, tw.length)) continue;
+        // dosi: quelle in comune devono coincidere (altrimenti è un'altra versione del piatto)
+        let same = 0, diff = 0;
+        for (const line of (rec.recipeIngredient || []).map(String)) { const n = line.match(/(\d+(?:[.,]\d+)?)/); const w = words(line.replace(/\d+(?:[.,]\d+)?/g, '')); const k = w.find(x => descDose[x] != null); if (!n || !k) continue; (parseFloat(n[1].replace(',', '.')) === descDose[k] ? same++ : diff++); }
+        if (diff) { console.log('sito del cuoco: dosi diverse', u); continue; }
+        if (Object.keys(descDose).length >= 3 && same < 2) { console.log('sito del cuoco: dosi non confrontabili', u); continue; }
+        console.log('sito del cuoco: ricetta trovata', u);
+        return `<script type="application/ld+json">${JSON.stringify(rec).replace(/<\//g, '<\\/')}</script><meta property="gn:site" content="${u.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">`;
+      }
+      if (Date.now() > stopAt) return '';
+    }
+  }
+  return '';
+}
+
+// Gemini guarda il video YouTube (link pubblico passato direttamente all'API) e trascrive ingredienti e passaggi come detti e mostrati.
+// Si usa solo quando il procedimento non è scritto da nessuna parte; consuma quota del piano gratuito, quindi video fino a 25 minuti
+async function ytVideoRecipe(env, id, seconds) {
+  if (!env.GEMINI_KEY || !id || (seconds && seconds > 1500)) return null;
+  const prompt = `Guarda questo video di cucina e trascrivi fedelmente la ricetta così come viene detta e mostrata: sei un trascrittore, non un cuoco. Rispondi in italiano, SOLO con JSON:
+{"is_recipe":true,"title":"nome del piatto","servings":0,"time":0,"ingredients":["quantità unità ingrediente, come detto o mostrato (es. \"400 g spaghetti\", \"3 spicchi aglio\"); solo il nome se la dose non viene detta"],"steps":["un passaggio per voce, in ordine, con le parole del cuoco, comprese temperature e tempi detti"]}
+servings: per quante persone, solo se detto, altrimenti 0. time: minuti totali dall'inizio al piatto pronto solo se detto o chiaramente deducibile dai tempi detti, altrimenti 0. Non inventare dosi, tempi o passaggi non detti né mostrati. is_recipe false se il video non è una ricetta.`;
+  const body = { contents: [{ parts: [{ file_data: { file_uri: `https://www.youtube.com/watch?v=${id}` } }, { text: prompt }] }],
+    generationConfig: { temperature: 0.2, maxOutputTokens: 4000, responseMimeType: 'application/json', mediaResolution: 'MEDIA_RESOLUTION_LOW' } };
+  for (let i = 0; i < 2; i++) {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_KEY }, body: JSON.stringify(body), signal: AbortSignal.timeout(80000) });
+    if (r.ok) { const j = await r.json(); console.log('video Gemini: ok', JSON.stringify(j.usageMetadata || {})); return lastJson((j.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('')); }
+    const msg = str(await r.text(), 300);
+    if (r.status === 400 && !i && /mediaResolution|media_resolution/i.test(msg)) { delete body.generationConfig.mediaResolution; continue; }
+    console.log('video Gemini non disponibile:', r.status, msg); return null;
+  }
+  return null;
+}
+
 async function preview(env, b) {
   let u;
   try { u = new URL(str(b.url, 2000)); } catch { throw Object.assign(new Error('Link non valido'), { status: 400 }); }
@@ -490,7 +579,8 @@ async function preview(env, b) {
     const title = js('title'), desc = js('shortDescription'), author = js('author'), secs = +js('lengthSeconds') || 0;
     if (title || desc) {
       const esc = v => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-      return { html: `<html><head><title>${esc(title)}</title><meta property="og:title" content="${esc(title)}"><meta property="og:site_name" content="${esc(author)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:image" content="https://i.ytimg.com/vi/${yt}/hqdefault.jpg"></head></html>`, url: `https://www.youtube.com/watch?v=${yt}`, seconds: secs };
+      let site = ''; try { site = await creatorRecipe(desc, title); } catch (e) { console.log('sito del cuoco', e.message); }
+      return { html: `<html><head><title>${esc(title)}</title><meta property="og:title" content="${esc(title)}"><meta property="og:site_name" content="${esc(author)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:image" content="https://i.ytimg.com/vi/${yt}/hqdefault.jpg">${site}</head></html>`, url: `https://www.youtube.com/watch?v=${yt}`, seconds: secs, site: !!site };
     }
   }
   // Instagram: la pagina di incorporamento ufficiale (pensata per mostrare i post su altri siti) ha la didascalia completa
