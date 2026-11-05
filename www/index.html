@@ -76,14 +76,14 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px}
 .item .more{position:absolute;top:8px;right:8px;z-index:2;width:32px;height:32px;border-radius:50%;border:none;background:color-mix(in srgb,var(--card) 80%,transparent);color:var(--fg);font-size:1.1rem;line-height:1;cursor:pointer;box-shadow:var(--sh);backdrop-filter:blur(6px);display:grid;place-items:center}
 .item .thumb{position:relative}
 #menu{padding:12px 16px calc(16px + env(safe-area-inset-bottom));max-width:480px}#menu h3{margin:4px 0 12px;font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#menu .btn{width:100%;justify-content:center;margin-bottom:8px;font-size:1rem;padding:13px}#menu .btn.danger{color:#fff;background:#c62828;border-color:#c62828}
+#menu .btn{width:100%;justify-content:center;margin-bottom:8px;font-size:1rem;padding:13px}#menu .lbl{margin:0 0 8px;font-size:.82rem;color:var(--mut);font-weight:600}.socRow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}#menu .socRow .btn{margin:0;color:#fff;border:none;font-weight:700}#menu .ig{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)}#menu .tt{background:#010101}#menu .yt{background:#ff0000}#menu .fb{background:#1877f2}#ratePop{max-width:420px;text-align:center}#ratePop h3{margin:4px 0 2px;font-size:1.1rem}#ratePop .rate{justify-content:center;gap:4px;margin:10px 0 4px}#ratePop .rate button{font-size:2.8rem;padding:0 4px}#ratePop .btn{margin-top:10px;width:100%;justify-content:center}#menu .btn.danger{color:#fff;background:#c62828;border-color:#c62828}
 .thumb{aspect-ratio:4/3;position:relative;display:grid;place-items:center;font-size:2.6rem;overflow:hidden;background:var(--ph,linear-gradient(135deg,#e9a23b33,#c2502f33))}
 .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s}
 .item:hover .thumb img{transform:scale(1.04)}
 .thumb .play{position:absolute;left:8px;bottom:8px;z-index:2;height:24px;min-width:24px;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;background:#000b;color:#fff;border-radius:999px;padding:0 8px;backdrop-filter:blur(6px)}
 .thumb .cat{position:absolute;left:8px;top:8px;font-size:.68rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;background:color-mix(in srgb,var(--card) 88%,transparent);color:var(--fg);border-radius:999px;padding:3px 8px;backdrop-filter:blur(6px)}
 .thumb .rt{position:absolute;right:8px;top:8px;font-size:.72rem;background:#000a;color:#ffd166;border-radius:999px;padding:2px 7px}
-.sv{position:absolute;right:8px;bottom:8px;height:24px;font-size:.74rem;font-weight:700;background:#000b;color:#ffd166;border-radius:999px;padding:0 9px;backdrop-filter:blur(6px);display:inline-flex;align-items:center;gap:5px;z-index:2}.sv small{font-weight:600;color:#fffd}.sv.big{position:static;font-size:1.25rem;background:none;color:var(--star);padding:0;backdrop-filter:none}.sv.big small{color:var(--mut);font-size:.85rem;font-weight:500}.sv.hero{right:14px;bottom:14px;font-size:.95rem;padding:5px 11px}
+.sv{position:absolute;right:8px;bottom:8px;height:24px;font-size:.74rem;font-weight:700;background:#000b;color:#ffd166;border-radius:999px;padding:0 9px;backdrop-filter:blur(6px);display:inline-flex;align-items:center;gap:5px;z-index:2}.sv small{font-weight:600;color:#fffd}.sv.big{position:static;font-size:1.25rem;background:none;color:var(--star);padding:0;backdrop-filter:none}.sv.big small{color:var(--mut);font-size:.85rem;font-weight:500}.sv.onHero{right:14px;bottom:14px;font-size:.95rem;padding:5px 11px}.sv[data-rate]{cursor:pointer}.sv[data-rate]::after{content:'';position:absolute;inset:-10px} /* area di tocco più grande */
 .st5{position:relative;display:inline-block;line-height:1;letter-spacing:1px;color:#ffffff66;white-space:nowrap}.st5 i{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:#ffd166;font-style:normal}.sv.big .st5{color:var(--bd)}.sv.big .st5 i{color:var(--star)}.svRow{display:flex;gap:10px;align-items:baseline;margin-top:12px;flex-wrap:wrap}
 .item .b{padding:11px 13px 13px;flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
 .item h3{margin:0;font-size:1.02rem;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
@@ -198,7 +198,7 @@ details summary{cursor:pointer}
 .warnTxt{color:var(--acc);font-weight:600}
 .srcGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11rem),1fr));gap:10px}.srcCard{font:inherit;text-align:left;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:12px;cursor:pointer;color:var(--fg)}.srcCard b{display:block;font-size:1rem;margin-bottom:4px}.srcCard span{font-size:.78rem;color:var(--mut);line-height:1.35;display:block}.srcCard:active{transform:scale(.98)}
 .shopBox{margin:4px 0 12px}.shopBox summary{list-style:none;cursor:pointer;background:var(--acc);color:#fff;font-weight:700;font-size:1.05rem;padding:14px 16px;border-radius:14px;text-align:center;box-shadow:var(--sh)}.shopBox summary::-webkit-details-marker{display:none}.shopBox summary span{font-weight:500;opacity:.85}.shopBox[open] summary{border-radius:14px 14px 0 0}.shopBox #shopList{background:var(--card);border:1px solid var(--bd);border-top:none;border-radius:0 0 14px 14px;padding:10px 14px 14px}
-#bOut .dish{font-size:1rem}#bOut .dish small{font-size:.82rem}#bOut .dish .r{font-size:.72rem}#bOut .meal>.meta{font-size:.85rem}#bOut .nbox span{font-size:.78rem}#bOut .bdg{font-size:.76rem}#bOut .fonti p{text-align:left;margin:8px 0 0;font-size:.82rem}.aiTag{position:absolute;right:8px;top:8px;z-index:2;font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:center}.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
+#bOut .dish{font-size:1rem}#bOut .dish small{font-size:.82rem}#bOut .dish .r{font-size:.72rem}#bOut .meal>.meta{font-size:.85rem}#bOut .nbox span{font-size:.78rem}#bOut .bdg{font-size:.76rem}#bOut .fonti p{text-align:left;margin:8px 0 0;font-size:.82rem}.aiTag{position:absolute;right:8px;top:8px;z-index:2;font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:left}@media (max-width:899px){.list>.fonti{max-width:calc(100% - 180px)}} /* a sinistra: a destra c'è il pulsante «Nuova ricetta» */.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
 .kv{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
 .kv span{font-size:.8rem;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--bg2)}
 
@@ -481,8 +481,9 @@ details summary{cursor:pointer}
 </dialog>
 <datalist id="countries"></datalist><datalist id="regions"></datalist>
 
-<dialog id="menu"><h3 id="menuT"></h3><button class="btn" id="menuEdit">✏️ Modifica</button><button class="btn danger" id="menuDel">🗑 Elimina</button><button class="btn" id="menuCancel">Annulla</button></dialog>
+<dialog id="menu"><h3 id="menuT"></h3><p class="lbl">Condividi su</p><div class="socRow"><button class="btn ig" data-s="instagram">Instagram</button><button class="btn tt" data-s="tiktok">TikTok</button><button class="btn yt" data-s="youtube">YouTube</button><button class="btn fb" data-s="facebook">Facebook</button></div><button class="btn" id="menuEdit">✏️ Modifica</button><button class="btn danger" id="menuDel">🗑 Elimina</button><button class="btn" id="menuCancel">Annulla</button></dialog>
 <dialog id="photo"><button class="dclose" id="phX" aria-label="Chiudi">✕</button><div id="phv"></div></dialog>
+<dialog id="ratePop"><h3 id="rateT" tabindex="-1" autofocus></h3><p class="meta" id="rateSub" style="margin:0"></p><div class="rate" id="rateStars"><button type="button" data-n="1" aria-label="1 stelle">★</button><button type="button" data-n="2" aria-label="2 stelle">★</button><button type="button" data-n="3" aria-label="3 stelle">★</button><button type="button" data-n="4" aria-label="4 stelle">★</button><button type="button" data-n="5" aria-label="5 stelle">★</button></div><p class="meta" id="rateHint" style="margin:0"></p><button class="btn" id="rateX">Chiudi</button></dialog>
 <dialog id="rec"><div class="rech"><b>🎬 Il video della ricetta</b><button type="button" class="dclose" id="recX" aria-label="Chiudi" style="float:none;margin:0">✕</button></div><div id="recBody"></div></dialog>
 
 <dialog id="acct">
@@ -777,17 +778,47 @@ const pubId=i=>i?.book&&!i.pronto&&!i.colazione?i.id:i?.bookId||'';
 const STARS={}; // id -> [media, voti, mio voto, letto quando]
 const fmtAvg=a=>String(a).replace('.',',');
 const st5=(a,t)=>`<span class="st5" title="${esc(t||'')}"><i style="width:${Math.max(0,Math.min(5,+a||0))/5*100}%">★★★★★</i>★★★★★</span>`;
-const starsHtml=(id,big)=>{const v=STARS[id]||[0,0,0];const n=v[1],w=n===1?'voto':'voti',t=n?`${fmtAvg(v[0])} su 5, ${n} ${w}`:'ancora nessun voto';return big?`<span class="sv big">${st5(v[0],t)}<small>${n?` ${fmtAvg(v[0])} su 5 · ${n} ${w}`:' ancora nessun voto: dai il tuo'}</small></span>`:`<span class="sv">${st5(v[0],t)}<small>${n?` ${n}`:''}</small></span>`};
-function starsPaint(){document.querySelectorAll('.item[data-pub]').forEach(el=>{const id=el.dataset.pub;if(!STARS[id])return;const h=starsHtml(id),b=el.querySelector('.sv');if(b)b.outerHTML=h;else el.querySelector('.thumb')?.insertAdjacentHTML('beforeend',h)});const d=$('#dStars');if(d?.dataset.id)starsBlock(d.dataset.id);const hv=$('#heroStars');if(hv?.dataset.id)hv.innerHTML=starsHtml(hv.dataset.id)}
+const starsHtml=(id,big)=>{const v=STARS[id]||[0,0,0];const n=v[1],w=n===1?'voto':'voti',t=n?`${fmtAvg(v[0])} su 5, ${n} ${w}`:'ancora nessun voto';return big?`<span class="sv big">${st5(v[0],t)}<small>${n?` ${fmtAvg(v[0])} su 5 · ${n} ${w}`:' ancora nessun voto: dai il tuo'}</small></span>`:`<span class="sv" data-rate="${esc(id)}">${st5(v[0],t)}<small>${n?` ${n}`:''}</small></span>`};
+// Le stelline sulla copertina: nelle mie ricette il mio voto (vuote se non l'ho dato), nel ricettario la media dei Gnammers. Si toccano per votare
+const isMine=i=>items.some(x=>x.id===i.id);
+const myRate=i=>i.rating||(i.bookId&&STARS[i.bookId]?.[2])||0;
+const canRate=i=>!!pubId(i)||isMine(i);
+function svInner(i){const pid=pubId(i);
+  if(isMine(i)||!pid){const r=myRate(i);return st5(r,r?`${r} stelle, il tuo voto`:'tocca per dare il tuo voto')}
+  const v=STARS[pid]||[0,0,0],n=v[1];return st5(v[0],n?`${fmtAvg(v[0])} su 5, ${n} ${n===1?'voto':'voti'}`:'ancora nessun voto')+`<small>${n?' '+n:''}</small>`}
+const svOf=(i,cls)=>`<span class="sv${cls?' '+cls:''}" data-rate="${esc(i.id)}">${svInner(i)}</span>`;
+const heroSv=i=>svOf(i,'onHero').replace('class="sv onHero"','class="sv onHero" id="heroStars"'); // non «hero»: quella classe è della foto
+const findAny=id=>items.find(x=>x.id===id)||BK.find(x=>x.id===id)||(book||[]).find(x=>x.id===id);
+function starsPaint(){document.querySelectorAll('.item[data-pub]').forEach(el=>{const id=el.dataset.pub;if(!STARS[id])return;const i=findAny(el.dataset.id);if(!i)return;const h=svOf(i),b=el.querySelector('.sv');if(b)b.outerHTML=h;else el.querySelector('.thumb')?.insertAdjacentHTML('beforeend',h)});const d=$('#dStars');if(d?.dataset.id)starsBlock(d.dataset.id);const hv=$('#heroStars');if(hv&&DET)hv.outerHTML=heroSv(DET)}
+let DET=null; // la ricetta aperta nella scheda
+// Dà (o toglie, n=0) il voto: nelle mie ricette resta sul telefono; per quelle del ricettario va anche ai Gnammers
+async function rateSet(i,n){const pid=pubId(i),it=items.find(x=>x.id===i.id);
+  if(it){it.rating=n;it.t=Date.now();saveItems()}
+  if(pid){STARS[pid]=[...(STARS[pid]||[0,0,0]).slice(0,3),Date.now()];STARS[pid][2]=n}
+  render();starsPaint();rateRefresh(i);
+  if(!pid){toast(n?'Voto salvato':'Voto tolto');return}
+  try{const r=await server('/stars/vote',{id:pid,s:n,dev:DEV},await starsToken());STARS[pid]=[r.avg,r.n,r.my,Date.now()];starsPaint();rateRefresh(i);toast(n?'Grazie del voto!':'Voto tolto')}
+  catch(e){toast(e.message||'Voto non inviato: riprova');starsFetch([pid],true)}}
+// Aggiorna le stelle nella scheda aperta e nella finestrella del voto
+function rateRefresh(i){const r=myRate(i);
+  if(RATE&&RATE.id===i.id)$('#rateStars').querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.n<=r));
+  if(DET&&DET.id===i.id){$('#dRate')?.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.n<=r));const hv=$('#heroStars');if(hv)hv.outerHTML=heroSv(i)}}
+let RATE=null;
+function rateOpen(id){const i=findAny(id);if(!i||!canRate(i))return;RATE=i;const r=myRate(i),pid=pubId(i),v=pid&&STARS[pid];
+  $('#rateT').textContent=i.title||'Ricetta';$('#rateSub').textContent=pid&&v?.[1]?`Voto dei Gnammers: ${fmtAvg(v[0])} su 5 (${v[1]} ${v[1]===1?'voto':'voti'})`:pid?'Ancora nessun voto dei Gnammers':'';
+  $('#rateStars').querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.n<=r));$('#rateHint').textContent=r?'Il tuo voto. Tocca la stessa stella per toglierlo':'Tocca una stella: 1 così così, 5 buonissima';
+  $('#ratePop').showModal()}
+$('#rateStars').onclick=e=>{const b=e.target.closest('button');if(!b||!RATE)return;const n=+b.dataset.n,s=myRate(RATE)===n?0:n;rateSet(RATE,s);setTimeout(()=>$('#ratePop').close(),350)};
+$('#rateX').onclick=()=>$('#ratePop').close();$('#ratePop').onclick=e=>{if(e.target===$('#ratePop'))$('#ratePop').close()};
+// Un tocco sulle stelline (scheda, copertina) apre il voto invece di aprire la ricetta
+document.addEventListener('click',e=>{const s=e.target.closest('.sv[data-rate]');if(!s)return;e.preventDefault();e.stopPropagation();lpFired=false;rateOpen(s.dataset.rate)},true);
 async function starsToken(){try{return ACC?await idToken():null}catch{return null}}
 async function starsFetch(ids,force){const want=[...new Set(ids.filter(Boolean))].filter(id=>force||!STARS[id]||Date.now()-(STARS[id][3]||0)>6e5).slice(0,80);if(!want.length)return;
   try{const r=await server('/stars',{ids:want,dev:DEV},await starsToken());for(const id of want)STARS[id]=[...(r.stars[id]||[0,0,0]),Date.now()];starsPaint()}catch{}}
 function starsBlock(id){const d=$('#dStars');if(!d)return;const v=STARS[id]||[0,0,0];
   d.innerHTML=`<div class="svRow"><b>Voto dei Gnammers</b>${starsHtml(id,true)}</div><div class="rate" id="dMy">${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" class="${n<=(v[2]||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}<span class="meta" style="align-self:center;margin-left:8px">${v[2]?'il tuo voto':'tocca le stelle per votare'}</span></div>`;
-  $('#dMy').onclick=async ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n,cur=STARS[id]?.[2]||0,s=cur===n?0:n;
-    STARS[id]=[...(STARS[id]||[0,0,0]).slice(0,3),Date.now()];STARS[id][2]=s;starsBlock(id);
-    try{const r=await server('/stars/vote',{id,s,dev:DEV},await starsToken());STARS[id]=[r.avg,r.n,r.my,Date.now()];starsBlock(id);starsPaint();toast(s?'Grazie del voto!':'Voto tolto')}
-    catch(e){toast(e.message||'Voto non inviato: riprova');starsFetch([id],true)}}}
+  $('#dMy').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n,cur=STARS[id]?.[2]||0,s=cur===n?0:n;
+    const it=items.find(x=>pubId(x)===id)||(DET&&pubId(DET)===id?DET:null);if(it)rateSet(it,s)}}
 async function server(path,body,auth){
   const ctl=new AbortController();setTimeout(()=>ctl.abort(),90000);
   let res;
@@ -899,7 +930,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=120; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=121; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1168,7 +1199,7 @@ function card(i){
   const gara=i.contest?`<div class="badges"><span class="bdg gara">🏆 In gara</span></div>`:'';
   return `<div class="item" data-id="${i.id}"${pubId(i)?` data-pub="${esc(pubId(i))}"`:''}>
     <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${i.imgGen?'<span class="aiTag" title="Immagine generata con l\'AI">AI</span>':''}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
-      <span class="cat">${esc(i.cat||'Altro')}</span>${vid?'<span class="play" title="Con video">▶</span>':''}${pubId(i)?starsHtml(pubId(i)):i.rating?`<span class="sv">${st5(i.rating,i.rating+' stelle, il tuo voto')}</span>`:''}</div>
+      <span class="cat">${esc(i.cat||'Altro')}</span>${vid?'<span class="play" title="Con video">▶</span>':''}${canRate(i)?svOf(i):''}</div>
     <div class="b"><h3>${esc(i.title||i.url)}</h3>
       <div class="facts">${facts.map(f=>`<span>${f}</span>`).join('')}</div>${gara}</div></div>`;
 }
@@ -1825,7 +1856,7 @@ function openDetail(i){
   $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button><div class="dcols"><div class="dmain">
     ${i.clips?.length?`<div class="clipPl" id="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p><p class="row" style="justify-content:flex-start;gap:8px;margin:0 0 10px"><button type="button" class="btn pri" data-vc="share">📤 Pubblica</button><button type="button" class="btn" data-vc="save">💾 Salva nel rullino</button></p></div>`
       :e?`<iframe class="video ${e.v?'v':'h'}" src="${esc(e.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
-      :i.image?`<div class="heroWrap">${pubId(i)?`<span class="sv hero" id="heroStars" data-id="${esc(pubId(i))}">${starsHtml(pubId(i))}</span>`:i.rating?`<span class="sv hero">${st5(i.rating,i.rating+' stelle, il tuo voto')}</span>`:''}<img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;hero&quot; style=&quot;display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)&quot;>${em}</div>'"></div>`
+      :i.image?`<div class="heroWrap">${canRate(i)?heroSv(i):''}<img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;hero&quot; style=&quot;display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)&quot;>${em}</div>'"></div>`
       :`<div class="heroWrap"><div class="hero" style="display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)">${em}</div></div>`}
     <h2 style="margin-top:12px">${esc(i.title||i.url)}</h2>
     ${i.pseudo?`<div class="warn" style="margin:8px 0">Piatto <b>italo-americano</b>: nato all'estero e spesso presentato come italiano, non fa parte della cucina italiana di tutti i giorni.</div>`:''}
@@ -1838,7 +1869,7 @@ function openDetail(i){
     ${i.artusi?`<details class="meta" style="margin-top:6px"><summary>Testo originale di Artusi: «${esc(i.origTitle)}» (n. ${i.num}, ${esc(i.chapter)})</summary><p class="cap" style="margin-top:6px">${esc(i.text)}</p></details>`:''}
     ${i.book&&!i.linked?`<p class="lic" style="margin-top:8px">${sourceLine(i)}</p>`:''}
     ${pubId(i)?`<div id="dStars" data-id="${esc(pubId(i))}"></div>`:''}
-    <div class="rate" id="dRate" style="margin-top:8px${i.book?';display:none':''}">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n<=(i.rating||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}</div>
+    <div class="rate" id="dRate" style="margin-top:8px${i.book||pubId(i)?';display:none':''}">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n<=(i.rating||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}</div>
     </div><div class="dside">
     ${i.linked?`<div class="kv"><span>Costo ${esc(i.cost||'n.d.')}</span></div><h3>Ingredienti principali</h3><ul>${i.ingredients.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
       <p class="meta">Dosi e procedimento sono sulla pagina originale. <a class="btn pri" style="margin-top:8px" href="${esc(i.url)}" target="_blank" rel="noopener">Apri su GialloZafferano</a></p>
@@ -1852,8 +1883,7 @@ function openDetail(i){
     <div class="row">${i.url&&i.source!=='Gnamina'&&i.source!=='Aggregatore Ricette'?`<a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">Apri originale</a>`:''}
       <a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">▶ Cerca su YouTube</a><span class="sp"></span>
       ${i.pronto||i.colazione?'':i.book?'<button class="btn pri" id="dSave">Salva nelle mie</button>':'<button class="btn" id="dEdit">Modifica</button>'}<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button></div></div></div>`;
-  $('#dRate').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n;i.rating=i.rating===n?0:n;i.t=Date.now();saveItems();render();
-    $('#dRate').querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.n<=i.rating))};
+  DET=i;$('#dRate').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n;rateSet(i,myRate(i)===n?0:n)};
   {const pid=pubId(i);if(pid){starsBlock(pid);starsFetch([pid],true)}}
   if(i.ingredients?.length&&!i.linked){
     const base=i.servings||i.s||4;let n=base;
@@ -2363,8 +2393,31 @@ function openItemMenu(id){
   $('#menuEdit').onclick=()=>{$('#menu').close();openForm(it)};
   $('#menuDel').onclick=()=>{if(confirm(`Eliminare «${it.title||'questa ricetta'}»?`)){$('#menu').close();deleteRecipe(id)}};
   $('#menuCancel').onclick=()=>$('#menu').close();
+  $('#menu').querySelectorAll('.socRow .btn').forEach(b=>b.onclick=()=>{$('#menu').close();shareSocial(it,b.dataset.s)});
   $('#menu').showModal();
 }
+// Condivisione sui social dal tocco lungo: il video della ricetta (o la foto di copertina) con la didascalia già negli appunti.
+// Nell'app Android si apre direttamente l'app scelta; su iPhone e nel browser il menù di condivisione del telefono, dove si sceglie l'app
+const SOC={instagram:{n:'Instagram',pkg:'com.instagram.android',web:'https://www.instagram.com/'},tiktok:{n:'TikTok',pkg:'com.zhiliaoapp.musically',web:'https://www.tiktok.com/upload'},youtube:{n:'YouTube',pkg:'com.google.android.youtube',web:'https://www.youtube.com/upload'},facebook:{n:'Facebook',pkg:'com.facebook.katana',web:'https://www.facebook.com/sharer/sharer.php?u='}};
+async function shareSocial(it,net){const S=SOC[net];if(!S)return;const title=it.title||'La mia ricetta';
+  const link=it.video||SITE;
+  const cap=`${title} 🍅 Ricetta su Gnamina ${link}\n#gnamina #ricetta #cucinaitaliana${net==='tiktok'?' #foodtiktok':net==='instagram'?' #foodporn #instafood':''}`;
+  let files=[];
+  if(it.clips?.length){try{files=await clipFiles(it.clipKey,it.clips,title)}catch{toast('Il video non è su questo telefono: condivido la foto')}}
+  if(!files.length&&it.image){try{const b=await (await fetch(it.image)).blob();if(b.size)files=[new File([b],'gnamina-'+(title.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,40)||'ricetta')+'.jpg',{type:b.type||'image/jpeg'})]}catch{}}
+  if(net==='youtube'&&!it.clips?.length){toast(it.video?'Il video è già su YouTube':'Per YouTube serve il video: registralo con «Modifica → Registra il video con la guida»');if(!it.video)return}
+  let copied=false;try{await navigator.clipboard.writeText(cap);copied=true}catch{}
+  const hint=copied?`Didascalia copiata: in ${S.n} tieni premuto nella descrizione e scegli Incolla`:`Scegli ${S.n}`;
+  if(window.AndroidShare?.shareTo){ // app Android: direttamente nell'app scelta
+    if(files.length){toast(`Apro ${S.n}…`);for(const f of files){AndroidShare.videoBegin(f.name,(f.type||'video/mp4').split(';')[0]);const CH=768*1024;for(let o=0;o<f.size;o+=CH)AndroidShare.videoChunk(await blobB64(f.slice(o,o+CH)));AndroidShare.videoEndTo(S.pkg,S.n,cap)}}
+    else AndroidShare.shareTo(S.pkg,S.n,title,cap);
+    return}
+  if(files.length&&navigator.canShare?.({files})){toast(`Nel menù scegli ${S.n}. ${hint}`);try{await navigator.share({files,title,text:cap})}catch(e){if(e.name!=='AbortError')toast('Condivisione non riuscita')}return}
+  if(net==='facebook'){window.open(S.web+encodeURIComponent(link)+'&quote='+encodeURIComponent(cap),'_blank','noopener');return}
+  if(navigator.share){try{await navigator.share({title,text:cap})}catch(e){if(e.name!=='AbortError')toast('Condivisione non riuscita')}return}
+  toast(hint);window.open(S.web,'_blank','noopener');
+}
+window.onShareTo=(ok,name)=>{if(!ok)toast(`${name||'L\'app'} non è installata: ho aperto il menù di condivisione`)};
 $('#menu').onclick=e=>{if(e.target===$('#menu'))$('#menu').close()}; // tocco fuori: chiude
 let lp=null,lpFired=false;
 const lpCancel=()=>{clearTimeout(lp);lp=null};

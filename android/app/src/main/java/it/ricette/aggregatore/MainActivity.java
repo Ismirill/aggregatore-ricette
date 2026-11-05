@@ -96,6 +96,11 @@ public class MainActivity extends BridgeActivity {
 
     // Passa il video al menu di condivisione (TikTok, Instagram, Facebook, YouTube, WhatsApp…) con la didascalia come testo
     private boolean shareVideoFile(java.io.File f, String mime, String caption) {
+        return shareFileTo(f, mime, caption, null, null);
+    }
+
+    // Condivide un file (video o foto): con «pkg» va dritto nell'app scelta (Instagram, TikTok, YouTube, Facebook); se non è installata, il menu di condivisione
+    private boolean shareFileTo(java.io.File f, String mime, String caption, String pkg, String appName) {
         try {
             android.net.Uri u = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", f);
             Intent s = new Intent(Intent.ACTION_SEND);
@@ -103,12 +108,28 @@ public class MainActivity extends BridgeActivity {
             s.putExtra(Intent.EXTRA_STREAM, u);
             if (caption != null && !caption.isEmpty()) s.putExtra(Intent.EXTRA_TEXT, caption);
             s.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            Intent ch = Intent.createChooser(s, "Pubblica il video");
-            runOnUiThread(() -> startActivity(ch));
+            startTo(s, pkg, appName, "Pubblica il video");
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    // Avvia l'intent nell'app indicata; se manca, apre il menu di condivisione e avvisa la pagina
+    private void startTo(Intent s, String pkg, String appName, String chooserTitle) {
+        runOnUiThread(() -> {
+            if (pkg != null && !pkg.isEmpty()) {
+                try {
+                    Intent d = new Intent(s);
+                    d.setPackage(pkg);
+                    startActivity(d);
+                    js("window.onShareTo&&onShareTo(true,'" + String.valueOf(appName).replace("'", "") + "')");
+                    return;
+                } catch (Exception e) { /* app non installata: menu di condivisione */ }
+                js("window.onShareTo&&onShareTo(false,'" + String.valueOf(appName).replace("'", "") + "')");
+            }
+            startActivity(Intent.createChooser(s, chooserTitle));
+        });
     }
 
     @Override
@@ -206,6 +227,29 @@ public class MainActivity extends BridgeActivity {
             i.putExtra(Intent.EXTRA_SUBJECT, title);
             i.putExtra(Intent.EXTRA_TEXT, text);
             runOnUiThread(() -> startActivity(Intent.createChooser(i, title)));
+        }
+
+        // Condivide un testo direttamente in un'app (pacchetto Android), es. Facebook; se manca, il menu di condivisione
+        @JavascriptInterface
+        public void shareTo(String pkg, String appName, String title, String text) {
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.setType("text/plain");
+            i.putExtra(Intent.EXTRA_SUBJECT, title);
+            i.putExtra(Intent.EXTRA_TEXT, text);
+            startTo(i, pkg, appName, title);
+        }
+
+        // Come videoEnd, ma il file va dritto nell'app scelta (Instagram, TikTok, YouTube, Facebook)
+        @JavascriptInterface
+        public void videoEndTo(String pkg, String appName, String caption) {
+            final boolean ready = vidOut != null && vidFile != null;
+            closeVid();
+            final java.io.File f = vidFile;
+            final String m = vidMime, c = caption;
+            new Thread(() -> {
+                boolean ok = ready && shareFileTo(f, m, c, pkg, appName);
+                js("window.onVideoDone&&onVideoDone(" + ok + ",'share')");
+            }).start();
         }
 
         // Accesso con Google dentro l'app: foglio nativo di scelta dell'account (Google Play Services), poi il token ID va a Firebase dalla pagina

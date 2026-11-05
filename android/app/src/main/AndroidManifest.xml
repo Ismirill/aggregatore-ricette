@@ -69,5 +69,8 @@
     <!-- Per sapere se l'app YouTube è installata: il video di una ricetta le viene passato direttamente -->
     <queries>
         <package android:name="com.google.android.youtube" />
+        <package android:name="com.instagram.android" />
+        <package android:name="com.zhiliaoapp.musically" />
+        <package android:name="com.facebook.katana" />
     </queries>
 </manifest>
