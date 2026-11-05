@@ -174,7 +174,9 @@ Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diet
   const img = b.image ? await imagePart(str(b.image, 2000)) : null;
   const r0 = await aiJson(env, prompt, img), r = r0 && faithful(r0, text);
   // YouTube: se il procedimento non è scritto né nella descrizione né sul sito del cuoco, Gemini guarda il video
-  const yid = r && r.is_recipe !== false && !b.haveSteps && !(r.steps || []).length ? ytIdOf(b.url) : '';
+  // i «capitoli» del video (00:00 Preparazione del sugo…) non sono un procedimento: passaggi veri = almeno due frasi di una certa lunghezza
+  const realSteps = (r?.steps || []).filter(x => String(x).trim().length >= 30).length >= 2;
+  const yid = r && r.is_recipe !== false && !b.haveSteps && !realSteps ? ytIdOf(b.url) : '';
   if (yid) try {
     const v = await ytVideoRecipe(env, yid, +b.seconds || 0);
     if (v && v.is_recipe !== false) {
