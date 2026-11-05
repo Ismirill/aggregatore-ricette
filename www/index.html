@@ -931,7 +931,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=124; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=125; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2105,6 +2105,8 @@ async function runAnalysis(url,overwrite){
   setDiets([...new Set([...(overwrite?[]:getDiets()),...c.diets])]);
   const n=(a.ingredients||[]).length;
   showPv(n?`Trovati ${n} ingredienti`:a.transcript?'Trascritto il parlato del video':'Ingredienti non trovati: aggiungili tu se vuoi');
+  // Video YouTube con la stessa ricetta sul sito del cuoco: ingredienti, procedimento, persone e tempo arrivano da lì così come sono
+  if(a.fromSite&&a.stepsFromSchema&&a.steps?.length&&n>=3){showPv(`Ricetta completa dal sito del cuoco · ${n} ingredienti · ${a.steps.length} passaggi${a.servings?` · per ${a.servings}`:''}${a.time?` · ${a.time} min`:''}`);return}
   // Post social o pagine senza dati strutturati: completa con l'AI se la chiave è configurata
   if(aiOn()&&(['TikTok','Instagram','YouTube','Facebook','Pinterest'].includes(sourceOf(url))||n<3)){
     showPv('Analisi AI della ricetta…');
@@ -2119,8 +2121,8 @@ async function runAnalysis(url,overwrite){
       // il post non elenca gli ingredienti: l'AI dà solo i nomi tipici del piatto, senza dosi, e lo si dice
       if(r.inferred&&r.ingredients.length)r.ingredients.push('(il post non elenca gli ingredienti: questi sono quelli tipici del piatto, senza dosi; guarda il video e completa)');
       if(r.ingredients.length)f.ingredients.value=r.ingredients.join('\n');
-      if(r.steps.length&&(overwrite||!f.steps.value||!(a.stepsFromSchema)))f.steps.value=r.steps.join('\n'); // i passaggi dell'AI (fedeli al testo) vincono sulla divisione a paragrafi della didascalia
-      if(r.time&&(overwrite||!f.time.value||!a.timeFromSchema))f.time.value=r.time; // il tempo ricostruito dall'AI vince sul primo «N minuti» letto nella didascalia; resta quello dichiarato dai siti di ricette (schema.org)
+      if(r.steps.length&&!(a.stepsFromSchema&&a.steps?.length)&&(overwrite||!f.steps.value))f.steps.value=r.steps.join('\n'); // i passaggi dell'AI (fedeli al testo) vincono sulla divisione a paragrafi della didascalia, mai su quelli strutturati della pagina
+      if(r.time&&!a.timeFromSchema&&(overwrite||!f.time.value))f.time.value=r.time; // il tempo ricostruito dall'AI vince sul primo «N minuti» letto nella didascalia; resta quello dichiarato dai siti di ricette (schema.org)
       if(r.servings&&(overwrite||!f.servings.value))f.servings.value=r.servings;
       if(r.country){f.country.value=r.country;f.region.value=r.region}
       setDiets(r.diets);

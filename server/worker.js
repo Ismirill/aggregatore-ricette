@@ -488,8 +488,8 @@ const ytIdOf = url => { try { const u = new URL(url); if (!/(^|\.)(youtube\.com|
 
 // La stessa ricetta sul sito del cuoco: nella descrizione del video c'è quasi sempre il link al sito, e lì la ricetta ha i dati
 // strutturati (schema.org Recipe) con il procedimento scritto. Si cerca sul sito il titolo del video («?s=», WordPress e simili),
-// si legge la pagina più somigliante e la si accetta solo se è davvero la stessa ricetta: titolo sovrapponibile e, quando il
-// video elenca gli ingredienti con le dosi, dosi uguali (lo stesso cuoco ha spesso più versioni dello stesso piatto)
+// si legge la pagina più somigliante e la si accetta se è lo stesso piatto: titolo sovrapponibile e, quando il video elenca gli
+// ingredienti, gli stessi ingredienti (le dosi possono differire, es. per un numero diverso di persone: vale la lista del sito)
 async function creatorRecipe(desc, title, timeoutMs = 9000) {
   const stopAt = Date.now() + timeoutMs, left = () => Math.max(500, stopAt - Date.now());
   const fx = (url, opt = {}) => fetch(url, { ...opt, headers: { 'User-Agent': PREVIEW_UA, 'Accept-Language': 'it-IT,it;q=0.9', ...(opt.headers || {}) }, redirect: 'follow', signal: AbortSignal.timeout(left()) }).catch(() => null);
@@ -506,9 +506,9 @@ async function creatorRecipe(desc, title, timeoutMs = 9000) {
     if (origins.length >= 3 || Date.now() > stopAt) break;
   }
   console.log('sito del cuoco: siti', origins.join(' ') || 'nessuno');
-  // ingredienti con dose scritti nella descrizione: nome → numero (per il confronto delle dosi)
-  const descDose = {};
-  for (const line of String(desc).split('\n')) { const m = line.match(/(\d+(?:[.,]\d+)?)/); const w = words(line.replace(/\d+(?:[.,]\d+)?\s*(?:g|gr|grammi|kg|ml|cl|l|cucchia\w*|spicchi?o?|mazz\w*|pizzic\w*|tazz\w*|bicchier\w*)?\b/gi, '')).filter(x => !/^(q\.?b|quanto|basta|piacere|ingredient|preparare|persone|porzioni)/.test(x)); if (m && w.length && line.length < 80) descDose[w[0]] = parseFloat(m[1].replace(',', '.')); }
+  // ingredienti scritti nella descrizione (righe brevi con una dose o un segno di elenco): i nomi, per riconoscere lo stesso piatto
+  const descNames = new Set();
+  for (const line of String(desc).split('\n')) { if (line.length > 80 || !/\d|^\s*[-•✔✓*▪►]/.test(line)) continue; const w = words(line.replace(/\d+(?:[.,]\d+)?\s*(?:g|gr|grammi|kg|ml|cl|l|cucchia\w*|spicchi?o?|mazz\w*|pizzic\w*|tazz\w*|bicchier\w*)?\b/gi, '')).filter(x => !/^(q\.?b|quanto|basta|piacere|ingredient|preparare|persone|porzioni|circa|extravergine|fresco|fresca)/.test(x)); if (w.length) descNames.add(w[0].slice(0, 5)); }
   const checkPage = async u => {
       const pr = await fx(u); if (!pr || !pr.ok) return '';
       const ph = (await pr.text()).slice(0, 1_500_000);
@@ -517,12 +517,12 @@ async function creatorRecipe(desc, title, timeoutMs = 9000) {
         let rec; try { const j = JSON.parse(m[1]); rec = [j, ...(j['@graph'] || []), ...(Array.isArray(j) ? j : [])].find(x => x && (x['@type'] === 'Recipe' || (Array.isArray(x['@type']) && x['@type'].includes('Recipe')))); } catch { continue; }
         if (!rec || !rec.recipeInstructions) continue;
         const rw = words(rec.name || ''); if (tw.filter(w => rw.some(x => x.startsWith(w.slice(0, 5)))).length < Math.min(2, tw.length)) continue;
-        // dosi: quelle in comune devono coincidere (altrimenti è un'altra versione del piatto)
-        let same = 0, diff = 0;
-        for (const line of (rec.recipeIngredient || []).map(String)) { const n = line.match(/(\d+(?:[.,]\d+)?)/); const w = words(line.replace(/\d+(?:[.,]\d+)?/g, '')); const k = w.find(x => descDose[x] != null); if (!n || !k) continue; (parseFloat(n[1].replace(',', '.')) === descDose[k] ? same++ : diff++); }
-        // stessa ricetta se le dosi coincidono; una sola dose diversa su almeno tre uguali è una piccola variante (6 o 10 pomodorini), accettata
-        if (diff > 1 || (diff && same < 3)) { console.log('sito del cuoco: dosi diverse', u, same, diff); continue; }
-        if (Object.keys(descDose).length >= 3 && same < 2) { console.log('sito del cuoco: dosi non confrontabili', u); continue; }
+        // stesso piatto se gli ingredienti del video si ritrovano sul sito (almeno la metà, e almeno due); le dosi possono differire
+        if (descNames.size >= 3) {
+          const siteW = (rec.recipeIngredient || []).map(String).flatMap(l => words(l.replace(/\d+(?:[.,]\d+)?/g, '')).map(x => x.slice(0, 5)));
+          const hit = [...descNames].filter(n => siteW.includes(n)).length;
+          if (hit < Math.max(2, Math.ceil(descNames.size / 2))) { console.log('sito del cuoco: ingredienti diversi', u, hit, '/', descNames.size); continue; }
+        }
         console.log('sito del cuoco: ricetta trovata', u);
         return `<script type="application/ld+json">${JSON.stringify(rec).replace(/<\//g, '<\\/')}</script><meta property="gn:site" content="${u.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">`;
       }
