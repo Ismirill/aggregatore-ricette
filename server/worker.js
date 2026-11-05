@@ -76,7 +76,7 @@ const str = (v, n) => String(v ?? '').slice(0, n);
 // Cache su D1 delle letture dei post (/preview) e delle analisi AI (/analyze): la stessa ricetta virale la salvano in tanti,
 // così la lettura esterna, la trascrizione del video e la chiamata al modello si pagano una volta sola. La chiave è
 // l'impronta del link (o del testo): nel database non si vede da chi arriva la richiesta. Si salvano solo i risultati utili.
-const CACHE_V = 2; // aumentare quando cambiano prompt o formato della risposta: le voci vecchie non valgono più
+const CACHE_V = 3; // aumentare quando cambiano prompt o formato della risposta: le voci vecchie non valgono più
 const DAY = 86_400_000;
 async function cached(env, kind, key, ttl, make, worth = () => true) {
   if (!env.SYNC || env.FORCE_AI) return make(); // nelle prove dell'amministratore niente cache: si vuole la risposta del fornitore
@@ -102,7 +102,7 @@ function cacheUrl(u) {
 }
 const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : ''), 3 * DAY, () => preview(env, b),
   r => !!(r.transcript || /ld\+json/.test(r.html) || /content="[^"]{60,}"/.test(r.html))); // niente pagina di accesso o vuota in cache
-const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([str(b.caption || b.title, 6000), str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
+const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([str(b.caption || b.title, 9000), str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
   () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length));
 
 // Scarica la copertina del post (lato server non ci sono blocchi CORS)
@@ -120,8 +120,23 @@ async function imagePart(url) {
   } catch { return null; }
 }
 
-// Numeri scritti nel testo del post (per controllare che dosi, tempi e porzioni non siano inventati)
-const numsIn = t => new Set((String(t).match(/\d+(?:[.,]\d+)?/g) || []).map(x => x.replace(',', '.')));
+// Numeri scritti nel testo del post (per controllare che dosi, tempi e porzioni non siano inventati).
+// Nel parlato trascritto le dosi sono in lettere («due etti di farina», «mezzo litro», «tre uova»): valgono anche quelle,
+// convertite come le scrive il modello (due etti → 200, mezzo chilo → 500, un litro → 1000)
+const WORD_N = { un: 1, una: 1, uno: 1, due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8, nove: 9, dieci: 10, undici: 11, dodici: 12, tredici: 13, quattordici: 14, quindici: 15, sedici: 16, diciassette: 17, diciotto: 18, diciannove: 19, venti: 20, venticinque: 25, trenta: 30, quaranta: 40, cinquanta: 50, sessanta: 60, settanta: 70, ottanta: 80, novanta: 90, cento: 100, centocinquanta: 150, duecento: 200, duecentocinquanta: 250, trecento: 300, quattrocento: 400, cinquecento: 500, seicento: 600, settecento: 700, ottocento: 800, novecento: 900, mille: 1000, mezzo: 0.5, mezza: 0.5 };
+const NUM_WORDS = Object.keys(WORD_N).join('|');
+function numsIn(t) {
+  const s = String(t).toLowerCase(), out = new Set((s.match(/\d+(?:[.,]\d+)?/g) || []).map(x => x.replace(',', '.')));
+  const add = n => { if (n > 0) out.add(String(+n.toFixed(2))); };
+  for (const m of s.matchAll(new RegExp(`\\b(\\d+(?:[.,]\\d+)?|${NUM_WORDS})\\b(\\s+e\\s+mezz[oa]\\b)?(?:\\s+(etti?|ett[oi]|chil[oi]|kg|grammi?|gr?|litr[oi]|l|ml|cl|dl|decilitr[oi]|cucchia\\w*|tazz[ae]|bicchier\\w*)\\b(\\s+e\\s+mezz[oa]\\b)?)?`, 'g'))) {
+    let n = /^\d/.test(m[1]) ? parseFloat(m[1].replace(',', '.')) : WORD_N[m[1]];
+    if (m[2] || m[4]) n += 0.5;
+    const u = m[3] || '';
+    add(n);
+    if (/^ett/.test(u)) add(n * 100); else if (/^(chil|kg)/.test(u)) add(n * 1000); else if (/^(litr|l)$/.test(u) || /^litr/.test(u)) add(n * 1000); else if (/^(dl|decil)/.test(u)) add(n * 100); else if (u === 'cl') add(n * 10);
+  }
+  return out;
+}
 // Durate scritte nel post: "30 minuti", "1 ora", "15'", "mezz'ora", "una decina di minuti", "una ventina di minuti"
 const NUM_IT = { un: 1, una: 1, uno: 1, due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8, nove: 9, dieci: 10, dodici: 12, quindici: 15, venti: 20, venticinque: 25, trenta: 30, quaranta: 40, quarantacinque: 45, cinquanta: 50, sessanta: 60,
   decina: 10, dozzina: 12, quindicina: 15, ventina: 20, trentina: 30, quarantina: 40, cinquantina: 50 };
@@ -131,7 +146,7 @@ const SERV_RX = /(?:per|x|serves?|for)\s*\d+\s*(?:person|porzion|pers\b|people|s
 
 async function analyze(env, b) {
   const cats = (Array.isArray(b.cats) ? b.cats : []).slice(0, 30).map(c => str(c, 40));
-  const text = str(b.caption || b.title, 6000);
+  const text = str(b.caption || b.title, 9000); // didascalia + parlato trascritto (un video di 3 minuti ≈ 3.000 caratteri)
   const prompt = `Questo è un post con una ricetta, salvato in un ricettario personale in italiano.
 Link: ${str(b.url, 500)}
 Fonte: ${str(b.source, 40)}${b.author ? ' · autore: ' + str(b.author, 80) : ''}
@@ -139,6 +154,7 @@ Titolo/didascalia (e, se presente, la trascrizione di ciò che viene detto nel v
 """${text}"""
 
 Sei un trascrittore fedele, non un cuoco: riporta SOLO ciò che è scritto nel testo (hashtag compresi: #cannellini, #carote sono ingredienti) o chiaramente visibile nell'immagine allegata. Non aggiungere dosi, tempi, porzioni o passaggi che non ci sono. Meglio un campo vuoto di un dato inventato.
+Se c'è il «Parlato nel video», ciò che il cuoco dice vale come testo scritto: le dosi dette a voce in lettere vanno scritte in cifre («due etti di farina» → "200 g farina", «mezzo litro di latte» → "500 ml latte", «tre uova» → "3 uova", «un cucchiaio» → "1 cucchiaio"), e i passaggi raccontati a voce vanno in steps, in ordine, uno per voce. La trascrizione automatica può avere errori di ascolto: correggi solo quelli evidenti.
 Guarda bene l'immagine: se mostra il piatto, elenca gli ingredienti che si riconoscono con certezza (es. fagioli bianchi, carote a dadini, patate, pasta corta, pane); se contiene testo sovrimpresso (titolo, elenco di ingredienti, dosi), trascrivilo e usalo come se fosse nel post.
 Estrai i dati in italiano:
 - title: nome breve del piatto (senza hashtag né emoji).
@@ -188,7 +204,8 @@ function timesIn(text) {
 const servingsIn = text => +((String(text).match(SERV_RX) || [''])[0].match(/\d+/) || [0])[0] || 0;
 
 function faithful(r, text) {
-  const nums = numsIn(text), hasList = /ingredient/i.test(text) || /\d+\s?(?:g|gr|kg|ml|cl|l|cucchia|tazz)\b/i.test(text);
+  const nums = numsIn(text), spoken = /parlato nel video:/i.test(text); // il parlato trascritto vale come testo scritto
+  const hasList = /ingredient/i.test(text) || new RegExp(`(?:\\d+|\\b(?:${NUM_WORDS}))\\s?(?:g|gr|grammi?|kg|chil[oi]|ml|cl|dl|l|litr[oi]|ett[oi]|cucchia|tazz|bicchier|pizzic)\\b`, 'i').test(text) || (spoken && nums.size > 0);
   // tempo e porzioni: valgono solo se scritti nel post; se il modello li salta o li inventa, si legge direttamente il testo
   const tm = timesIn(text), sv = servingsIn(text);
   r.time = Math.round(+r.time) || 0; r.time_note = str(r.time_note, 120).trim();
@@ -463,6 +480,19 @@ async function preview(env, b) {
     }
     return null;
   };
+  // YouTube: oEmbed dà solo il titolo; la pagina del video ha la descrizione completa (spesso con ingredienti e dosi), autore e durata.
+  // I sottotitoli automatici non si leggono da qui (il lettore li chiede con i suoi token): il parlato resta fuori
+  const yt = /(^|\.)(youtube\.com|youtu\.be)$/.test(u.hostname) && (u.hostname.endsWith('youtu.be') ? u.pathname.slice(1).split('/')[0] : u.searchParams.get('v') || (u.pathname.match(/\/(?:shorts|embed|live)\/([\w-]{11})/) || [])[1]);
+  if (yt && /^[\w-]{11}$/.test(yt)) {
+    const r = await fetch(`https://www.youtube.com/watch?v=${yt}&hl=it`, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36', 'Accept-Language': 'it-IT,it;q=0.9' } }).catch(() => null);
+    const html = r?.ok ? (await r.text()).slice(0, 3_000_000) : '';
+    const js = k => { const m = html.match(new RegExp(`"${k}":"((?:[^"\\\\]|\\\\.)*)"`)); try { return m ? JSON.parse('"' + m[1] + '"') : ''; } catch { return ''; } };
+    const title = js('title'), desc = js('shortDescription'), author = js('author'), secs = +js('lengthSeconds') || 0;
+    if (title || desc) {
+      const esc = v => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+      return { html: `<html><head><title>${esc(title)}</title><meta property="og:title" content="${esc(title)}"><meta property="og:site_name" content="${esc(author)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:image" content="https://i.ytimg.com/vi/${yt}/hqdefault.jpg"></head></html>`, url: `https://www.youtube.com/watch?v=${yt}`, seconds: secs };
+    }
+  }
   // Instagram: la pagina di incorporamento ufficiale (pensata per mostrare i post su altri siti) ha la didascalia completa
   let embedCaption = '', embedImage = '';
   const ig = u.hostname.match(/instagram\.com$/) && u.pathname.match(/^\/(?:[\w.]+\/)?(p|reels?|tv)\/([\w-]+)/);

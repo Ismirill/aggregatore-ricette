@@ -735,8 +735,9 @@ async function analyze(url,pasted){
       const j=await getJson('https://www.tiktok.com/oembed?url='+encodeURIComponent(url),ctl);
       out={title:j.title||'',caption:j.title||'',image:j.thumbnail_url||'',author:j.author_name||'',videoId:j.embed_product_id||''};
     }else if(src==='YouTube'){
-      const j=await getJson('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent(url),ctl);
-      out={title:j.title||'',image:j.thumbnail_url||'',author:j.author_name||''};
+      try{const j=await getJson('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent(url),ctl);out={title:j.title||'',image:j.thumbnail_url||'',author:j.author_name||''}}catch{}
+      // la descrizione completa del video (spesso con ingredienti e dosi) la legge il server dalla pagina di YouTube
+      if(aiOn())try{const p=await server('/preview',{url});const g=parseHtml(p.html);if(g.caption&&g.caption.length>(out.caption||'').length)out={...out,...Object.fromEntries(Object.entries(g).filter(([,v])=>v&&(!Array.isArray(v)||v.length)))}}catch{}
     }
     if(src!=='YouTube'){
       let html='',fin='';
@@ -930,7 +931,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=122; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=123; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2123,7 +2124,7 @@ async function runAnalysis(url,overwrite){
       if(r.servings&&(overwrite||!f.servings.value))f.servings.value=r.servings;
       if(r.country){f.country.value=r.country;f.region.value=r.region}
       setDiets(r.diets);
-      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata${a.transcript?' (didascalia + parlato del video)':''} · ${r.ingredients.length} ingredienti${!r.time?' · tempo non indicato nel post':r.timeHow==='sommato'?` · tempo ≈ ${r.time} min, somma dei passaggi (riposi, cotture, forno)`:r.timeHow==='stimato'?` · tempo ≈ ${r.time} min, stimato dai passaggi${r.timeNote?` (${r.timeNote})`:''}`:` · tempo ${r.time} min, indicato nel post`}`);
+      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata${a.transcript?' (didascalia + parlato del video)':''} · ${r.ingredients.length} ingredienti${!r.time?' · tempo non indicato nel post':r.timeHow==='sommato'?` · tempo ≈ ${r.time} min, somma dei passaggi (riposi, cotture, forno)`:r.timeHow==='stimato'?` · tempo ≈ ${r.time} min, stimato dai passaggi${r.timeNote?` (${r.timeNote})`:''}`:` · tempo ${r.time} min, indicato nel post`}${!r.steps.length&&['YouTube','Instagram','Facebook'].includes(sourceOf(url))?' · il procedimento è solo detto nel video: guardalo e scrivilo tu nel passo «Preparazione»':''}`);
     }catch(e){showPv(aiErr(e))}
   }
 }
