@@ -4,6 +4,10 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-06
+
+- **Versione 126**: nel passo «Come si chiama il piatto?» la foto di copertina sta su **una riga sola**: anteprima piccola, «📷 Scatta», «🖼 Galleria», «🌐 Online» e, quando la foto c'è, il «✕» per toglierla. Nuova la **ricerca online** della foto: cerca il nome del piatto su Wikimedia Commons e Openverse (foto con licenza libera, senza chiavi né server), mostra una griglia di foto da toccare e salva nella ricetta chi l'ha fatta e la licenza (visibili nella scheda, come per il ricettario). Pagina più compatta: via la spiegazione lunga sulla copertina, «Persone» e «Tempo» sempre affiancati, niente anteprima doppia della foto in cima al passo. Provata nel browser a 360 e 375 px: ricerca «Carbonara» → 24 foto, scelta, ✕, salvataggio (la foto viene ridotta e tenuta nella ricetta) e credito nella scheda.
+
 ## 2026-11-05
 
 - **Server, chiave YouTube attiva**: creata dall'utente la chiave YouTube Data API v3 (progetto Google Cloud di Firebase, limitata a quella API) e caricata come segreto `YOUTUBE_KEY` del worker. Prova in produzione su sei video di Casa Pappagallo: quando YouTube nega la pagina al server (429), la descrizione arriva comunque dall'API ufficiale e la ricetta del sito del cuoco viene trovata (tortelli di patate, colcannon, salsicce al vino con purè). Nessuna modifica al codice.
