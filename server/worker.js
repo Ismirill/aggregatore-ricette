@@ -314,6 +314,7 @@ async function dictate(env, b) {
   const buf = Buffer.from(data, 'base64');
   if (buf.byteLength < 1000) throw Object.assign(new Error('Audio troppo corto'), { status: 400 });
   const transcript = await whisper(env, buf, str(b.mime, 40).toLowerCase());
+  if (b.plain) return { transcript: transcript || '' }; // solo il testo (comandi a voce di «Cucina con me»)
   if (!transcript) return { result: null, transcript: '' };
   const result = await aiJson(env, `Questo è il testo di una ricetta dettata a voce da chi la cucina, trascritto automaticamente (può avere errori di ascolto, parole in dialetto, numeri scritti in lettere). Ricava i dati della ricetta restando fedele a quello che è stato detto: non inventare dosi, tempi o passaggi non detti; correggi solo gli errori evidenti di trascrizione e scrivi le quantità in cifre (es. «due etti di farina» → «200 g farina», «mezzo litro» → «500 ml»). Rispondi SOLO con un oggetto JSON:
 {"is_recipe":true|false,"title":"nome del piatto","servings":numero di persone o null,"time":minuti totali o null,"cat":"Antipasti|Primi|Secondi|Contorni|Piatti unici|Lievitati|Dolci|Altro","ingredients":["quantità e ingrediente, uno per voce, come detto"],"steps":["un passaggio per voce, in ordine, scritto in modo chiaro"],"notes":"consigli o note dette a parte"}

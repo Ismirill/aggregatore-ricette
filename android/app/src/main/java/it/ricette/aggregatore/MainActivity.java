@@ -1,7 +1,16 @@
 package it.ricette.aggregatore;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
+import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import com.getcapacitor.BridgeActivity;
 import org.json.JSONObject;
@@ -14,7 +23,11 @@ public class MainActivity extends BridgeActivity {
     private String pendingShare;
     // Contenuto del file di backup in attesa che l'utente scelga dove salvarlo
     private String pendingFile;
-    private static final int SAVE_FILE = 7331, REC_VIDEO = 7332, PICK_VIDEO = 7333, GOOGLE_SIGNIN = 7334;
+    private static final int SAVE_FILE = 7331, REC_VIDEO = 7332, PICK_VIDEO = 7333, GOOGLE_SIGNIN = 7334, MIC_PERM = 7335;
+    // «Cucina con me»: riconoscimento vocale nativo (il WebView non ha il Web Speech API); i risultati vanno alla pagina con window.onSpeech(testo)
+    private SpeechRecognizer recognizer;
+    private boolean listenOn;
+    private final Handler ui = new Handler(Looper.getMainLooper());
     // File in cui la fotocamera scrive il video della ricetta (cartella cache dell'app, condiviso con YouTube tramite FileProvider)
     private android.net.Uri pendingVideo;
     // Video con il marchio ricevuto dalla pagina a pezzi (base64) in un file della cache: poi si condivide o si salva nella Galleria
@@ -136,6 +149,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getBridge().getWebView().addJavascriptInterface(new ShareBridge(), "AndroidShare");
+        getBridge().getWebView().addJavascriptInterface(new SpeechBridge(), "AndroidSpeech");
         cleanApks(); // l'APK dell'aggiornamento appena installato non serve più
         handleShare(getIntent());
     }
@@ -211,7 +225,112 @@ public class MainActivity extends BridgeActivity {
         getBridge().getWebView().post(() -> getBridge().getWebView().evaluateJavascript("window.toast&&toast('" + m + "')", null));
     }
 
+    // --- Cucina con me: ascolto continuo con il riconoscimento di Android (si riavvia da solo dopo ogni frase) ---
+    private void startListen() {
+        listenOn = true;
+        if (androidx.core.content.ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            androidx.core.app.ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, MIC_PERM); // minSdk 22: le versioni di androidx
+            return;
+        }
+        if (recognizer == null) {
+            recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            recognizer.setRecognitionListener(new RecognitionListener() {
+                public void onReadyForSpeech(Bundle b) {}
+                public void onBeginningOfSpeech() {}
+                public void onRmsChanged(float v) {}
+                public void onBufferReceived(byte[] b) {}
+                public void onEndOfSpeech() {}
+                public void onPartialResults(Bundle b) {}
+                public void onEvent(int t, Bundle b) {}
+                public void onError(int e) {
+                    if (listenOn) ui.postDelayed(MainActivity.this::listenOnce, e == SpeechRecognizer.ERROR_RECOGNIZER_BUSY ? 1200 : 500);
+                }
+                public void onResults(Bundle b) {
+                    java.util.ArrayList<String> r = b.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                    if (r != null && !r.isEmpty() && r.get(0) != null) js("window.onSpeech&&onSpeech(" + JSONObject.quote(r.get(0)) + ")");
+                    if (listenOn) ui.postDelayed(MainActivity.this::listenOnce, 250);
+                }
+            });
+        }
+        muteBeeps(true);
+        listenOnce();
+    }
+
+    private void listenOnce() {
+        if (!listenOn || recognizer == null) return;
+        try {
+            Intent it = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            it.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            it.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "it-IT");
+            it.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "it-IT");
+            it.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
+            it.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+            recognizer.startListening(it);
+        } catch (Exception e) {
+            if (listenOn) ui.postDelayed(MainActivity.this::listenOnce, 1500);
+        }
+    }
+
+    private void stopListen() {
+        listenOn = false;
+        if (recognizer != null) try { recognizer.cancel(); } catch (Exception ignored) {}
+        muteBeeps(false);
+    }
+
+    // Android suona un «bip» a ogni avvio dell'ascolto: mentre si cucina stiamo zitti (la voce dell'app usa il canale della musica, che resta acceso)
+    private void muteBeeps(boolean on) {
+        try {
+            AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
+            int dir = on ? AudioManager.ADJUST_MUTE : AudioManager.ADJUST_UNMUTE;
+            am.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, dir, 0);
+            am.adjustStreamVolume(AudioManager.STREAM_SYSTEM, dir, 0);
+        } catch (Exception ignored) {}
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == MIC_PERM) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) { if (listenOn) startListen(); }
+            else { listenOn = false; js("window.toast&&toast('Microfono non permesso: usa i pulsanti')"); }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopListen();
+        if (recognizer != null) try { recognizer.destroy(); } catch (Exception ignored) {}
+        recognizer = null;
+        super.onDestroy();
+    }
+
+    class SpeechBridge {
+        @JavascriptInterface
+        public boolean available() {
+            return SpeechRecognizer.isRecognitionAvailable(MainActivity.this);
+        }
+
+        @JavascriptInterface
+        public void start() {
+            runOnUiThread(MainActivity.this::startListen);
+        }
+
+        @JavascriptInterface
+        public void stop() {
+            runOnUiThread(MainActivity.this::stopListen);
+        }
+    }
+
     class ShareBridge {
+        // Schermo acceso finché si cucina («Cucina con me»)
+        @JavascriptInterface
+        public void keepAwake(boolean on) {
+            runOnUiThread(() -> {
+                if (on) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            });
+        }
+
         @JavascriptInterface
         public String take() {
             String s = pendingShare;

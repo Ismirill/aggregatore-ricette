@@ -142,7 +142,8 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 .row .sp{flex:1}
 .rate{display:flex;gap:2px}
 .rate button{background:none;border:none;font-size:1.8rem;color:var(--bd);cursor:pointer;padding:0 2px;transition:transform .1s}
-.rate button:active{transform:scale(1.2)}.rate button.on{color:var(--star)}#dStars{margin-top:10px}.rate.big button{font-size:2.3rem;padding:0 3px;color:color-mix(in srgb,var(--mut) 40%,var(--bd))}.rateTxt{margin:0 0 4px}
+.rate button:active{transform:scale(1.2)}.rate button.on{color:var(--star)}
+/* Cucina con me */dialog#cook{max-width:560px}.cookTxt{font-size:1.25rem;line-height:1.5;min-height:4.5rem;max-height:42dvh;overflow:auto;margin:8px 0 12px;white-space:pre-wrap}.cookTxt ul{margin:0;padding-left:22px}.cookTxt li{margin:2px 0}.cookTimer{background:var(--bg2);border-radius:14px;padding:12px;text-align:center;margin:0 0 12px}.cookTimer b{display:block;font-size:2.6rem;font-family:var(--serif);line-height:1.1}.cookTimer span{font-size:.8rem;color:var(--mut)}.cookBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cookBtns .btn{width:100%;padding:13px 6px;font-size:1rem;white-space:nowrap}.cookBtns .btn.on{background:color-mix(in srgb,var(--acc) 18%,var(--card));border-color:var(--acc)}.cookBtn{width:100%;margin:2px 0 12px;padding:13px;font-size:1rem}#dStars{margin-top:10px}.rate.big button{font-size:2.3rem;padding:0 3px;color:color-mix(in srgb,var(--mut) 40%,var(--bd))}.rateTxt{margin:0 0 4px}
 .dacts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}.dacts .btn{width:100%;padding:12px 8px;white-space:nowrap;font-size:.95rem}.dacts.odd .btn:last-child{grid-column:1/-1}
 .fonti2{margin-top:18px;border-top:1px solid var(--bd);padding-top:8px}.fonti2 summary{cursor:pointer;font-size:.8rem;color:var(--mut);list-style:none;user-select:none}.fonti2 summary::-webkit-details-marker{display:none}.fonti2 summary::before{content:'▸ '}.fonti2[open] summary::before{content:'▾ '}.fonti2 .lic{margin:6px 0 0;font-size:.76rem;line-height:1.45}
 /* Commenti dei Gnammers nella scheda */.comm .cm{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--bd)}.comm .cm:first-child{border-top:none}.cav{width:38px;height:38px;border-radius:50%;flex:none;overflow:hidden;background:color-mix(in srgb,var(--acc) 12%,var(--bg2));display:grid;place-items:center;color:var(--mut)}.cav .tom{width:100%;height:100%;object-fit:cover;display:block}.cav svg{width:22px;height:22px}.comm .cm>div{flex:1;min-width:0}.comm .cm b{font-size:.95rem}.comm .cm p{margin:2px 0 4px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45}.comm .lnk{font-size:.78rem;font-weight:500;color:var(--mut)}.commIn{display:flex;gap:8px;align-items:flex-end;margin-top:8px}.commIn textarea{flex:1;min-width:0;font-size:max(16px,1rem);min-height:2.6rem}.commIn .btn{flex:none}.comm>.btn{margin-top:6px}
@@ -484,6 +485,12 @@ details summary{cursor:pointer}
 <datalist id="countries"></datalist><datalist id="regions"></datalist>
 
 <dialog id="menu"><h3 id="menuT"></h3><p class="lbl">Condividi su</p><div class="socRow"><button class="btn ig" data-s="instagram">Instagram</button><button class="btn tt" data-s="tiktok">TikTok</button><button class="btn yt" data-s="youtube">YouTube</button><button class="btn fb" data-s="facebook">Facebook</button></div><button class="btn" id="menuEdit">✏️ Modifica</button><button class="btn danger" id="menuDel">🗑 Elimina</button><button class="btn" id="menuCancel">Annulla</button></dialog>
+<dialog id="cook"><div class="dhead"><h2 id="cookT" style="font-size:1.25rem">Cucina con me</h2><button type="button" class="icon" id="cookX" aria-label="Chiudi">✕</button></div>
+  <p class="meta" id="cookWhere" style="margin:0"></p>
+  <div class="cookTxt" id="cookTxt"></div>
+  <div class="cookTimer" id="cookTimer" hidden><b id="cookLeft">0:00</b><span>Ti avviso io quando è passato il tempo, poi passo al passaggio seguente</span></div>
+  <div class="cookBtns"><button type="button" class="btn" data-c="repeat">🔁 Ripeti</button><button type="button" class="btn pri" data-c="next">⏭ Avanti</button><button type="button" class="btn" data-c="prev">⏮ Indietro</button><button type="button" class="btn" data-c="ing">🥕 Ingredienti</button><button type="button" class="btn" data-c="pause" id="cookPause">⏸ Pausa</button><button type="button" class="btn" data-c="mic" id="cookMic">🎤 Voce</button></div>
+  <p class="meta" id="cookHint" style="margin:10px 0 0;min-height:1.2em"></p></dialog>
 <dialog id="photo"><button class="dclose" id="phX" aria-label="Chiudi">✕</button><div id="phv"></div></dialog>
 <dialog id="ratePop"><h3 id="rateT" tabindex="-1" autofocus></h3><p class="meta" id="rateSub" style="margin:0"></p><div class="rate" id="rateStars"><button type="button" data-n="1" aria-label="1 stelle">★</button><button type="button" data-n="2" aria-label="2 stelle">★</button><button type="button" data-n="3" aria-label="3 stelle">★</button><button type="button" data-n="4" aria-label="4 stelle">★</button><button type="button" data-n="5" aria-label="5 stelle">★</button></div><p class="meta" id="rateHint" style="margin:0"></p><button class="btn" id="rateX">Chiudi</button></dialog>
 <dialog id="rec"><div class="rech"><b>🎬 Il video della ricetta</b><button type="button" class="dclose" id="recX" aria-label="Chiudi" style="float:none;margin:0">✕</button></div><div id="recBody"></div></dialog>
@@ -983,7 +990,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=131; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=132; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1937,7 +1944,7 @@ function openDetail(i){
     ${i.linked?`<div class="kv"><span>Costo ${esc(i.cost||'n.d.')}</span></div><h3>Ingredienti principali</h3><ul>${i.ingredients.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="meta">Dosi e procedimento sono sulla pagina originale di GialloZafferano.</p>`
     :i.ingredients?.length?`<h3>Ingredienti</h3><div class="srv">Per <button type="button" class="btn" id="sMinus" aria-label="Meno persone">−</button><b id="sN"></b><button type="button" class="btn" id="sPlus" aria-label="Più persone">+</button> <span id="sLbl">persone</span> <span class="meta" id="sOrig"></span></div>
       <div class="nut" id="nut"></div><ul id="ingList"></ul>`:''}
-    ${i.steps?.length?`<h3>Procedimento</h3><ol>${i.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
+    ${i.steps?.length?`<h3>Procedimento</h3><button type="button" class="btn pri cookBtn" id="dCook">🔊 Cucina con me: leggo io ingredienti e passaggi</button><ol>${i.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
     ${i.note?`<h3>Note</h3><p class="cap">${esc(i.note)}</p>`:''}
     ${!i.ingredients?.length&&i.caption?`<h3>Descrizione</h3><p class="cap">${esc(i.caption)}</p>`:''}
     ${fonti.length?`<details class="fonti2"><summary>Fonti e note</summary>${fonti.map(f=>`<p class="lic">${f}</p>`).join('')}${i.artusi?`<details class="meta" style="margin-top:8px"><summary>Testo originale di Artusi: «${esc(i.origTitle)}» (n. ${i.num}, ${esc(i.chapter)})</summary><p class="cap" style="margin-top:6px">${esc(i.text)}</p></details>`:''}</details>`:''}
@@ -1955,12 +1962,113 @@ function openDetail(i){
     draw();
   }
   $('#dClose').onclick=$('#dX').onclick=()=>$('#det').close();
+  if($('#dCook'))$('#dCook').onclick=()=>cookOpen(i);
   if(i.clips?.length){clipPlayer(i.clipKey,i.clips,$('#clipPl'));$('#clipPl').onclick=e=>{const b=e.target.closest('[data-vc]');if(b)(b.dataset.vc==='share'?clipsShare:clipsSave)(i.clipKey,i.clips,i.title)}}
   if($('#dEdit'))$('#dEdit').onclick=()=>{$('#det').close();openForm(i)};
   if($('#dSave'))$('#dSave').onclick=()=>{saveFromBook(i);$('#det').close()};
   $('#det').showModal();
 }
 $('#det').addEventListener('close',()=>$('#dv').innerHTML=''); // ferma il video
+/* ---------- Cucina con me: la scheda legge a voce ingredienti e passaggi, ascolta «ripeti», «avanti», «indietro», «ingredienti», «pausa»
+   e aspetta i tempi scritti nei passaggi (timer, poi passa da sola al seguente). Lo schermo resta acceso.
+   Voce: riconoscimento del telefono (Android nativo o del browser); senza, il pulsante «Parla» registra qualche secondo e lo fa trascrivere al server ---------- */
+const COOK={on:false,i:null,step:-1,timer:null,left:0,paused:false,voice:false,rec:null,busy:false,wake:null,tier:'',speaking:false,q:[]};
+const TTS_OK=()=>'speechSynthesis' in window&&'SpeechSynthesisUtterance' in window;
+let cookVoiceObj=null;function cookVoice(){if(!TTS_OK())return null;const vs=speechSynthesis.getVoices().filter(v=>/^it[-_]/i.test(v.lang));return vs.find(v=>/alice|federica|elsa|google italiano|paola|italia/i.test(v.name))||vs[0]||null}
+if(TTS_OK()){speechSynthesis.onvoiceschanged=()=>{cookVoiceObj=cookVoice()};cookVoiceObj=cookVoice()}
+// Testo adatto alla lettura: unità per esteso, «q.b.» → «quanto basta»
+const speakable=t=>String(t).replace(/\bq\.?\s?b\.?/gi,'quanto basta').replace(/(\d)\s?kg\b/gi,'$1 chili').replace(/(\d)\s?(?:g|gr)\b\.?/gi,'$1 grammi').replace(/(\d)\s?ml\b/gi,'$1 millilitri').replace(/(\d)\s?cl\b/gi,'$1 centilitri').replace(/(\d)\s?dl\b/gi,'$1 decilitri').replace(/(\d)\s?l\b/gi,'$1 litri').replace(/\bn\.\s?(\d)/gi,'$1').replace(/#\S+/g,'').replace(/[*_~]/g,'').replace(/\s+/g,' ').trim();
+const fmtMinSpeak=m=>m>=60?`${String(Math.round(m/60*10)/10).replace('.',',')} or${m>=90?'e':'a'}`:m<1?`${Math.round(m*60)} secondi`:`${Math.round(m)} minut${Math.round(m)===1?'o':'i'}`;
+// Legge a voce (a pezzi: i browser a volte troncano le frasi lunghe); mentre parla non ascolta, se no si risente
+function cookSay(text,cb){
+  if(!COOK.on)return;cookListen(false);
+  if(!TTS_OK()){COOK.speaking=false;cookListen(true);cb&&cb();return}
+  speechSynthesis.cancel();COOK.speaking=true;
+  const parts=String(text).match(/[^.!?]+[.!?]*/g)||[String(text)],chunks=[];for(const p of parts){const t=p.trim();if(!t)continue;if(chunks.length&&(chunks[chunks.length-1]+' '+t).length<180)chunks[chunks.length-1]+=' '+t;else chunks.push(t)}
+  const gen=++COOK.gen;let k=0;
+  const next=()=>{if(gen!==COOK.gen)return;if(k>=chunks.length||!COOK.on){COOK.speaking=false;if(COOK.on)cookListen(true);cb&&cb();return}
+    const u=new SpeechSynthesisUtterance(chunks[k++]);u.lang='it-IT';u.rate=.92;const v=cookVoiceObj||cookVoice();if(v)u.voice=v;
+    let done=false;const end=()=>{if(done)return;done=true;setTimeout(next,120)};u.onend=end;u.onerror=end;speechSynthesis.speak(u);
+    const est=Math.min(60000,2000+u.text.length*95);setTimeout(()=>{if(!done&&!speechSynthesis.speaking)end()},est)};
+  next()}
+// Minuti scritti in un passaggio («cuoci per 10 minuti», «mezz'ora», «un'ora»): il più lungo
+function stepMinutes(s){let max=0;const t=String(s).toLowerCase();
+  for(const m of t.matchAll(/(\d+(?:[.,]\d+)?)(?:\s*(?:-|–|a|o)\s*(\d+(?:[.,]\d+)?))?\s*(minut[io]|min\b|or[ae]\b|h\b|second[io]|sec\b)/g)){const a=parseFloat(m[1].replace(',','.')),b=m[2]?parseFloat(m[2].replace(',','.')):a;let v=(a+b)/2;if(/^or|^h/.test(m[3]))v*=60;else if(/^sec/.test(m[3]))v/=60;if(v>0)max=Math.max(max,v)}
+  for(const [rx,v] of [[/mezz'?\s?ora/,30],[/un'ora e mezza/,90],[/un'ora(?! e mezza)/,60],[/un paio d'ore/,120],[/(?:tutta la|una) notte/,720],[/un quarto d'ora/,15],[/tre quarti d'ora/,45],[/qualche minuto|pochi minuti/,3]])if(rx.test(t))max=Math.max(max,v);
+  return max}
+const cookIngs=()=>{const li=[...document.querySelectorAll('#ingList li')].map(x=>x.textContent.trim()).filter(Boolean);return li.length?li:(COOK.i?.ingredients||[])};
+const cookServ=()=>{const n=$('#sN')?.textContent;return n?`per ${n} person${n==='1'?'a':'e'}`:''};
+function cookHint(t){$('#cookHint').textContent=t}
+function cookOpen(i){COOK.i=i;COOK.on=true;COOK.step=-1;COOK.paused=false;$('#cookPause').textContent='⏸ Pausa';$('#cookT').textContent=i.title||'Cucina con me';
+  if(!$('#cook').open)$('#cook').showModal();cookWake(true);cookVoiceSetup();cookShowIng();
+  cookSay(`Cuciniamo ${speakable(i.title||'questa ricetta')}. Ti leggo prima gli ingredienti.`,()=>cookReadIng(true))}
+function cookShowIng(){COOK.step=-1;cookTimerStop();$('#cookWhere').textContent='Ingredienti '+cookServ();$('#cookTxt').innerHTML=`<ul>${cookIngs().map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;cookHint(COOK.voice?'Puoi dire: «ripeti», «avanti», «ingredienti», «pausa»':'Tocca «Avanti» quando sei pronto')}
+function cookReadIng(intro){const l=cookIngs();cookSay(`${intro?'Ingredienti '+cookServ()+'. ':''}${l.map(speakable).join('. ')}. Quando sei pronto dimmi avanti, e cominciamo con il procedimento.`)}
+function cookGo(k){if(!COOK.on)return;const st=COOK.i.steps||[];if(k<0){cookShowIng();cookReadIng(true);return}if(k>=st.length){cookEnd();return}
+  COOK.step=k;const text=st[k],min=stepMinutes(text),wait=min>=0.5&&min<=90;cookTimerStop();
+  $('#cookWhere').textContent=`Passo ${k+1} di ${st.length}`;$('#cookTxt').textContent=text;
+  cookHint(wait?'Alla fine del tempo passo da sola al passaggio seguente':COOK.voice?'Puoi dire: «ripeti», «avanti», «indietro», «ingredienti»':'Tocca «Avanti» quando hai finito');
+  const tail=wait?` Ci vogliono circa ${fmtMinSpeak(min)}: ti avviso io quando è passato il tempo.`:min>90?` Questo passaggio richiede circa ${fmtMinSpeak(min)}: quando è pronto dimmi avanti.`:' Quando hai finito dimmi avanti, oppure ripeti se non hai capito.';
+  cookSay(`Passo ${k+1} di ${st.length}. ${speakable(text)}.${tail}`,()=>{if(wait&&COOK.step===k&&COOK.on&&!COOK.timer)cookTimerStart(Math.round(min*60))})}
+function cookEnd(){COOK.step=(COOK.i.steps||[]).length;cookTimerStop();$('#cookWhere').textContent='Fine';$('#cookTxt').textContent='La ricetta è finita: buon appetito!';cookHint('');cookSay('Abbiamo finito: buon appetito!')}
+function cookRepeat(){if(COOK.step<0)cookReadIng(false);else if(COOK.step>=(COOK.i.steps||[]).length)cookEnd();else{const k=COOK.step;cookSay(`Passo ${k+1}. ${speakable(COOK.i.steps[k])}.`)}} // ripetere non riavvia il timer
+function cookTimerStart(sec){COOK.left=sec;$('#cookTimer').hidden=false;cookTimerPaint();clearInterval(COOK.timer);
+  COOK.timer=setInterval(()=>{if(COOK.paused)return;COOK.left--;cookTimerPaint();if(COOK.left<=0){cookTimerStop();cookBeep();cookSay('Tempo finito.',()=>{if(COOK.on)cookGo(COOK.step+1)})}},1000)}
+function cookTimerStop(){clearInterval(COOK.timer);COOK.timer=null;$('#cookTimer').hidden=true}
+function cookTimerPaint(){const s=Math.max(0,COOK.left);$('#cookLeft').textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`}
+function cookBeep(){try{const ac=new (window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(t=>{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=880;g.gain.setValueAtTime(.001,ac.currentTime+t);g.gain.exponentialRampToValueAtTime(.5,ac.currentTime+t+.02);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+.3);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+.32)});setTimeout(()=>ac.close(),1500)}catch{}}
+function cookPause(p){COOK.paused=p;$('#cookPause').textContent=p?'▶ Riprendi':'⏸ Pausa';
+  if(p){COOK.gen++;if(TTS_OK())speechSynthesis.cancel();COOK.speaking=false;cookHint('In pausa: tocca «Riprendi»'+(COOK.voice?' o di\' «continua»':''));cookListen(true)}
+  else{if(COOK.timer)cookSay('Riprendiamo.');else cookRepeat()}}
+// I comandi, detti o toccati
+function cookCmd(raw){const t=String(raw||'').toLowerCase().trim();if(!t||!COOK.on)return false;const has=rx=>rx.test(t);
+  if(has(/quanto manca|quanto tempo/)){cookSay(COOK.timer?`Mancano ${fmtMinSpeak(COOK.left/60)}.`:'Non c\'è un tempo da aspettare: quando hai finito dimmi avanti.');return true}
+  if(has(/\b(pausa|aspetta|fermati|ferma|stop)\b/)){cookPause(true);return true}
+  if(COOK.paused&&has(/riprendi|continua|riparti|vai|avanti/)){cookPause(false);return true}
+  if(has(/ingredient/)){cookShowIng();cookReadIng(true);return true}
+  if(has(/ripet|non ho capito|di nuovo|ancora|rileggi|hai detto/)){cookRepeat();return true}
+  if(has(/indietro|precedente|torna/)){cookGo(COOK.step-1);return true}
+  if(has(/dall'inizio|ricominci/)){cookGo(-1);return true}
+  if(has(/\b(avanti|prossim[oa]|continua|vai|fatto|finito|pront[oa]|ok|okay|va bene|procedi|successiv[oa])\b/)){cookGo(COOK.step+1);return true}
+  if(has(/\b(esci|chiudi|basta|fine)\b/)){cookClose();return true}
+  return false}
+function cookFlash(t){cookHint(`Ho sentito: «${String(t).trim()}»`)}
+window.onSpeech=t=>{if(COOK.on&&cookCmd(t))cookFlash(t)}; // dal riconoscimento nativo di Android
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function cookTier(){try{if(window.AndroidSpeech&&AndroidSpeech.available())return 'android'}catch{}return SR?'web':(REC_OK()&&aiOn())?'push':''}
+function cookVoiceSetup(){COOK.tier=cookTier();const b=$('#cookMic');if(!COOK.tier){b.hidden=true;COOK.voice=false;return}b.hidden=false;
+  if(COOK.tier==='push'){b.textContent='🎤 Parla';COOK.voice=false;return}
+  COOK.voice=load('cookVoice',true)!==false;cookMicBtn()}
+function cookMicBtn(){const b=$('#cookMic');if(COOK.tier==='push')return;b.textContent=COOK.voice?'🎤 Voce attiva':'🎤 Voce spenta';b.classList.toggle('on',COOK.voice)}
+function cookListen(on){
+  if(COOK.tier==='android'){try{if(on&&COOK.voice&&COOK.on)AndroidSpeech.start();else AndroidSpeech.stop()}catch{}return}
+  if(COOK.tier!=='web')return;
+  if(!on||!COOK.voice||!COOK.on){if(COOK.rec){const r=COOK.rec;COOK.rec=null;r.onend=null;try{r.stop()}catch{}}return}
+  if(COOK.rec)return;
+  const r=new SR();r.lang='it-IT';r.continuous=true;r.interimResults=false;r.maxAlternatives=1;
+  r.onresult=e=>{for(let k=e.resultIndex;k<e.results.length;k++)if(e.results[k].isFinal){const t=e.results[k][0].transcript;if(cookCmd(t))cookFlash(t)}};
+  r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){COOK.rec=null;COOK.voice=false;cookMicBtn();toast('Microfono non permesso: usa i pulsanti')}};
+  r.onend=()=>{if(COOK.rec===r){COOK.rec=null;if(COOK.on&&COOK.voice&&!COOK.speaking)setTimeout(()=>cookListen(true),300)}};
+  try{r.start();COOK.rec=r}catch{COOK.rec=null}}
+async function cookPush(){ // senza riconoscimento sul dispositivo: registro qualche secondo e lo faccio trascrivere al server
+  if(COOK.busy)return;COOK.busy=true;const b=$('#cookMic');b.textContent='🎤 Parla ora…';b.classList.add('on');COOK.gen++;if(TTS_OK())speechSynthesis.cancel();COOK.speaking=false;
+  try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});const chunks=[];const mr=new MediaRecorder(stream,{mimeType:dictMime()||undefined,audioBitsPerSecond:48000});mr.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+    await new Promise(ok=>{mr.onstop=ok;mr.start();setTimeout(()=>{try{mr.stop()}catch{ok()}},3500)});stream.getTracks().forEach(t=>t.stop());
+    b.textContent='🎤 Un attimo…';const type=(chunks[0]?.type||dictMime()||'audio/webm').split(';')[0],blob=new Blob(chunks,{type});
+    const {transcript}=await server('/dictate',{audio:await blobB64(blob),mime:type,plain:true});
+    if(transcript&&cookCmd(transcript))cookFlash(transcript);else cookSay('Non ho capito. Puoi dire: ripeti, avanti, indietro, ingredienti, pausa.')}
+  catch(e){toast(e?.name==='NotAllowedError'?'Permesso del microfono negato':'Non sono riuscita ad ascoltare: usa i pulsanti')}
+  finally{COOK.busy=false;b.textContent='🎤 Parla';b.classList.remove('on')}}
+// Schermo acceso finché si cucina: Wake Lock del browser e, nell'APK, il flag nativo della finestra
+async function cookWake(on){try{if(window.AndroidShare?.keepAwake)AndroidShare.keepAwake(!!on)}catch{}
+  try{if(on){if('wakeLock' in navigator&&!COOK.wake){COOK.wake=await navigator.wakeLock.request('screen');COOK.wake.addEventListener('release',()=>{COOK.wake=null})}}else if(COOK.wake){const w=COOK.wake;COOK.wake=null;await w.release()}}catch{}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&COOK.on)cookWake(true)});
+function cookClose(){COOK.on=false;COOK.gen++;cookTimerStop();if(TTS_OK())speechSynthesis.cancel();COOK.speaking=false;cookListen(false);cookWake(false);if($('#cook').open)$('#cook').close()}
+$('#cookX').onclick=()=>cookClose();$('#cook').addEventListener('cancel',e=>{e.preventDefault();cookClose()});$('#cook').addEventListener('close',()=>{if(COOK.on)cookClose()});
+$('#cook').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;const c=b.dataset.c;
+  if(c==='repeat')cookRepeat();else if(c==='next')cookGo(COOK.step+1);else if(c==='prev')cookGo(COOK.step-1);else if(c==='ing'){cookShowIng();cookReadIng(true)}else if(c==='pause')cookPause(!COOK.paused);
+  else if(c==='mic'){if(COOK.tier==='push')cookPush();else{COOK.voice=!COOK.voice;save('cookVoice',COOK.voice);cookMicBtn();cookListen(COOK.voice);if(COOK.voice)toast('Ti ascolto: puoi dire «ripeti», «avanti», «ingredienti»')}}};
+
 
 /* ---------- Form ---------- */
 function setRating(n){formRating=n;$('#fRateIn').innerHTML=[1,2,3,4,5].map(k=>`<button type="button" data-n="${k}" class="${k<=n?'on':''}">★</button>`).join('')}
