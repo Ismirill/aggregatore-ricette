@@ -143,6 +143,7 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 .rate{display:flex;gap:2px}
 .rate button{background:none;border:none;font-size:1.8rem;color:var(--bd);cursor:pointer;padding:0 2px;transition:transform .1s}
 .rate button:active{transform:scale(1.2)}.rate button.on{color:var(--star)}
+/* Commenti dei Gnammers nella scheda */.comm .cm{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--bd)}.comm .cm:first-child{border-top:none}.cav{width:38px;height:38px;border-radius:50%;flex:none;overflow:hidden;background:color-mix(in srgb,var(--acc) 12%,var(--bg2));display:grid;place-items:center;color:var(--mut)}.cav .tom{width:100%;height:100%;object-fit:cover;display:block}.cav svg{width:22px;height:22px}.comm .cm>div{flex:1;min-width:0}.comm .cm b{font-size:.95rem}.comm .cm p{margin:2px 0 4px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45}.comm .lnk{font-size:.78rem;font-weight:500;color:var(--mut)}.commIn{display:flex;gap:8px;align-items:flex-end;margin-top:8px}.commIn textarea{flex:1;min-width:0;font-size:max(16px,1rem);min-height:2.6rem}.commIn .btn{flex:none}.comm>.btn{margin-top:6px}
 
 /* ---------- Scheda ricetta ---------- */
 .dv{position:relative}.dcols{display:contents}
@@ -819,6 +820,34 @@ function starsBlock(id){const d=$('#dStars');if(!d)return;const v=STARS[id]||[0,
   d.innerHTML=`<div class="svRow"><b>Voto dei Gnammers</b>${starsHtml(id,true)}</div><div class="rate" id="dMy">${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" class="${n<=(v[2]||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}<span class="meta" style="align-self:center;margin-left:8px">${v[2]?'il tuo voto':'tocca le stelle per votare'}</span></div>`;
   $('#dMy').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n,cur=STARS[id]?.[2]||0,s=cur===n?0:n;
     const it=items.find(x=>pubId(x)===id)||(DET&&pubId(DET)===id?DET:null);if(it)rateSet(it,s)}}
+/* ---------- Commenti dei Gnammers sotto le ricette del ricettario (server: /comments). Pubblici, con nome e pomodoro di chi scrive.
+   Si scrive con l'account e dopo essersi presentati; il proprio commento si può eliminare, quelli degli altri segnalare ---------- */
+const COMM={};
+const agoIt=t=>{const d=Date.now()-t,m=Math.round(d/6e4),h=Math.round(d/36e5),g=Math.round(d/864e5);return m<1?'adesso':m<60?`${m} min fa`:h<24?`${h} ${h===1?'ora':'ore'} fa`:g<7?`${g} ${g===1?'giorno':'giorni'} fa`:new Date(t).toLocaleDateString('it-IT',{day:'numeric',month:'short'})};
+const commAv=c=>isTom(c.avatar)?avatarImg(c.avatar.slice(4),Math.min(4,Math.max(0,+c.level||0))):ANON_SVG;
+async function commLoad(id){const d=$('#dComm');if(!d||d.dataset.id!==id)return;
+  try{const r=await server('/comments',{id},await starsToken());COMM[id]=r.comments||[];commPaint(id)}
+  catch(e){const l=d.querySelector('.commList');if(l)l.innerHTML=`<p class="meta">${e.status===0?'Senza connessione i commenti non si leggono':'Commenti non disponibili in questo momento'}</p>`}}
+function commPaint(id){const d=$('#dComm');if(!d||d.dataset.id!==id)return;const list=COMM[id]||[];
+  d.querySelector('.commList').innerHTML=list.length?list.map(c=>`<div class="cm" data-cid="${esc(c.id)}"><span class="cav">${commAv(c)}</span><div><b>${esc(c.name)}</b> <span class="meta">· ${agoIt(c.t)}</span><p>${esc(c.text)}</p><button type="button" class="lnk" data-act="${c.mine?'del':'rep'}">${c.mine?'Elimina':'Segnala'}</button></div></div>`).join(''):'<p class="meta">Ancora nessun commento: scrivi tu il primo.</p>';
+  d.querySelector('.commN').textContent=list.length?` (${list.length})`:''}
+// La casella per scrivere: con l'account e il profilo; altrimenti il passo che manca
+const commBox=()=>!ACC?`<button type="button" class="btn" data-act="login">Accedi per commentare</button>`:!profDone()?`<button type="button" class="btn" data-act="login">Presentati ai Gnammers per commentare</button>`
+  :`<div class="commIn"><span class="cav">${picHtml('')}</span><textarea rows="2" maxlength="500" placeholder="Scrivi un commento…" aria-label="Il tuo commento"></textarea><button type="button" class="btn pri" data-act="send">Invia</button></div>`;
+function commInit(id){const d=$('#dComm');if(!d)return;
+  d.innerHTML=`<h3 style="margin:14px 0 6px">Commenti dei Gnammers<span class="commN"></span></h3><div class="commList"><p class="meta">Carico i commenti…</p></div>${commBox()}`;
+  d.onclick=async ev=>{const b=ev.target.closest('[data-act]');if(!b)return;const act=b.dataset.act;
+    if(act==='login'){openAcct(false);return}
+    if(act==='send'){const ta=d.querySelector('textarea'),text=ta.value.trim();if(!text){ta.focus();return}b.disabled=true;
+      try{await profPush();const r=await server('/comments/add',{id,text},await starsToken());(COMM[id]||=[]).push(r.comment);ta.value='';commPaint(id);toast('Commento pubblicato')}catch(e){toast(e.message||'Commento non inviato')}b.disabled=false;return}
+    const cid=b.closest('.cm')?.dataset.cid;if(!cid)return;
+    if(act==='del'){if(!confirm('Eliminare il tuo commento?'))return;try{await server('/comments/del',{id:cid},await starsToken());COMM[id]=(COMM[id]||[]).filter(c=>c.id!==cid);commPaint(id);toast('Commento eliminato')}catch(e){toast(e.message||'Non riesco a eliminarlo')}}
+    if(act==='rep'){if(!ACC){openAcct(false);return}if(!confirm('Segnalare questo commento come non adatto?'))return;try{await server('/comments/report',{id:cid},await starsToken());toast('Grazie, lo controlliamo')}catch(e){toast(e.message||'Segnalazione non inviata')}}};
+  commLoad(id)}
+// Il profilo (nome e pomodoro, con il livello) va anche sul server, così gli altri Gnammers lo vedono accanto ai commenti
+let profPushT=0;
+async function profPush(){if(!ACC||!profDone())return;const sig=JSON.stringify([PROF.name,PROF.avatar,gnammerLevel().k,ACC.uid]);if(load('profPushed','')===sig)return;
+  try{await server('/profile',{name:PROF.name,avatar:PROF.avatar,level:gnammerLevel().k},await idToken());save('profPushed',sig)}catch{}}
 async function server(path,body,auth){
   const ctl=new AbortController();setTimeout(()=>ctl.abort(),90000);
   let res;
@@ -930,7 +959,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=126; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=127; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1050,7 +1079,7 @@ function gnammerLevel(){const ric=items.filter(i=>i.contest).length,ass=load('ta
 const profName=()=>PROF.name||'';
 const profPic=()=>'';           // niente foto: l'immagine è il pomodoro del livello
 const profDone=()=>!!(PROF.name&&isTom(PROF.avatar));   // nome + pomodoro: obbligatori per chi ha l'account
-function saveProf(){save('gnammer',PROF);userBtnUI();if(view==='home')renderHome()}
+function saveProf(){save('gnammer',PROF);userBtnUI();if(view==='home')renderHome();clearTimeout(profPushT);profPushT=setTimeout(profPush,1500)}
 // Immagine del Gnammer come HTML: foto o avatar; sagoma anonima se non si è presentati
 const ANON_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
 function picHtml(cls){return isTom(PROF.avatar)?avatarImg(PROF.avatar.slice(4),gnammerLevel().k):ANON_SVG}
@@ -1870,6 +1899,7 @@ function openDetail(i){
     ${i.book&&!i.linked?`<p class="lic" style="margin-top:8px">${sourceLine(i)}</p>`:''}
     ${pubId(i)?`<div id="dStars" data-id="${esc(pubId(i))}"></div>`:''}
     <div class="rate" id="dRate" style="margin-top:8px${i.book||pubId(i)?';display:none':''}">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n<=(i.rating||0)?'on':''}" aria-label="${n} stelle">★</button>`).join('')}</div>
+    ${pubId(i)?`<div class="comm" id="dComm" data-id="${esc(pubId(i))}"></div>`:''}
     </div><div class="dside">
     ${i.linked?`<div class="kv"><span>Costo ${esc(i.cost||'n.d.')}</span></div><h3>Ingredienti principali</h3><ul>${i.ingredients.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
       <p class="meta">Dosi e procedimento sono sulla pagina originale. <a class="btn pri" style="margin-top:8px" href="${esc(i.url)}" target="_blank" rel="noopener">Apri su GialloZafferano</a></p>
@@ -1884,7 +1914,7 @@ function openDetail(i){
       <a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">▶ Cerca su YouTube</a><span class="sp"></span>
       ${i.pronto||i.colazione?'':i.book?'<button class="btn pri" id="dSave">Salva nelle mie</button>':'<button class="btn" id="dEdit">Modifica</button>'}<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button></div></div></div>`;
   DET=i;$('#dRate').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const n=+b.dataset.n;rateSet(i,myRate(i)===n?0:n)};
-  {const pid=pubId(i);if(pid){starsBlock(pid);starsFetch([pid],true)}}
+  {const pid=pubId(i);if(pid){starsBlock(pid);starsFetch([pid],true);commInit(pid)}}
   if(i.ingredients?.length&&!i.linked){
     const base=i.servings||i.s||4;let n=base;
     const draw=()=>{const f=n/base;
@@ -2637,7 +2667,8 @@ async function accountLink(){
 async function accRun(fn,msg){const s0=$('#accStat');if(s0)s0.textContent='Un momento…';try{await fn();if(msg)toast(msg)}catch(e){const s=$('#accStat');if(s)s.textContent=e.message||'Operazione non riuscita';else toast(e.message||'Operazione non riuscita')}}
 async function accRegister(email,pw){await setSession(await fbRest('signUp',{email,password:pw,returnSecureToken:true}));try{await fbRest('sendOobCode',{requestType:'VERIFY_EMAIL',idToken:ACC.it})}catch{}await accountLink()}
 async function accLogin(email,pw){await setSession(await fbRest('signInWithPassword',{email,password:pw,returnSecureToken:true}));await accountLink()}
-$('#acct').addEventListener('close',()=>{if(ACC)save('accEver',1)});
+$('#acct').addEventListener('close',()=>{if(ACC){save('accEver',1);profPush()}});
+setTimeout(()=>profPush(),2500); // all'avvio, se nome o pomodoro sono cambiati senza connessione
 const accReset=email=>fbRest('sendOobCode',{requestType:'PASSWORD_RESET',email});
 async function accVerify(){await fbRest('sendOobCode',{requestType:'VERIFY_EMAIL',idToken:await idToken()})}
 function accLogout(){ACC=null;save('acc',null);if(SY?.code){SY=null;try{localStorage.removeItem('sync')}catch{}syKeys=null}accUI();syncUI();toast('Sei uscito: le ricette restano su questo dispositivo')}

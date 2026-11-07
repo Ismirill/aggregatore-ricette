@@ -828,7 +828,8 @@ async function account(env, req, b) {
   const row = await env.SYNC.prepare('SELECT code FROM users WHERE uid = ?1').bind(u.uid).first();
   let code = row ? await openS(env, 'codice', row.code) : null;
   if (b.delete) {
-    if (code) await env.SYNC.batch([env.SYNC.prepare('DELETE FROM docs WHERE k = ?1').bind(await hexSha('gnamina-id:' + code)), env.SYNC.prepare('DELETE FROM users WHERE uid = ?1').bind(u.uid)]);
+    await socialTables(env);
+    await env.SYNC.batch([...(code ? [env.SYNC.prepare('DELETE FROM docs WHERE k = ?1').bind(await hexSha('gnamina-id:' + code)), env.SYNC.prepare('DELETE FROM users WHERE uid = ?1').bind(u.uid)] : []), env.SYNC.prepare('DELETE FROM profiles WHERE uid = ?1').bind(u.uid), env.SYNC.prepare('DELETE FROM comments WHERE uid = ?1').bind(u.uid), env.SYNC.prepare('DELETE FROM reports WHERE uid = ?1').bind(u.uid)]);
     return { deleted: true };
   }
   if (!code) {
@@ -895,6 +896,77 @@ async function starsVote(env, req, body) {
   return { id, avg: r?.n ? Math.round(r.a * 10) / 10 : 0, n: r?.n || 0, my: s >= 1 && s <= 5 ? s : 0 };
 }
 
+// Gnammers: profilo pubblico (nome e pomodoro, con il livello) e commenti sotto le ricette del ricettario (stesso id delle stelle).
+// I commenti sono pubblici e in chiaro, così si possono moderare. Si scrive solo con l'account (email confermata se è un account
+// con password) e dopo essersi presentati; chi chiude l'account sparisce anche dai commenti (vedi account()).
+let socialReady = false;
+async function socialTables(env) {
+  if (socialReady) return;
+  await env.SYNC.batch([
+    env.SYNC.prepare('CREATE TABLE IF NOT EXISTS profiles (uid TEXT PRIMARY KEY, name TEXT NOT NULL, avatar TEXT NOT NULL, level INTEGER NOT NULL DEFAULT 0, t INTEGER NOT NULL)'),
+    env.SYNC.prepare('CREATE TABLE IF NOT EXISTS comments (id TEXT PRIMARY KEY, rid TEXT NOT NULL, uid TEXT NOT NULL, text TEXT NOT NULL, t INTEGER NOT NULL, del INTEGER NOT NULL DEFAULT 0)'),
+    env.SYNC.prepare('CREATE INDEX IF NOT EXISTS comments_rid ON comments (rid, t)'),
+    env.SYNC.prepare('CREATE TABLE IF NOT EXISTS reports (cid TEXT NOT NULL, uid TEXT NOT NULL, why TEXT, t INTEGER NOT NULL, PRIMARY KEY (cid, uid))'),
+  ]);
+  socialReady = true;
+}
+const bad = m => Object.assign(new Error(m), { status: 400 });
+// Parole che qui non si usano: il commento (o il nome) viene rifiutato prima di essere salvato
+const BAD_WORDS = /\b(vaffanculo|stronz\w*|coglion\w*|merd\w*|cazz\w*|puttan\w*|troi[ae]|froci\w*|negr[oi]|minchia|bastard\w*|porca madonna|porco dio|dio cane|idiot[aie]|deficient[ei]|cretin[aio]|imbecill[ei]|ricchion\w*)\b/i;
+const cleanText = (v, n) => str(v, n).replace(/[\u0000-\u0008\u000b-\u001f]/g, '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+async function profileSet(env, req, b) {
+  const u = await verifyUser(env, req); await socialTables(env);
+  const name = cleanText(b.name, 30).replace(/[<>]/g, ''), avatar = /^tom:[fm]$/.test(String(b.avatar || '')) ? String(b.avatar) : '', level = Math.min(4, Math.max(0, Math.round(+b.level) || 0));
+  if (name.length < 2 || !avatar) throw bad('Servono nome e immagine');
+  if (BAD_WORDS.test(name)) throw bad('Questo nome non va bene');
+  await env.SYNC.prepare('INSERT INTO profiles (uid,name,avatar,level,t) VALUES (?1,?2,?3,?4,?5) ON CONFLICT(uid) DO UPDATE SET name=excluded.name, avatar=excluded.avatar, level=excluded.level, t=excluded.t').bind(u.uid, name, avatar, level, Date.now()).run();
+  return { ok: true, name, avatar, level };
+}
+const fmtComment = (r, me) => ({ id: r.id, name: r.name || 'Gnammer', avatar: r.avatar || '', level: r.level || 0, text: r.text, t: r.t, mine: !!me && r.uid === me });
+async function commentsGet(env, req, b) {
+  await socialTables(env);
+  const rid = str(b.id, 80);
+  if (!rid) throw bad('Ricetta mancante');
+  let me = ''; if (req.headers.get('Authorization')) { try { me = (await verifyUser(env, req)).uid; } catch {} }
+  const rows = await env.SYNC.prepare('SELECT c.id, c.uid, c.text, c.t, p.name, p.avatar, p.level FROM comments c LEFT JOIN profiles p ON p.uid = c.uid WHERE c.rid = ?1 AND c.del = 0 ORDER BY c.t DESC LIMIT 60').bind(rid).all();
+  return { comments: rows.results.map(r => fmtComment(r, me)).reverse() };
+}
+async function commentAdd(env, req, b) {
+  const u = await verifyUser(env, req); await socialTables(env);
+  if (u.provider === 'password' && !u.verified) throw Object.assign(new Error('Conferma prima la tua email con il link che ti abbiamo mandato'), { status: 403 });
+  const rid = str(b.id, 80), text = cleanText(b.text, 500);
+  if (!rid) throw bad('Ricetta mancante');
+  if (text.length < 2) throw bad('Scrivi qualcosa');
+  if (BAD_WORDS.test(text)) throw bad('Il commento contiene parole che qui non si usano');
+  if (/https?:\/\/|www\.|\.(it|com|net|org)\b/i.test(text)) throw bad('Nei commenti niente link');
+  const p = await env.SYNC.prepare('SELECT name, avatar, level FROM profiles WHERE uid = ?1').bind(u.uid).first();
+  if (!p) throw Object.assign(new Error('Presentati prima ai Gnammers: nome e immagine'), { status: 403 });
+  const last = await env.SYNC.prepare('SELECT MAX(t) AS t, COUNT(*) AS n FROM comments WHERE uid = ?1 AND t > ?2').bind(u.uid, Date.now() - 3600e3).first();
+  if (last?.t && Date.now() - last.t < 15e3) throw Object.assign(new Error('Aspetta qualche secondo tra un commento e l\'altro'), { status: 429 });
+  if ((last?.n || 0) >= 30) throw Object.assign(new Error('Hai scritto tanti commenti in poco tempo: riprova tra un po\''), { status: 429 });
+  const row = { id: crypto.randomUUID().replace(/-/g, '').slice(0, 20), rid, uid: u.uid, text, t: Date.now(), ...p };
+  await env.SYNC.prepare('INSERT INTO comments (id,rid,uid,text,t) VALUES (?1,?2,?3,?4,?5)').bind(row.id, rid, u.uid, text, row.t).run();
+  return { comment: fmtComment(row, u.uid) };
+}
+async function commentDel(env, req, b) {
+  await socialTables(env);
+  const cid = str(b.id, 40); if (!cid) throw bad('Commento mancante');
+  if (env.ADMIN_TOKEN && req.headers.get('X-Admin') === env.ADMIN_TOKEN) { await env.SYNC.prepare('UPDATE comments SET del = 2 WHERE id = ?1').bind(cid).run(); return { ok: true }; } // moderazione
+  const u = await verifyUser(env, req);
+  const r = await env.SYNC.prepare('UPDATE comments SET del = 1 WHERE id = ?1 AND uid = ?2').bind(cid, u.uid).run();
+  if (!r.meta.changes) throw Object.assign(new Error('Puoi cancellare solo i tuoi commenti'), { status: 403 });
+  return { ok: true };
+}
+async function commentReport(env, req, b) {
+  const u = await verifyUser(env, req); await socialTables(env);
+  const cid = str(b.id, 40), why = cleanText(b.why, 200); if (!cid) throw bad('Commento mancante');
+  await env.SYNC.prepare('INSERT OR IGNORE INTO reports (cid,uid,why,t) VALUES (?1,?2,?3,?4)').bind(cid, u.uid, why, Date.now()).run();
+  const n = (await env.SYNC.prepare('SELECT COUNT(*) AS n FROM reports WHERE cid = ?1').bind(cid).first())?.n || 0;
+  if (n >= 3) await env.SYNC.prepare('UPDATE comments SET del = 3 WHERE id = ?1 AND del = 0').bind(cid).run(); // tre segnalazioni: nascosto in attesa di controllo
+  return { ok: true, hidden: n >= 3 };
+}
+const SOCIAL = { '/profile': profileSet, '/comments': commentsGet, '/comments/add': commentAdd, '/comments/del': commentDel, '/comments/report': commentReport };
+
 export default {
   // Aggiornamento automatico dei prezzi: un lotto di province ogni giorno
   async scheduled(event, env, ctx) {
@@ -958,9 +1030,10 @@ export default {
         return reply(origin, { error: limit ? 'Limite giornaliero raggiunto' : e.message }, limit ? 429 : e.status === 400 ? 400 : 502);
       }
     }
-    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/dictate', '/nutrition', '/preview', '/translate-recipe', '/sync', '/account', '/handoff', '/handoff/take', '/stars', '/stars/vote'].includes(path)) return reply(origin, { error: 'Not found' }, 404);
+    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/dictate', '/nutrition', '/preview', '/translate-recipe', '/sync', '/account', '/handoff', '/handoff/take', '/stars', '/stars/vote', ...Object.keys(SOCIAL)].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';
-    if (env.LIMITER && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
+    // Le letture leggere (stelle e commenti di una scheda) non consumano il limite per IP: chi sfoglia il ricettario le fa a ogni ricetta
+    if (env.LIMITER && path !== '/stars' && path !== '/comments' && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
     // Stelle dei Gnammers (lettura a lotti e voto)
     if (req.method === 'POST' && (path === '/stars' || path === '/stars/vote')) {
       if (!env.SYNC) return reply(origin, { error: 'Non disponibile' }, 503);
@@ -969,6 +1042,12 @@ export default {
         if (path === '/stars/vote') { const ip = req.headers.get('CF-Connecting-IP') || 'local'; if (env.LIMITER && !(await env.LIMITER.limit({ key: 'stars:' + ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429); }
         return reply(origin, path === '/stars' ? await starsGet(env, req, body) : await starsVote(env, req, body));
       } catch (e) { return reply(origin, { error: e.message }, e.status || 500); }
+    }
+    // Gnammers: profilo pubblico e commenti
+    if (SOCIAL[path]) {
+      if (!env.SYNC) return reply(origin, { error: 'Non disponibile' }, 503);
+      let body; try { body = await req.json(); } catch { return reply(origin, { error: 'Richiesta non valida' }, 400); }
+      try { return reply(origin, await SOCIAL[path](env, req, body)); } catch (e) { if (!e.status) console.log('errore', path, e.message); return reply(origin, { error: e.status ? e.message : 'Operazione non riuscita' }, e.status || 502); }
     }
     if (path === '/sync' || path === '/account' || path === '/handoff' || path === '/handoff/take') {
       try {
