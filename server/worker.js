@@ -158,7 +158,7 @@ Sei un trascrittore fedele, non un cuoco: riporta SOLO ciò che è scritto nel t
 Se c'è il «Parlato nel video», ciò che il cuoco dice vale come testo scritto: le dosi dette a voce in lettere vanno scritte in cifre («due etti di farina» → "200 g farina", «mezzo litro di latte» → "500 ml latte", «tre uova» → "3 uova", «un cucchiaio» → "1 cucchiaio"), e i passaggi raccontati a voce vanno in steps, in ordine, uno per voce. La trascrizione automatica può avere errori di ascolto: correggi solo quelli evidenti.
 Guarda bene l'immagine: se mostra il piatto, elenca gli ingredienti che si riconoscono con certezza (es. fagioli bianchi, carote a dadini, patate, pasta corta, pane); se contiene testo sovrimpresso (titolo, elenco di ingredienti, dosi), trascrivilo e usalo come se fosse nel post.
 Estrai i dati in italiano:
-- title: nome breve del piatto (senza hashtag né emoji).
+- title: SOLO il nome del piatto, senza hashtag, emoji, aggettivi pubblicitari o commenti: «Carbonara vegana, la più buona del mondo» → "Carbonara vegana"; «Come fare la pasta alla norma perfetta» → "Pasta alla norma".
 - cat: uno tra ${cats.map(c => `"${c}"`).join(', ')}.
 - servings: per quante persone sono le dosi, SOLO se scritto nel post ("per 4 persone", "4 porzioni", "ingredienti per 2"…); altrimenti 0. "per 10 minuti" non è una porzione.
 - ingredients: un ingrediente per voce, nell'ordine del post, formato "quantità unità ingrediente" (es. "320 g spaghetti", "2 uova", "olio extravergine q.b."). Le quantità solo se scritte nel post: se un ingrediente è nominato senza dose, scrivi solo il nome (es. "pomodori secchi"), NON "q.b." e NON una dose tipica. Se il post non elenca ingredienti, metti i soli NOMI: prima quelli nominati nel testo e negli hashtag, poi quelli che vedi nell'immagine (mettili anche in seen), senza dosi, e imposta inferred a true. Usa nomi concreti, non categorie: niente "verdure" o "legumi" se sai quali sono (carote, cannellini). Se non riconosci il piatto, lascia vuoto.
@@ -194,7 +194,30 @@ Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diet
       if (!r.time && +v.time > 0 && +v.time <= 1440) { r.time = Math.round(+v.time); r.time_how = 'video'; r.time_note = ''; }
     }
   } catch (e) { console.log('video Gemini', e.message); }
+  if (r && r.title) r.title = dishName(r.title);
   return { result: r };
+}
+
+// Titoli dei post: resta solo il nome del piatto (stessa funzione nell'app)
+// Dal titolo di un post o di un video al solo nome del piatto: via commenti, superlativi, «come fare», hashtag, emoji, nome del canale
+const FLUFF=/\b(pi[uù]\s+\w+\s+(del\s+mondo|che\s+(esist\w*|c'?[èe]|abbia\w*)|di\s+sempre|mai\s+\w+)|(del\s+mondo|che\s+esist\w*|di\s+sempre|in\s+assoluto)|fatt[aoie]\s+(per|da|come|in\s+casa)|per\s+tutti|per\s+(me|te|voi|noi)|come\s+(si\s+fa|fare|farl[aoie]|prepararl[aoie]|preparare|cucinare|non\s+l'?hai|al\s+ristorante|quell[aoie]|la\s+faccio|lo\s+faccio|nonna|quando)|(la|il|le|i)?\s*mi[aoe]\s+(versione|ricetta)|ricetta\s+(facile|veloce|perfetta|originale|cremosa|infallibile|semplice|della\s+nonna|di\s+famiglia|segreta|definitiva|completa)|(facile|veloce|facilissim\w|velocissim\w|buonissim\w|cremosissim\w|golosissim\w|perfett[aoie]|infallibile|spettacolare|pazzesc\w|incredibile|strepitos\w|favolos\w|irresistibile|deliziosissim\w)\b|in\s+\d+\s+minuti|in\s+pochi\s+minuti|senza\s+(errori|segreti|fatica|sforzo|impazzire)|trucc\w|segret\w|svel\w|provala|provatela|provateci|devi\s+provare|da\s+provare|non\s+ci\s+credere|lasciat\w|guard\w+\s+fino|iscrivi\w*|like|subscribe|tutorial|vlog|parte\s+\d+|ep\.?\s*\d+|episodio)\b/i;
+function dishName(t){
+  let s=String(t||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,' ').replace(/#\S+|@\S+/g,' ').replace(/\s+/g,' ').trim();
+  if(!s)return '';
+  const orig=s;
+  s=s.replace(/\s*[|•·]\s*(youtube|tiktok|instagram|facebook|cookist|giallozafferano|fatto in casa da benedetta)[^|•·]*$/i,'');
+  // pezzi separati da : | - – — ! ? … ( , : si tiene il primo che non è un commento
+  const parts=s.split(/\s*(?:[:|•·!?]|\s[-–—]\s|\.{3}|…|\(|\)|,\s)\s*/).map(x=>x.trim()).filter(x=>/[a-zà-ü]/i.test(x));
+  let best=parts.find(p=>!FLUFF.test(p))||parts[0]||s;
+  // in testa: «ricetta», «come fare la», «ecco la», «la migliore», «la vera»…
+  for(let k=0;k<3;k++)best=best.replace(/^(?:la\s+|il\s+|le\s+|i\s+|lo\s+|gli\s+|l')?(?:ricetta\s+(?:della|del|dello|delle|dei|degli|di|per)\s+|ricetta\s+|come\s+(?:si\s+fa|fare|preparare|cucinare|si\s+prepara|si\s+cucina|si\s+fanno|si\s+preparano|facciamo|prepariamo|cucino|faccio|preparo)\s+|ecco\s+|oggi\s+|facciamo\s+|prepariamo\s+|cuciniamo\s+|vi\s+presento\s+|vi\s+svelo\s+|la\s+ver[ae]\s+|il\s+vero\s+|la\s+migliore?\s+|il\s+migliore?\s+|le\s+migliori\s+|i\s+migliori\s+|la\s+pi[uù]\s+buona\s+|il\s+pi[uù]\s+buono\s+|un[ao']?\s+|tutt[aoie]\s+(?:la|il|le|i)\s+|(?:la|il|le|i|lo|gli)\s+(?=\w))\s*/i,'');
+  // in coda: commenti dopo il nome
+  for(let k=0;k<3;k++)best=best.replace(/\s+(?:che\s+(?:esist\w*|c'?[èe]|abbia\w*|piace\w*|fa\s+impazzire|conquista\w*|tutti\s+\w+)|pi[uù]\s+\w+\s+(?:del\s+mondo|di\s+sempre|che\s+.*|mai\s+.*)|del\s+mondo|di\s+sempre|in\s+assoluto|fatt[aoie]\s+(?:per|da|come|in\s+casa).*|per\s+tutti.*|per\s+(?:me|te|voi|noi).*|come\s+(?:non\s+l'?hai|al\s+ristorante|quell[aoie]|la\s+faccio|lo\s+faccio|nonna|quando|si\s+deve|dio\s+comanda).*|in\s+\d+\s+minuti.*|in\s+pochi\s+minuti.*|senza\s+(?:errori|segreti|fatica|sforzo|impazzire).*|(?:facile|veloce|facilissim\w|velocissim\w|buonissim\w|cremosissim\w|golosissim\w|perfett[aoie]|infallibile|spettacolare|pazzesc\w|incredibile|strepitos\w|favolos\w|irresistibile|deliziosissim\w|squisit\w|super\s+\w+|originale|classic[aoie]|tradizionale|autentic[aoie]|vera|verissim\w)(?:\s+(?:e|ed|,)\s+\w+)*|ricetta(?:\s+\w+)*|(?:la|il)\s+mi[ao]\s+\w+.*|versione\s+\w+.*|tutorial.*|step\s+by\s+step.*|passo\s+(?:dopo|per)\s+passo.*)\s*$/i,'').replace(/\s+(?:\w+\s+(?:e|ed)\s+)?(?:facile|veloce|facilissim\w|velocissim\w|buonissim\w|cremosissim\w|golosissim\w|perfett[aoie]|infallibile|spettacolare|pazzesc\w|incredibile|strepitos\w|favolos\w|irresistibile|deliziosissim\w|squisit\w)\s*$/i,'');
+  best=best.replace(/\s+(?:e|ed|con|senza|al|alla|allo|alle|ai|agli|di|del|della|dello|delle|dei|degli|e\s+con)\s*$/i,'');
+  best=best.replace(/^[\s\-–—:;,.!?'"«»“”]+|[\s\-–—:;,.!?'"«»“”]+$/g,'').trim();
+  if(best.length<3||!/[a-zà-ü]{3}/i.test(best))best=orig.replace(/^[\s\-–—:;,.!?'"«»]+|[\s\-–—:;,.!?'"«»]+$/g,'');
+  if(best.length>3&&best===best.toUpperCase())best=best.toLowerCase();
+  return best.charAt(0).toUpperCase()+best.slice(1);
 }
 
 // Controllo meccanico sul risultato: tutto ciò che è un numero deve stare nel testo del post, altrimenti via.
