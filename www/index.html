@@ -991,8 +991,8 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=135; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
-const SITE='https://ismirill.github.io/aggregatore-ricette/';
+const APP_VERSION=136; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
   if(inApp)try{const r=await fetch(SITE+name+'?t='+Math.floor(Date.now()/36e5));if(r.ok)return await r.json()}catch{}

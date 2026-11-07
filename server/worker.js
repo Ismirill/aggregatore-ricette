@@ -486,7 +486,7 @@ Rispondi solo con JSON: {"items":[{"name":"","grams":0,"kcal":0,"protein":0,"car
 // Anteprima di una pagina per conto dell'app: i browser non possono leggere direttamente Facebook, Instagram e molti siti.
 // Il server si identifica in modo trasparente come "AggregatoreRicette" e usa solo i dati pubblici delle anteprime dei link
 // (titolo, descrizione, immagine) e i blocchi schema.org Recipe.
-const PREVIEW_UA = 'AggregatoreRicette/1.0 (+https://ismirill.github.io/aggregatore-ricette/)';
+const PREVIEW_UA = 'Gnamina/1.0 (+https://gnamina.it/)';
 // Trascrizione del parlato di un video (Whisper su Workers AI). Solo video brevi e non troppo pesanti: la quota è condivisa.
 async function transcribe(env, videoUrl, seconds) {
   try {
@@ -1002,7 +1002,7 @@ export default {
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors(origin) });
     const path = new URL(req.url).pathname;
     if (req.method === 'GET' && path === '/')
-      return new Response('Server AI dell\'Aggregatore Ricette: attivo. Si usa dall\'app, non dal browser.\nApp: https://ismirill.github.io/aggregatore-ricette/\n',
+      return new Response('Server AI dell\'Aggregatore Ricette: attivo. Si usa dall\'app, non dal browser.\nApp: https://gnamina.it/\n',
         { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
     // Copertina di un post social: i CDN di Instagram/Facebook/TikTok non permettono di mostrare le immagini su altri siti
     // e i loro indirizzi scadono. Solo quei server di immagini, solo immagini, massimo 3 MB.
