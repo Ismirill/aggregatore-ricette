@@ -2,7 +2,7 @@ import ING from './ingredienti.json';
 // Server dell'Aggregatore Ricette: fa le richieste AI per conto dell'app con Cloudflare Workers AI
 // (quota gratuita giornaliera, nessuna chiave per l'utente). I prompt stanno qui, così l'endpoint non è un proxy generico.
 const MODEL = '@cf/google/gemma-4-26b-a4b-it'; // visione + testo, licenza Gemma (utilizzabile in UE)
-const ORIGINS = ['https://ismirill.github.io', 'https://localhost', 'http://localhost', 'http://localhost:8080', 'http://127.0.0.1:8080', 'capacitor://localhost'];
+const ORIGINS = ['https://ismirill.github.io', 'https://gnamina.it', 'https://www.gnamina.it', 'https://gnamina.com', 'https://www.gnamina.com', 'https://localhost', 'http://localhost', 'http://localhost:8080', 'http://127.0.0.1:8080', 'capacitor://localhost'];
 const DIETS = ['Vegano', 'Vegetariano', 'Senza glutine', 'Senza lattosio', 'Senza uova', 'Senza frutta secca', 'Ipocalorico'];
 
 const cors = origin => ({
