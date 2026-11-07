@@ -296,6 +296,21 @@ details summary{cursor:pointer}
   .welcome .hscroll{grid-auto-flow:row;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;overflow:visible;scroll-snap-type:none;padding:4px 0 6px}
   .list{gap:22px}
 }
+@media (min-width:1180px){
+  /* Scheda della ricetta: più larga, foto grande a sinistra con titolo e voto, a destra ingredienti e procedimento con più respiro */
+  dialog#det{max-width:1320px;padding:28px 36px 32px}
+  .dcols{grid-template-columns:minmax(0,11fr) minmax(0,13fr);gap:44px}
+  .dmain .heroWrap{border-radius:22px}.dmain h2{font-size:2.3rem;line-height:1.08;margin-top:18px}
+  .dmain .kv span{font-size:.9rem;padding:6px 12px}.dmain>.meta{font-size:.95rem}
+  .dside h3{font-size:1.35rem;margin:26px 0 10px}.dside h3:first-child{margin-top:0}
+  .dside .srv{font-size:1.05rem}.nbox{grid-template-columns:repeat(3,1fr);gap:10px}
+  #ingList{font-size:1.04rem;line-height:1.6;column-gap:36px}#ingList li{margin-bottom:4px}
+  .dv ol{font-size:1.06rem;line-height:1.65;padding-left:26px}.dv ol li{margin-bottom:12px;padding-left:4px}
+  .cookBtn{font-size:1.05rem;padding:14px;margin:4px 0 14px}
+  .comm .cm p{font-size:1rem}.commIn textarea{min-height:3rem}
+  .dacts{grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:10px;margin-top:22px}.dacts.odd .btn:last-child{grid-column:auto}.dacts .btn{padding:13px 10px;font-size:1rem}
+  .fonti2{margin-top:22px}
+}
 @media (hover:hover) and (min-width:900px){
   .item{transition:transform .18s,box-shadow .18s}.item:hover{transform:translateY(-3px);box-shadow:var(--sh2),0 0 0 1px color-mix(in srgb,var(--acc) 35%,transparent)}
   .wbtn{transition:transform .15s,box-shadow .15s,border-color .15s}.wbtn:hover{transform:translateY(-2px);box-shadow:var(--sh2);border-left-color:var(--acc)}
@@ -1017,7 +1032,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=137; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=138; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
