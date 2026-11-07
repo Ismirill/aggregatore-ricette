@@ -990,7 +990,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=132; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=133; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1972,8 +1972,11 @@ $('#det').addEventListener('close',()=>$('#dv').innerHTML=''); // ferma il video
 /* ---------- Cucina con me: la scheda legge a voce ingredienti e passaggi, ascolta «ripeti», «avanti», «indietro», «ingredienti», «pausa»
    e aspetta i tempi scritti nei passaggi (timer, poi passa da sola al seguente). Lo schermo resta acceso.
    Voce: riconoscimento del telefono (Android nativo o del browser); senza, il pulsante «Parla» registra qualche secondo e lo fa trascrivere al server ---------- */
-const COOK={on:false,i:null,step:-1,timer:null,left:0,paused:false,voice:false,rec:null,busy:false,wake:null,tier:'',speaking:false,q:[]};
+const COOK={on:false,i:null,step:-1,timer:null,left:0,paused:false,voice:false,rec:null,busy:false,wake:null,tier:'',speaking:false,gen:0,sayCb:null};
 const TTS_OK=()=>'speechSynthesis' in window&&'SpeechSynthesisUtterance' in window;
+const NATIVE_TTS=()=>{try{return !!(window.AndroidSpeech&&AndroidSpeech.canSpeak())}catch{return false}}; // nell'APK il WebView non parla: voce di Android
+function cookSilence(){COOK.gen=(COOK.gen||0)+1;COOK.sayCb=null;COOK.speaking=false;try{if(window.AndroidSpeech?.stopSay)AndroidSpeech.stopSay()}catch{}if(TTS_OK())speechSynthesis.cancel()}
+window.onSpoken=id=>{const s=COOK.sayCb;if(!s||s.id!==id)return;COOK.sayCb=null;COOK.speaking=false;if(COOK.on)cookListen(true);s.cb&&s.cb()}; // fine lettura dalla voce nativa
 let cookVoiceObj=null;function cookVoice(){if(!TTS_OK())return null;const vs=speechSynthesis.getVoices().filter(v=>/^it[-_]/i.test(v.lang));return vs.find(v=>/alice|federica|elsa|google italiano|paola|italia/i.test(v.name))||vs[0]||null}
 if(TTS_OK()){speechSynthesis.onvoiceschanged=()=>{cookVoiceObj=cookVoice()};cookVoiceObj=cookVoice()}
 // Testo adatto alla lettura: unità per esteso, «q.b.» → «quanto basta»
@@ -1981,11 +1984,12 @@ const speakable=t=>String(t).replace(/\bq\.?\s?b\.?/gi,'quanto basta').replace(/
 const fmtMinSpeak=m=>m>=60?`${String(Math.round(m/60*10)/10).replace('.',',')} or${m>=90?'e':'a'}`:m<1?`${Math.round(m*60)} secondi`:`${Math.round(m)} minut${Math.round(m)===1?'o':'i'}`;
 // Legge a voce (a pezzi: i browser a volte troncano le frasi lunghe); mentre parla non ascolta, se no si risente
 function cookSay(text,cb){
-  if(!COOK.on)return;cookListen(false);
-  if(!TTS_OK()){COOK.speaking=false;cookListen(true);cb&&cb();return}
-  speechSynthesis.cancel();COOK.speaking=true;
+  if(!COOK.on)return;cookListen(false);cookSilence();const gen=COOK.gen;
+  if(NATIVE_TTS()){COOK.speaking=true;const id='s'+gen;COOK.sayCb={id,cb};try{AndroidSpeech.say(text,id)}catch{window.onSpoken(id)}return}
+  if(!TTS_OK()||!speechSynthesis.getVoices().length){COOK.speaking=false;cookListen(true);if(!COOK.noVoiceSaid){COOK.noVoiceSaid=true;toast('Su questo dispositivo la voce non è disponibile: leggi sullo schermo')}cb&&cb();return}
+  COOK.speaking=true;
   const parts=String(text).match(/[^.!?]+[.!?]*/g)||[String(text)],chunks=[];for(const p of parts){const t=p.trim();if(!t)continue;if(chunks.length&&(chunks[chunks.length-1]+' '+t).length<180)chunks[chunks.length-1]+=' '+t;else chunks.push(t)}
-  const gen=++COOK.gen;let k=0;
+  let k=0;
   const next=()=>{if(gen!==COOK.gen)return;if(k>=chunks.length||!COOK.on){COOK.speaking=false;if(COOK.on)cookListen(true);cb&&cb();return}
     const u=new SpeechSynthesisUtterance(chunks[k++]);u.lang='it-IT';u.rate=.92;const v=cookVoiceObj||cookVoice();if(v)u.voice=v;
     let done=false;const end=()=>{if(done)return;done=true;setTimeout(next,120)};u.onend=end;u.onerror=end;speechSynthesis.speak(u);
@@ -2018,7 +2022,7 @@ function cookTimerStop(){clearInterval(COOK.timer);COOK.timer=null;$('#cookTimer
 function cookTimerPaint(){const s=Math.max(0,COOK.left);$('#cookLeft').textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`}
 function cookBeep(){try{const ac=new (window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(t=>{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=880;g.gain.setValueAtTime(.001,ac.currentTime+t);g.gain.exponentialRampToValueAtTime(.5,ac.currentTime+t+.02);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+.3);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+.32)});setTimeout(()=>ac.close(),1500)}catch{}}
 function cookPause(p){COOK.paused=p;$('#cookPause').textContent=p?'▶ Riprendi':'⏸ Pausa';
-  if(p){COOK.gen++;if(TTS_OK())speechSynthesis.cancel();COOK.speaking=false;cookHint('In pausa: tocca «Riprendi»'+(COOK.voice?' o di\' «continua»':''));cookListen(true)}
+  if(p){cookSilence();cookHint('In pausa: tocca «Riprendi»'+(COOK.voice?' o di\' «continua»':''));cookListen(true)}
   else{if(COOK.timer)cookSay('Riprendiamo.');else cookRepeat()}}
 // I comandi, detti o toccati
 function cookCmd(raw){const t=String(raw||'').toLowerCase().trim();if(!t||!COOK.on)return false;const has=rx=>rx.test(t);
@@ -2051,7 +2055,7 @@ function cookListen(on){
   r.onend=()=>{if(COOK.rec===r){COOK.rec=null;if(COOK.on&&COOK.voice&&!COOK.speaking)setTimeout(()=>cookListen(true),300)}};
   try{r.start();COOK.rec=r}catch{COOK.rec=null}}
 async function cookPush(){ // senza riconoscimento sul dispositivo: registro qualche secondo e lo faccio trascrivere al server
-  if(COOK.busy)return;COOK.busy=true;const b=$('#cookMic');b.textContent='🎤 Parla ora…';b.classList.add('on');COOK.gen++;if(TTS_OK())speechSynthesis.cancel();COOK.speaking=false;
+  if(COOK.busy)return;COOK.busy=true;const b=$('#cookMic');b.textContent='🎤 Parla ora…';b.classList.add('on');cookSilence();
   try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});const chunks=[];const mr=new MediaRecorder(stream,{mimeType:dictMime()||undefined,audioBitsPerSecond:48000});mr.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
     await new Promise(ok=>{mr.onstop=ok;mr.start();setTimeout(()=>{try{mr.stop()}catch{ok()}},3500)});stream.getTracks().forEach(t=>t.stop());
     b.textContent='🎤 Un attimo…';const type=(chunks[0]?.type||dictMime()||'audio/webm').split(';')[0],blob=new Blob(chunks,{type});
@@ -2063,7 +2067,7 @@ async function cookPush(){ // senza riconoscimento sul dispositivo: registro qua
 async function cookWake(on){try{if(window.AndroidShare?.keepAwake)AndroidShare.keepAwake(!!on)}catch{}
   try{if(on){if('wakeLock' in navigator&&!COOK.wake){COOK.wake=await navigator.wakeLock.request('screen');COOK.wake.addEventListener('release',()=>{COOK.wake=null})}}else if(COOK.wake){const w=COOK.wake;COOK.wake=null;await w.release()}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&COOK.on)cookWake(true)});
-function cookClose(){COOK.on=false;COOK.gen++;cookTimerStop();if(TTS_OK())speechSynthesis.cancel();COOK.speaking=false;cookListen(false);cookWake(false);if($('#cook').open)$('#cook').close()}
+function cookClose(){COOK.on=false;cookTimerStop();cookSilence();cookListen(false);cookWake(false);if($('#cook').open)$('#cook').close()}
 $('#cookX').onclick=()=>cookClose();$('#cook').addEventListener('cancel',e=>{e.preventDefault();cookClose()});$('#cook').addEventListener('close',()=>{if(COOK.on)cookClose()});
 $('#cook').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;const c=b.dataset.c;
   if(c==='repeat')cookRepeat();else if(c==='next')cookGo(COOK.step+1);else if(c==='prev')cookGo(COOK.step-1);else if(c==='ing'){cookShowIng();cookReadIng(true)}else if(c==='pause')cookPause(!COOK.paused);

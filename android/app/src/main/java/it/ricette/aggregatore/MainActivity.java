@@ -10,6 +10,9 @@ import android.os.Looper;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import java.util.Locale;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import com.getcapacitor.BridgeActivity;
@@ -27,6 +30,9 @@ public class MainActivity extends BridgeActivity {
     // «Cucina con me»: riconoscimento vocale nativo (il WebView non ha il Web Speech API); i risultati vanno alla pagina con window.onSpeech(testo)
     private SpeechRecognizer recognizer;
     private boolean listenOn;
+    // Voce dell'app (il WebView non ha speechSynthesis): TextToSpeech di Android in italiano; a fine frase chiama window.onSpoken(id)
+    private TextToSpeech tts;
+    private boolean ttsReady;
     private final Handler ui = new Handler(Looper.getMainLooper());
     // File in cui la fotocamera scrive il video della ricetta (cartella cache dell'app, condiviso con YouTube tramite FileProvider)
     private android.net.Uri pendingVideo;
@@ -150,6 +156,16 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         getBridge().getWebView().addJavascriptInterface(new ShareBridge(), "AndroidShare");
         getBridge().getWebView().addJavascriptInterface(new SpeechBridge(), "AndroidSpeech");
+        tts = new TextToSpeech(this, status -> {
+            if (status != TextToSpeech.SUCCESS) return;
+            int r = tts.setLanguage(Locale.ITALIAN);
+            ttsReady = r != TextToSpeech.LANG_MISSING_DATA && r != TextToSpeech.LANG_NOT_SUPPORTED;
+            tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                public void onStart(String id) {}
+                public void onDone(String id) { js("window.onSpoken&&onSpoken(" + JSONObject.quote(id) + ")"); }
+                public void onError(String id) { js("window.onSpoken&&onSpoken(" + JSONObject.quote(id) + ")"); }
+            });
+        });
         cleanApks(); // l'APK dell'aggiornamento appena installato non serve più
         handleShare(getIntent());
     }
@@ -298,6 +314,8 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onDestroy() {
+        if (tts != null) try { tts.stop(); tts.shutdown(); } catch (Exception ignored) {}
+        tts = null;
         stopListen();
         if (recognizer != null) try { recognizer.destroy(); } catch (Exception ignored) {}
         recognizer = null;
@@ -305,6 +323,23 @@ public class MainActivity extends BridgeActivity {
     }
 
     class SpeechBridge {
+        @JavascriptInterface
+        public boolean canSpeak() {
+            return ttsReady;
+        }
+
+        // Legge un testo; a fine lettura la pagina riceve onSpoken(id). Una nuova frase interrompe la precedente
+        @JavascriptInterface
+        public void say(String text, String id) {
+            if (!ttsReady || tts == null) { js("window.onSpoken&&onSpoken(" + JSONObject.quote(id) + ")"); return; }
+            runOnUiThread(() -> { try { tts.setSpeechRate(0.95f); tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, id); } catch (Exception e) { js("window.onSpoken&&onSpoken(" + JSONObject.quote(id) + ")"); } });
+        }
+
+        @JavascriptInterface
+        public void stopSay() {
+            runOnUiThread(() -> { if (tts != null) try { tts.stop(); } catch (Exception ignored) {} });
+        }
+
         @JavascriptInterface
         public boolean available() {
             return SpeechRecognizer.isRecognitionAvailable(MainActivity.this);
