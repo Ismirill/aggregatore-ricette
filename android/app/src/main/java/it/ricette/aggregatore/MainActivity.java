@@ -297,7 +297,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         stopListen();
         if (recognizer != null) try { recognizer.destroy(); } catch (Exception ignored) {}
         recognizer = null;
