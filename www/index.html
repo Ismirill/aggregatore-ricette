@@ -990,7 +990,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=133; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=134; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1977,7 +1977,7 @@ const TTS_OK=()=>'speechSynthesis' in window&&'SpeechSynthesisUtterance' in wind
 const NATIVE_TTS=()=>{try{return !!(window.AndroidSpeech&&AndroidSpeech.canSpeak())}catch{return false}}; // nell'APK il WebView non parla: voce di Android
 function cookSilence(){COOK.gen=(COOK.gen||0)+1;COOK.sayCb=null;COOK.speaking=false;try{if(window.AndroidSpeech?.stopSay)AndroidSpeech.stopSay()}catch{}if(TTS_OK())speechSynthesis.cancel()}
 window.onSpoken=id=>{const s=COOK.sayCb;if(!s||s.id!==id)return;COOK.sayCb=null;COOK.speaking=false;if(COOK.on)cookListen(true);s.cb&&s.cb()}; // fine lettura dalla voce nativa
-let cookVoiceObj=null;function cookVoice(){if(!TTS_OK())return null;const vs=speechSynthesis.getVoices().filter(v=>/^it[-_]/i.test(v.lang));return vs.find(v=>/alice|federica|elsa|google italiano|paola|italia/i.test(v.name))||vs[0]||null}
+let cookVoiceObj=null;function cookVoice(){if(!TTS_OK())return null;const vs=speechSynthesis.getVoices().filter(v=>/^it[-_]/i.test(v.lang));return vs.find(v=>/enhanced|premium|neural|natural/i.test(v.name))||vs.find(v=>/alice|federica|elsa|google italiano|paola|italia/i.test(v.name))||vs[0]||null}
 if(TTS_OK()){speechSynthesis.onvoiceschanged=()=>{cookVoiceObj=cookVoice()};cookVoiceObj=cookVoice()}
 // Testo adatto alla lettura: unità per esteso, «q.b.» → «quanto basta»
 const speakable=t=>String(t).replace(/\bq\.?\s?b\.?/gi,'quanto basta').replace(/(\d)\s?kg\b/gi,'$1 chili').replace(/(\d)\s?(?:g|gr)\b\.?/gi,'$1 grammi').replace(/(\d)\s?ml\b/gi,'$1 millilitri').replace(/(\d)\s?cl\b/gi,'$1 centilitri').replace(/(\d)\s?dl\b/gi,'$1 decilitri').replace(/(\d)\s?l\b/gi,'$1 litri').replace(/\bn\.\s?(\d)/gi,'$1').replace(/#\S+/g,'').replace(/[*_~]/g,'').replace(/\s+/g,' ').trim();
@@ -1991,7 +1991,7 @@ function cookSay(text,cb){
   const parts=String(text).match(/[^.!?]+[.!?]*/g)||[String(text)],chunks=[];for(const p of parts){const t=p.trim();if(!t)continue;if(chunks.length&&(chunks[chunks.length-1]+' '+t).length<180)chunks[chunks.length-1]+=' '+t;else chunks.push(t)}
   let k=0;
   const next=()=>{if(gen!==COOK.gen)return;if(k>=chunks.length||!COOK.on){COOK.speaking=false;if(COOK.on)cookListen(true);cb&&cb();return}
-    const u=new SpeechSynthesisUtterance(chunks[k++]);u.lang='it-IT';u.rate=.92;const v=cookVoiceObj||cookVoice();if(v)u.voice=v;
+    const u=new SpeechSynthesisUtterance(chunks[k++]);u.lang='it-IT';u.rate=1.05;const v=cookVoiceObj||cookVoice();if(v)u.voice=v;
     let done=false;const end=()=>{if(done)return;done=true;setTimeout(next,120)};u.onend=end;u.onerror=end;speechSynthesis.speak(u);
     const est=Math.min(60000,2000+u.text.length*95);setTimeout(()=>{if(!done&&!speechSynthesis.speaking)end()},est)};
   next()}

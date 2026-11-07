@@ -12,6 +12,7 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.speech.tts.Voice;
 import java.util.Locale;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
@@ -160,6 +161,18 @@ public class MainActivity extends BridgeActivity {
             if (status != TextToSpeech.SUCCESS) return;
             int r = tts.setLanguage(Locale.ITALIAN);
             ttsReady = r != TextToSpeech.LANG_MISSING_DATA && r != TextToSpeech.LANG_NOT_SUPPORTED;
+            // La voce italiana di qualità più alta tra quelle installate (quelle «di rete» di Google sono le più naturali); a parità, quella che non ha bisogno di connessione
+            try {
+                Voice best = null;
+                java.util.Set<Voice> all = tts.getVoices();
+                if (all != null) for (Voice v : all) {
+                    if (v.getLocale() == null || !"it".equals(v.getLocale().getLanguage())) continue;
+                    if (v.getFeatures() != null && v.getFeatures().contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)) continue;
+                    if (best == null || v.getQuality() > best.getQuality() || (v.getQuality() == best.getQuality() && best.isNetworkConnectionRequired() && !v.isNetworkConnectionRequired())) best = v;
+                }
+                if (best != null) tts.setVoice(best);
+            } catch (Exception ignored) {}
+            tts.setPitch(1.0f);
             tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                 public void onStart(String id) {}
                 public void onDone(String id) { js("window.onSpoken&&onSpoken(" + JSONObject.quote(id) + ")"); }
@@ -332,7 +345,7 @@ public class MainActivity extends BridgeActivity {
         @JavascriptInterface
         public void say(String text, String id) {
             if (!ttsReady || tts == null) { js("window.onSpoken&&onSpoken(" + JSONObject.quote(id) + ")"); return; }
-            runOnUiThread(() -> { try { tts.setSpeechRate(0.95f); tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, id); } catch (Exception e) { js("window.onSpoken&&onSpoken(" + JSONObject.quote(id) + ")"); } });
+            runOnUiThread(() -> { try { tts.setSpeechRate(1.12f); tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, id); } catch (Exception e) { js("window.onSpoken&&onSpoken(" + JSONObject.quote(id) + ")"); } });
         }
 
         @JavascriptInterface
