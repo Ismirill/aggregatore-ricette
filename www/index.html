@@ -490,7 +490,8 @@ details summary{cursor:pointer}
   <div class="cookTxt" id="cookTxt"></div>
   <div class="cookTimer" id="cookTimer" hidden><b id="cookLeft">0:00</b><span>Ti avviso io quando è passato il tempo, poi passo al passaggio seguente</span></div>
   <div class="cookBtns"><button type="button" class="btn" data-c="repeat">🔁 Ripeti</button><button type="button" class="btn pri" data-c="next">⏭ Avanti</button><button type="button" class="btn" data-c="prev">⏮ Indietro</button><button type="button" class="btn" data-c="ing">🥕 Ingredienti</button><button type="button" class="btn" data-c="pause" id="cookPause">⏸ Pausa</button><button type="button" class="btn" data-c="mic" id="cookMic">🎤 Voce</button></div>
-  <p class="meta" id="cookHint" style="margin:10px 0 0;min-height:1.2em"></p></dialog>
+  <p class="meta" id="cookHint" style="margin:10px 0 0;min-height:1.2em"></p>
+  <div id="cookVoiceBox" hidden><p class="meta" id="cookVoiceTxt" style="margin:8px 0 6px"></p><button type="button" class="btn" id="cookImprove" style="width:100%">🗣 Migliora la voce</button></div></dialog>
 <dialog id="photo"><button class="dclose" id="phX" aria-label="Chiudi">✕</button><div id="phv"></div></dialog>
 <dialog id="ratePop"><h3 id="rateT" tabindex="-1" autofocus></h3><p class="meta" id="rateSub" style="margin:0"></p><div class="rate" id="rateStars"><button type="button" data-n="1" aria-label="1 stelle">★</button><button type="button" data-n="2" aria-label="2 stelle">★</button><button type="button" data-n="3" aria-label="3 stelle">★</button><button type="button" data-n="4" aria-label="4 stelle">★</button><button type="button" data-n="5" aria-label="5 stelle">★</button></div><p class="meta" id="rateHint" style="margin:0"></p><button class="btn" id="rateX">Chiudi</button></dialog>
 <dialog id="rec"><div class="rech"><b>🎬 Il video della ricetta</b><button type="button" class="dclose" id="recX" aria-label="Chiudi" style="float:none;margin:0">✕</button></div><div id="recBody"></div></dialog>
@@ -990,7 +991,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=134; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=135; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://ismirill.github.io/aggregatore-ricette/';
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2040,7 +2041,14 @@ function cookFlash(t){cookHint(`Ho sentito: «${String(t).trim()}»`)}
 window.onSpeech=t=>{if(COOK.on&&cookCmd(t))cookFlash(t)}; // dal riconoscimento nativo di Android
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 function cookTier(){try{if(window.AndroidSpeech&&AndroidSpeech.available())return 'android'}catch{}return SR?'web':(REC_OK()&&aiOn())?'push':''}
-function cookVoiceSetup(){COOK.tier=cookTier();const b=$('#cookMic');if(!COOK.tier){b.hidden=true;COOK.voice=false;return}b.hidden=false;
+// Nell'APK: se la voce italiana manca o è di qualità bassa, il pulsante apre la schermata di Android per scaricare quella buona
+function cookVoiceCheck(){const box=$('#cookVoiceBox');if(!window.AndroidSpeech?.voiceInfo){box.hidden=true;return}
+  let v={};try{v=JSON.parse(AndroidSpeech.voiceInfo()||'{}')}catch{}
+  const poor=!v.ready||(+v.quality||0)<400;box.hidden=!poor;
+  if(poor)$('#cookVoiceTxt').textContent=v.ready?'La voce italiana del telefono è quella di base, un po\' meccanica: con un tocco scarichi quella naturale (gratis, una volta sola).':'Sul telefono manca la voce italiana: con un tocco la scarichi (gratis, una volta sola).'}
+window.onVoiceChanged=()=>{if($('#cook').open)cookVoiceCheck()};
+$('#cookImprove').onclick=()=>{try{AndroidSpeech.improveVoice();toast('Scegli la voce italiana e scaricala, poi torna qui')}catch{}};
+function cookVoiceSetup(){cookVoiceCheck();COOK.tier=cookTier();const b=$('#cookMic');if(!COOK.tier){b.hidden=true;COOK.voice=false;return}b.hidden=false;
   if(COOK.tier==='push'){b.textContent='🎤 Parla';COOK.voice=false;return}
   COOK.voice=load('cookVoice',true)!==false;cookMicBtn()}
 function cookMicBtn(){const b=$('#cookMic');if(COOK.tier==='push')return;b.textContent=COOK.voice?'🎤 Voce attiva':'🎤 Voce spenta';b.classList.toggle('on',COOK.voice)}

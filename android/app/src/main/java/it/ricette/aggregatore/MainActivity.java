@@ -161,17 +161,7 @@ public class MainActivity extends BridgeActivity {
             if (status != TextToSpeech.SUCCESS) return;
             int r = tts.setLanguage(Locale.ITALIAN);
             ttsReady = r != TextToSpeech.LANG_MISSING_DATA && r != TextToSpeech.LANG_NOT_SUPPORTED;
-            // La voce italiana di qualità più alta tra quelle installate (quelle «di rete» di Google sono le più naturali); a parità, quella che non ha bisogno di connessione
-            try {
-                Voice best = null;
-                java.util.Set<Voice> all = tts.getVoices();
-                if (all != null) for (Voice v : all) {
-                    if (v.getLocale() == null || !"it".equals(v.getLocale().getLanguage())) continue;
-                    if (v.getFeatures() != null && v.getFeatures().contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)) continue;
-                    if (best == null || v.getQuality() > best.getQuality() || (v.getQuality() == best.getQuality() && best.isNetworkConnectionRequired() && !v.isNetworkConnectionRequired())) best = v;
-                }
-                if (best != null) tts.setVoice(best);
-            } catch (Exception ignored) {}
+            pickVoice();
             tts.setPitch(1.0f);
             tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                 public void onStart(String id) {}
@@ -300,6 +290,27 @@ public class MainActivity extends BridgeActivity {
         }
     }
 
+    // La voce italiana di qualità più alta tra quelle installate (quelle «di rete» di Google sono le più naturali); a parità, quella che non ha bisogno di connessione
+    private void pickVoice() {
+        if (tts == null) return;
+        try {
+            Voice best = null;
+            java.util.Set<Voice> all = tts.getVoices();
+            if (all != null) for (Voice v : all) {
+                if (v.getLocale() == null || !"it".equals(v.getLocale().getLanguage())) continue;
+                if (v.getFeatures() != null && v.getFeatures().contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)) continue;
+                if (best == null || v.getQuality() > best.getQuality() || (v.getQuality() == best.getQuality() && best.isNetworkConnectionRequired() && !v.isNetworkConnectionRequired())) best = v;
+            }
+            if (best != null) { tts.setVoice(best); ttsReady = true; }
+        } catch (Exception ignored) {}
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (tts != null && ttsReady) { pickVoice(); js("window.onVoiceChanged&&onVoiceChanged()"); } // tornati dalle impostazioni: magari c'è una voce migliore
+    }
+
     private void stopListen() {
         listenOn = false;
         if (recognizer != null) try { recognizer.cancel(); } catch (Exception ignored) {}
@@ -346,6 +357,40 @@ public class MainActivity extends BridgeActivity {
         public void say(String text, String id) {
             if (!ttsReady || tts == null) { js("window.onSpoken&&onSpoken(" + JSONObject.quote(id) + ")"); return; }
             runOnUiThread(() -> { try { tts.setSpeechRate(1.12f); tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, id); } catch (Exception e) { js("window.onSpoken&&onSpoken(" + JSONObject.quote(id) + ")"); } });
+        }
+
+        // Stato della voce in uso: pronta, nome, qualità (100 bassissima … 500 altissima), se serve la rete
+        @JavascriptInterface
+        public String voiceInfo() {
+            try {
+                JSONObject o = new JSONObject();
+                o.put("ready", ttsReady);
+                Voice v = tts != null ? tts.getVoice() : null;
+                if (v != null) { o.put("name", v.getName()); o.put("quality", v.getQuality()); o.put("network", v.isNetworkConnectionRequired()); }
+                return o.toString();
+            } catch (Exception e) { return "{}"; }
+        }
+
+        // Apre la schermata del motore vocale per scaricare le voci (poi le impostazioni della sintesi vocale, se quella non c'è)
+        @JavascriptInterface
+        public void improveVoice() {
+            runOnUiThread(() -> {
+                try {
+                    Intent i = new Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                    String eng = tts != null ? tts.getDefaultEngine() : null;
+                    if (eng != null) i.setPackage(eng);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                } catch (Exception e) {
+                    try {
+                        Intent i = new Intent("com.android.settings.TTS_SETTINGS");
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(i);
+                    } catch (Exception e2) {
+                        js("window.toast&&toast('Apri Impostazioni del telefono → Sintesi vocale')");
+                    }
+                }
+            });
         }
 
         @JavascriptInterface
