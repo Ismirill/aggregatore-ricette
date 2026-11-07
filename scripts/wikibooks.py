@@ -15,7 +15,7 @@ from pathlib import Path
 API = 'https://it.wikibooks.org/w/api.php'
 PREFIX = 'Libro di cucina/Ricette/'
 OUT = Path(__file__).resolve().parent.parent / 'www' / 'ricettario.json'
-UA = {'User-Agent': 'AggregatoreRicette/1.0 (https://ismirill.github.io/aggregatore-ricette/)'}
+UA = {'User-Agent': 'Gnamina/1.0 (https://gnamina.it/)'}
 
 
 def api(**q):

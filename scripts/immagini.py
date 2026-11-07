@@ -21,7 +21,7 @@ API_EN = 'https://en.wikipedia.org/w/api.php'
 COMMONS = 'https://commons.wikimedia.org/w/api.php'
 WIKIDATA = 'https://www.wikidata.org/w/api.php'
 STRATEGY = 2  # se cambia, le ricette senza foto vengono ricercate di nuovo
-UA = {'User-Agent': 'AggregatoreRicette/1.0 (https://ismirill.github.io/aggregatore-ricette/)'}
+UA = {'User-Agent': 'Gnamina/1.0 (https://gnamina.it/)'}
 STOP = {'di', 'del', 'della', 'dei', 'degli', 'delle', 'al', 'alla', 'alle', 'allo', 'ai', 'agli', 'con', 'e', 'in', 'a', 'da', 'la', 'il',
         'lo', 'le', 'i', 'gli', 'un', 'una', 'per', 'su', 'sul', 'sulla', "d'", "all'", "dell'", 'alla', 'ricetta', 'classica', 'classico'}
 

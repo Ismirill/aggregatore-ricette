@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / 'www' / 'mondo.json'
 SRC = 'https://theunitools.com/data/unitools-recipes-v1.json'
 AI = 'https://ricette-ai.ricettedelcuore.workers.dev/translate-recipe'
-UA = {'User-Agent': 'AggregatoreRicette/1.0 (https://ismirill.github.io/aggregatore-ricette/)', 'Content-Type': 'application/json'}
+UA = {'User-Agent': 'Gnamina/1.0 (https://gnamina.it/)', 'Content-Type': 'application/json'}
 LIMIT = int(__import__("os").environ.get("MONDO_LIMIT", 150))
 UNITS = {'g': 'g', 'kg': 'kg', 'ml': 'ml', 'l': 'l', 'tbsp': ('cucchiaio', 'cucchiai'), 'tsp': ('cucchiaino', 'cucchiaini'),
          'clove': ('spicchio', 'spicchi'), 'pinch': ('pizzico', 'pizzichi'), 'sprig': ('rametto', 'rametti'), 'slice': ('fetta', 'fette'), 'piece': ''}

@@ -31,7 +31,7 @@ CHECK_LIMIT = int(os.environ.get('IMG_CHECK', 20))    # vecchie immagini da cont
 ONLY = os.environ.get('IMG_ONLY', '')                 # per le prove: solo questa ricetta (id)
 GEN_VERSION = 2                                       # metodo di generazione: 2 = con descrizione del piatto
 SOURCES = ['ricettario.json', 'puglia.json', 'mondo.json', 'artusi.json', 'libere.json', 'collegate.json']
-UA = {'User-Agent': 'AggregatoreRicette/1.0 (https://ismirill.github.io/aggregatore-ricette/)'}
+UA = {'User-Agent': 'Gnamina/1.0 (https://gnamina.it/)'}
 
 
 def recipes():

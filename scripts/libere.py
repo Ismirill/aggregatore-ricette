@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / 'www' / 'libere.json'
 APP = ROOT / 'scripts' / 'ricette_app.json'  # piatti di tutti i giorni scritti per l'app (nessun contenuto di terzi)
 SRV = 'https://ricette-ai.ricettedelcuore.workers.dev'
-UA = {'User-Agent': 'AggregatoreRicette/1.0 (https://ismirill.github.io/aggregatore-ricette/)', 'Content-Type': 'application/json'}
+UA = {'User-Agent': 'Gnamina/1.0 (https://gnamina.it/)', 'Content-Type': 'application/json'}
 CATS = ['Antipasti', 'Primi', 'Secondi', 'Contorni', 'Piatti unici', 'Lievitati', 'Dolci', 'Altro']
 
 # Wikipedia in italiano: voce -> (titolo per l'app, tipo di piatto)
@@ -160,7 +160,7 @@ def main():
         except Exception as e:
             print('Cookbook non riuscito', page, e)
     for b in BASE + json.loads(APP.read_text(encoding='utf-8')):
-        out.append({'region': '', **b, 'id': 'base-' + re.sub(r'\W+', '-', b['title'].lower()).strip('-'), 'url': 'https://ismirill.github.io/aggregatore-ricette/', 'source': 'Gnamina',
+        out.append({'region': '', **b, 'id': 'base-' + re.sub(r'\W+', '-', b['title'].lower()).strip('-'), 'url': 'https://gnamina.it/', 'source': 'Gnamina',
                     'license': 'ricetta scritta per l\'app', 'diets': [], 'country': 'Italia'})
     for r in out:
         for f in ('b', 'n', 'cov', 's', 'sub'):

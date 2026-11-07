@@ -31,7 +31,7 @@ PIXABAY = os.environ.get('PIXABAY_KEY', '')
 LIMIT = int(os.environ.get('SEARCH_LIMIT', 30))     # ricette per esecuzione
 CANDIDATES = 2                                       # foto da far controllare all'AI per ogni ricetta
 RETRY_DAYS = 120                                     # dopo quanto riprovare una ricetta rimasta senza foto
-UA = {'User-Agent': 'AggregatoreRicette/1.0 (https://ismirill.github.io/aggregatore-ricette/)'}
+UA = {'User-Agent': 'Gnamina/1.0 (https://gnamina.it/)'}
 SOURCES = ['ricettario.json', 'puglia.json', 'mondo.json', 'artusi.json', 'libere.json', 'collegate.json']
 # Parole che nei titoli non aiutano la ricerca ("Pollo in salsa d'uovo" -> "pollo salsa uovo")
 STOP = {'alla', 'alle', 'allo', 'agli', 'ai', 'al', 'di', 'del', 'della', 'delle', 'dei', 'degli', 'con', 'in', 'e', 'ed', 'o', 'a', 'la', 'le', 'il', 'lo', 'gli', 'i', 'un', 'una', 'col', 'coi', 'colla', 'per', 'da', 'su', 'the', 'with', 'and', 'of'}

@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / 'www' / 'puglia.json'
 CKAN = 'https://dati.puglia.it/ckan/api/3/action/package_show?id=prodotti-tipici-e-ricette'
 AI = 'https://ricette-ai.ricettedelcuore.workers.dev/analyze'
-UA = {'User-Agent': 'AggregatoreRicette/1.0 (https://ismirill.github.io/aggregatore-ricette/)', 'Content-Type': 'application/json'}
+UA = {'User-Agent': 'Gnamina/1.0 (https://gnamina.it/)', 'Content-Type': 'application/json'}
 CATS = ['Antipasti', 'Primi', 'Secondi', 'Contorni', 'Piatti unici', 'Lievitati', 'Dolci', 'Altro']
 
 

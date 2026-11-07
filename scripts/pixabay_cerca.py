@@ -16,7 +16,7 @@ for n, i in enumerate(ids):
     t = re.sub(r'\(.*?\)', '', rec[i]['title']).strip()
     q = {'key': KEY, 'q': t[:100], 'lang': 'it', 'image_type': 'photo', 'category': 'food', 'safesearch': 'true', 'per_page': 3}
     try:
-        d = json.load(urllib.request.urlopen(urllib.request.Request('https://pixabay.com/api/?' + urllib.parse.urlencode(q), headers={'User-Agent': 'Gnamina/1.0 (https://ismirill.github.io/aggregatore-ricette/)'}), timeout=30))
+        d = json.load(urllib.request.urlopen(urllib.request.Request('https://pixabay.com/api/?' + urllib.parse.urlencode(q), headers={'User-Agent': 'Gnamina/1.0 (https://gnamina.it/)'}), timeout=30))
         h = (d.get('hits') or [None])[0]
         if h:
             out[i] = {'thumb': h['webformatURL'], 'page': h['pageURL'], 'by': h.get('user', 'Pixabay'), 'lic': 'Pixabay License', 'src': 'Pixabay', 'tags': h.get('tags', '')}

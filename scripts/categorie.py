@@ -20,7 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 BOOK = ROOT / 'www' / 'ricettario.json'
 OUT = ROOT / 'www' / 'categorie.json'
-UA = {'User-Agent': 'AggregatoreRicette/1.0 (https://ismirill.github.io/aggregatore-ricette/)'}
+UA = {'User-Agent': 'Gnamina/1.0 (https://gnamina.it/)'}
 TYPES = ['Antipasti', 'Primi', 'Secondi', 'Contorni', 'Piatti unici', 'Lievitati', 'Dolci', 'Altro']
 
 # Correzioni controllate a mano, per ricette di qualsiasi fonte (Wikibooks, UniTools, Artusi, Puglia…): l'app le applica dopo

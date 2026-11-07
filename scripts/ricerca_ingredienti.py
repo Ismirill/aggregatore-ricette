@@ -20,7 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / 'scripts' / 'ingredienti_appresi.json'
-UA = {'User-Agent': 'AggregatoreRicette/1.0 (https://ismirill.github.io/aggregatore-ricette/)'}
+UA = {'User-Agent': 'Gnamina/1.0 (https://gnamina.it/)'}
 
 # Righe che non sono ingredienti (attrezzi, istruzioni): si ignorano
 NOT_FOOD = re.compile(r'spago|stampo|vaso|vasett[io] di vetro|colino|forma circolare|teglia|carta (da )?forno|stuzzicadent|pellicola|sac [àa] poche|'
