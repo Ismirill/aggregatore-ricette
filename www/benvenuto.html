@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gnamina · la tua app di cucina, semplice e gratis</title>
+<meta name="description" content="Gnamina salva le ricette da TikTok, Instagram e YouTube, ha un ricettario di oltre 1.500 piatti, legge gli ingredienti a voce mentre cucini, crea il menu nel tuo budget con la lista della spesa. Gratis, senza pubblicità, su telefono e computer.">
+<meta property="og:title" content="Gnamina · la tua app di cucina">
+<meta property="og:description" content="Ricette dai social, ricettario, contest tra Gnammers, menu a budget e lista della spesa. Gratis e senza pubblicità.">
+<meta property="og:image" content="https://gnamina.it/icon-512.png">
+<meta property="og:url" content="https://gnamina.it/benvenuto.html">
+<link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon-180.png">
+<script>try{const t=localStorage.getItem("theme")||"dark";if(t!=="auto")document.documentElement.dataset.theme=t}catch{document.documentElement.dataset.theme="dark"}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'Fredoka';src:url(fonts/fredoka.woff2) format('woff2');font-weight:500 700;font-display:swap}
+:root{--bg:#f7f2ea;--bg2:#efe7da;--card:#fffdf9;--fg:#2a231d;--mut:#8a7e71;--acc:#c2502f;--acc2:#e9a23b;--ok:#5f7a35;--bd:#e8dfd1;
+  --sh:0 1px 2px #2a231d10,0 6px 20px #2a231d0d;--sh2:0 10px 30px #2a231d26;--serif:'Fraunces',Georgia,serif;--sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#15120e;--bg2:#1d1914;--card:#221d17;--fg:#f2ebe1;--mut:#a89c8c;--acc:#e6734d;--acc2:#f0b24f;--ok:#a3bd6f;--bd:#352e25;--sh:0 1px 2px #0006,0 6px 20px #0004;--sh2:0 12px 32px #0008;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#15120e;--bg2:#1d1914;--card:#221d17;--fg:#f2ebe1;--mut:#a89c8c;--acc:#e6734d;--acc2:#f0b24f;--ok:#a3bd6f;--bd:#352e25;--sh:0 1px 2px #0006,0 6px 20px #0004;--sh2:0 12px 32px #0008;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;background-image:radial-gradient(900px 500px at 15% -10%,color-mix(in srgb,var(--acc) 14%,transparent),transparent 70%)}
+a{color:var(--acc)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid color-mix(in srgb,var(--bd) 70%,transparent)}
+.top{display:flex;align-items:center;gap:14px;height:68px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--fg)}.brand img{width:40px;height:40px;border-radius:11px;box-shadow:0 6px 16px color-mix(in srgb,var(--acc) 35%,transparent)}
+.brand b{font-family:'Fredoka',var(--sans);font-size:1.4rem;font-weight:700}
+.links{margin-left:auto;display:flex;gap:4px;align-items:center}.links a{color:var(--mut);text-decoration:none;font-weight:600;font-size:.92rem;padding:8px 12px;border-radius:999px}.links a:hover{color:var(--fg);background:color-mix(in srgb,var(--fg) 6%,transparent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);background:var(--card);color:var(--fg);padding:12px 20px;border-radius:999px;font:inherit;font-weight:700;text-decoration:none;cursor:pointer;box-shadow:var(--sh);transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--sh2)}.btn.pri{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 88%,#fff),var(--acc) 60%,color-mix(in srgb,var(--acc) 85%,#000));color:#fff;border:none}
+.btn.big{font-size:1.1rem;padding:16px 28px}
+.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:center;padding:56px 0 40px}
+.eyebrow{font-size:.8rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin:0 0 10px}
+h1{font-family:var(--serif);font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.05;margin:0 0 16px;text-wrap:balance}
+.lead{font-size:1.2rem;line-height:1.55;color:var(--fg);max-width:34rem;margin:0 0 24px}.lead b{color:var(--acc)}
+.cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.note{font-size:.9rem;color:var(--mut);margin:14px 0 0;max-width:34rem}
+.phone{justify-self:center;width:340px;max-width:100%;aspect-ratio:9/19;border-radius:42px;background:#111;padding:12px;box-shadow:0 30px 60px -20px #000a,0 0 0 1px #0004;position:relative}
+.phone::before{content:'';position:absolute;top:12px;left:50%;transform:translateX(-50%);width:110px;height:26px;background:#111;border-radius:0 0 18px 18px;z-index:2}
+.phone iframe{width:100%;height:100%;border:0;border-radius:32px;background:var(--bg);display:block}
+.strip{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin:0 0 56px}.strip span{font-size:.95rem;color:var(--mut);font-weight:600;display:flex;align-items:center;gap:6px}
+section{padding:28px 0 48px}h2{font-family:var(--serif);font-size:clamp(1.7rem,3.2vw,2.4rem);margin:0 0 8px;text-wrap:balance}.sub{color:var(--mut);font-size:1.08rem;margin:0 0 26px;max-width:40rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px 22px 20px;box-shadow:var(--sh);transition:transform .18s,box-shadow .18s}.card:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.card .ic{font-size:2rem;line-height:1;margin-bottom:12px}.card h3{margin:0 0 6px;font-size:1.15rem}.card p{margin:0;color:var(--mut);line-height:1.5}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:16px;counter-reset:s}
+.step{background:var(--bg2);border-radius:20px;padding:22px}.step::before{counter-increment:s;content:counter(s);display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--acc);color:#fff;font-weight:700;font-size:1.1rem;margin-bottom:12px}
+.step h3{margin:0 0 6px;font-size:1.1rem}.step p{margin:0;color:var(--mut)}
+.band{background:linear-gradient(160deg,color-mix(in srgb,var(--acc) 18%,var(--card)),var(--card) 60%);border:1px solid color-mix(in srgb,var(--acc) 30%,var(--bd));border-radius:28px;padding:40px 36px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:30px;align-items:center;box-shadow:var(--sh)}
+.band h2{margin-bottom:12px}.band p{font-size:1.08rem;line-height:1.6;margin:0 0 10px}.band ul{margin:10px 0 0;padding-left:20px;line-height:1.7;font-size:1.05rem}
+.tom{font-size:9rem;line-height:1;text-align:center;filter:drop-shadow(0 20px 30px #0005)}
+.free{text-align:center;padding:40px 0 20px}.free h2{margin-bottom:10px}.free p{max-width:44rem;margin:0 auto 20px;color:var(--mut);font-size:1.08rem}
+footer{border-top:1px solid var(--bd);padding:26px 0 40px;color:var(--mut);font-size:.9rem}footer .wrap{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}footer a{color:var(--mut)}
+@media (max-width:860px){.hero{grid-template-columns:1fr;padding-top:32px;text-align:center}.lead,.note{margin-left:auto;margin-right:auto}.cta{justify-content:center}.phone{display:none}.band{grid-template-columns:1fr;padding:28px 22px}.tom{font-size:6rem}.links a:not(.btn){display:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap top">
+  <a class="brand" href="benvenuto.html"><img src="icon-192.png" alt="" width="40" height="40"><b>Gnamina</b></a>
+  <nav class="links"><a href="#cosa">Cos'è</a><a href="#come">Come funziona</a><a href="#gnammers">I Gnammers</a><a class="btn pri" href="./?start">Apri Gnamina</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div>
+      <p class="eyebrow">La tua app di cucina</p>
+      <h1>Le ricette che ami, <br>in un posto solo. Gratis.</h1>
+      <p class="lead">Salvi una ricetta da <b>TikTok, Instagram o YouTube</b> con un tocco, sfogli un ricettario di oltre 1.500 piatti italiani e dal mondo, e mentre cucini Gnamina ti <b>legge gli ingredienti a voce</b>. Senza pubblicità, senza abbonamenti.</p>
+      <div class="cta">
+        <a class="btn pri big" href="./?start">Apri Gnamina</a>
+        <a class="btn big" href="https://github.com/Ismirill/aggregatore-ricette/releases/tag/apk">Scarica per Android</a>
+      </div>
+      <p class="note">Su iPhone apri gnamina.it in Safari e scegli «Aggiungi alla schermata Home»: diventa un'app come le altre. Sul computer funziona così com'è.</p>
+    </div>
+    <div class="phone"><iframe src="./?start" title="Gnamina" loading="lazy"></iframe></div>
+  </div>
+
+  <div class="strip"><span>🍅 Oltre 1.500 ricette</span><span>🔊 Lettura a voce</span><span>🏆 Contest settimanali</span><span>💶 Costi e calorie a persona</span><span>🛒 Lista della spesa</span></div>
+
+  <section id="cosa">
+    <h2>Cosa fa Gnamina</h2>
+    <p class="sub">Pensata per chi vuole cucinare, non smanettare: pulsanti grandi, poche parole, e la voce che ti accompagna.</p>
+    <div class="grid">
+      <div class="card"><div class="ic">📲</div><h3>Ricette dai social</h3><p>Condividi un video di TikTok, Instagram, YouTube o Facebook con Gnamina: legge il post, il parlato e il sito del cuoco, e compila titolo, ingredienti con le dosi e procedimento. Tu controlli e salvi.</p></div>
+      <div class="card"><div class="ic">📖</div><h3>Un ricettario vero</h3><p>Oltre 1.500 piatti italiani, regionali e dal mondo, con foto, tempo, difficoltà, costo e calorie a persona. Le dosi si ricalcolano per quante persone vuoi.</p></div>
+      <div class="card"><div class="ic">🔊</div><h3>Cucina con me</h3><p>Nella scheda tocchi un pulsante e Gnamina legge ingredienti e passaggi a voce. Dici «ripeti», «avanti», «ingredienti»: lei risponde, aspetta i tempi di cottura e tiene lo schermo acceso.</p></div>
+      <div class="card"><div class="ic">🍽️</div><h3>Il menu nel tuo budget</h3><p>Dici quante persone, quanti giorni e quanto vuoi spendere: Gnamina compone il menu, bilanciato, e prepara la lista della spesa con i prezzi della tua zona.</p></div>
+      <div class="card"><div class="ic">✍️</div><h3>Le ricette di casa</h3><p>Scrivi, detta a voce o fotografa la pagina del quaderno della nonna: l'app la trascrive. Le tue ricette restano tue, cifrate sul tuo telefono.</p></div>
+      <div class="card"><div class="ic">☁️</div><h3>Su tutti i tuoi dispositivi</h3><p>Con un account gratuito le ricette si allineano tra telefono, tablet e computer. Nessun dato venduto, nessuna pubblicità.</p></div>
+    </div>
+  </section>
+
+  <section id="come">
+    <h2>Come si salva una ricetta da un video</h2>
+    <p class="sub">Tre tocchi, e la ricetta è nelle tue, con le dosi e i passaggi.</p>
+    <div class="steps">
+      <div class="step"><h3>Apri il video e tocca «Condividi»</h3><p>Su TikTok, Instagram, YouTube o Facebook, come faresti per mandarlo a un amico.</p></div>
+      <div class="step"><h3>Scegli Gnamina</h3><p>Tra le app proposte. Su iPhone si usa il comando rapido, che l'app ti fa installare.</p></div>
+      <div class="step"><h3>Controlla e salva</h3><p>Gnamina ha già compilato tutto: titolo, ingredienti con le dosi, procedimento, tempo. Correggi se serve e salva.</p></div>
+    </div>
+  </section>
+
+  <section id="gnammers">
+    <div class="band">
+      <div>
+        <p class="eyebrow">La sfida della settimana</p>
+        <h2>I Gnammers: cuochi di casa che si sfidano</h2>
+        <p>Ogni settimana un tema. Chi vuole partecipa con una sua ricetta originale e un breve video girato con l'app. La settimana dopo tutti possono cucinare le ricette degli altri e votarle con le stelle: chi allega la foto del piatto vale di più, perché ha cucinato davvero.</p>
+        <ul><li>La ricetta più votata entra nel Ricettario di Gnamina, con il nome di chi l'ha fatta.</li><li>Chi partecipa sale di livello: Novizio, Cuoco, Sous chef, Chef, Maestro.</li><li>Sotto ogni ricetta i Gnammers si scambiano consigli nei commenti.</li></ul>
+      </div>
+      <div class="tom">🍅</div>
+    </div>
+  </section>
+
+  <section class="free">
+    <h2>Gratis, senza pubblicità, trasparente</h2>
+    <p>Gnamina è fatta da una persona, con strumenti gratuiti, e il suo codice è pubblico. Il ricettario viene da fonti libere (Wikibooks, Artusi, Regione Puglia, Wikimedia Commons), con le fonti scritte in ogni scheda. Le tue ricette sono cifrate sul tuo telefono: il server non le legge.</p>
+    <a class="btn pri big" href="./?start">Apri Gnamina</a>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <span>© Gnamina</span>
+  <a href="./?start">Apri l'app</a>
+  <a href="https://github.com/Ismirill/aggregatore-ricette">Codice su GitHub</a>
+  <a href="https://github.com/Ismirill/aggregatore-ricette/releases/tag/apk">APK Android</a>
+  <a href="https://github.com/Ismirill/aggregatore-ricette/blob/main/CHANGELOG.md">Novità</a>
+</div></footer>
+</body>
+</html>

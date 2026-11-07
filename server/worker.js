@@ -909,6 +909,12 @@ async function starsGet(env, req, body) {
   }
   return { stars: out };
 }
+// Le ricette più votate dai Gnammers (vetrina del sito): media e numero di voti, al massimo 16
+async function starsTop(env) {
+  await starsTable(env);
+  const r = await env.SYNC.prepare('SELECT id, AVG(s) AS a, COUNT(*) AS n FROM stars GROUP BY id ORDER BY a DESC, n DESC LIMIT 16').all();
+  return { top: r.results.map(x => ({ id: x.id, avg: Math.round(x.a * 10) / 10, n: x.n })) };
+}
 async function starsVote(env, req, body) {
   await starsTable(env);
   const id = String(body.id || '').slice(0, 80), s = Math.round(+body.s) || 0;
@@ -1054,17 +1060,17 @@ export default {
         return reply(origin, { error: limit ? 'Limite giornaliero raggiunto' : e.message }, limit ? 429 : e.status === 400 ? 400 : 502);
       }
     }
-    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/dictate', '/nutrition', '/preview', '/translate-recipe', '/sync', '/account', '/handoff', '/handoff/take', '/stars', '/stars/vote', ...Object.keys(SOCIAL)].includes(path)) return reply(origin, { error: 'Not found' }, 404);
+    if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/dictate', '/nutrition', '/preview', '/translate-recipe', '/sync', '/account', '/handoff', '/handoff/take', '/stars', '/stars/vote', '/stars/top', ...Object.keys(SOCIAL)].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';
     // Le letture leggere (stelle e commenti di una scheda) non consumano il limite per IP: chi sfoglia il ricettario le fa a ogni ricetta
-    if (env.LIMITER && path !== '/stars' && path !== '/comments' && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
+    if (env.LIMITER && path !== '/stars' && path !== '/stars/top' && path !== '/comments' && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
     // Stelle dei Gnammers (lettura a lotti e voto)
-    if (req.method === 'POST' && (path === '/stars' || path === '/stars/vote')) {
+    if (req.method === 'POST' && (path === '/stars' || path === '/stars/vote' || path === '/stars/top')) {
       if (!env.SYNC) return reply(origin, { error: 'Non disponibile' }, 503);
       let body; try { body = await req.json(); } catch { return reply(origin, { error: 'Richiesta non valida' }, 400); }
       try {
         if (path === '/stars/vote') { const ip = req.headers.get('CF-Connecting-IP') || 'local'; if (env.LIMITER && !(await env.LIMITER.limit({ key: 'stars:' + ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429); }
-        return reply(origin, path === '/stars' ? await starsGet(env, req, body) : await starsVote(env, req, body));
+        return reply(origin, path === '/stars/top' ? await starsTop(env) : path === '/stars' ? await starsGet(env, req, body) : await starsVote(env, req, body));
       } catch (e) { return reply(origin, { error: e.message }, e.status || 500); }
     }
     // Gnammers: profilo pubblico e commenti

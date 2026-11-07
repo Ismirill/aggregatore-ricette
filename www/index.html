@@ -311,6 +311,19 @@ details summary{cursor:pointer}
   .dacts{grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:10px;margin-top:22px}.dacts.odd .btn:last-child{grid-column:auto}.dacts .btn{padding:13px 10px;font-size:1rem}
   .fonti2{margin-top:22px}
 }
+.vetrina{display:none}
+@media (min-width:900px){
+  .vetrina{grid-column:1/-1;display:grid;gap:30px;margin:4px 0 10px}
+  .vhero{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);grid-template-rows:1fr 1fr;gap:16px;height:min(560px,62vh)}
+  .vtile{position:relative;border-radius:24px;overflow:hidden;cursor:pointer;background:var(--bg2);box-shadow:var(--sh);min-height:0}.vtile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s}.vtile:hover img{transform:scale(1.05)}
+  .vtile.big{grid-row:1/span 2}.vtile .vt{position:absolute;inset:auto 0 0;padding:22px 24px;background:linear-gradient(transparent,#000d);color:#fff}.vtile .vt b{font-family:var(--serif);font-size:1.35rem;display:block;line-height:1.15;text-wrap:balance;text-shadow:0 2px 8px #0008}.vtile.big .vt{padding:34px 36px}.vtile.big .vt b{font-size:2.6rem;line-height:1.05}.vtile .vt span{display:block;margin-top:6px;font-size:.88rem;opacity:.9}.vtile.big .vt span{font-size:1rem}
+  .vtag{position:absolute;top:14px;left:14px;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--acc);color:#fff;padding:5px 10px;border-radius:999px;box-shadow:0 2px 8px #0005}
+  .vcats{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:14px}.vcat{font:inherit;background:none;border:none;padding:0;cursor:pointer;color:var(--fg);text-align:center}.vcat img{width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;display:block;box-shadow:var(--sh),0 0 0 3px var(--card),0 0 0 4px var(--bd);transition:transform .2s,box-shadow .2s}.vcat:hover img{transform:scale(1.06);box-shadow:var(--sh2),0 0 0 3px var(--card),0 0 0 4px var(--acc)}.vcat b{display:block;margin-top:10px;font-size:.95rem}
+  .vsec h3{font-family:var(--serif);font-size:1.7rem;margin:0 0 2px}.vsec>.meta{margin:0 0 16px;font-size:.95rem}
+  .vgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+  .vband{display:flex;align-items:center;gap:24px;background:linear-gradient(160deg,color-mix(in srgb,var(--acc) 18%,var(--card)),var(--card) 60%);border:1px solid color-mix(in srgb,var(--acc) 30%,var(--bd));border-radius:24px;padding:24px 30px;box-shadow:var(--sh)}.vband>div{flex:1;min-width:0}.vband .eyebrow{font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin:0 0 4px}.vband h3{font-family:var(--serif);font-size:1.6rem;margin:0 0 4px}.vband p{margin:0;color:var(--mut)}.vband .btn{flex:none;padding:14px 24px;font-size:1.02rem}
+}
+@media (min-width:1180px){.vhero{height:min(600px,66vh)}.vcats{gap:18px}}
 @media (hover:hover) and (min-width:900px){
   .item{transition:transform .18s,box-shadow .18s}.item:hover{transform:translateY(-3px);box-shadow:var(--sh2),0 0 0 1px color-mix(in srgb,var(--acc) 35%,transparent)}
   .wbtn{transition:transform .15s,box-shadow .15s,border-color .15s}.wbtn:hover{transform:translateY(-2px);box-shadow:var(--sh2);border-left-color:var(--acc)}
@@ -393,7 +406,7 @@ details summary{cursor:pointer}
     <select id="fSort"><option value="new">In evidenza / più recenti</option><option value="fast">Più veloci</option><option value="easy">Più facili</option><option value="cheap">Più economiche</option><option value="rate">Più votate</option><option value="az">A–Z</option></select>
   </div>
 </header>
-<nav class="nav" id="tabs"><div class="nbrand"><img src="icon-192.png" alt="" width="192" height="192"><div><b>Gnamina</b><small>La tua app di cucina</small></div></div><div class="nsec" id="secLbl">Sezioni</div><button class="tab" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie<span class="cnt"></span></button><button class="tab on" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Sfida</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario<span class="cnt"></span></button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v7M10 3v7M17 3c-2 2-3 4-3 7h3v11"/></svg>Il mio menu</button><div class="nsec">Strumenti</div><div id="ntools"></div><div class="nfoot">Versione <span id="navVer"></span></div></nav>
+<nav class="nav" id="tabs"><div class="nbrand"><img src="icon-192.png" alt="" width="192" height="192"><div><b>Gnamina</b><small>La tua app di cucina</small></div></div><div class="nsec" id="secLbl">Sezioni</div><button class="tab" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie<span class="cnt"></span></button><button class="tab on" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Sfida</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario<span class="cnt"></span></button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v7M10 3v7M17 3c-2 2-3 4-3 7h3v11"/></svg>Il mio menu</button><div class="nsec">Strumenti</div><div id="ntools"></div><div class="nfoot">Versione <span id="navVer"></span> · <a href="benvenuto.html" style="color:inherit">Cos'è Gnamina</a></div></nav>
 <main><div class="list" id="list"></div>
 <section id="home" hidden></section>
 <section id="budget" hidden>
@@ -1032,7 +1045,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=138; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=139; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1315,6 +1328,32 @@ function fillSelects(){
   $('#countries').innerHTML=COUNTRIES.map(c=>`<option value="${c}">`).join('');
   $('#regions').innerHTML=REGIONS.map(c=>`<option value="${esc(c)}">`).join('');
 }
+/* ---------- Vetrina del Ricettario (schermi larghi): un piatto in evidenza grande, i tipi di piatto con le foto, le ricette più votate dai Gnammers o i piatti di oggi, la sfida della settimana ---------- */
+const WIDE=()=>matchMedia('(min-width:900px)').matches;
+let TOP=load('starsTop',null);
+async function topFetch(){if(TOP&&Date.now()-(TOP.t||0)<36e5)return;if(!navigator.onLine)return;
+  try{const r=await server('/stars/top',{});TOP={t:Date.now(),list:(r.top||[]).slice(0,16)};save('starsTop',TOP);for(const x of TOP.list)STARS[x.id]=[x.avg,x.n,STARS[x.id]?.[2]||0,Date.now()];if(view==='book')render()}catch{TOP={t:Date.now(),list:TOP?.list||[]}}}
+const VCATS=[['Antipasti','Antipasti'],['Primi','Primi'],['Secondi','Secondi'],['Contorni','Contorni'],['Piatti unici','Piatti unici'],['Lievitati','Lievitati'],['Dolci','Dolci'],['Internazionali','Dal mondo']];
+function vetrina(){
+  if(!book)return '';
+  const day=Math.floor(Date.now()/864e5),pool=book.filter(b=>b.image&&b.country==='Italia'&&['Primi','Secondi','Contorni','Piatti unici','Dolci','Antipasti','Lievitati'].includes(b.cat));
+  if(!pool.length)return '';
+  const pick=[];for(let i=0;pick.length<12&&i<80;i++){const b=pool[(day*7919+i*104729)%pool.length];if(!pick.includes(b))pick.push(b)}
+  const top=(TOP?.list||[]).map(t=>findAny(t.id)).filter(b=>b&&b.image&&!b.pronto&&!b.colazione);
+  const hero=[...top,...pick.filter(b=>!top.includes(b))].slice(0,3);
+  const tile=(b,big)=>{const v=STARS[pubId(b)],tm=(b.ingredients?.length||b.steps?.length)?timing(b):null;
+    return `<div class="vtile${big?' big':''}" data-vid="${esc(b.id)}" role="button" tabindex="0"><img src="${esc(b.image)}" alt="" loading="${big?'eager':'lazy'}" referrerpolicy="no-referrer"><span class="vtag">${esc(b.cat||'')}</span><div class="vt"><b>${esc(b.title)}</b><span>${[b.region||b.country,tm&&fmtMin(tm.t),v?.[1]?`★ ${fmtAvg(v[0])} · ${v[1]} ${v[1]===1?'voto':'voti'}`:''].filter(Boolean).map(esc).join(' · ')}</span></div></div>`};
+  const catImg=c=>{const cp=(c==='Internazionali'?book.filter(b=>b.image&&isIntl(b)):pool.filter(b=>b.cat===c));return cp.length?cp[(day*31)%cp.length].image:''};
+  const grid=top.length>=4?top.slice(0,8):pick.filter(b=>!hero.includes(b)).slice(0,8);
+  const c=CONTEST,ph=contestPhase(c);
+  return `<div class="vetrina">
+    <div class="vhero">${hero.map((b,i)=>tile(b,i===0)).join('')}</div>
+    <div class="vcats">${VCATS.map(([c,l])=>{const im=catImg(c);return im?`<button type="button" class="vcat" data-vcat="${esc(c)}"><img src="${esc(im)}" alt="" loading="lazy" referrerpolicy="no-referrer"><b>${esc(l)}</b></button>`:''}).join('')}</div>
+    <div class="vsec"><h3>${top.length>=4?'Le più votate dai Gnammers':'I piatti di oggi'}</h3><p class="meta">${top.length>=4?'Le stelle le danno le persone che le hanno cucinate':'Otto piatti italiani scelti per oggi, cambiano ogni giorno'}</p><div class="vgrid">${grid.map(card).join('')}</div></div>
+    <div class="vband"><div><p class="eyebrow">La sfida della settimana</p><h3>${esc(c.tema)}</h3><p>${esc(c.descrizione||'')}</p></div><button type="button" class="btn pri" data-goto="home">${ph==='join'?'Partecipa':ph==='taste'?'Assaggia e vota':'Scopri la sfida'}</button></div>
+    <div class="vsec"><h3>Tutte le ricette italiane</h3><p class="meta">Scegli un tipo di piatto qui sopra, oppure cerca per nome o ingrediente</p></div>
+  </div>`;
+}
 function render(){
   navCounts();
   const q=$('#q').value.trim().toLowerCase(),fd=$('#fDiet').value,fz=$('#fZone').value,fr=+$('#fRate').value,ft=+$('#fTime').value,fdf=+$('#fDiff').value,fc=+$('#fCost').value,fs=$('#fSort').value;
@@ -1341,10 +1380,13 @@ function render(){
   const nPu=view==='book'&&book?book.filter(x=>x.source==='Regione Puglia').length:0,nWo=view==='book'&&book?book.filter(x=>x.world).length:0,nAr=view==='book'&&book?book.filter(x=>x.artusi).length:0,nLi=view==='book'&&book?book.filter(x=>x.libera&&x.source!=='Gnamina').length:0,nGn=view==='book'&&book?book.filter(x=>x.source==='Gnamina').length:0;
   const lic=view==='mine'&&items.length?`<p class="lic">Le ricette salvate da te restano tue: per quelle importate da un link la fonte originale è indicata nella scheda, insieme alla foto e al suo autore.</p>${fontiDati()}`
     :view==='book'&&book?.length?`<p class="lic">${book.length-nGz-nPu-nWo-nAr-nLi-nGn} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}${nPu?`, ${nPu} ricette tipiche della <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia</a> (CC BY 4.0)`:''}${nWo?`, ${nWo} ricette dal mondo di <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> (CC BY-SA 4.0, tradotte in italiano)`:''}${nAr?`, ${nAr} ricette dall'<a href="https://it.wikisource.org/wiki/La_scienza_in_cucina_e_l%27arte_di_mangiar_bene_(1895)" target="_blank" rel="noopener">Artusi (1895)</a>, pubblico dominio`:''}${nLi?`, ${nLi} da Wikipedia e dal Cookbook di Wikibooks (CC BY-SA 4.0)`:''}${nGn?`, ${nGn} piatti di tutti i giorni scritti per Gnamina`:''}</p>${fontiFoto()}${fontiDati()}`:'';
-  $('#list').innerHTML=(list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
+  const vet=showIta&&!cur2&&!fd&&!fz&&!fr&&!ft&&!fdf&&!fc&&WIDE()?vetrina():'';if(vet&&!TOP)topFetch();
+  $('#list').innerHTML=vet+(list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
     :`<div class="empty">${q?noResults(q):view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':welcome()}</div>`)+(lic?`<details class="lic fonti"><summary>Fonti e licenze</summary>${lic}</details>`:'');
   $('#list').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>$(`#tabs .tab[data-v=${b.dataset.goto}]`).click());
+  $('#list').querySelectorAll('.vtile[data-vid]').forEach(t=>{t.onclick=()=>{const b=findAny(t.dataset.vid);if(b)openDetail(b)};t.onkeydown=e=>{if(e.key==='Enter')t.click()}});
+  $('#list').querySelectorAll('.vcat[data-vcat]').forEach(b=>b.onclick=()=>{const c=b.dataset.vcat;if(c==='Internazionali'){cur='Internazionali';cur2=''}else{cur='Italiane';cur2=c}render();scrollTo({top:0,behavior:'smooth'})});
 }
 // Prima apertura: «Le mie ricette» è vuota, si mostrano le tre cose da fare e i piatti di oggi dal Ricettario
 function welcome(){
@@ -2990,6 +3032,8 @@ if(inApp)fetch(SITE+'version.json?t='+Date.now()).then(r=>r.json()).then(v=>{if(
   document.querySelector('main').prepend(b);$('#verInfo').textContent+=` · disponibile la ${v.version}`;
   $('#updGo').onclick=()=>{if(nat){AndroidShare.updateApk(v.apk,name);$('#updMsg').textContent='Download in corso… quando finisce si apre l\'installazione: tocca «Aggiorna».'}else window.open(v.apk,'_blank','noopener')};
   window.onApkState=(st,msg)=>{const m=$('#updMsg');if(!m)return;m.textContent=st==='started'?'Download in corso… quando finisce si apre l\'installazione: tocca «Aggiorna».':st==='done'?'Download finito: nel pannello di Android tocca «Aggiorna». Se non lo vedi, apri le notifiche e tocca il file scaricato.':'Download non riuscito'+(msg?' ('+msg+')':'')+': controlla la connessione e riprova.'}}}).catch(()=>{});
+// Sul computer, chi non ha ancora ricette parte dal Ricettario: la vetrina con le foto è la prima cosa che vede
+if(WIDE()&&(view==='home'||view==='mine')&&!items.length&&!location.search)goView('book');
 if('serviceWorker' in navigator&&location.protocol==='https:'&&location.hostname!=='localhost')navigator.serviceWorker.register('sw.js');
 </script>
 </body>
