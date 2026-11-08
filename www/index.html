@@ -10,6 +10,9 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="theme-color" id="themeColor" content="#15120e">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script>/* Sul computer e sul tablet largo la prima pagina del sito è il «quaderno» (benvenuto.html); nelle app, sul telefono, con un indirizzo che porta parametri o per chi ha già ricette si entra subito nell'app */
+try{const L=location,app=L.protocol==='capacitor:'||(L.hostname==='localhost'&&!L.port)||!!window.Capacitor||matchMedia('(display-mode: standalone)').matches,mine=(JSON.parse(localStorage.getItem('items')||'[]')||[]).length;
+if(!app&&!L.search&&!L.hash&&!mine&&matchMedia('(min-width:900px)').matches&&!sessionStorage.getItem('gnApp'))L.replace('benvenuto.html')}catch(e){}</script>
 <script>try{const t=localStorage.getItem("theme")||"dark";if(t!=="auto")document.documentElement.dataset.theme=t;document.documentElement.dataset.style=localStorage.getItem("style")||"trattoria"}catch{document.documentElement.dataset.theme="dark";document.documentElement.dataset.style="trattoria"}
 // colore della barra di stato coerente con il tema (scuro predefinito; «Automatico» segue il sistema)
 function themeColor(){const t=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.getElementById("themeColor").content=t==="dark"?"#15120e":"#f7f2ea"}themeColor();matchMedia("(prefers-color-scheme:dark)").addEventListener("change",themeColor);</script>
@@ -1045,7 +1048,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=139; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=140; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -3033,7 +3036,13 @@ if(inApp)fetch(SITE+'version.json?t='+Date.now()).then(r=>r.json()).then(v=>{if(
   $('#updGo').onclick=()=>{if(nat){AndroidShare.updateApk(v.apk,name);$('#updMsg').textContent='Download in corso… quando finisce si apre l\'installazione: tocca «Aggiorna».'}else window.open(v.apk,'_blank','noopener')};
   window.onApkState=(st,msg)=>{const m=$('#updMsg');if(!m)return;m.textContent=st==='started'?'Download in corso… quando finisce si apre l\'installazione: tocca «Aggiorna».':st==='done'?'Download finito: nel pannello di Android tocca «Aggiorna». Se non lo vedi, apri le notifiche e tocca il file scaricato.':'Download non riuscito'+(msg?' ('+msg+')':'')+': controlla la connessione e riprova.'}}}).catch(()=>{});
 // Sul computer, chi non ha ancora ricette parte dal Ricettario: la vetrina con le foto è la prima cosa che vede
-if(WIDE()&&(view==='home'||view==='mine')&&!items.length&&!location.search)goView('book');
+// Indirizzi che arrivano dalla prima pagina del sito: ?app, ?v=vista, ?cat=tipo di piatto, ?q=ricerca, ?r=ricetta del Ricettario
+{const P=new URLSearchParams(location.search),V=P.get('v'),C=P.get('cat'),Q=P.get('q'),R=P.get('r');
+ if(V||C||Q||R||P.has('app')){history.replaceState(null,'',location.pathname);try{sessionStorage.setItem('gnApp','1')}catch{}}
+ if(V&&['mine','home','book','budget'].includes(V))goView(V);else if(C||Q||R)goView('book');
+ else if(WIDE()&&(view==='home'||view==='mine')&&!items.length&&(!location.search||P.has('app')))goView('book');
+ if(C||Q||R)loadBook().then(()=>{if(C){if(C==='Internazionali'){cur='Internazionali';cur2=''}else{cur='Italiane';cur2=C}}
+   if(Q){$('#q').value=Q}render();if(R){const it=findAny(R);if(it)openDetail(it);else toast('Ricetta non trovata')}}).catch(()=>{});}
 if('serviceWorker' in navigator&&location.protocol==='https:'&&location.hostname!=='localhost')navigator.serviceWorker.register('sw.js');
 </script>
 </body>
