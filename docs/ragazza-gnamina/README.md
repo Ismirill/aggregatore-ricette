@@ -5,7 +5,7 @@ I video si generano con MiniMax H3 sul PC con la GPU, tramite ComfyUI alla porta
 
 ![Il kit fisso](kit-fisso.jpg)
 
-Il video di benvenuto definitivo, usato nel sito, è `video/benvenuto-definitivo.mp4`: seme 7, tagliato a 5,4 s.
+Il video di benvenuto definitivo, usato nel sito, è `video/benvenuto-definitivo.mp4`: «Ciao! Benvenuto su Gnamìna!», una pausa col sorriso, poi «Il tuo nuovo sito di cucina!». È il seme 7 con la traccia guida, tagliato a 5,35 s.
 
 ## Riferimenti fissi (`riferimenti/`)
 
@@ -34,6 +34,7 @@ Le due immagini `origine-*` sono le ragazze generate da Geronimo da cui è nata 
 python3 script/h3_r2v.py \
   --ref riferimenti/1-volto.jpg --ref riferimenti/2-figura.jpg \
   --ref riferimenti/3-cucina-fronte.jpg --ref riferimenti/4-cucina-sinistra.jpg --ref riferimenti/5-cucina-destra.jpg \
+  --refaudio audio/guida-benvenuto.wav \
   --prompt prompt/video_benvenuto_fisso.txt --out video.mp4 \
   --w 768 --h 1024 --dur 6.5 --seed 7 \
   --noturbo --steps 20 --sched beta --realism 0.65 \
@@ -42,12 +43,21 @@ python3 script/h3_r2v.py \
 
 - **Qualità piena, niente turbo.** Con la LoRA turbo a 4 passi la voce diventa metallica.
 - **LoRA realism a 0.65.** Se la ragazza ingrassa o le guance tornano rosse, va abbassata, non alzata.
-- **Seme 7** per il benvenuto. Lo stesso seme con lo stesso prompt e gli stessi riferimenti dà lo stesso video. Il seme 47 diceva «Jnamina».
+- **Seme 7** per il benvenuto. Lo stesso seme con lo stesso prompt, gli stessi riferimenti e la stessa traccia guida dà lo stesso video.
+
+## La pronuncia: «Gnamìna», con l'accento sulla «ì»
+
+Senza aiuto il modello sbaglia spesso. Dice «Jnamina», mette l'accento su «Gnà», oppure aggiunge parole inventate. La soluzione è una **traccia guida** passata come `<Audio 1>` (`--refaudio`):
+
+- La traccia si fa con la voce italiana del Mac, che rispetta l'accento scritto: `say -v Alice -r 175 "Ciao! Benvenuto su Gnamìna!"`.
+- Le frasi vanno messe ai tempi voluti, con i silenzi in mezzo. Il benvenuto ha la prima frase da 0,55 s, il sorriso fino a 3,75 s e poi la seconda frase. Esempio: `audio/guida-benvenuto.wav`.
+- Il prompt chiede di seguire parole, tempi e accento della traccia, ma con la voce naturale della ragazza invece di quella sintetica.
+- Per verificare l'accento si usa `script/tono.py video.mp4 inizio durata`. Con «Gnamìna» giusto il tono resta alto su «mì» e cade su «na». Con «Gnàmina» cade subito dopo «Gna».
 - Ogni video da 6–7 secondi richiede circa 10–11 minuti sulla RTX 5080.
 
 ## Controlli prima di usare un video
 
-1. **Dizione.** `script/trascrivi.sh video.mp4` trascrive l'audio con il servizio di dettatura di Gnamina. La trascrizione deve dire «Gnamina» e non contenere parole in più come «ya» o «eh». Se le contiene, si cambia il seme.
+1. **Dizione.** `script/trascrivi.sh video.mp4` trascrive l'audio con il servizio di dettatura di Gnamina. La trascrizione deve dire «Gnamina» e non contenere parole in più come «ya» o «eh». Se le contiene, si cambia il seme. L'accento si controlla con `script/tono.py`.
 2. **Frasi ripetute.** Se l'ultima frase viene detta due volte, si taglia il video dopo la prima con ffmpeg (`-t`), con una breve dissolvenza dell'audio.
 3. **Pulizia dell'audio** prima della pubblicazione:
    ```bash

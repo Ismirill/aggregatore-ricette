@@ -13,7 +13,7 @@ ap.add_argument('--out', required=True)
 ap.add_argument('--w', type=int, default=576); ap.add_argument('--h', type=int, default=768)
 ap.add_argument('--dur', type=float, default=5); ap.add_argument('--seed', type=int, default=1)
 ap.add_argument('--steps', type=int, default=4); ap.add_argument('--noturbo', action='store_true')
-ap.add_argument('--model', default='minimax_h3_ref2va_pruned_int8_convrot.safetensors'); ap.add_argument('--sched', default='simple')
+ap.add_argument('--refaudio', action='append', default=[], help='audio di riferimento, <Audio 1>…'); ap.add_argument('--model', default='minimax_h3_ref2va_pruned_int8_convrot.safetensors'); ap.add_argument('--sched', default='simple')
 a = ap.parse_args(); H = a.host.rstrip('/')
 
 def get(p):
@@ -23,7 +23,7 @@ def post(p, body):
     with urllib.request.urlopen(req, timeout=120) as r: return json.loads(r.read())
 def upload(path):
     b = uuid.uuid4().hex; name = os.path.basename(path)
-    ct = mimetypes.guess_type(path)[0] or 'image/png'
+    ct = mimetypes.guess_type(path)[0] or 'application/octet-stream'
     body = (f'--{b}\r\nContent-Disposition: form-data; name="image"; filename="{name}"\r\nContent-Type: {ct}\r\n\r\n').encode() + open(path, 'rb').read() + \
            (f'\r\n--{b}\r\nContent-Disposition: form-data; name="overwrite"\r\n\r\ntrue\r\n--{b}--\r\n').encode()
     req = urllib.request.Request(H + '/upload/image', body, {'Content-Type': f'multipart/form-data; boundary={b}'})
@@ -56,6 +56,9 @@ wf = {
 }
 if a.noturbo: del wf['lora']
 if a.realism <= 0: del wf['real']
+for k, r in enumerate(a.refaudio, 1):
+    wf[f'aud{k}'] = {'class_type': 'LoadAudio', 'inputs': {'audio': upload(r)}}
+    wf['r2v']['inputs'][f'ref_audios.ref_audio_{k}'] = [f'aud{k}', 0]
 for k, r in enumerate(refs, 1):
     wf[f'ref{k}'] = {'class_type': 'LoadImage', 'inputs': {'image': r}}
     wf['r2v']['inputs'][f'ref_images.ref_image_{k}'] = [f'ref{k}', 0]
