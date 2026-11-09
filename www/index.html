@@ -18,7 +18,7 @@ if(!app&&!L.search&&!L.hash&&!mine&&matchMedia('(min-width:900px)').matches&&!se
 // colore della barra di stato coerente con il tema (scuro predefinito; «Automatico» segue il sistema)
 function themeColor(){const t=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.getElementById("themeColor").content=t==="dark"?"#15120e":"#f7f2ea"}themeColor();matchMedia("(prefers-color-scheme:dark)").addEventListener("change",themeColor);</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ---------- Tema: cucina italiana calda (terracotta, crema, oliva); chiaro e scuro automatici ---------- */
 :root{--bg:#f7f2ea;--bg2:#efe7da;--card:#fffdf9;--fg:#2a231d;--mut:#8a7e71;--acc:#c2502f;--acc2:#e9a23b;--ok:#5f7a35;--bd:#e8dfd1;--star:#e0a526;
@@ -556,6 +556,30 @@ details summary{cursor:pointer}
 :root[data-sito] .sPics{height:320px}:root[data-sito] .sPics .p1{width:200px;left:0}:root[data-sito] .sPics .p2{width:170px;left:30%}:root[data-sito] .sPics .p3{display:none}
 :root[data-sito] #budget{grid-template-columns:1fr}:root[data-sito] .sSide{grid-template-columns:1fr 1fr 1fr}
 }
+/* scrittura a mano sulle righe del quaderno: righe ogni 34 px dal bordo alto del foglio, testi in Caveat con interlinea 34 (titoli 68);
+   righeQuaderno() fa partire ogni blocco esattamente su una riga, anche dopo pulsanti e caselle */
+@media (min-width:900px){
+:root[data-sito]{--hand:'Caveat','Bradley Hand','Segoe Print',cursive;--L:34px;--riga:#c3d0e3;--margine:#e3867c}
+:root[data-sito] .sCard,:root[data-sito] .contest,:root[data-sito] .bform,:root[data-sito] .sNote{background-color:#fdf8ee;background-image:linear-gradient(90deg,transparent var(--mx,62px),var(--margine) var(--mx,62px) calc(var(--mx,62px) + 2px),transparent calc(var(--mx,62px) + 2px)),repeating-linear-gradient(180deg,transparent 0 calc(var(--L) - 1px),var(--riga) calc(var(--L) - 1px) var(--L)),url(casa/carta-liscia.jpg);background-size:auto,auto,cover;background-position:0 0,0 -2px,center;background-repeat:no-repeat,repeat,no-repeat}
+:root[data-sito] .sCard{--mx:70px;padding:var(--L) 40px var(--L) 100px}
+:root[data-sito] .contest,:root[data-sito] #home>.contest{padding-top:var(--L)!important;border-radius:4px}
+:root[data-sito] .bform{padding-top:var(--L)}
+:root[data-sito] .sNote{--mx:-9px;padding:var(--L) 26px 22px}
+:root[data-sito] .sEye,:root[data-sito] .contest .eyebrow{font-family:var(--hand);font-weight:700;font-size:26px;letter-spacing:.01em;text-transform:none;line-height:var(--L);margin:0;color:#3f7a2e;position:relative;top:7px}
+:root[data-sito] .sTitle,:root[data-sito] .contest h2{font-family:var(--hand);font-weight:700;font-size:62px;line-height:calc(var(--L)*2);margin:0;letter-spacing:0;position:relative;top:17px}
+:root[data-sito] .contest h2{font-size:56px;top:18px}
+:root[data-sito] .sLead,:root[data-sito] .contest .desc,:root[data-sito] .contest .rules{font-family:var(--hand);font-weight:500;font-size:28px;line-height:var(--L);margin:0;color:#2f2822;position:relative;top:7px}
+:root[data-sito] .contest .rules{font-size:25px;padding-left:22px;top:8px}
+:root[data-sito] .sLead,:root[data-sito] .contest .desc{margin-top:var(--L)}
+:root[data-sito] .sSlot{margin-top:var(--L)}
+:root[data-sito] .contest .state{margin:var(--L) 0 14px}
+:root[data-sito] .bform .step>h3{font-family:var(--hand);font-weight:700;font-size:38px;line-height:var(--L);margin:0;color:#c8301f;position:relative;top:5px}
+:root[data-sito] .bform .step p:has(>b){font-family:var(--hand);font-size:28px;line-height:var(--L);margin:0 0 4px!important;position:relative;top:7px}
+:root[data-sito] .bform .step p:has(>b) b{font-weight:700}
+:root[data-sito] .sNote h3{font-family:var(--hand);font-weight:700;font-size:34px;line-height:var(--L);margin:0;position:relative;top:6px}
+:root[data-sito] .sNote ul{font-family:var(--hand);font-weight:500;font-size:24px;line-height:var(--L);margin:0;position:relative;top:8px}
+}
+@media (min-width:900px) and (max-width:1179px){:root[data-sito] .sTitle{font-size:50px;top:19px}:root[data-sito] .contest h2{font-size:46px;top:20px}}
 </style>
 </head>
 <body>
@@ -1218,7 +1242,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=145; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=146; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2932,8 +2956,18 @@ if(SITO){
   document.body.append(foot);
   const gv0=goView;goView=function(v){gv0(v);siteHero(v)};
 }
+// Scrittura sulle righe del quaderno (sito): ogni blocco scritto a mano parte da una riga (multiplo di 34 px dal bordo alto del foglio)
+const RIGHE='.sCard>.sEye,.sCard>.sTitle,.sCard>.sLead,.contest>.eyebrow,.contest>h2,.contest>.desc,.contest>.rules,.bform .step>h3,.bform .step p:has(>b),.sNote>h3,.sNote>ul';
+function righeQuaderno(){if(!SITO)return;let els;try{els=[...document.querySelectorAll(RIGHE)]}catch{return}
+  els.forEach(el=>el.style.marginTop='');if(innerWidth<900)return;
+  for(const el of els){const box=el.closest('.sCard,.contest,.bform,.sNote');if(!box||!el.offsetParent)continue;
+    let y=0,n=el;while(n&&n!==box){y+=n.offsetTop;n=n.offsetParent}if(n!==box)continue;y-=parseFloat(getComputedStyle(el).top)||0; // la spinta verso la riga non conta
+    const r=Math.round(y)%34;if(r)el.style.marginTop=(parseFloat(getComputedStyle(el).marginTop)||0)+34-r+'px'}}
+if(SITO){let q=0;const run=()=>{if(!q)q=requestAnimationFrame(()=>{q=0;righeQuaderno()})};
+  new MutationObserver(run).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
+  addEventListener('resize',run);document.fonts?.ready.then(run);run()}
 // Sul sito il logo al centro della testata riporta alla prima pagina, il quaderno
-if(document.documentElement.dataset.sito){$('.nbrand').onclick=()=>{location.href='benvenuto.html'};$('.nbrand').title='Prima pagina di Gnamina'}
+if(document.documentElement.dataset.sito){$('.nbrand').onclick=()=>{if(window.gnBenvenuto)return gnBenvenuto();const s=document.createElement('script');s.src='casa/cuoca.js';s.onload=()=>gnBenvenuto();s.onerror=()=>{location.href='benvenuto.html'};document.head.appendChild(s)};$('.nbrand').title='Benvenuti su Gnamina'}
 const deskQ=matchMedia('(min-width:900px)'),addHome=$('#add').nextSibling;
 function placeDesk(){const d=deskQ.matches,nav=$('#tabs');
   const sito=!!document.documentElement.dataset.sito; // sul sito anche il profilo va nella testata

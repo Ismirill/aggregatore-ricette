@@ -8,7 +8,7 @@
 <meta property="og:title" content="Gnamina · il quaderno delle ricette di casa"><meta property="og:description" content="Ricette di casa con le dosi giuste e la voce che ti guida. Gratis, senza pubblicità."><meta property="og:image" content="https://gnamina.it/icon-512.png"><meta property="og:url" content="https://gnamina.it/benvenuto.html">
 <link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon-180.png"><link rel="canonical" href="https://gnamina.it/benvenuto.html">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,600&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 /* Quaderno di casa: logo al centro in testata, tutto in Nunito (le lettere del logo), carta a righe vera, foto incollate con nastro e graffette */
 :root{
@@ -166,6 +166,20 @@ footer{margin-top:90px;background:#2b2420;color:#e7dccd}
   .facciata h3{font-size:26px}.facciata p,.facciata ol{font-size:16px}.foto-graffetta{width:100%}
   .sfida h2{font-size:32px}.sfida .fotos{width:200px}
 }
+
+/* ---------- Scrittura a mano sulle righe dei fogli di quaderno (Caveat): righe ogni 34 px dal bordo alto, blocchi allineati dallo script in fondo ---------- */
+:root{--hand:'Caveat','Bradley Hand','Segoe Print',cursive;--L:34px}
+.pagina{--mx:80px;padding-top:var(--L);background-color:#fdf8ee;background-image:linear-gradient(90deg,transparent var(--mx),var(--margine) var(--mx) calc(var(--mx) + 2px),transparent calc(var(--mx) + 2px)),repeating-linear-gradient(180deg,transparent 0 calc(var(--L) - 1px),#c3d0e3 calc(var(--L) - 1px) var(--L)),url(casa/carta-liscia.jpg);background-size:auto,auto,cover;background-position:0 0,0 -2px,center;background-repeat:no-repeat,repeat,no-repeat}
+.facciata.righe{padding-top:var(--L);background-image:linear-gradient(90deg,transparent 78px,var(--margine) 78px,var(--margine) 80px,transparent 80px),repeating-linear-gradient(180deg,transparent 0 calc(var(--L) - 1px),var(--riga) calc(var(--L) - 1px) var(--L));background-position:0 0,0 -2px}
+.pagina .occhiello{font-family:var(--hand);font-weight:700;font-size:26px;letter-spacing:.01em;text-transform:none;line-height:var(--L);margin:0;position:relative;top:7px}
+.pagina h1{font-family:var(--hand);font-weight:700;font-size:52px;line-height:calc(var(--L)*2);margin:0;position:relative;top:19px}
+.pagina p.lead{font-family:var(--hand);font-weight:500;font-size:27px;line-height:var(--L);margin:var(--L) 0 var(--L);color:#2f2822;position:relative;top:7px}
+.facciata h3{font-family:var(--hand);font-weight:700;font-size:40px;line-height:var(--L);margin:0;position:relative;top:5px}
+.facciata p,.facciata ol{font-family:var(--hand);font-weight:500;font-size:26px;line-height:var(--L);margin:var(--L) 0 0;color:#2f2822;position:relative;top:7px}
+.facciata ol{font-weight:600;margin-top:0}
+@media (max-width:900px){.pagina{--mx:40px;padding-top:var(--L)}.pagina h1{font-size:40px;top:22px}
+  .facciata.righe{background-image:linear-gradient(90deg,transparent 44px,var(--margine) 44px,var(--margine) 46px,transparent 46px),repeating-linear-gradient(180deg,transparent 0 calc(var(--L) - 1px),var(--riga) calc(var(--L) - 1px) var(--L))}}
+@media (max-width:640px){.pagina{--mx:34px;padding-top:var(--L)}.pagina h1{font-size:32px;line-height:var(--L);top:7px}.pagina p.lead{font-size:23px;top:8px}.pagina .occhiello{font-size:22px;top:8px}.facciata h3{font-size:34px;top:6px}.facciata p,.facciata ol{font-size:23px;top:8px}}
 </style>
 </head>
 <body>
@@ -177,7 +191,7 @@ footer{margin-top:90px;background:#2b2420;color:#e7dccd}
       <a href="#regioni">Regioni</a>
       <a href="#quaderno" class="solo-largo">Cucina con me</a>
     </nav>
-    <a class="logo" href="benvenuto.html" aria-label="Gnamina, pagina iniziale"><img src="icon-512.png" alt="Gnamina"></a>
+    <a class="logo" href="benvenuto.html" aria-label="Gnamina, ti diamo il benvenuto" onclick="if(window.gnBenvenuto){gnBenvenuto(event)}"><img src="icon-512.png" alt="Gnamina"></a>
     <nav class="dx" aria-label="Altro">
       <a href="./?v=home">La sfida</a>
       <a href="./?v=budget" class="solo-largo">Il mio menu</a>
@@ -301,6 +315,14 @@ fetch('contest.json?'+Math.floor(Date.now()/36e5)).then(r=>r.ok?r.json():null).t
   document.getElementById('sfStato').textContent={soon:'La sfida della settimana · si parte '+d(c.inizio),join:'La sfida della settimana · si partecipa fino a '+d(c.fine_partecipazione),taste:'La sfida della settimana · si assaggia e si vota fino a '+d(c.fine_assaggio),done:'La sfida della settimana · conclusa'}[ph];
   document.getElementById('sfBtn').textContent={soon:'Prepara la tua ricetta',join:'Partecipa',taste:'Assaggia e vota',done:'Vedi la sfida'}[ph];
 }).catch(()=>{});
+</script>
+<script>
+// Scrittura sulle righe: ogni blocco scritto a mano parte da una riga del quaderno (multiplo di 34 px dal bordo alto del foglio)
+(function(){const SEL='.pagina>.occhiello,.pagina>h1,.pagina>p.lead,.facciata>h3,.facciata>p,.facciata>ol';
+  function righe(){const els=[...document.querySelectorAll(SEL)];els.forEach(e=>e.style.marginTop='');
+    for(const el of els){const box=el.closest('.pagina,.facciata');if(!box||!el.offsetParent)continue;let y=0,n=el;while(n&&n!==box){y+=n.offsetTop;n=n.offsetParent}if(n!==box)continue;
+      y-=parseFloat(getComputedStyle(el).top)||0;const r=Math.round(y)%34;if(r)el.style.marginTop=(parseFloat(getComputedStyle(el).marginTop)||0)+34-r+'px'}}
+  let q=0;const run=()=>{if(!q)q=requestAnimationFrame(()=>{q=0;righe()})};addEventListener('resize',run);document.fonts&&document.fonts.ready.then(run);addEventListener('load',run);run()})();
 </script>
 </body>
 </html>
