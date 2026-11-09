@@ -3,6 +3,10 @@
 Il kit fisso per fare sempre la stessa ragazza nella stessa cucina, video dopo video.
 I video si generano con MiniMax H3 sul PC con la GPU, tramite ComfyUI alla porta 8188.
 
+![Il kit fisso](kit-fisso.jpg)
+
+Il video di benvenuto definitivo, usato nel sito, è `video/benvenuto-definitivo.mp4`: seme 7, tagliato a 5,4 s.
+
 ## Riferimenti fissi (`riferimenti/`)
 
 Vanno passati **sempre in questo ordine**, perché nei prompt sono `<Picture 1>` … `<Picture 5>`:
@@ -31,14 +35,14 @@ python3 script/h3_r2v.py \
   --ref riferimenti/1-volto.jpg --ref riferimenti/2-figura.jpg \
   --ref riferimenti/3-cucina-fronte.jpg --ref riferimenti/4-cucina-sinistra.jpg --ref riferimenti/5-cucina-destra.jpg \
   --prompt prompt/video_benvenuto_fisso.txt --out video.mp4 \
-  --w 768 --h 1024 --dur 6.5 --seed 47 \
+  --w 768 --h 1024 --dur 6.5 --seed 7 \
   --noturbo --steps 20 --sched beta --realism 0.65 \
   --model Minimax-h3_Singularity_ref2va_v2_pruned_int8.safetensors
 ```
 
 - **Qualità piena, niente turbo.** Con la LoRA turbo a 4 passi la voce diventa metallica.
 - **LoRA realism a 0.65.** Se la ragazza ingrassa o le guance tornano rosse, va abbassata, non alzata.
-- **Seme 47.** Lo stesso seme con lo stesso prompt dà lo stesso video.
+- **Seme 7** per il benvenuto. Lo stesso seme con lo stesso prompt e gli stessi riferimenti dà lo stesso video. Il seme 47 diceva «Jnamina».
 - Ogni video da 6–7 secondi richiede circa 10–11 minuti sulla RTX 5080.
 
 ## Controlli prima di usare un video
