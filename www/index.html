@@ -482,8 +482,8 @@ details summary{cursor:pointer}
 :root[data-sito] .fis.nastro{width:104px;left:50%;top:-13px;margin-left:-52px}
 :root[data-sito] .fis.puntina{width:32px;left:50%;top:-18px;margin-left:-16px;filter:drop-shadow(3px 7px 3px rgba(0,0,0,.32))}
 :root[data-sito] .sIll{position:absolute;z-index:3;pointer-events:none;filter:drop-shadow(0 8px 10px rgba(43,36,32,.2))}
-:root[data-sito] .sHero{position:relative;background:#6b4c33 url(casa/tavolo.jpg) center 60%/cover no-repeat;padding:70px 0 64px}
-:root[data-sito] .sHero::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(40,28,18,.6),rgba(40,28,18,.15) 55%,rgba(40,28,18,.35))}
+:root[data-sito] .sHero{position:relative;background:#6b4c33 url(casa/tavolo.jpg) right center/cover no-repeat;padding:70px 0 64px;transition:background-image .3s}
+:root[data-sito] .sHero::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(40,28,18,.55),rgba(40,28,18,.1) 50%,rgba(40,28,18,.2))}
 :root[data-sito] .sWrap{position:relative;max-width:1240px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:minmax(0,560px) 1fr;gap:40px;align-items:center}
 :root[data-sito] .sCard{position:relative;background:#fdf8ee url(casa/carta.jpg) center/cover;padding:40px 40px 34px 100px;box-shadow:0 30px 60px rgba(0,0,0,.35);transform:rotate(-1.2deg)}
 :root[data-sito] .sEye{margin:0 0 8px;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#3f7a2e}
@@ -1218,7 +1218,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=144; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=145; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2899,13 +2899,14 @@ $('#add').onclick=()=>openForm();
    titolo grande, polaroid con puntine), colonna di foto accanto a «Il mio menu», piè di pagina con il logotipo ---------- */
 const SITO=!!document.documentElement.dataset.sito;
 const SHERO={
-  mine:{eye:'Il tuo quaderno',title:'Le tue <em>ricette</em>',lead:'Quelle salvate da TikTok, Instagram e YouTube, quelle di famiglia e quelle prese dal Ricettario. Sempre con le dosi per quanti siete.',pics:['wb-risotto-con-la-zucca','cb-panna-cotta-with-red-fruit-sauce','wb-risotto-con-gli-asparagi']},
-  book:{eye:'Il Ricettario di Gnamina',title:'Oltre 1.500 ricette <em>di casa</em>',lead:'Piatti italiani, regionali e dal mondo, con foto, tempo, difficoltà, costo e calorie a persona.',pics:['wb-arancini-al-radicchio','wb-focaccia-al-formaggio','wo-tiramisu']},
-  home:{eye:'La sfida della settimana',title:'Cucina, assaggia, <em>vota</em>',lead:'Ogni settimana un tema. Partecipi con la tua ricetta e un breve video, poi tutti la cucinano e la votano. La più votata entra nel Ricettario.',pics:['wo-spaghetti-carbonara','wb-arancini-al-radicchio','wb-focaccia-al-formaggio']},
-  budget:{eye:'Il mio menu',title:'La settimana a tavola, <em>nel tuo budget</em>',lead:'Sei domande e preparo pranzi e cene bilanciati, con frutta e verdura di stagione e la lista della spesa con i prezzi della tua zona.',pics:['wb-risotto-con-gli-asparagi','wo-tiramisu','wb-focaccia-al-formaggio']},
+  mine:{bg:'ap-mie',eye:'Il tuo quaderno',title:'Le tue <em>ricette</em>',lead:'Quelle salvate da TikTok, Instagram e YouTube, quelle di famiglia e quelle prese dal Ricettario. Sempre con le dosi per quanti siete.',pics:['wb-risotto-con-la-zucca','cb-panna-cotta-with-red-fruit-sauce','wb-risotto-con-gli-asparagi']},
+  book:{bg:'ap-ricettario',eye:'Il Ricettario di Gnamina',title:'Oltre 1.500 ricette <em>di casa</em>',lead:'Piatti italiani, regionali e dal mondo, con foto, tempo, difficoltà, costo e calorie a persona.',pics:['wb-arancini-al-radicchio','wb-focaccia-al-formaggio','wo-tiramisu']},
+  home:{bg:'ap-sfida',eye:'La sfida della settimana',title:'Cucina, assaggia, <em>vota</em>',lead:'Ogni settimana un tema. Partecipi con la tua ricetta e un breve video, poi tutti la cucinano e la votano. La più votata entra nel Ricettario.',pics:['wo-spaghetti-carbonara','wb-arancini-al-radicchio','wb-focaccia-al-formaggio']},
+  budget:{bg:'ap-menu',eye:'Il mio menu',title:'La settimana a tavola, <em>nel tuo budget</em>',lead:'Sei domande e preparo pranzi e cene bilanciati, con frutta e verdura di stagione e la lista della spesa con i prezzi della tua zona.',pics:['wb-risotto-con-gli-asparagi','wo-tiramisu','wb-focaccia-al-formaggio']},
 };
 const FIS=['<img class="fis puntina" src="casa/puntina-rossa.webp" alt="">','<img class="fis nastro" src="casa/nastro-quadretti.webp" alt="" style="transform:rotate(-4deg)">','<img class="fis puntina" src="casa/puntina-crema.webp" alt="">'];
 function siteHero(v){const h=SHERO[v]||SHERO.mine,el=$('#sHero');if(!el)return;
+  el.style.backgroundImage=`url(casa/${h.bg}.jpg)`; // foto di apertura della sezione, generata con MiniMax
   el.querySelector('.sEye').textContent=h.eye;el.querySelector('.sTitle').innerHTML=h.title;el.querySelector('.sLead').textContent=h.lead;
   el.querySelector('.sSlot').hidden=!(v==='mine'||v==='book');
   const mine=v==='mine'?items.filter(i=>i.image).slice(0,3).map(i=>({id:i.id,img:i.image})):[];
