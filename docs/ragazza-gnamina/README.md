@@ -59,9 +59,9 @@ Senza aiuto il modello sbaglia spesso. Dice «Jnamina», mette l'accento su «Gn
 
 1. **Dizione.** `script/trascrivi.sh video.mp4` trascrive l'audio con il servizio di dettatura di Gnamina. La trascrizione deve dire «Gnamina» e non contenere parole in più come «ya» o «eh». Se le contiene, si cambia il seme. L'accento si controlla con `script/tono.py`.
 2. **Frasi ripetute.** Se l'ultima frase viene detta due volte, si taglia il video dopo la prima con ffmpeg (`-t`), con una breve dissolvenza dell'audio.
-3. **Pulizia dell'audio** prima della pubblicazione:
+3. **Rifinitura della voce** prima della pubblicazione. Toglie il fruscio, ammorbidisce le sibilanti, scalda i bassi, smorza gli acuti metallici e porta il volume a -16 LUFS senza compressore, perché il compressore alza il sottofondo:
    ```bash
-   ffmpeg -i video.mp4 -af "highpass=f=70,afftdn=nr=12:nf=-40:tn=1,lowpass=f=13000,aresample=44100" …
+   ffmpeg -i video.mp4 -af "highpass=f=80,afftdn=nr=18:nf=-38:tn=1,deesser=i=0.4:m=0.5:f=0.5,lowshelf=f=220:g=2,equalizer=f=3400:t=q:w=1.4:g=-2.5,highshelf=f=7500:g=-3,lowpass=f=13000,volume=-6dB,loudnorm=I=-16:TP=-1.5:LRA=11:linear=true,aresample=44100" …
    ```
 4. **Versione per il sito.** Il video va ridotto a 600x800, H.264 crf 25 e AAC, con `+faststart`. Il file va in `www/casa/cuoca.mp4` e la sua prima immagine in `www/casa/cuoca.webp`.
 
