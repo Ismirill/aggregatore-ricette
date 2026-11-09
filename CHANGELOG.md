@@ -4,6 +4,10 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-09
+
+- **Versione 143, tutto il sito nello stile «quaderno»** (richiesta dell'utente: le sottopagine avevano ancora il vecchio aspetto). Sul sito da computer e tablet (da 900 px, fuori dalle app Android e iOS e dall'app installata) la barra laterale scura diventa la testata della prima pagina: barra bianca, logo del pomodoro grande al centro (riporta a `benvenuto.html`), «Le mie», «Sfida», «Ricettario» a sinistra, «Il mio menu», foto di un piatto, impostazioni, profilo e «Nuova ricetta» a destra (sotto i 1180 px il pulsante diventa «+ Nuova»). Tutto in Nunito, colori della pagina a quaderno anche con il tema scuro scelto nell'app, fondo a carta a righe; ricette come polaroid leggermente inclinate; vetrina del Ricettario con cornici bianche; sfida, banner della sfida e «Il mio menu» come pagine di quaderno con il margine rosso; scheda della ricetta con la foto in cornice e le righe; pulsanti rossi con l'ombra piena; chip con il bordo tratteggiato. L'app sul telefono e le app restano com'erano (lo stile vale solo con `data-sito`, impostato all'avvio). Provato nel browser a 1440 e 1000 px su Ricettario, Sfida, Il mio menu, Le mie, scheda della ricetta e nuova ricetta.
+
 ## 2026-11-08
 
 - **Versione 142**: puntine e nastri adesivi della pagina a quaderno ora sono veri, disegnati da **MiniMax H3** sul PC (puntine rosse e crema, nastri a pois, a quadretti, a righe e kraft), generati su **fondo verde pieno** e ritagliati con la chiave verde: nessun alone bianco intorno, la foto sotto resta intera (l'utente aveva notato che l'alone «cancellava la foto»). L'ombra è aggiunta dal CSS, morbida e trasparente. Una puntina o un nastro per foto, centrati sul bordo bianco in alto; due nastri sugli angoli della pagina d'apertura. Scartate le varianti verdi, sbiadite dalla chiave. Prompt in `scratchpad/brand/prompts_fissaggi.json`.

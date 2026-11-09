@@ -12,12 +12,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <script>/* Sul computer e sul tablet largo la prima pagina del sito è il «quaderno» (benvenuto.html); nelle app, sul telefono, con un indirizzo che porta parametri o per chi ha già ricette si entra subito nell'app */
 try{const L=location,app=L.protocol==='capacitor:'||(L.hostname==='localhost'&&!L.port)||!!window.Capacitor||matchMedia('(display-mode: standalone)').matches,mine=(JSON.parse(localStorage.getItem('items')||'[]')||[]).length;
+if(!app)document.documentElement.dataset.sito='1'; // stile «quaderno» del sito su computer e tablet (vedi CSS «Sito»)
 if(!app&&!L.search&&!L.hash&&!mine&&matchMedia('(min-width:900px)').matches&&!sessionStorage.getItem('gnApp'))L.replace('benvenuto.html')}catch(e){}</script>
 <script>try{const t=localStorage.getItem("theme")||"dark";if(t!=="auto")document.documentElement.dataset.theme=t;document.documentElement.dataset.style=localStorage.getItem("style")||"trattoria"}catch{document.documentElement.dataset.theme="dark";document.documentElement.dataset.style="trattoria"}
 // colore della barra di stato coerente con il tema (scuro predefinito; «Automatico» segue il sistema)
 function themeColor(){const t=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.getElementById("themeColor").content=t==="dark"?"#15120e":"#f7f2ea"}themeColor();matchMedia("(prefers-color-scheme:dark)").addEventListener("change",themeColor);</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 /* ---------- Tema: cucina italiana calda (terracotta, crema, oliva); chiaro e scuro automatici ---------- */
 :root{--bg:#f7f2ea;--bg2:#efe7da;--card:#fffdf9;--fg:#2a231d;--mut:#8a7e71;--acc:#c2502f;--acc2:#e9a23b;--ok:#5f7a35;--bd:#e8dfd1;--star:#e0a526;
@@ -385,6 +386,93 @@ details summary{cursor:pointer}
   .dmain h2{font-size:1.7rem;margin-top:14px}.dside .row{margin-top:24px}
   #ingList{columns:2;column-gap:28px}#ingList li{break-inside:avoid}
   .toast{bottom:28px;left:calc(50% + 134px)}
+}
+
+/* =================== Sito su computer e tablet (da 900 px, fuori dalle app): stile «quaderno» come benvenuto.html ===================
+   testata bianca con il logo grande al centro, sezioni ai lati, carta a righe, caratteri del logo (Nunito), ricette come polaroid */
+@media (min-width:900px){
+:root[data-sito]{--bg:#fbf5e9;--bg2:#f4ead6;--card:#fffdf8;--fg:#2b2420;--fg2:#2b2420;--mut:#6f645a;--acc:#c8301f;--acc2:#e9a23b;--ok:#3f7a2e;--bd:#e6d9c2;--star:#e0a526;
+  --sh:0 1px 2px #2b242012,0 10px 24px #2b24201a;--sh2:0 16px 36px #2b242030;--serif:'Nunito',ui-rounded,system-ui,sans-serif;--sans:'Nunito',ui-rounded,system-ui,sans-serif;--pattern:none;color-scheme:light}
+:root[data-sito] body{font-family:var(--sans);padding-left:0;padding-top:84px;background-color:#fbf5e9;background-image:repeating-linear-gradient(0deg,transparent 0 33px,#dbe3ef 33px 34px)}
+:root[data-sito] h1,:root[data-sito] h2,:root[data-sito] h3{font-family:var(--sans);font-weight:900;letter-spacing:-.01em}
+/* testata */
+:root[data-sito] .nav{top:0;left:0;right:0;bottom:auto;width:auto;height:84px;flex-direction:row;align-items:center;justify-content:flex-start;gap:4px;padding:0 max(28px,calc((100vw - 1240px)/2));background:#fff;border:0;box-shadow:0 2px 0 #f0e4cf,0 10px 30px rgba(43,36,32,.08);overflow:visible;backdrop-filter:none;-webkit-backdrop-filter:none}
+:root[data-sito] .nbrand{position:absolute;left:50%;top:12px;transform:translateX(-50%);margin:0;padding:0;z-index:2;cursor:pointer}
+:root[data-sito] .nbrand img{width:118px;height:118px;border-radius:30px;box-shadow:0 12px 26px rgba(163,36,22,.32),0 0 0 6px #fff;transition:transform .25s}
+:root[data-sito] .nbrand:hover img{transform:rotate(-4deg) scale(1.03)}
+:root[data-sito] .nbrand>div,:root[data-sito] .nsec,:root[data-sito] .nfoot{display:none}
+:root[data-sito] .tab{flex:none;font-size:1.02rem;font-weight:800;padding:10px 14px;border-radius:999px;color:var(--fg);box-shadow:none}
+:root[data-sito] .tab svg{display:none}
+:root[data-sito] .tab:hover{background:#f6ecdc;color:var(--fg)}
+:root[data-sito] .tab.on{color:var(--acc);background:#fbece6;box-shadow:none}
+:root[data-sito] .tab .cnt{margin-left:6px;background:#f4ead6;color:var(--mut)}
+:root[data-sito] .tab.on .cnt{background:#f7d9cf;color:var(--acc)}
+:root[data-sito] .tab[data-v=book]{margin-right:auto}
+:root[data-sito] .tab .cnt{display:none}
+:root[data-sito] #ntools{order:9;flex-direction:row;gap:0;margin-left:6px}
+:root[data-sito] #ntools .icon{width:44px;height:44px;padding:0;justify-content:center;border-radius:50%;color:var(--fg)}
+:root[data-sito] #ntools .icon.user{overflow:hidden;border:2px solid #f0d6cc;margin-left:4px}:root[data-sito] #ntools .icon.user .tom{width:100%;height:100%;object-fit:cover}
+:root[data-sito] #ntools .icon .lbl{display:none}
+:root[data-sito] #ntools .icon:hover{background:#f6ecdc}
+:root[data-sito] .nav .fab{order:10;width:auto;height:44px;margin:0 0 0 8px;padding:0 20px;border-radius:999px;font-size:.98rem;font-weight:800;background:var(--acc);box-shadow:0 5px 0 #a32416}
+:root[data-sito] .nav .fab:active{transform:translateY(3px);box-shadow:0 2px 0 #a32416}
+:root[data-sito] header{position:relative;top:auto;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;padding:64px 28px 4px;border:0;box-shadow:none}
+:root[data-sito] header>*,:root[data-sito] main{max-width:1240px;margin-left:auto;margin-right:auto}
+:root[data-sito] main{padding:16px 28px 72px}
+:root[data-sito] .brand h1{font-size:2.5rem;color:var(--fg)}
+:root[data-sito] .icon{background:#fff;border-color:var(--bd)}
+:root[data-sito] .sw input{background:#fff;border:2px solid var(--fg);border-radius:999px;font-weight:600;box-shadow:none}
+:root[data-sito] #fBtn{background:#fff;border:2px solid var(--fg);font-weight:800;box-shadow:none}
+:root[data-sito] .chip{background:#fff;border:1.5px dashed #c9a273;font-weight:700}
+:root[data-sito] .chip:hover{border-style:solid}
+:root[data-sito] .chip.on{background:var(--acc);border:1.5px solid var(--acc);color:#fff}.chip.on small{color:#ffd9cf}
+:root[data-sito] .filters select{background:#fff;border:1.5px solid var(--bd);font-family:var(--sans);font-weight:600}
+:root[data-sito] .btn{font-family:var(--sans);font-weight:800}
+:root[data-sito] .btn.pri{background:var(--acc);border-color:var(--acc);box-shadow:0 4px 0 #a32416}
+:root[data-sito] .btn.pri:active{transform:translateY(2px);box-shadow:0 2px 0 #a32416}
+/* ricette come polaroid */
+:root[data-sito] .item{background:#fff;border:0;border-radius:3px;padding:10px 10px 2px;box-shadow:0 12px 26px rgba(43,36,32,.16)}
+:root[data-sito] .list>.item:nth-child(4n+1){transform:rotate(-.7deg)}:root[data-sito] .list>.item:nth-child(4n+2){transform:rotate(.6deg)}
+:root[data-sito] .list>.item:nth-child(4n+3){transform:rotate(-.4deg)}:root[data-sito] .list>.item:nth-child(4n){transform:rotate(.8deg)}
+:root[data-sito] .list>.item:hover,:root[data-sito] .vgrid .item:hover{transform:rotate(0) translateY(-5px);box-shadow:0 18px 34px rgba(43,36,32,.22)}
+:root[data-sito] .item .thumb{border-radius:0}
+:root[data-sito] .item h3{font-weight:900;color:var(--fg)}
+:root[data-sito] .item .cat{background:var(--acc);color:#fff}
+/* vetrina del Ricettario */
+:root[data-sito] .vtile{border-radius:4px;border:10px solid #fff;box-shadow:0 16px 34px rgba(43,36,32,.2)}
+:root[data-sito] .vtile.big{border-width:12px}
+:root[data-sito] .vtile .vt b{font-family:var(--sans);font-weight:900}
+:root[data-sito] .vcat img{box-shadow:0 10px 22px rgba(43,36,32,.18),0 0 0 6px #fff,0 0 0 7px var(--bd)}
+:root[data-sito] .vcat b{font-weight:900;font-size:1.02rem}
+:root[data-sito] .vsec h3{font-size:2rem}
+:root[data-sito] .vband,:root[data-sito] .contest,:root[data-sito] .bform{background-color:#fffdf8;background-image:linear-gradient(90deg,transparent 62px,#e3867c 62px,#e3867c 64px,transparent 64px),repeating-linear-gradient(0deg,transparent 0 33px,#dbe3ef 33px 34px);border:0;border-radius:4px;box-shadow:0 22px 44px rgba(43,36,32,.18)}
+:root[data-sito] .vband{padding-left:90px}
+:root[data-sito] .vband h3,:root[data-sito] .contest h2{color:var(--acc)}
+:root[data-sito] .vband .eyebrow,:root[data-sito] .contest .eyebrow{color:var(--ok)}
+/* la sfida */
+:root[data-sito] .contest{padding-left:92px!important;color:var(--fg)}
+:root[data-sito] #home>.contest{padding-left:100px!important}
+:root[data-sito] .contest .desc,:root[data-sito] .contest .rules{color:#4a4038}
+:root[data-sito] .contest .cbtn{background:var(--acc);box-shadow:0 6px 0 #a32416;border-radius:999px}
+:root[data-sito] .who,:root[data-sito] .mine-gara,:root[data-sito] .wbtn,:root[data-sito] #home>.empty{background:#fff;border:1px solid var(--bd);border-radius:6px}
+:root[data-sito] .wbtn{border-left:5px solid var(--acc)}
+/* il mio menu */
+:root[data-sito] .bhead h2{font-size:2.5rem}.bhead p{max-width:44rem}
+:root[data-sito] .bform{padding:30px 34px 28px 96px}
+:root[data-sito] .seg{background:#f4ead6}
+:root[data-sito] .seg input:checked+span{background:#fff;color:var(--acc)}
+:root[data-sito] #bOut .dish,:root[data-sito] #bOut .meal{font-family:var(--sans)}
+/* finestre */
+:root[data-sito] dialog{background:#fffdf8;border-radius:10px}
+:root[data-sito] dialog#det .dmain .heroWrap{border-radius:4px;border:12px solid #fff;box-shadow:0 18px 36px rgba(43,36,32,.2)}
+:root[data-sito] .dside{background-image:repeating-linear-gradient(0deg,transparent 0 33px,#e7ebf2 33px 34px)}
+:root[data-sito] .toast{left:50%}
+:root[data-sito] .welcome>h2{font-size:2.8rem}.welcome .tagline{color:var(--acc)}
+}
+@media (min-width:900px) and (max-width:1179px){
+:root[data-sito] .tab{padding:8px 10px;font-size:.96rem}
+:root[data-sito] .nav .fab{font-size:0;padding:0 16px}:root[data-sito] .nav .fab::before{content:'+ Nuova';font-size:.95rem}
+:root[data-sito] .nbrand img{width:100px;height:100px;border-radius:26px}
 }
 </style>
 </head>
@@ -1048,7 +1136,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=142; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=143; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2724,10 +2812,13 @@ $('#list').addEventListener('contextmenu',e=>{const it=e.target.closest('.item')
 /* ---------- Eventi generali ---------- */
 $('#add').onclick=()=>openForm();
 // Barra laterale (schermi larghi): «Nuova ricetta» sotto l'intestazione e gli strumenti (foto, impostazioni) in basso; sul telefono tornano al loro posto
+// Sul sito il logo al centro della testata riporta alla prima pagina, il quaderno
+if(document.documentElement.dataset.sito){$('.nbrand').onclick=()=>{location.href='benvenuto.html'};$('.nbrand').title='Prima pagina di Gnamina'}
 const deskQ=matchMedia('(min-width:900px)'),addHome=$('#add').nextSibling;
 function placeDesk(){const d=deskQ.matches,nav=$('#tabs');
-  if(d){nav.insertBefore($('#add'),$('#secLbl'));$('#ntools').append($('#camBtn'),$('#setBtn'))}
-  else{document.body.insertBefore($('#add'),addHome);$('.top').append($('#camBtn'),$('#setBtn'))}}
+  const sito=!!document.documentElement.dataset.sito; // sul sito anche il profilo va nella testata
+  if(d){nav.insertBefore($('#add'),$('#secLbl'));$('#ntools').append(...(sito?[$('#camBtn'),$('#setBtn'),$('#userBtn')]:[$('#camBtn'),$('#setBtn')]))}
+  else{document.body.insertBefore($('#add'),addHome);$('.top').append($('#camBtn'),$('#userBtn'),$('#setBtn'))}}
 deskQ.addEventListener('change',placeDesk);placeDesk();$('#navVer').textContent=APP_VERSION;
 function navCounts(){const m=$('#tabs [data-v=mine] .cnt'),b=$('#tabs [data-v=book] .cnt');if(m)m.textContent=items.length||'';if(b)b.textContent=book?book.length+BK.length:''}
 ['#q','#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate','#fSort'].forEach(s=>$(s).addEventListener('input',()=>{render();filtUI()}));
