@@ -324,5 +324,6 @@ fetch('contest.json?'+Math.floor(Date.now()/36e5)).then(r=>r.ok?r.json():null).t
       y-=parseFloat(getComputedStyle(el).top)||0;const r=Math.round(y)%34;if(r)el.style.marginTop=(parseFloat(getComputedStyle(el).marginTop)||0)+34-r+'px'}}
   let q=0;const run=()=>{if(!q)q=requestAnimationFrame(()=>{q=0;righe()})};addEventListener('resize',run);document.fonts&&document.fonts.ready.then(run);addEventListener('load',run);run()})();
 </script>
+<script src="casa/cuoca.js" defer></script>
 </body>
 </html>

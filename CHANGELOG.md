@@ -6,6 +6,12 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-09
 
+- **Versione 147, il benvenuto della ragazza di Gnamina** (richiesta dell'utente: un benvenuto animato toccando il logo in alto; scelto il video «seme 47 rifinito»). Sul sito da computer, toccando il logo al centro, e nella prima pagina (benvenuto.html), toccando il logo, si apre un foglio di quaderno con la polaroid della ragazza all'isola della cucina che dice «Ciao! Benvenuto su Gnamìna!», sorride e, cambiata inquadratura, «Il tuo nuovo sito di cucina!». Sotto ci sono i pulsanti «Sfoglia il ricettario» e «Cos'è Gnamina» (o «Resta qui» nella prima pagina).
+  - File nuovi: `www/casa/cuoca.js` (il foglio, caricato solo al tocco sul sito), `cuoca.mp4` (600x800, 5,5 s, circa 660 KB, scaricato solo quando si apre) e la copertina `cuoca.webp`.
+  - Il video parte con la voce perché nasce da un tocco; se il browser la blocca parte muto. Se il video non si carica resta la foto. «↻ Ancora» lo fa ripartire.
+  - Sugli schermi bassi (telefono in orizzontale, finestre piccole) il foglio non si stringe sotto i 290 px e si può scorrere.
+  - Il video è il seme 47 con la traccia guida per la pronuncia, tagliato a 5,55 s e con la voce rifinita. Il kit per rifarlo è in `docs/ragazza-gnamina/`, aggiornato al seme 47.
+  - L'app sul telefono non cambia.
 - **Versione 146, la scrittura a mano sulle righe del quaderno** (richiesta dell'utente: i testi dentro le pagine di quaderno del sito devono sembrare scritti a mano e stare sulle righe). Sul sito da computer e tablet sono scritti in **Caveat** (Google Fonts, scelto tra Caveat, Kalam, Patrick Hand e Gochi Hand):
   - l'apertura di «Le mie», «Sfida», «Ricettario» e «Il mio menu»: occhiello, titolo e descrizione;
   - il foglio della sfida della settimana: tema, descrizione e regole;

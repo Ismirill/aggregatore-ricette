@@ -5,7 +5,7 @@ I video si generano con MiniMax H3 sul PC con la GPU, tramite ComfyUI alla porta
 
 ![Il kit fisso](kit-fisso.jpg)
 
-Il video di benvenuto definitivo, usato nel sito, è `video/benvenuto-definitivo.mp4`: «Ciao! Benvenuto su Gnamìna!», una pausa col sorriso, poi «Il tuo nuovo sito di cucina!». È il seme 7 con la traccia guida, tagliato a 5,35 s.
+Il video di benvenuto definitivo, usato nel sito, è `video/benvenuto-definitivo.mp4`: «Ciao! Benvenuto su Gnamìna!», una pausa col sorriso, poi «Il tuo nuovo sito di cucina!». È il seme 47 con la traccia guida, tagliato a 5,55 s per togliere un «mmm» canticchiato in coda. Il seme 7 (tagliato a 5,35 s) è la riserva: accento su «mì» un po' più marcato, ma occhi chiusi nel primo saluto.
 
 ## Riferimenti fissi (`riferimenti/`)
 
@@ -36,14 +36,14 @@ python3 script/h3_r2v.py \
   --ref riferimenti/3-cucina-fronte.jpg --ref riferimenti/4-cucina-sinistra.jpg --ref riferimenti/5-cucina-destra.jpg \
   --refaudio audio/guida-benvenuto.wav \
   --prompt prompt/video_benvenuto_fisso.txt --out video.mp4 \
-  --w 768 --h 1024 --dur 6.5 --seed 7 \
+  --w 768 --h 1024 --dur 6.5 --seed 47 \
   --noturbo --steps 20 --sched beta --realism 0.65 \
   --model Minimax-h3_Singularity_ref2va_v2_pruned_int8.safetensors
 ```
 
 - **Qualità piena, niente turbo.** Con la LoRA turbo a 4 passi la voce diventa metallica.
 - **LoRA realism a 0.65.** Se la ragazza ingrassa o le guance tornano rosse, va abbassata, non alzata.
-- **Seme 7** per il benvenuto. Lo stesso seme con lo stesso prompt, gli stessi riferimenti e la stessa traccia guida dà lo stesso video.
+- **Seme 47** per il benvenuto (riserva: seme 7). Lo stesso seme con lo stesso prompt, gli stessi riferimenti e la stessa traccia guida dà lo stesso video.
 
 ## La pronuncia: «Gnamìna», con l'accento sulla «ì»
 
