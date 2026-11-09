@@ -474,6 +474,88 @@ details summary{cursor:pointer}
 :root[data-sito] .nav .fab{font-size:0;padding:0 16px}:root[data-sito] .nav .fab::before{content:'+ Nuova';font-size:.95rem}
 :root[data-sito] .nbrand img{width:100px;height:100px;border-radius:26px}
 }
+
+/* ---- Sito, seconda parte: apertura delle sezioni, polaroid con puntine e nastri, colonne, piè di pagina ---- */
+@media (min-width:900px){
+:root[data-sito] .top{display:none}
+:root[data-sito] .fis{position:absolute;z-index:3;pointer-events:none;height:auto;filter:drop-shadow(1px 3px 2px rgba(43,36,32,.28))}
+:root[data-sito] .fis.nastro{width:104px;left:50%;top:-13px;margin-left:-52px}
+:root[data-sito] .fis.puntina{width:32px;left:50%;top:-18px;margin-left:-16px;filter:drop-shadow(3px 7px 3px rgba(0,0,0,.32))}
+:root[data-sito] .sIll{position:absolute;z-index:3;pointer-events:none;filter:drop-shadow(0 8px 10px rgba(43,36,32,.2))}
+:root[data-sito] .sHero{position:relative;background:#6b4c33 url(casa/tavolo.jpg) center 60%/cover no-repeat;padding:70px 0 64px}
+:root[data-sito] .sHero::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(40,28,18,.6),rgba(40,28,18,.15) 55%,rgba(40,28,18,.35))}
+:root[data-sito] .sWrap{position:relative;max-width:1240px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:minmax(0,560px) 1fr;gap:40px;align-items:center}
+:root[data-sito] .sCard{position:relative;background:#fdf8ee url(casa/carta.jpg) center/cover;padding:40px 40px 34px 100px;box-shadow:0 30px 60px rgba(0,0,0,.35);transform:rotate(-1.2deg)}
+:root[data-sito] .sEye{margin:0 0 8px;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#3f7a2e}
+:root[data-sito] .sTitle{margin:0;font-size:48px;line-height:1.03;color:#c8301f;text-wrap:balance}
+:root[data-sito] .sTitle em{font-style:normal;color:#2b2420}
+:root[data-sito] .sLead{margin:14px 0 0;font-size:18px;font-weight:600;line-height:1.55;color:#3d342d}
+:root[data-sito] .sSlot{margin-top:20px}
+:root[data-sito] .sSlot .searchbar{margin:0;max-width:none}
+:root[data-sito] .sPics{position:relative;height:380px}
+:root[data-sito] .sPol{position:absolute;padding:12px 12px 26px;background:#fff;border:0;cursor:pointer;box-shadow:0 20px 40px rgba(0,0,0,.35);transition:transform .25s}
+:root[data-sito] .sPol .foto{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+:root[data-sito] .sPics .p1{width:260px;left:4%;top:20px;transform:rotate(-6deg)}
+:root[data-sito] .sPics .p2{width:220px;left:42%;top:0;transform:rotate(5deg)}
+:root[data-sito] .sPics .p3{width:200px;left:30%;top:190px;transform:rotate(-2deg)}
+:root[data-sito] .sPics .sPol:hover{transform:rotate(0) scale(1.04);z-index:4}
+:root[data-sito] header{padding-top:34px}
+/* ricette: polaroid con puntina o nastro, a rotazione */
+:root[data-sito] .list>.item,:root[data-sito] .vgrid>.item,:root[data-sito] .hscroll>.item{position:relative;overflow:visible;padding-top:14px}
+:root[data-sito] .list>.item::before,:root[data-sito] .vgrid>.item::before,:root[data-sito] .hscroll>.item::before{content:'';position:absolute;z-index:3;left:50%;pointer-events:none;background:center/contain no-repeat;filter:drop-shadow(2px 5px 3px rgba(0,0,0,.28))}
+:root[data-sito] .item:nth-child(4n+1)::before{width:30px;height:52px;top:-18px;margin-left:-15px;background-image:url(casa/puntina-rossa.webp)}
+:root[data-sito] .item:nth-child(4n+2)::before{width:100px;height:24px;top:-11px;margin-left:-50px;background-image:url(casa/nastro-quadretti.webp);transform:rotate(-3deg)}
+:root[data-sito] .item:nth-child(4n+3)::before{width:30px;height:52px;top:-18px;margin-left:-15px;background-image:url(casa/puntina-crema.webp)}
+:root[data-sito] .item:nth-child(4n)::before{width:100px;height:24px;top:-11px;margin-left:-50px;background-image:url(casa/nastro-pois.webp);transform:rotate(3deg)}
+:root[data-sito] .list{gap:34px 26px;padding-top:12px}
+:root[data-sito] .vgrid{gap:34px 26px;padding-top:10px}
+:root[data-sito] .occh{margin:0 0 6px;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#3f7a2e}
+:root[data-sito] .vsec h3,:root[data-sito] .hsec h3,:root[data-sito] .bhead h2{font-size:2.3rem}
+:root[data-sito] .vsec h3 em,:root[data-sito] .sNote h3 em{font-style:normal;color:#c8301f}
+/* vetrina: piatto in evidenza come foto incorniciata con il nastro */
+:root[data-sito] .vtile{overflow:visible}
+:root[data-sito] .vtile>img{border-radius:0}
+:root[data-sito] .vtile.big::before{content:'';position:absolute;z-index:3;top:-24px;left:50%;width:150px;height:34px;margin-left:-75px;background:url(casa/nastro-kraft.webp) center/contain no-repeat;transform:rotate(-2deg);filter:drop-shadow(1px 3px 2px rgba(0,0,0,.25))}
+:root[data-sito] .vhero{overflow:visible}
+/* la sfida */
+:root[data-sito] .contest{overflow:visible}
+:root[data-sito] #home>.contest::after,:root[data-sito] .contest::after{content:'';position:absolute;right:-50px;bottom:-46px;width:150px;height:150px;font-size:0;opacity:1;background:url(casa/ill-2.webp) center/contain no-repeat;transform:rotate(14deg);filter:drop-shadow(0 8px 10px rgba(43,36,32,.2))}
+:root[data-sito] .contest::before{content:'';position:absolute;z-index:3;top:-16px;left:50%;width:130px;height:30px;margin-left:-65px;background:url(casa/nastro-righe.webp) center/contain no-repeat;transform:rotate(-3deg)}
+:root[data-sito] #home>.who::before{content:'';position:absolute;top:-16px;left:28px;width:28px;height:48px;background:url(casa/puntina-rossa.webp) center/contain no-repeat;filter:drop-shadow(2px 5px 3px rgba(0,0,0,.28))}
+:root[data-sito] #home>.who{position:relative;transform:rotate(.6deg)}
+:root[data-sito] #home>.empty{position:relative;transform:rotate(-.6deg)}
+:root[data-sito] #home>.empty::before{content:'';position:absolute;top:-12px;left:50%;width:110px;height:26px;margin-left:-55px;background:url(casa/nastro-pois.webp) center/contain no-repeat}
+/* il mio menu: pagina di quaderno con una colonna di foto accanto */
+:root[data-sito] #budget{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px 46px;align-items:start}
+:root[data-sito] #budget[hidden]{display:none}
+:root[data-sito] #budget>.bhead{display:none}
+:root[data-sito] #budget>#bOut{grid-column:1/-1}
+:root[data-sito] .bform{position:relative;overflow:visible;transform:rotate(-.4deg);margin-top:14px}
+:root[data-sito] .sSide{position:relative;display:grid;gap:34px;padding-top:24px}
+:root[data-sito] .sSide .sPol{position:relative;cursor:default;width:78%}
+:root[data-sito] .sSide .sPol.solo{transform:rotate(3deg)}
+:root[data-sito] .sSide .sPol.s2{transform:rotate(-4deg);justify-self:end;width:64%}
+:root[data-sito] .sNote{position:relative;background:#fffdf8;padding:26px 26px 22px;box-shadow:0 16px 32px rgba(43,36,32,.16);transform:rotate(-1deg);background-image:repeating-linear-gradient(0deg,transparent 0 31px,#dbe3ef 31px 32px)}
+:root[data-sito] .sNote h3{margin:0 0 8px;font-size:1.5rem;color:#c8301f}
+:root[data-sito] .sNote ul{margin:0;padding-left:20px;font-weight:700;line-height:32px}
+/* piè di pagina */
+:root[data-sito] .sFoot{background:#2b2420;color:#e7dccd;margin-top:40px}
+:root[data-sito] .sFootIn{max-width:1240px;margin:0 auto;padding:34px 28px;display:grid;grid-template-columns:auto 1fr auto;gap:32px;align-items:center}
+:root[data-sito] .sFootIn img{width:220px;border-radius:14px}
+:root[data-sito] .sFootIn p{margin:0;font-weight:600}
+:root[data-sito] .sFootIn nav{display:flex;gap:18px}
+:root[data-sito] .sFootIn a{color:#e7dccd;font-weight:700}
+:root[data-sito] main{padding-bottom:30px}
+/* scheda della ricetta: foto con il nastro */
+:root[data-sito] dialog#det .dmain .heroWrap{overflow:visible}
+:root[data-sito] dialog#det .dmain .heroWrap::before{content:'';position:absolute;z-index:3;top:-26px;left:50%;width:140px;height:32px;margin-left:-70px;background:url(casa/nastro-quadretti.webp) center/contain no-repeat;transform:rotate(-3deg)}
+:root[data-sito] dialog#det .dmain .hero{border-radius:0}
+}
+@media (min-width:900px) and (max-width:1179px){
+:root[data-sito] .sWrap{grid-template-columns:minmax(0,1fr) 300px}:root[data-sito] .sTitle{font-size:38px}
+:root[data-sito] .sPics{height:320px}:root[data-sito] .sPics .p1{width:200px;left:0}:root[data-sito] .sPics .p2{width:170px;left:30%}:root[data-sito] .sPics .p3{display:none}
+:root[data-sito] #budget{grid-template-columns:1fr}:root[data-sito] .sSide{grid-template-columns:1fr 1fr 1fr}
+}
 </style>
 </head>
 <body>
@@ -1136,7 +1218,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=143; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=144; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1440,9 +1522,9 @@ function vetrina(){
   return `<div class="vetrina">
     <div class="vhero">${hero.map((b,i)=>tile(b,i===0)).join('')}</div>
     <div class="vcats">${VCATS.map(([c,l])=>{const im=catImg(c);return im?`<button type="button" class="vcat" data-vcat="${esc(c)}"><img src="${esc(im)}" alt="" loading="lazy" referrerpolicy="no-referrer"><b>${esc(l)}</b></button>`:''}).join('')}</div>
-    <div class="vsec"><h3>${top.length>=4?'Le più votate dai Gnammers':'I piatti di oggi'}</h3><p class="meta">${top.length>=4?'Le stelle le danno le persone che le hanno cucinate':'Otto piatti italiani scelti per oggi, cambiano ogni giorno'}</p><div class="vgrid">${grid.map(card).join('')}</div></div>
+    <div class="vsec"><p class="occh">${top.length>=4?'Scelte da chi le ha cucinate':'Dal Ricettario'}</p><h3>${top.length>=4?'Le più votate dai <em>Gnammers</em>':'I piatti <em>di oggi</em>'}</h3><p class="meta">${top.length>=4?'Le stelle le danno le persone che le hanno cucinate':'Otto piatti italiani scelti per oggi, cambiano ogni giorno'}</p><div class="vgrid">${grid.map(card).join('')}</div></div>
     <div class="vband"><div><p class="eyebrow">La sfida della settimana</p><h3>${esc(c.tema)}</h3><p>${esc(c.descrizione||'')}</p></div><button type="button" class="btn pri" data-goto="home">${ph==='join'?'Partecipa':ph==='taste'?'Assaggia e vota':'Scopri la sfida'}</button></div>
-    <div class="vsec"><h3>Tutte le ricette italiane</h3><p class="meta">Scegli un tipo di piatto qui sopra, oppure cerca per nome o ingrediente</p></div>
+    <div class="vsec"><p class="occh">Dal Nord al Sud</p><h3>Tutte le ricette <em>italiane</em></h3><p class="meta">Scegli un tipo di piatto qui sopra, oppure cerca per nome o ingrediente</p></div>
   </div>`;
 }
 function render(){
@@ -2812,6 +2894,43 @@ $('#list').addEventListener('contextmenu',e=>{const it=e.target.closest('.item')
 /* ---------- Eventi generali ---------- */
 $('#add').onclick=()=>openForm();
 // Barra laterale (schermi larghi): «Nuova ricetta» sotto l'intestazione e gli strumenti (foto, impostazioni) in basso; sul telefono tornano al loro posto
+
+/* ---------- Sito su computer e tablet: apertura di ogni sezione come la prima pagina (foto del tavolo, pagina di quaderno con i nastri,
+   titolo grande, polaroid con puntine), colonna di foto accanto a «Il mio menu», piè di pagina con il logotipo ---------- */
+const SITO=!!document.documentElement.dataset.sito;
+const SHERO={
+  mine:{eye:'Il tuo quaderno',title:'Le tue <em>ricette</em>',lead:'Quelle salvate da TikTok, Instagram e YouTube, quelle di famiglia e quelle prese dal Ricettario. Sempre con le dosi per quanti siete.',pics:['wb-risotto-con-la-zucca','cb-panna-cotta-with-red-fruit-sauce','wb-risotto-con-gli-asparagi']},
+  book:{eye:'Il Ricettario di Gnamina',title:'Oltre 1.500 ricette <em>di casa</em>',lead:'Piatti italiani, regionali e dal mondo, con foto, tempo, difficoltà, costo e calorie a persona.',pics:['wb-arancini-al-radicchio','wb-focaccia-al-formaggio','wo-tiramisu']},
+  home:{eye:'La sfida della settimana',title:'Cucina, assaggia, <em>vota</em>',lead:'Ogni settimana un tema. Partecipi con la tua ricetta e un breve video, poi tutti la cucinano e la votano. La più votata entra nel Ricettario.',pics:['wo-spaghetti-carbonara','wb-arancini-al-radicchio','wb-focaccia-al-formaggio']},
+  budget:{eye:'Il mio menu',title:'La settimana a tavola, <em>nel tuo budget</em>',lead:'Sei domande e preparo pranzi e cene bilanciati, con frutta e verdura di stagione e la lista della spesa con i prezzi della tua zona.',pics:['wb-risotto-con-gli-asparagi','wo-tiramisu','wb-focaccia-al-formaggio']},
+};
+const FIS=['<img class="fis puntina" src="casa/puntina-rossa.webp" alt="">','<img class="fis nastro" src="casa/nastro-quadretti.webp" alt="" style="transform:rotate(-4deg)">','<img class="fis puntina" src="casa/puntina-crema.webp" alt="">'];
+function siteHero(v){const h=SHERO[v]||SHERO.mine,el=$('#sHero');if(!el)return;
+  el.querySelector('.sEye').textContent=h.eye;el.querySelector('.sTitle').innerHTML=h.title;el.querySelector('.sLead').textContent=h.lead;
+  el.querySelector('.sSlot').hidden=!(v==='mine'||v==='book');
+  const mine=v==='mine'?items.filter(i=>i.image).slice(0,3).map(i=>({id:i.id,img:i.image})):[];
+  const pics=mine.length===3?mine:h.pics.map(id=>({id,img:'img/'+id+'.jpg'}));
+  el.querySelector('.sPics').innerHTML=pics.map((p,k)=>`<button type="button" class="sPol p${k+1}" data-sid="${esc(p.id)}">${FIS[k]}<img class="foto" src="${esc(p.img)}" alt="" referrerpolicy="no-referrer"></button>`).join('');}
+if(SITO){
+  const hero=document.createElement('section');hero.id='sHero';hero.className='sHero';
+  hero.innerHTML=`<div class="sWrap"><div class="sCard"><img class="fis" src="casa/nastro-kraft.webp" alt="" style="width:118px;top:-2px;left:-36px;transform:rotate(-38deg)"><img class="fis" src="casa/nastro-pois.webp" alt="" style="width:118px;top:-2px;right:-36px;transform:rotate(38deg)">
+    <p class="sEye"></p><h1 class="sTitle"></h1><p class="sLead"></p><div class="sSlot"></div><img class="sIll" src="casa/ill-1.webp" alt="" style="width:118px;left:-62px;bottom:-50px;transform:rotate(-16deg)"></div><div class="sPics"></div></div>`;
+  document.body.insertBefore(hero,document.querySelector('header'));
+  hero.querySelector('.sSlot').append($('#sbar'));
+  hero.querySelector('.sPics').onclick=async e=>{const b=e.target.closest('[data-sid]');if(!b)return;await loadBook();const it=findAny(b.dataset.sid);if(it)openDetail(it)};
+  // accanto a «Il mio menu»: due foto e cosa si ottiene
+  const side=document.createElement('aside');side.className='sSide';
+  side.innerHTML=`<div class="sPol solo"><img class="fis nastro" src="casa/nastro-righe.webp" alt="" style="transform:rotate(3deg)"><img class="foto" src="img/gz-orecchiette-broccoli-e-salsiccia.jpg" alt=""></div>
+    <div class="sNote"><img class="fis puntina" src="casa/puntina-rossa.webp" alt=""><h3>Cosa ti preparo</h3><ul><li>Pranzi e cene bilanciati, senza ripetere i piatti</li><li>Frutta e verdura del mese</li><li>La lista della spesa con i prezzi della tua zona</li><li>Il costo a persona, piatto per piatto</li><li>Un piatto non ti va? Lo cambi con un tocco</li></ul></div>
+    <div class="sPol solo s2"><img class="fis puntina" src="casa/puntina-crema.webp" alt=""><img class="foto" src="img/cb-panna-cotta-with-red-fruit-sauce.jpg" alt=""></div>`;
+  $('#bForm').after(side);
+  $('#bForm').insertAdjacentHTML('beforeend','<img class="fis" src="casa/nastro-kraft.webp" alt="" style="width:118px;top:-12px;left:40px;transform:rotate(-6deg)"><img class="sIll" src="casa/ill-5.webp" alt="" style="width:150px;right:-46px;bottom:-44px;transform:rotate(-24deg)">');
+  // piè di pagina
+  const foot=document.createElement('footer');foot.className='sFoot';
+  foot.innerHTML=`<div class="sFootIn"><img src="casa/logotipo-rosso.jpg" alt="Gnamina"><p>Gratis, senza pubblicità. Le tue ricette restano tue, cifrate sul tuo telefono. Sul telefono, sul tablet e sul computer, su gnamina.it.</p><nav><a href="benvenuto.html">Cos'è Gnamina</a><a href="https://github.com/Ismirill/aggregatore-ricette/releases/tag/apk" target="_blank" rel="noopener">App Android</a><a href="https://github.com/Ismirill/aggregatore-ricette" target="_blank" rel="noopener">Codice aperto</a></nav></div>`;
+  document.body.append(foot);
+  const gv0=goView;goView=function(v){gv0(v);siteHero(v)};
+}
 // Sul sito il logo al centro della testata riporta alla prima pagina, il quaderno
 if(document.documentElement.dataset.sito){$('.nbrand').onclick=()=>{location.href='benvenuto.html'};$('.nbrand').title='Prima pagina di Gnamina'}
 const deskQ=matchMedia('(min-width:900px)'),addHome=$('#add').nextSibling;
