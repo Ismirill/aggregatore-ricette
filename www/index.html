@@ -927,7 +927,9 @@ function sourceOf(url){
 // Titolo fasullo: le app social, quando si condivide un post, mandano come titolo solo il proprio nome («Instagram», «TikTok»)
 // o la pagina di accesso; va scartato e sostituito con la didascalia o con il nome dato dall'AI
 // Titolo pulito: via hashtag, emoji e punteggiatura ai bordi; i titoli urlati in maiuscolo diventano normali
-const tidyTitle=t=>{t=String(t||'').replace(/\s*#\S+/g,'').replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu,'').replace(/^[\s\p{P}\p{S}]+|[\s!¡.:;,\-–—]+$/gu,'').replace(/\s{2,}/g,' ').trim().slice(0,140);
+const tidyTitle=t=>{t=String(t||'').replace(/\s*#\S+/g,'').replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu,'').replace(/^[\s\p{P}\p{S}]+|[\s!¡.:;,\-–—]+$/gu,'').replace(/\s{2,}/g,' ').trim();
+  if(t.length>40)t=t.replace(/^(.{8,}?)\s*[?!.](?:\s.*)?$/su,'$1'); // «Eggplant in olive oil Are you putting this on bread…?» → solo fin dove finisce la frase
+  t=t.slice(0,140);
   if(t.length>3&&!/\p{Ll}/u.test(t))t=t.charAt(0)+t.slice(1).toLowerCase();return t};
 // Titoli dei post: resta solo il nome del piatto (stessa funzione nel server)
 // Dal titolo di un post o di un video al solo nome del piatto: via commenti, superlativi, «come fare», hashtag, emoji, nome del canale
@@ -999,6 +1001,10 @@ function parseHtml(html){
   }
   return out;
 }
+// Testo in inglese (ricette lette dai siti dei cuochi stranieri): parole tipiche inglesi molto più numerose di quelle italiane
+const looksEnglish=t=>{const en=(String(t).match(/\b(the|and|with|cups?|tablespoons?|teaspoons?|tbsp|tsp|into|until|add|minutes|chopped|large|small|heat|oil)\b/gi)||[]).length,it=(String(t).match(/\b(il|lo|la|gli|le|di|del|della|con|per|aggiungi|aggiungere|minuti|cucchia\w*|olio|sale|pepe|tritat\w*)\b/gi)||[]).length;return en>=6&&en>it*2};
+// Un ingrediente ripetuto senza dose («nocciole» dopo «250 g nocciole») si toglie: resta la riga con la dose
+const dedupIng=list=>list.filter((l,i)=>/\d/.test(l)||!list.some((o,j)=>j!==i&&/\d/.test(o)&&new RegExp(`(^|\\s)${l.trim().toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(\\s|$)`).test(o.toLowerCase())));
 // Refusi comuni delle unità nei post: «300fr», «300 g r» → «300 gr»
 const fixUnit=l=>{l=String(l).replace(/(\d)\s*(?:fr|g\s+r)\b/gi,'$1 gr');return /\p{Lu}{3}/u.test(l)&&l===l.toUpperCase()?l.toLowerCase():l};
 // Ricava ingredienti e passaggi dal testo di un post (didascalia TikTok/Instagram)
@@ -1014,7 +1020,9 @@ function parseCaption(text){
   return res;
 }
 async function getJson(u,ctl){return (await fetch(u,{signal:ctl.signal})).json()}
+let readErr=''; // l'ultimo motivo dato dal server per un post che non riesce a leggere
 async function analyze(url,pasted){
+  readErr='';
   const ctl=new AbortController();setTimeout(()=>ctl.abort(),10000);
   const src=sourceOf(url);let out={};
   try{
@@ -1035,10 +1043,12 @@ async function analyze(url,pasted){
       if(!social)try{const res=await fetch(url,{signal:ctl.signal});html=await res.text();fin=res.url;if(!useful(parseHtml(html)))html=''}catch{}
       let transcript='';
       let site=false;
-      if(!html&&aiOn())try{const p=await server('/preview',{url});html=p.html;fin=p.url;transcript=String(p.transcript||'');site=!!p.site}catch{}
+      const pre=out; // quello letto prima dal browser (TikTok: titolo dall'oEmbed), da tenere se il server non riesce
+      if(!html&&aiOn())try{const p=await server('/preview',{url});html=p.html;fin=p.url;transcript=String(p.transcript||'');site=!!p.site}catch(e){if(e?.status===502&&e.message)readErr=e.message}
       if(!html&&!social)try{const res=await fetch(url,{signal:ctl.signal});html=await res.text();fin=res.url}catch{}
       out=parseHtml(html||'<html></html>');
       if(!useful(out)&&!out.title)out={};
+      if(!html&&pre.caption&&!out.caption)out={...pre};
       if(transcript)out.transcript=transcript; // parlato del video (TikTok, reel di Instagram), trascritto dal server
       if(site)out.fromSite=true; // ricetta letta dal sito o dal blog del cuoco linkato nella didascalia
       if(fin&&fin!==url)out.finalUrl=fin;
@@ -1148,7 +1158,7 @@ async function server(path,body,auth){
   return d;
 }
 // 429 dal server: o troppe richieste dallo stesso telefono (15 al minuto) o quota gratuita giornaliera dell'AI esaurita (si rinnova alle 2 di notte, ora italiana)
-const aiErr=e=>e?.status===429?(/giornalier|quota|limite/i.test(e.message||'')?'Quota AI gratuita esaurita per oggi: si rinnova ogni giorno, riprova più tardi':'Troppe richieste, riprova tra un minuto'):e?.message||'Servizio AI non disponibile';
+const aiErr=e=>e?.status===429?(/giornalier|quota|limite/i.test(e.message||'')?'Il servizio AI gratuito è al limite in questo momento: riprova tra qualche minuto':'Troppe richieste, riprova tra un minuto'):e?.message||'Servizio AI non disponibile';
 
 // Estrae i dati di una ricetta da un post social (didascalia + copertina, analizzati dal server)
 async function aiAnalyze(d){
@@ -1249,7 +1259,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=150; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=151; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2598,7 +2608,7 @@ async function readRecipe(url,overwrite){
   $('#capL').hidden=!social&&!f.caption.value;
   const a=await analyze(url,f.caption.value.trim());
   if(f.url.value!==url)return;
-  if(!a){$('#capL').hidden=false;showPv(social?'Non riesco a leggere il post: copia la sua descrizione e incollala qui sotto':'Non riesco a leggere la pagina: compila tu i dati');if(social)f.caption.focus();return}
+  if(!a){$('#capL').hidden=false;showPv(readErr?readErr+(social?'. Intanto puoi copiare la descrizione del post e incollarla qui sotto':''):social?'Non riesco a leggere il post: copia la sua descrizione e incollala qui sotto':'Non riesco a leggere la pagina: compila tu i dati');if(social)f.caption.focus();return}
   const img0=extra.image;Object.assign(extra,{image:String(extra.image||'').startsWith('data:')?extra.image:a.image||extra.image,author:a.author||extra.author,caption:a.caption||extra.caption,transcript:a.transcript||'',videoId:a.videoId||extra.videoId,videoEmbed:a.videoEmbed||extra.videoEmbed,finalUrl:a.finalUrl||extra.finalUrl});if(extra.image!==img0)covCredit();
   const put=(el,v)=>{if(v&&(overwrite||!el.value))el.value=v};
   if(a.title&&(overwrite||junkTitle(f.title.value)))f.title.value=dishName(a.title);put(f.time,a.time);put(f.servings,a.servings);
@@ -2610,6 +2620,14 @@ async function readRecipe(url,overwrite){
   const n=(a.ingredients||[]).length;
   showPv(n?`Trovati ${n} ingredienti`:a.transcript?'Trascritto il parlato del video':'Ingredienti non trovati: aggiungili tu se vuoi');
   // Video YouTube con la stessa ricetta sul sito del cuoco: ingredienti, procedimento, persone e tempo arrivano da lì così come sono
+  if(a.fromSite&&a.stepsFromSchema&&a.steps?.length&&n>=3&&aiOn()&&looksEnglish([f.title.value,f.ingredients.value,f.steps.value].join('\n'))){
+    showPv('Ricetta in inglese dal sito del cuoco: la traduco…');
+    try{const ing=lines(f.ingredients.value),st=lines(f.steps.value);
+      const t=(await server('/translate-recipe',{recipe:{name:f.title.value,summary:'',ingredients:ing.map(x=>({name:x,note:''})),steps:st}})).result;
+      if(f.url.value!==url)return;
+      if(t?.ingredients?.length===ing.length&&t.steps?.length===st.length){f.title.value=dishName(t.name)||f.title.value;f.ingredients.value=t.ingredients.map(x=>fixUnit(x.name)).join('\n');f.steps.value=t.steps.join('\n')}
+    }catch{}
+  }
   if(a.fromSite&&a.stepsFromSchema&&a.steps?.length&&n>=3){showPv(`Ricetta completa dal sito del cuoco · ${n} ingredienti · ${a.steps.length} passaggi${a.servings?` · per ${a.servings}`:''}${a.time?` · ${a.time} min`:''}`);return}
   // Post social o pagine senza dati strutturati: completa con l'AI se la chiave è configurata
   if(aiOn()&&(['TikTok','Instagram','YouTube','Facebook','Pinterest'].includes(sourceOf(url))||n<3)){
@@ -2625,7 +2643,7 @@ async function readRecipe(url,overwrite){
       if(cats.includes(r.cat))f.cat.value=BASE_RX.test(f.title.value.trim())?'Altro':r.cat;
       // il post non elenca gli ingredienti: l'AI dà solo i nomi tipici del piatto, senza dosi, e lo si dice
       if(r.inferred&&r.ingredients.length)r.ingredients.push('(il post non elenca gli ingredienti: questi sono quelli tipici del piatto, senza dosi; guarda il video e completa)');
-      if(r.ingredients.length)f.ingredients.value=r.ingredients.map(fixUnit).join('\n');
+      if(r.ingredients.length)f.ingredients.value=dedupIng(r.ingredients.map(fixUnit)).join('\n');
       if(r.steps.length&&!(a.stepsFromSchema&&a.steps?.length)&&(overwrite||!editing||!f.steps.value))f.steps.value=r.steps.join('\n'); // i passaggi dell'AI (fedeli al testo) vincono sulla divisione a paragrafi della didascalia, mai su quelli strutturati della pagina
       // l'AI legge il post fedelmente: se non vi trova passaggi, le righe prese dalla didascalia non lo sono («scrivetemi in DM», hashtag); nella ricetta nuova si tolgono
       else if(!r.steps.length&&!editing&&!overwrite&&!(a.stepsFromSchema&&a.steps?.length))f.steps.value='';

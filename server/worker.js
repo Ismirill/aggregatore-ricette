@@ -105,7 +105,8 @@ function cacheUrl(u) {
 const LOGIN_RX = /log in or sign up|<title>log in \| tiktok|accedi o iscriviti|make your day/i;
 const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : /instagram\.com\/(?:[\w.]+\/)?reels?\/|facebook\.com|fb\.watch/.test(String(b.url)) ? ':parlato' : ''), 3 * DAY, () => preview(env, b),
   r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html)) && !LOGIN_RX.test(r.html || '')); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
-const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
+const ANALYZE_V = 3; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
+const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([ANALYZE_V, str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
   () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length && !(r.result.inferred && !r.result.steps?.length))); // le analisi «indovinate» (ingredienti tipici, nessun passaggio) non si salvano: la prossima volta si riprova
 
 // Scarica la copertina del post (lato server non ci sono blocchi CORS)
@@ -159,11 +160,11 @@ Titolo/didascalia (e, se presente, la trascrizione di ciò che viene detto nel v
 Sei un trascrittore fedele, non un cuoco: riporta SOLO ciò che è scritto nel testo (hashtag compresi: #cannellini, #carote sono ingredienti) o chiaramente visibile nell'immagine allegata. Non aggiungere dosi, tempi, porzioni o passaggi che non ci sono. Meglio un campo vuoto di un dato inventato.
 Se c'è il «Parlato nel video», ciò che il cuoco dice vale come testo scritto: le dosi dette a voce in lettere vanno scritte in cifre («due etti di farina» → "200 g farina", «mezzo litro di latte» → "500 ml latte", «tre uova» → "3 uova", «un cucchiaio» → "1 cucchiaio"), e i passaggi raccontati a voce vanno in steps, in ordine, uno per voce. La trascrizione automatica può avere errori di ascolto: correggi solo quelli evidenti.
 Guarda bene l'immagine: se mostra il piatto, elenca gli ingredienti che si riconoscono con certezza (es. fagioli bianchi, carote a dadini, patate, pasta corta, pane); se contiene testo sovrimpresso (titolo, elenco di ingredienti, dosi), trascrivilo e usalo come se fosse nel post.
-Estrai i dati in italiano:
-- title: SOLO il nome del piatto, senza hashtag, emoji, aggettivi pubblicitari o commenti: «Carbonara vegana, la più buona del mondo» → "Carbonara vegana"; «Come fare la pasta alla norma perfetta» → "Pasta alla norma".
+Estrai i dati in italiano. Se il post è in un'altra lingua (inglese, spagnolo…), traduci in italiano titolo, ingredienti e passaggi: i nomi di piatti noti restano com'è d'uso in Italia («Arancini», «Tacos»), «chicken» → pollo, «bell peppers» → peperoni. I numeri delle dosi restano esattamente quelli del post e si traducono solo le unità: cup/cups → tazza/tazze, tbsp → cucchiaio, tsp → cucchiaino, lb → libbra, oz → oncia, clove → spicchio; nei passaggi le temperature in °F si scrivono in °C se il post le dà anche in °C, altrimenti si convertono (425°F → 220°C).
+- title: SOLO il nome del piatto, senza hashtag, emoji, aggettivi pubblicitari o commenti: «Carbonara vegana, la più buona del mondo» → "Carbonara vegana"; «Come fare la pasta alla norma perfetta» → "Pasta alla norma". Il nome deve restare specifico, con gli ingredienti o la variante che lo distinguono: «Pizza in 1h 45 ~ Basilico, Limone, Parmigiano & Pepe nero» → "Pizza basilico, limone e parmigiano", non solo "Pizza"; «Pane fatto in casa in due passaggi» → "Pane fatto in casa", non solo "Pane".
 - cat: uno tra ${cats.map(c => `"${c}"`).join(', ')}.
 - servings: per quante persone sono le dosi, SOLO se scritto nel post ("per 4 persone", "4 porzioni", "ingredienti per 2"…); altrimenti 0. "per 10 minuti" non è una porzione.
-- ingredients: un ingrediente per voce, nell'ordine del post, formato "quantità unità ingrediente" (es. "320 g spaghetti", "2 uova", "olio extravergine q.b."). Le quantità solo se scritte nel post: se un ingrediente è nominato senza dose, scrivi solo il nome (es. "pomodori secchi"), NON "q.b." e NON una dose tipica. Se il post non elenca ingredienti, metti i soli NOMI: prima quelli nominati nel testo e negli hashtag, poi quelli che vedi nell'immagine (mettili anche in seen), senza dosi, e imposta inferred a true. Usa nomi concreti, non categorie: niente "verdure" o "legumi" se sai quali sono (carote, cannellini). Se non riconosci il piatto, lascia vuoto.
+- ingredients: un ingrediente per voce, nell'ordine del post (una riga con due misure dello stesso ingrediente, es. «2 uova 100 g» o «3 cachi (circa 600 g)», è UN solo ingrediente: "2 uova (100 g)"), formato "quantità unità ingrediente" (es. "320 g spaghetti", "2 uova", "olio extravergine q.b."). Le quantità solo se scritte nel post: se un ingrediente è nominato senza dose, scrivi solo il nome (es. "pomodori secchi"), NON "q.b." e NON una dose tipica. Se il post non elenca ingredienti, metti i soli NOMI: prima quelli nominati nel testo e negli hashtag, poi quelli che vedi nell'immagine (mettili anche in seen), senza dosi, e imposta inferred a true. Usa nomi concreti, non categorie: niente "verdure" o "legumi" se sai quali sono (carote, cannellini). Se non riconosci il piatto, lascia vuoto.
 - steps: passaggi del procedimento SOLO se descritti nel post, un passaggio per voce, con le parole del post; altrimenti vuoto.
 - diets: solo tra ${DIETS.map(x => `"${x}"`).join(', ')} e solo se evidente dagli ingredienti elencati; nel dubbio nessuna.
 - country e region: zona d'origine del piatto se chiara dal nome (region solo per regioni italiane), altrimenti stringa vuota.
@@ -493,11 +494,14 @@ const PREVIEW_UA = 'Gnamina/1.0 (+https://gnamina.it/)';
 async function transcribe(env, videoUrl, seconds, referer = 'https://www.tiktok.com/') {
   try {
     if (!env?.AI || !/^https:\/\//.test(videoUrl) || !seconds || seconds > 240) return '';
-    const r = await fetch(videoUrl, { headers: { 'User-Agent': PREVIEW_UA, Referer: referer } });
+    // solo i primi 24 MB: i video dei social hanno l'indice all'inizio, quindi anche un pezzo si legge (es. 92 s di un reel di 125 s da 31 MB)
+    const r = await fetch(videoUrl, { headers: { 'User-Agent': PREVIEW_UA, Referer: referer, Range: 'bytes=0-23999999' } });
     if (!r.ok) return '';
     const buf = await r.arrayBuffer();
     if (buf.byteLength > 24e6) return '';
-    const t = await whisper(env, buf);
+    // video con sola musica: Whisper inventa frasi di chiusura dei sottotitoli («Grazie a tutti», «Sottotitoli creati dalla comunità Amara.org», «Musica»)
+    const t = (await whisper(env, buf)).replace(/\b(?:musica|grazie a tutti|grazie per la visione|grazie per l'attenzione|sottotitoli (?:creati|a cura) [^.]*|amara\.org|iscriviti al canale)\b[.!,]?/gi, ' ').replace(/\s+/g, ' ').trim();
+    if (t.split(' ').filter(w => /\p{L}{2}/u.test(w)).length < 6) return '';
     // video con sola musica: Whisper inventa frasi ripetute («Grazie a tutti. Grazie a tutti…»), che non sono una ricetta
     const w = t.toLowerCase().replace(/[^\p{L}\p{N}' ]+/gu, ' ').split(/\s+/).filter(Boolean);
     return w.length >= 6 && new Set(w).size / w.length < 0.35 ? '' : t;
@@ -545,7 +549,8 @@ async function creatorRecipe(desc, title, timeoutMs = 9000) {
   console.log('sito del cuoco: siti', origins.join(' ') || 'nessuno');
   // ingredienti scritti nella descrizione (righe brevi con una dose o un segno di elenco): i nomi, per riconoscere lo stesso piatto
   const descNames = new Set();
-  for (const line of String(desc).split('\n')) { if (line.length > 80 || !/\d|^\s*[-•✔✓*▪►]/.test(line)) continue; const w = words(line.replace(/\d+(?:[.,]\d+)?\s*(?:g|gr|grammi|kg|ml|cl|l|cucchia\w*|spicchi?o?|mazz\w*|pizzic\w*|tazz\w*|bicchier\w*)?\b/gi, '')).filter(x => !/^(q\.?b|quanto|basta|piacere|ingredient|preparare|persone|porzioni|circa|extravergine|fresco|fresca)/.test(x)); if (w.length) descNames.add(w[0].slice(0, 5)); }
+  // i capitoli del video («00:37 Tomato Sauce») e i link non sono ingredienti
+  for (const line of String(desc).split('\n')) { if (line.length > 80 || !/\d|^\s*[-•✔✓*▪►]/.test(line) || /^\s*\(?(?:\d{1,2}:)?\d{1,2}:\d{2}\b|https?:\/\//.test(line)) continue; const w = words(line.replace(/\d+(?:[.,]\d+)?\s*(?:g|gr|grammi|kg|ml|cl|l|cucchia\w*|spicchi?o?|mazz\w*|pizzic\w*|tazz\w*|bicchier\w*)?\b/gi, '')).filter(x => !/^(q\.?b|quanto|basta|piacere|ingredient|preparare|persone|porzioni|circa|extravergine|fresco|fresca)/.test(x)); if (w.length) descNames.add(w[0].slice(0, 5)); }
   const checkPage = async u => {
       const pr = await fx(u); if (!pr || !pr.ok) return '';
       const ph = (await pr.text()).slice(0, 1_500_000);
@@ -601,9 +606,11 @@ servings: per quante persone, solo se detto, altrimenti 0. time: minuti totali d
     generationConfig: { temperature: 0.2, maxOutputTokens: 4000, responseMimeType: 'application/json', mediaResolution: 'MEDIA_RESOLUTION_LOW' } };
   // Modello sovraccarico (503) o quota del minuto (429): si riprova dopo una pausa, poi con i modelli di riserva
   const models = [...new Set([GEMINI_MODEL, ...GEMINI_VIDEO_FALLBACK])];
+  const stopAt = Date.now() + 50000;
   for (const model of models) for (let i = 0; i < 3; i++) {
+    if (Date.now() > stopAt - 5000) return null;
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-      { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_KEY }, body: JSON.stringify(body), signal: AbortSignal.timeout(80000) });
+      { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_KEY }, body: JSON.stringify(body), signal: AbortSignal.timeout(Math.max(5000, stopAt - Date.now())) }).catch(e => ({ ok: false, status: 0, text: async () => String(e.message) }));
     if (r.ok) { const j = await r.json(); console.log('video Gemini: ok', model, JSON.stringify(j.usageMetadata || {})); return lastJson((j.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('')); }
     const msg = str(await r.text(), 300);
     if (r.status === 400 && /mediaResolution|media_resolution/i.test(msg)) { delete body.generationConfig.mediaResolution; continue; }

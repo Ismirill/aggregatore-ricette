@@ -6,6 +6,21 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-10
 
+- **Versione 151, le correzioni di tre prove su 90 video** (richiesta dell'utente: altre tre prove da 30 video, correzioni tenute da parte e poi pubblicate tutte insieme; risultati in `docs/prove/prova-30-video-2…4-2026-11-10.md`).
+  - **App:**
+    - quando il server non riesce a leggere un post si mostra il motivo vero («TikTok non risponde, riprova tra qualche minuto»), e per TikTok resta il titolo letto dal browser;
+    - le ricette in inglese lette dal sito del cuoco si traducono in italiano (es. «Birria Tacos Recipe» → «Tacos di birria»);
+    - un ingrediente ripetuto senza dose («nocciole» dopo «250 g nocciole») si toglie;
+    - il titolo di riserva, usato quando l'AI non risponde, si ferma alla prima frase;
+    - il messaggio «quota AI esaurita per oggi» diventa «il servizio AI gratuito è al limite in questo momento: riprova tra qualche minuto», perché di solito è un limite al minuto.
+  - **Server (pubblicato il 10/11 con l'ok dell'utente):**
+    - l'AI traduce in italiano i post in altre lingue: i numeri delle dosi restano quelli del post, si traducono solo le unità (cup → tazza, lb → libbra) e i °F diventano °C;
+    - i titoli restano specifici («Pizza basilico, limone e parmigiano», non solo «Pizza»), e «2 uova 100 g» è un solo ingrediente;
+    - dei video più pesanti di 24 MB si trascrivono i primi 24 MB, invece di saltarli;
+    - le frasi che Whisper inventa sulla musica («Grazie a tutti», «Musica», Amara.org) si scartano;
+    - nella descrizione dei video i capitoli («00:37 Tomato Sauce») e i link non contano come ingredienti, così la ricetta sul blog linkato si riconosce;
+    - Gemini che guarda il video YouTube ha al massimo 50 secondi in tutto;
+    - cache rinnovata per le letture dei post (`:p2`) e per le analisi (`ANALYZE_V = 3`).
 - **Versione 150, estrazione delle ricette corretta dopo la prova su 30 video** (richiesta dell'utente: prove a campione su TikTok, Instagram, YouTube e Facebook; risultati in `docs/prove/prova-30-video-2026-11-10.md`).
   - **Titolo:** nella ricetta nuova vince il nome del piatto dato dall'AI, non la prima riga della didascalia. Prima uscivano «Tiramisù salva la», «E se vi dicessimo sacher e crostata insieme», «Non c'è bisogno di dire nient'altro», «Nuova VIDEO» o «Video».
   - **Passaggi, tempo e persone:** quelli ricostruiti dall'AI vincono su quelli ricavati dalla didascalia anche se il campo era già pieno; restano quelli dei siti di ricette (schema.org). Prima la torta salata segnava 5 minuti invece di 35 e il plumcake 5 passaggi invece di 10. Se l'AI non trova passaggi nel post, le righe prese dalla didascalia («scrivetemi in DM», hashtag) si tolgono.
