@@ -6,6 +6,10 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-10
 
+- **Versione 154, nello stile Quaderno si scrive sulle righe** (richiesta dell'utente: in un quaderno si scrive tra le righe, quindi o le scritte stanno sulla riga giusta o serve un'alternativa).
+  - **Foglio della sfida:** è il più «da quaderno» ed è quasi tutto testo, quindi resta a righe, una ogni 28 px. Ogni scritta poggia sulla sua riga: occhiello, titolo scritto a mano su due righe, descrizione, data con l'etichetta, regole. Lo script `righeQuaderno`, lo stesso del sito, fa ripartire ogni blocco da una riga dopo i pulsanti, anche quando si cambia stile nelle Impostazioni.
+  - **Sfondo della pagina, foglio del menu e riquadro del Ricettario:** sono pieni di pulsanti, caselle e scelte, che non possono stare sulle righe. Diventano carta liscia color crema, con il solo margine rosso, come un blocco note senza righe.
+  - Provato a misura di telefono, misurando la posizione delle scritte rispetto alle righe. Sul sito da computer l'allineamento a 34 px resta com'era (controllato: tutti i blocchi partono da una riga).
 - **Versione 153, lo stile «Quaderno» per l'app e la web app** (richiesta dell'utente: un layout in più per l'app che ricalchi lo stile del sito). In Impostazioni → Aspetto, accanto a Trattoria e Crema, c'è «Quaderno». Riprende il sito gnamina.it:
   - carta crema a righe, Nunito, testata e barra in basso bianche, titolo della sezione scritto a mano (Caveat) in rosso;
   - ricette come polaroid leggermente storte, con puntine e nastri a rotazione;
