@@ -6,6 +6,12 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-10
 
+- **Versione 156, nello stile Quaderno la foto riempie tutta la scheda e le scritte stanno sopra** (richiesta dell'utente: la foto deve scendere fino in fondo, sotto le scritte, e le scritte devono essere chiare per leggersi sulla foto).
+  - **Scheda:** sul telefono la foto occupa tutta la polaroid. Titolo, tempo, difficoltà e costo sono bianchi in basso, sopra una sfumatura scura che li rende leggibili con qualsiasi foto. L'etichetta «In gara» diventa bianca con la scritta rossa.
+  - **In alto sulla foto:** il tipo di piatto a sinistra e le stelline a destra. Il ▶ del video e la scritta «AI» scendono di una riga, perché in basso ora ci sono le scritte.
+  - **Altezza:** la foto segue l'altezza dello schermo, tra 210 e 380 px, così restano due schede intere per schermata.
+  - Provato a 375×812 e 430×932: due schede intere e scritte leggibili. Toccando il titolo la ricetta si apre come prima.
+
 - **Versione 155, nello stile Quaderno le ricette sono una per riga, con la foto grande** (richiesta dell'utente: la foto è quella che invoglia ad aprire la ricetta, quindi più grande, una colonna sola e due ricette per schermata che scorrono).
   - **Le mie ricette e Ricettario sul telefono:** al posto di due schede affiancate (quattro per schermata) c'è una scheda per riga, larga quanto lo schermo, con il titolo e i dettagli più grandi. L'altezza della foto segue quella dello schermo, tra 150 e 250 px, così tra la testata e la barra in basso stanno due schede intere. Sui telefoni alti la foto diventa più grande. Le schede restano polaroid con puntine e nastri, solo un po' meno storte perché ora sono larghe.
   - **Titolo in alto:** la scritta a mano «Le mie ricette» aveva la «e» finale tagliata, perché la grafia sporge oltre l'ultima lettera. Ora ha un po' di spazio a destra.

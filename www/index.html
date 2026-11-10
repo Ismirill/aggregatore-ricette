@@ -429,17 +429,25 @@ details summary{cursor:pointer}
 :root[data-style=quaderno] .list>.item:nth-child(4n+2)::before{width:82px;height:20px;top:-10px;margin-left:-41px;background-image:url(casa/nastro-quadretti.webp);transform:rotate(-3deg)}
 :root[data-style=quaderno] .list>.item:nth-child(4n+3)::before{width:24px;height:42px;top:-16px;margin-left:-12px;background-image:url(casa/puntina-crema.webp)}
 :root[data-style=quaderno] .list>.item:nth-child(4n)::before{width:82px;height:20px;top:-10px;margin-left:-41px;background-image:url(casa/nastro-pois.webp);transform:rotate(3deg)}
-/* sul telefono una ricetta per riga con la foto larga: due schede per schermata, la foto è quella che invoglia ad aprire la ricetta */
+/* sul telefono una ricetta per riga e la foto riempie tutta la scheda: titolo e dettagli sono scritti in bianco sopra la foto,
+   su una sfumatura scura che li rende leggibili su qualsiasi immagine; due schede per schermata */
 @media (max-width:620px){
 :root[data-style=quaderno] .list{grid-template-columns:1fr;gap:34px}
-:root[data-style=quaderno] .list>.item{padding:10px 10px 4px}
-:root[data-style=quaderno] .list>.item .thumb{aspect-ratio:16/9;font-size:3.4rem}
+:root[data-style=quaderno] .list>.item{padding:10px;position:relative}
+:root[data-style=quaderno] .list>.item .thumb{aspect-ratio:4/3;font-size:3.6rem}
 /* l'altezza della foto segue lo schermo: due schede intere tra la testata e la barra in basso, più grande sui telefoni alti */
-:root[data-style=quaderno] .list>.item .thumb{height:clamp(150px,calc((100svh - 510px)/2),250px)}
-:root[data-style=quaderno] .list>.item .b{padding:10px 6px 10px;gap:5px}
-:root[data-style=quaderno] .list>.item h3{font-size:1.18rem;line-height:1.25}
-:root[data-style=quaderno] .list>.item .facts{font-size:.92rem}
+:root[data-style=quaderno] .list>.item .thumb{height:clamp(210px,calc((100svh - 352px)/2),380px)}
+:root[data-style=quaderno] .list>.item .b{position:absolute;left:10px;right:10px;bottom:10px;z-index:2;padding:46px 14px 12px;gap:4px;background:linear-gradient(180deg,transparent,rgba(20,14,10,.55) 38%,rgba(20,14,10,.82));pointer-events:none}
+:root[data-style=quaderno] .list>.item h3{font-size:1.3rem;line-height:1.22;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+:root[data-style=quaderno] .list>.item .facts{font-size:.95rem;color:#f3ece4;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+:root[data-style=quaderno] .list>.item .facts b{color:#fff}
+:root[data-style=quaderno] .list>.item .bdg.gara{background:#fff;color:var(--acc);text-shadow:none}
+/* sopra la foto restano in alto tipo di piatto, ▶ del video, stelline e «AI», perché in basso ci sono le scritte */
 :root[data-style=quaderno] .list>.item .thumb .cat{font-size:.74rem;padding:4px 10px}
+:root[data-style=quaderno] .list>.item .thumb .play{bottom:auto;top:40px}
+:root[data-style=quaderno] .list>.item .sv{bottom:auto;top:8px}
+:root[data-style=quaderno] .list>.item .thumb .rt{top:40px}
+:root[data-style=quaderno] .list>.item .aiTag{top:40px}
 :root[data-style=quaderno] .list>.item:nth-child(4n+1){transform:rotate(-.45deg)}:root[data-style=quaderno] .list>.item:nth-child(4n+2){transform:rotate(.4deg)}
 :root[data-style=quaderno] .list>.item:nth-child(4n+3){transform:rotate(.3deg)}:root[data-style=quaderno] .list>.item:nth-child(4n){transform:rotate(-.35deg)}}
 /* fogli di quaderno: la sfida, le domande del menu, i giorni del menu, la vetrina del Ricettario */
@@ -1345,7 +1353,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=155; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=156; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
