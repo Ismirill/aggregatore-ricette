@@ -388,6 +388,9 @@ details summary{cursor:pointer}
   .toast{bottom:28px;left:calc(50% + 134px)}
 }
 
+/* Sito sul telefono (sotto i 900 px, fuori dalle app): le decorazioni del quaderno aggiunte dal codice del sito hanno stile solo da 900 px, quindi qui restano nascoste e si vede l'app normale */
+@media (max-width:899px){:root[data-sito] #sHero,:root[data-sito] .sSide,:root[data-sito] .sFoot,:root[data-sito] #bForm>.fis,:root[data-sito] #bForm>.sIll{display:none!important}}
+
 /* =================== Sito su computer e tablet (da 900 px, fuori dalle app): stile «quaderno» come benvenuto.html ===================
    testata bianca con il logo grande al centro, sezioni ai lati, carta a righe, caratteri del logo (Nunito), ricette come polaroid */
 @media (min-width:900px){
@@ -1242,7 +1245,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=147; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=148; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2941,7 +2944,10 @@ if(SITO){
   hero.innerHTML=`<div class="sWrap"><div class="sCard"><img class="fis" src="casa/nastro-kraft.webp" alt="" style="width:118px;top:-2px;left:-36px;transform:rotate(-38deg)"><img class="fis" src="casa/nastro-pois.webp" alt="" style="width:118px;top:-2px;right:-36px;transform:rotate(38deg)">
     <p class="sEye"></p><h1 class="sTitle"></h1><p class="sLead"></p><div class="sSlot"></div><img class="sIll" src="casa/ill-1.webp" alt="" style="width:118px;left:-62px;bottom:-50px;transform:rotate(-16deg)"></div><div class="sPics"></div></div>`;
   document.body.insertBefore(hero,document.querySelector('header'));
-  hero.querySelector('.sSlot').append($('#sbar'));
+  // la ricerca va nel foglio d'apertura solo da 900 px; sul telefono torna al suo posto nella testata (le decorazioni del sito lì sono nascoste dal CSS)
+  const sbar=$('#sbar'),sbarHome=[sbar.parentNode,sbar.nextSibling],sitoQ=matchMedia('(min-width:900px)');
+  const placeSbar=()=>{if(sitoQ.matches)hero.querySelector('.sSlot').append(sbar);else if(sbar.parentNode!==sbarHome[0])sbarHome[0].insertBefore(sbar,sbarHome[1]&&sbarHome[1].parentNode===sbarHome[0]?sbarHome[1]:null)};
+  sitoQ.addEventListener('change',placeSbar);placeSbar();
   hero.querySelector('.sPics').onclick=async e=>{const b=e.target.closest('[data-sid]');if(!b)return;await loadBook();const it=findAny(b.dataset.sid);if(it)openDetail(it)};
   // accanto a «Il mio menu»: due foto e cosa si ottiene
   const side=document.createElement('aside');side.className='sSide';

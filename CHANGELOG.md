@@ -4,6 +4,10 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-10
+
+- **Versione 148, il sito sul telefono torna in ordine** (segnalazione dell'utente: nella versione web per telefono era tutto incasinato; il sito da computer resta com'è). Dalla versione 143 il codice del sito aggiungeva le decorazioni del quaderno anche sotto i 900 px: foglio d'apertura con nastri e foto, colonna accanto a «Il mio menu», piè di pagina e nastri sul modulo. Il loro stile però vale solo da 900 px, quindi sul telefono comparivano senza forma, sopra l'app. Ora sotto i 900 px restano nascoste e la ricerca torna nella testata dell'app; da 900 px tutto è come prima. Il cambio vale anche quando si gira un tablet, senza ricaricare. Provato su telefono (Le mie, Sfida, Ricettario, Il mio menu, prima pagina) e su computer. Le app non cambiano.
+
 ## 2026-11-09
 
 - **Versione 147, il benvenuto della ragazza di Gnamina** (richiesta dell'utente: un benvenuto animato toccando il logo in alto; scelto il video «seme 47 rifinito»). Sul sito da computer, toccando il logo al centro, e nella prima pagina (benvenuto.html), toccando il logo, si apre un foglio di quaderno con la polaroid della ragazza all'isola della cucina che dice «Ciao! Benvenuto su Gnamìna!», sorride e, cambiata inquadratura, «Il tuo nuovo sito di cucina!». Sotto ci sono i pulsanti «Sfoglia il ricettario» e «Cos'è Gnamina» (o «Resta qui» nella prima pagina).
