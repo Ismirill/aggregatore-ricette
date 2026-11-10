@@ -97,11 +97,11 @@ async function cached(env, kind, key, ttl, make, worth = () => true) {
 function cacheUrl(u) {
   try {
     const x = new URL(u); x.hash = '';
-    for (const p of [...x.searchParams.keys()]) if (/^(igsh|srtk|mibextid|fbclid|gclid|ref|_t|_r|si|s|feature)$/i.test(p) || /^utm_/i.test(p)) x.searchParams.delete(p);
+    for (const p of [...x.searchParams.keys()]) if (/^(igsh|srtk|mibextid|mdxt|fbclid|gclid|ref|_t|_r|si|s|feature)$/i.test(p) || /^utm_/i.test(p)) x.searchParams.delete(p);
     return x.href.replace(/\/+$/, ''); // il percorso resta com'è: i codici dei post Instagram distinguono maiuscole e minuscole
   } catch { return String(u); }
 }
-const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : ''), 3 * DAY, () => preview(env, b),
+const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : /instagram\.com\/(?:[\w.]+\/)?reels?\//.test(String(b.url)) ? ':parlato' : ''), 3 * DAY, () => preview(env, b),
   r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html))); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
 const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
   () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length && !(r.result.inferred && !r.result.steps?.length))); // le analisi «indovinate» (ingredienti tipici, nessun passaggio) non si salvano: la prossima volta si riprova
@@ -488,10 +488,10 @@ Rispondi solo con JSON: {"items":[{"name":"","grams":0,"kcal":0,"protein":0,"car
 // (titolo, descrizione, immagine) e i blocchi schema.org Recipe.
 const PREVIEW_UA = 'Gnamina/1.0 (+https://gnamina.it/)';
 // Trascrizione del parlato di un video (Whisper su Workers AI). Solo video brevi e non troppo pesanti: la quota è condivisa.
-async function transcribe(env, videoUrl, seconds) {
+async function transcribe(env, videoUrl, seconds, referer = 'https://www.tiktok.com/') {
   try {
     if (!env?.AI || !/^https:\/\//.test(videoUrl) || !seconds || seconds > 240) return '';
-    const r = await fetch(videoUrl, { headers: { 'User-Agent': PREVIEW_UA, Referer: 'https://www.tiktok.com/' } });
+    const r = await fetch(videoUrl, { headers: { 'User-Agent': PREVIEW_UA, Referer: referer } });
     if (!r.ok) return '';
     const buf = await r.arrayBuffer();
     if (buf.byteLength > 24e6) return '';
@@ -642,13 +642,16 @@ async function preview(env, b) {
     }
   }
   // Instagram: la pagina di incorporamento ufficiale (pensata per mostrare i post su altri siti) ha la didascalia completa
-  let embedCaption = '', embedImage = '';
+  let embedCaption = '', embedImage = '', igVideo = '', igSeconds = 0;
   const ig = u.hostname.match(/instagram\.com$/) && u.pathname.match(/^\/(?:[\w.]+\/)?(p|reels?|tv)\/([\w-]+)/);
   if (ig) {
     const e = await get(`https://www.instagram.com/${ig[1] === 'reels' ? 'reel' : ig[1]}/${ig[2]}/embed/captioned/`);
     const m = e && e.html.match(/class="Caption"[^>]*>([\s\S]*?)<\/div>/);
     const im = e && e.html.match(/class="EmbeddedMediaImage"[^>]*src="([^"]+)"/);
     if (im) embedImage = im[1].replace(/&amp;/g, '&');
+    // il video del reel (nella pagina è un testo JSON con le barre protette): serve a trascrivere il parlato, dove spesso c'è il procedimento
+    const vu = e && e.html.match(/video_url\\*":\\*"(https:[^"]+?)\\*"/), vd = e && e.html.match(/video_duration\\*":([\d.]+)/);
+    if (vu) { igVideo = vu[1].replace(/\\+u0026/g, '&').replace(/\\/g, ''); igSeconds = vd ? +vd[1] : 0; }
     if (m) embedCaption = unescape(m[1].replace(/<br\s*\/?>/gi, '\n').replace(/<a [^>]*class="CaptionUsername"[^>]*>[\s\S]*?<\/a>/i, '')).replace(/View all \d+ comments\s*$/i, '').trim();
   }
   // TikTok: la pagina del video chiede l'accesso e oEmbed non dà più il testo; la pagina di incorporamento ha didascalia, autore e copertina
@@ -688,7 +691,9 @@ async function preview(env, b) {
     + ['og:title', 'og:site_name', 'description'].map(k => tag(k, meta(k))).join('') + tag('og:image', meta('og:image') || embedImage)
     + tag('og:description', embedCaption.length > meta('og:description').length ? embedCaption : meta('og:description'))
     + ld.map(x => `<script type="application/ld+json">${x}</script>`).join('') + '</head></html>';
-  return { html: mini, url: r.url };
+  // Reel di Instagram: come per TikTok si trascrive il parlato (Groq prima, Workers AI di riserva), solo video fino a 4 minuti
+  const transcript = igVideo && b.transcribe !== false ? await transcribe(env, igVideo, igSeconds, 'https://www.instagram.com/') : '';
+  return transcript ? { html: mini, url: r.url, transcript } : { html: mini, url: r.url };
 }
 
 // Traduzione in italiano di una ricetta strutturata (dataset UniTools, CC BY-SA 4.0): solo titolo, descrizione,

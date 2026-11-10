@@ -424,6 +424,22 @@ public class MainActivity extends BridgeActivity {
             });
         }
 
+        // Il testo negli appunti per il tasto «📋 Incolla»: nel WebView navigator.clipboard.readText non funziona.
+        // Si legge sul thread principale (gli appunti si leggono solo con l'app in primo piano, come quando si tocca il tasto).
+        @JavascriptInterface
+        public String clip() {
+            java.util.concurrent.FutureTask<String> ft = new java.util.concurrent.FutureTask<>(() -> {
+                android.content.ClipboardManager cm = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                if (cm == null || !cm.hasPrimaryClip()) return "";
+                android.content.ClipData c = cm.getPrimaryClip();
+                if (c == null || c.getItemCount() == 0) return "";
+                CharSequence t = c.getItemAt(0).coerceToText(MainActivity.this);
+                return t == null ? "" : t.toString();
+            });
+            runOnUiThread(ft);
+            try { return ft.get(2, java.util.concurrent.TimeUnit.SECONDS); } catch (Exception e) { return ""; }
+        }
+
         @JavascriptInterface
         public String take() {
             String s = pendingShare;

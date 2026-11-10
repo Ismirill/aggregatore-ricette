@@ -999,6 +999,8 @@ function parseHtml(html){
   }
   return out;
 }
+// Refusi comuni delle unità nei post: «300fr», «300 g r» → «300 gr»
+const fixUnit=l=>String(l).replace(/(\d)\s*(?:fr|g\s+r)\b/gi,'$1 gr');
 // Ricava ingredienti e passaggi dal testo di un post (didascalia TikTok/Instagram)
 function parseCaption(text){
   const ls=lines(text),res={ingredients:[],steps:[]};
@@ -1006,7 +1008,7 @@ function parseCaption(text){
   if(iI>=0)res.ingredients=ls.slice(iI+1,iS>iI?iS:undefined);
   else res.ingredients=ls.filter(l=>/^[-•▪️✅🔸🔹*]|\d+\s?(g|gr|ml|kg|cl|l)\b|cucchia|q\.?b|pizzico|spicchi/i.test(l)&&l.length<80);
   if(iS>=0)res.steps=ls.slice(iS+1).filter(l=>!/^#/.test(l));
-  res.ingredients=res.ingredients.map(l=>l.replace(/^[-•▪️✅🔸🔹*\s]+/u,'')).filter(l=>l&&!/^#/.test(l)).slice(0,40);
+  res.ingredients=res.ingredients.map(l=>fixUnit(l.replace(/^[-•▪️✅🔸🔹*\s]+/u,''))).filter(l=>l&&!/^#/.test(l)).slice(0,40);
   const t=String(text).match(/(\d+)\s?(min|minuti)\b/i);if(t)res.time=+t[1];
   res.servings=servingsOf(text);
   return res;
@@ -1245,7 +1247,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=148; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=149; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2420,7 +2422,8 @@ function rGo(k){
   $('#rDots').innerHTML=Array.from({length:N},(_,j)=>`<i class="${j===i?'on':j<i?'done':''}"></i>`).join('');
   $('#rStepLbl').textContent=`Passo ${i+1} di ${N}`;
   $('#rBackTop').style.visibility=$('#rBack').style.visibility=i>0?'visible':'hidden';
-  const last=rStep===rSteps.length-1;$('#rNext').hidden=last;$('#rSave').hidden=!last;
+  const last=rStep===rSteps.length-1;$('#rNext').hidden=last;$('#rSave').hidden=!last;$('#rNext').classList.add('pri');$('#rNext').textContent='Avanti →';
+  if(key==='src')quickSaveUI();
   if(key==='end')endUI();if(last)endSum();
   $('#dlg').scrollTop=0;
   if(DESK){const el={base:f.title,ing:f.ingredients,steps:f.steps}[key];if(el)el.focus()}
@@ -2471,8 +2474,10 @@ $('#garaPick').onclick=()=>{const l=$('#garaList'),ok=items.filter(garaOk);
   l.hidden=false;l.querySelector('button')?.scrollIntoView({block:'nearest'})};
 $('#garaList').onclick=e=>{const b=e.target.closest('[data-id]');if(!b)return;const it=items.find(i=>i.id===b.dataset.id);if(!it)return;
   openForm({...it,contest:extra.contest,tags:[...new Set([...(it.tags||[]),'In gara'])]})};
-$('#pasteUrl').onclick=async()=>{let t='';try{t=await navigator.clipboard.readText()}catch{}
-  const u=extractUrl(t||'');if(u){$('#f').url.value=u;$('#capL').hidden=!['Facebook','Instagram'].includes(sourceOf(u))&&!$('#f').caption.value;runAnalysis(u,false)}else toast(t?'Negli appunti non c\'è un link':'Tieni premuto nel campo e scegli Incolla')};
+// Legge gli appunti: nell'app Android li passa il codice nativo (nel WebView navigator.clipboard.readText non funziona), altrove il browser
+async function readClip(){try{const t=window.AndroidShare?.clip?.();if(t)return String(t)}catch{}try{return await navigator.clipboard.readText()||''}catch{return ''}}
+$('#pasteUrl').onclick=async()=>{const t=await readClip();
+  const u=extractUrl(t||'');if(u){$('#f').url.value=u;$('#capL').hidden=!['Facebook','Instagram'].includes(sourceOf(u))&&!$('#f').caption.value;runAnalysis(u,false)}else{toast(t?'Negli appunti non c\'è un link':'Tieni premuto nel campo e scegli Incolla');if(!t)$('#f').url.focus()}};
 $('#shootBtn').onclick=()=>$('#ocrIn').click();$('#galBtn').onclick=()=>$('#galIn').click();$('#fileBtn').onclick=()=>$('#fileIn').click();
 $('#ocrIn').onchange=$('#galIn').onchange=e=>{const file=e.target.files[0];e.target.value='';if(file)ocrFill(file)};
 $('#fileIn').onchange=e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(file.type.startsWith('image/'))ocrFill(file);else textFill(file)};
@@ -2574,7 +2579,18 @@ async function covSearch(){
     extra.image=r.img;covCredit(`Foto: ${r.by||r.src} (${r.lic}) via ${r.src}`,r.page);covUI();showPv();toast('Foto di copertina pronta')}; // al salvataggio keepThumb la riduce e la tiene nella ricetta
 }
 function showPv(msg){$('#pv').innerHTML=(extra.image?`<img src="${esc(extra.image)}" alt="" referrerpolicy="no-referrer">`:'')+`<span>${esc(msg||sourceOf($('#f').url.value))}</span>`}
+// Ricetta presa da un link e già completa (nome, almeno 2 ingredienti, procedimento): nel primo passo compare subito «Salva la ricetta»,
+// così non serve passare da tutti i passi; «Controlla →» resta per chi vuole vedere i dettagli
+function quickSaveUI(){const f=$('#f');if(rSteps[rStep]!=='src')return false;
+  const on=!editing&&!extra.contest&&addMode==='link'&&!!f.title.value.trim()&&lines(f.ingredients.value).length>=2&&lines(f.steps.value).length>=1;
+  $('#rSave').hidden=!on;$('#rNext').classList.toggle('pri',!on);$('#rNext').textContent=on?'Controlla →':'Avanti →';
+  if(!editing&&addMode==='link')$('#urlMeta').textContent=on?'La ricetta è completa: premi «Salva la ricetta». Con «Controlla» vedi e cambi i dettagli.':'Appena c\'è il link, Gnamina legge la ricetta da sola. Poi premi «Avanti» e controlla.';return on}
 async function runAnalysis(url,overwrite){
+  await readRecipe(url,overwrite);
+  if($('#f').url.value===url&&quickSaveUI()){const f=$('#f'),n=lines(f.ingredients.value).length,st=lines(f.steps.value).length;
+    showPv(`Ricetta completa: «${f.title.value.trim()}» · ${n} ingredienti · ${st} passagg${st===1?'io':'i'}. Puoi salvarla subito`)}
+}
+async function readRecipe(url,overwrite){
   const f=$('#f');showPv('Analizzo la ricetta…');
   const social=['Facebook','Instagram'].includes(sourceOf(url));
   $('#capL').hidden=!social&&!f.caption.value;
@@ -2606,7 +2622,7 @@ async function runAnalysis(url,overwrite){
       if(cats.includes(r.cat))f.cat.value=BASE_RX.test(f.title.value.trim())?'Altro':r.cat;
       // il post non elenca gli ingredienti: l'AI dà solo i nomi tipici del piatto, senza dosi, e lo si dice
       if(r.inferred&&r.ingredients.length)r.ingredients.push('(il post non elenca gli ingredienti: questi sono quelli tipici del piatto, senza dosi; guarda il video e completa)');
-      if(r.ingredients.length)f.ingredients.value=r.ingredients.join('\n');
+      if(r.ingredients.length)f.ingredients.value=r.ingredients.map(fixUnit).join('\n');
       if(r.steps.length&&!(a.stepsFromSchema&&a.steps?.length)&&(overwrite||!f.steps.value))f.steps.value=r.steps.join('\n'); // i passaggi dell'AI (fedeli al testo) vincono sulla divisione a paragrafi della didascalia, mai su quelli strutturati della pagina
       if(r.time&&!a.timeFromSchema&&(overwrite||!f.time.value))f.time.value=r.time; // il tempo ricostruito dall'AI vince sul primo «N minuti» letto nella didascalia; resta quello dichiarato dai siti di ricette (schema.org)
       if(r.servings&&(overwrite||!f.servings.value))f.servings.value=r.servings;
@@ -2617,7 +2633,7 @@ async function runAnalysis(url,overwrite){
   }
 }
 $('#f').url.addEventListener('change',e=>{const u=extractUrl(e.target.value);if(u){e.target.value=u;$('#capL').hidden=!['Facebook','Instagram'].includes(sourceOf(u))&&!$('#f').caption.value;runAnalysis(u,false)}});
-$('#pasteCap').onclick=async()=>{try{const t=await navigator.clipboard.readText();if(t){$('#f').caption.value=t;const u=extractUrl($('#f').url.value);if(u)runAnalysis(u,true)}else toast('Gli appunti sono vuoti')}catch{toast('Tieni premuto nel campo e scegli Incolla')}};
+$('#pasteCap').onclick=async()=>{try{const t=await readClip();if(t){$('#f').caption.value=t;const u=extractUrl($('#f').url.value);if(u)runAnalysis(u,true)}else{toast('Tieni premuto nel campo e scegli Incolla');$('#f').caption.focus()}}catch{toast('Tieni premuto nel campo e scegli Incolla')}};
 $('#f').caption.addEventListener('change',()=>{const u=extractUrl($('#f').url.value);if(u&&$('#f').caption.value.trim().length>20)runAnalysis(u,true)});
 $('#analyzeBtn').onclick=()=>{const u=extractUrl($('#f').url.value);if(!u){toast('Incolla prima un link');return}$('#f').url.value=u;runAnalysis(u,!!editing)};
 /* ---------- Il video dell'utente: registrato o scelto qui, caricato sul SUO canale YouTube (nessuno spazio cloud nostro), qui resta solo il link ---------- */
@@ -2850,7 +2866,7 @@ async function clipsSave(key,clips,title){
   if(/iPhone|iPad/.test(navigator.userAgent)&&navigator.canShare?.({files})){toast('Nel menù scegli «Salva video» per metterlo nel rullino');try{await navigator.share({files,title:'Salva il video'})}catch(e){if(e.name!=='AbortError')toast('Salvataggio non riuscito')}return}
   files.forEach(dlFile);toast(files.length>1?'Video scaricati: li trovi nei download e nella galleria':'Video scaricato: lo trovi nei download e nella galleria');
 }
-$('#pasteVid').onclick=async()=>{let t='';try{t=await navigator.clipboard.readText()}catch{}
+$('#pasteVid').onclick=async()=>{const t=await readClip();
   const u=extractUrl(t||'');if(ytId(u)){$('#f').video.value=u;$('#f').video.setCustomValidity('');vidHint('Link del video inserito: salva la ricetta.');toast('Video collegato')}else toast(t?'Negli appunti non c\'è un link YouTube':'Tieni premuto nel campo e scegli Incolla')};
 $('#f').video.oninput=e=>e.target.setCustomValidity('');
 $('#f').onsubmit=e=>{
@@ -3011,7 +3027,7 @@ function importBackup(t){
     toast(add.length?`${add.length} ricette importate`:'Nessuna ricetta nuova nel backup')}catch{toast('Backup non valido')}
 }
 $('#imp').onclick=async()=>{
-  let t;try{t=await navigator.clipboard.readText()}catch{}
+  let t=await readClip();
   if(!t)t=prompt('Incolla qui il backup:');if(!t)return;
   importBackup(t);
 };
