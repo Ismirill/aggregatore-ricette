@@ -103,8 +103,9 @@ function cacheUrl(u) {
 }
 // pagine di accesso dei social (TikTok, Instagram, Facebook) arrivate al posto del post
 const LOGIN_RX = /log in or sign up|<title>log in \| tiktok|accedi o iscriviti|make your day/i;
-const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : /instagram\.com\/(?:[\w.]+\/)?reels?\/|facebook\.com|fb\.watch/.test(String(b.url)) ? ':parlato' : ''), 3 * DAY, () => preview(env, b),
-  r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html)) && !LOGIN_RX.test(r.html || '')); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
+// p3: letture rifatte con le correzioni del 10/11 (video oltre 24 MB, niente falso parlato, blog linkati)
+const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : ':p3'), 3 * DAY, () => preview(env, b),
+  r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html)) && !LOGIN_RX.test(r.html || '') && !r.retry); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
 const ANALYZE_V = 3; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
 const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([ANALYZE_V, str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
   () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length && !(r.result.inferred && !r.result.steps?.length))); // le analisi «indovinate» (ingredienti tipici, nessun passaggio) non si salvano: la prossima volta si riprova
@@ -505,7 +506,7 @@ async function transcribe(env, videoUrl, seconds, referer = 'https://www.tiktok.
     // video con sola musica: Whisper inventa frasi ripetute («Grazie a tutti. Grazie a tutti…»), che non sono una ricetta
     const w = t.toLowerCase().replace(/[^\p{L}\p{N}' ]+/gu, ' ').split(/\s+/).filter(Boolean);
     return w.length >= 6 && new Set(w).size / w.length < 0.35 ? '' : t;
-  } catch { return ''; }
+  } catch (e) { console.log('trascrizione non riuscita', e.message); return null; } // null = da riprovare (non va in cache)
 }
 // Whisper: se c'è la chiave si usa prima Groq (piano gratuito con 8 ore di audio al giorno, nessun addestramento sui dati),
 // e Workers AI resta di riserva: la trascrizione è la voce che più consuma la quota di Cloudflare
@@ -706,9 +707,9 @@ async function preview(env, b) {
     if (id && !tk) throw Object.assign(new Error('TikTok non risponde, riprova tra qualche minuto'), { status: 502 });
     if (tk) {
       // il parlato del video, trascritto (nei reel la ricetta spesso è solo detta a voce), e la ricetta sul sito del cuoco se la didascalia ha il link
-      const [transcript, site] = await Promise.all([b.transcribe === false ? '' : transcribe(env, tk.video, tk.seconds), socialSite(tk.text)]);
+      const [tr, site] = await Promise.all([b.transcribe === false ? '' : transcribe(env, tk.video, tk.seconds), socialSite(tk.text)]), transcript = tr || '';
       const esc = v => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-      return { html: `<html><head><title>${esc(tk.text.split('\n')[0].slice(0, 140))}</title><meta property="og:title" content="${esc(tk.text)}"><meta property="og:site_name" content="${esc(tk.author)}"><meta property="og:image" content="${esc(tk.image)}">${site}</head></html>`, url: tk.url, transcript, site: !!site };
+      return { html: `<html><head><title>${esc(tk.text.split('\n')[0].slice(0, 140))}</title><meta property="og:title" content="${esc(tk.text)}"><meta property="og:site_name" content="${esc(tk.author)}"><meta property="og:image" content="${esc(tk.image)}">${site}</head></html>`, url: tk.url, transcript, site: !!site, ...(tr === null ? { retry: true } : {}) };
     }
   }
   const page = await get(u);
@@ -730,7 +731,7 @@ async function preview(env, b) {
   const desc = embedCaption.length > meta('og:description').length ? embedCaption : meta('og:description');
   const [transcript, site] = await Promise.all([igVideo && b.transcribe !== false ? transcribe(env, igVideo, igSeconds, igRef) : '', ld.length ? '' : socialSite(desc)]);
   const out = { html: site ? mini.replace('</head>', site + '</head>') : mini, url: r.url };
-  if (transcript) out.transcript = transcript; if (site) out.site = true;
+  if (transcript) out.transcript = transcript; if (site) out.site = true; if (transcript === null) out.retry = true;
   return out;
 }
 
