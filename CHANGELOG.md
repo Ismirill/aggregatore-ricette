@@ -6,6 +6,7 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-10
 
+- **Versione 152, pulsante «Nuova ricetta» semitrasparente** (richiesta dell'utente: sul telefono il pulsante deve lasciar vedere cosa c'è sotto). Il pulsante che galleggia sopra le ricette ha il colore al 52–60% e una leggera sfocatura, con il bordo chiaro e il testo con un'ombra, così resta leggibile; provato col tema scuro e col tema chiaro. Sul computer il pulsante sta nella barra ed è pieno come prima.
 - **Versione 151, le correzioni di tre prove su 90 video** (richiesta dell'utente: altre tre prove da 30 video, correzioni tenute da parte e poi pubblicate tutte insieme; risultati in `docs/prove/prova-30-video-2…4-2026-11-10.md`).
   - **App:**
     - quando il server non riesce a leggere un post si mostra il motivo vero («TikTok non risponde, riprova tra qualche minuto»), e per TikTok resta il titolo letto dal browser;
