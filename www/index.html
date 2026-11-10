@@ -70,6 +70,16 @@ header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88
 .chip small{color:var(--mut);font-weight:500;margin-left:3px}
 .chip.on{background:var(--fg);border-color:var(--fg);color:var(--bg)}.chip.on small{color:color-mix(in srgb,var(--bg) 70%,transparent)}
 .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10rem),1fr));gap:8px;max-width:1100px;margin:10px auto 0}
+/* sul telefono tipi di piatto e cucine stanno dentro «Filtri»: la pagina guadagna due righe e resta pulita.
+   Aperto il pannello, le scelte vanno a capo per vederle tutte, e «Mostra le ricette» lo richiude */
+#fDone{display:none;grid-column:1/-1;justify-content:center;margin-top:4px}
+@media (max-width:899px){
+:root:not(.fOpen) #chips,:root:not(.fOpen) #chips2{display:none!important}
+:root.fOpen #chips,:root.fOpen #chips2{flex-wrap:wrap;overflow:visible;gap:8px}
+:root.fOpen #chips2{border-top:1.5px dashed var(--bd);margin-top:10px;padding-top:10px}
+:root.fOpen #chips2::before{content:attr(data-lbl);flex-basis:100%;font-size:.78rem;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+:root.fOpen header{max-height:calc(100svh - 84px);overflow-y:auto;overscroll-behavior:contain}
+#fDone{display:flex}}
 .filters select{padding:9px 28px 9px 12px;font-size:max(16px,1rem);border-radius:12px}
 @media (max-width:620px){.filters select:first-child{grid-column:1/-1}}
 
@@ -698,6 +708,7 @@ details summary{cursor:pointer}
     <select id="fCost"><option value="0">Ogni costo</option><option value="1">€ Fino a 1 € a persona</option><option value="2">€ Fino a 2 € a persona</option><option value="4">€ Fino a 4 € a persona</option></select>
     <select id="fRate"><option value="0">Ogni voto</option><option value="3">★ 3+</option><option value="4">★ 4+</option><option value="5">★ 5</option></select>
     <select id="fSort"><option value="new">In evidenza / più recenti</option><option value="fast">Più veloci</option><option value="easy">Più facili</option><option value="cheap">Più economiche</option><option value="rate">Più votate</option><option value="az">A–Z</option></select>
+    <button type="button" class="btn pri" id="fDone">Mostra le ricette</button>
   </div>
 </header>
 <nav class="nav" id="tabs"><div class="nbrand"><img src="icon-192.png" alt="" width="192" height="192"><div><b>Gnamina</b><small>La tua app di cucina</small></div></div><div class="nsec" id="secLbl">Sezioni</div><button class="tab" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie<span class="cnt"></span></button><button class="tab on" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Sfida</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario<span class="cnt"></span></button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v7M10 3v7M17 3c-2 2-3 4-3 7h3v11"/></svg>Il mio menu</button><div class="nsec">Strumenti</div><div id="ntools"></div><div class="nfoot">Versione <span id="navVer"></span> · <a href="benvenuto.html" style="color:inherit">Cos'è Gnamina</a></div></nav>
@@ -1353,7 +1364,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=156; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=157; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1453,7 +1464,7 @@ function saveFromBook(i){
 function goView(v){
   view=v;cur=view==='book'?'Italiane':'Tutte';cur2=''; // il Ricettario parte dalle ricette italiane
   $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
-  const bud=view==='budget',home=view==='home';['#sbar','#chips','#list'].forEach(x=>$(x).hidden=bud||home);$('#add').hidden=bud||home;if(bud||home){$('#chips2').hidden=true;$('.filters').hidden=true}$('#budget').hidden=!bud;$('#home').hidden=!home;filtUI();
+  const bud=view==='budget',home=view==='home';['#sbar','#chips','#list'].forEach(x=>$(x).hidden=bud||home);$('#add').hidden=bud||home;if(bud||home){$('#chips2').hidden=true;$('.filters').hidden=true;filtUI()}$('#budget').hidden=!bud;$('#home').hidden=!home;filtUI();
   $('#vTitle').textContent={home:'La sfida',mine:'Le mie ricette',book:'Ricettario',budget:'Il mio menu'}[view];window.scrollTo(0,0);
   if(home){renderHome();loadBook();return}
   if(bud){loadBook();loadPT();initBudget();return}
@@ -1681,6 +1692,8 @@ function render(){
   if(showIta){const tc={};data.forEach(i=>tc[i.cat]=(tc[i.cat]||0)+1);if(cur2&&!tc[cur2])cur2='';
     $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutte<small>${data.length}</small></button>`+cats.filter(c=>tc[c]).map(c=>`<button class="chip${c===cur2?' on':''}" data-p="${esc(c)}">${esc(c)}<small>${tc[c]}</small></button>`).join('')}
   $('#chips2').hidden=!showIntl&&!showBk&&!showIta;
+  $('#chips2').dataset.lbl=showIntl?'Paese':showIta?'Tipo di piatto tra le italiane':'Tipo';
+  filtUI();
   const list=data.filter(i=>(cur==='Tutte'||i.cat===cur||(showIntl&&(!cur2||i.country===cur2))||(cur==='Italiane'&&(!showIta||!cur2||i.cat===cur2)))&&(!showBk||!cur2||i.kind===cur2)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(!ft||timing(i).t<=ft)&&(!fdf||(fdf===3?timing(i).d===3:timing(i).d<=fdf))&&(!fc||((perPerson(i)?.eur??99)<=fc))
       &&(!q||[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q)))
     .sort(sorter(fs,!!q));
@@ -3120,7 +3133,10 @@ deskQ.addEventListener('change',placeDesk);placeDesk();$('#navVer').textContent=
 function navCounts(){const m=$('#tabs [data-v=mine] .cnt'),b=$('#tabs [data-v=book] .cnt');if(m)m.textContent=items.length||'';if(b)b.textContent=book?book.length+BK.length:''}
 ['#q','#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate','#fSort'].forEach(s=>$(s).addEventListener('input',()=>{render();filtUI()}));
 // Filtri nascosti dietro un pulsante; il pulsante si colora se ce n'è qualcuno attivo
-const filtUI=()=>{const n=['#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate'].filter(x=>$(x).value&&$(x).value!=='0').length;$('#fBtn').classList.toggle('on',n>0||!$('.filters').hidden);$('#fBtn').lastChild.textContent=n?`Filtri · ${n}`:'Filtri'};
+function filtUI(){const narrow=innerWidth<900,open=!$('.filters').hidden;
+  const n=['#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate'].filter(x=>$(x).value&&$(x).value!=='0').length+(narrow?(cur!==(view==='book'?'Italiane':'Tutte')?1:0)+(cur2?1:0):0);
+  document.documentElement.classList.toggle('fOpen',open);$('#fBtn').classList.toggle('on',n>0||open);$('#fBtn').lastChild.textContent=n?`Filtri · ${n}`:'Filtri'}
+$('#fDone').onclick=()=>{$('.filters').hidden=true;$('#fBtn').setAttribute('aria-expanded','false');filtUI();scrollTo({top:0,behavior:'smooth'})};
 $('#fBtn').onclick=()=>{const f=$('.filters');f.hidden=!f.hidden;$('#fBtn').setAttribute('aria-expanded',!f.hidden);filtUI()};
 $('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;cur2='';render()}};
 $('#chips2').onclick=e=>{const c=e.target.closest('.chip');if(c){cur2=c.dataset.p;render()}};

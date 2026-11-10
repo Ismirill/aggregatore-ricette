@@ -6,6 +6,13 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-10
 
+- **Versione 157, sul telefono tipi di piatto e cucine stanno dentro «Filtri»** (richiesta dell'utente: guadagnare le due righe sotto la ricerca e rendere la pagina più pulita).
+  - **Pagina:** nell'app e nella web app, sotto «Cerca» e «Filtri» non ci sono più le righe Italiane/Tutte/Colazione/Internazionali e Antipasti/Primi/Secondi: la lista parte subito.
+  - **Pannello Filtri:** in cima ci sono le stesse scelte, che vanno a capo per vederle tutte. La seconda serie del Ricettario ha un'etichetta («Tipo di piatto tra le italiane», oppure «Paese» per le internazionali). Sotto restano dieta, zona, tempo, difficoltà, costo, voto e ordine, e in fondo il pulsante «Mostra le ricette», che chiude il pannello. Se il pannello è più alto dello schermo, scorre.
+  - **Pulsante Filtri:** conta anche il tipo di piatto o la cucina scelti, per esempio «Filtri · 1» dopo aver scelto Primi, così si vede che la lista è filtrata.
+  - **Sito da computer** (dalla larghezza di 900 px in su): le righe restano visibili come prima.
+  - Provato a 375×812 in Le mie ricette e nel Ricettario, negli stili Crema e Quaderno, e a 1280×800 per il sito.
+
 - **Versione 156, nello stile Quaderno la foto riempie tutta la scheda e le scritte stanno sopra** (richiesta dell'utente: la foto deve scendere fino in fondo, sotto le scritte, e le scritte devono essere chiare per leggersi sulla foto).
   - **Scheda:** sul telefono la foto occupa tutta la polaroid. Titolo, tempo, difficoltà e costo sono bianchi in basso, sopra una sfumatura scura che li rende leggibili con qualsiasi foto. L'etichetta «In gara» diventa bianca con la scritta rossa.
   - **In alto sulla foto:** il tipo di piatto a sinistra e le stelline a destra. Il ▶ del video e la scritta «AI» scendono di una riga, perché in basso ora ci sono le scritte.
