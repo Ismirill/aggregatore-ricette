@@ -6,6 +6,12 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-10
 
+- **Versione 153, lo stile «Quaderno» per l'app e la web app** (richiesta dell'utente: un layout in più per l'app che ricalchi lo stile del sito). In Impostazioni → Aspetto, accanto a Trattoria e Crema, c'è «Quaderno». Riprende il sito gnamina.it:
+  - carta crema a righe, Nunito, testata e barra in basso bianche, titolo della sezione scritto a mano (Caveat) in rosso;
+  - ricette come polaroid leggermente storte, con puntine e nastri a rotazione;
+  - fogli a righe con il margine rosso per la sfida, le domande del menu e la vetrina del Ricettario, con i titoli scritti a mano;
+  - filtri tratteggiati, pulsanti rossi con l'ombra sotto, foto della ricetta incorniciata.
+  - È sempre chiaro come il sito, anche con «Scuro» o con il telefono in modalità scura; nelle Impostazioni una riga lo spiega. Lo stile predefinito resta Trattoria. Sul computer il sito resta com'è. Provato a misura di telefono in Le mie, Sfida, Ricettario, Il mio menu, scheda della ricetta e Impostazioni.
 - **Versione 152, pulsante «Nuova ricetta» semitrasparente** (richiesta dell'utente: sul telefono il pulsante deve lasciar vedere cosa c'è sotto). Il pulsante che galleggia sopra le ricette ha il colore al 52–60% e una leggera sfocatura, con il bordo chiaro e il testo con un'ombra, così resta leggibile; provato col tema scuro e col tema chiaro. Sul computer il pulsante sta nella barra ed è pieno come prima.
 - **Versione 151, le correzioni di tre prove su 90 video** (richiesta dell'utente: altre tre prove da 30 video, correzioni tenute da parte e poi pubblicate tutte insieme; risultati in `docs/prove/prova-30-video-2…4-2026-11-10.md`).
   - **App:**
