@@ -6,6 +6,11 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-10
 
+- **Versione 155, nello stile Quaderno le ricette sono una per riga, con la foto grande** (richiesta dell'utente: la foto è quella che invoglia ad aprire la ricetta, quindi più grande, una colonna sola e due ricette per schermata che scorrono).
+  - **Le mie ricette e Ricettario sul telefono:** al posto di due schede affiancate (quattro per schermata) c'è una scheda per riga, larga quanto lo schermo, con il titolo e i dettagli più grandi. L'altezza della foto segue quella dello schermo, tra 150 e 250 px, così tra la testata e la barra in basso stanno due schede intere. Sui telefoni alti la foto diventa più grande. Le schede restano polaroid con puntine e nastri, solo un po' meno storte perché ora sono larghe.
+  - **Titolo in alto:** la scritta a mano «Le mie ricette» aveva la «e» finale tagliata, perché la grafia sporge oltre l'ultima lettera. Ora ha un po' di spazio a destra.
+  - Provato a 375×812 e 430×932: due schede intere per schermata in Le mie ricette, nel Ricettario la seconda si vede quasi tutta perché le righe di filtri sono due. Gli stili Trattoria e Crema e il sito da computer non cambiano.
+
 - **Versione 154, nello stile Quaderno si scrive sulle righe** (richiesta dell'utente: in un quaderno si scrive tra le righe, quindi o le scritte stanno sulla riga giusta o serve un'alternativa).
   - **Foglio della sfida:** è il più «da quaderno» ed è quasi tutto testo, quindi resta a righe, una ogni 28 px. Ogni scritta poggia sulla sua riga: occhiello, titolo scritto a mano su due righe, descrizione, data con l'etichetta, regole. Lo script `righeQuaderno`, lo stesso del sito, fa ripartire ogni blocco da una riga dopo i pulsanti, anche quando si cambia stile nelle Impostazioni.
   - **Sfondo della pagina, foglio del menu e riquadro del Ricettario:** sono pieni di pulsanti, caselle e scelte, che non possono stare sulle righe. Diventano carta liscia color crema, con il solo margine rosso, come un blocco note senza righe.
