@@ -6,6 +6,15 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-10
 
+- **Versione 150, estrazione delle ricette corretta dopo la prova su 30 video** (richiesta dell'utente: prove a campione su TikTok, Instagram, YouTube e Facebook; risultati in `docs/prove/prova-30-video-2026-11-10.md`).
+  - **Titolo:** nella ricetta nuova vince il nome del piatto dato dall'AI, non la prima riga della didascalia. Prima uscivano «Tiramisù salva la», «E se vi dicessimo sacher e crostata insieme», «Non c'è bisogno di dire nient'altro», «Nuova VIDEO» o «Video».
+  - **Passaggi, tempo e persone:** quelli ricostruiti dall'AI vincono su quelli ricavati dalla didascalia anche se il campo era già pieno; restano quelli dei siti di ricette (schema.org). Prima la torta salata segnava 5 minuti invece di 35 e il plumcake 5 passaggi invece di 10. Se l'AI non trova passaggi nel post, le righe prese dalla didascalia («scrivetemi in DM», hashtag) si tolgono.
+  - **Ingredienti in maiuscolo** («1 KG DI VITELLO») diventano minuscoli.
+  - **Server (pubblicato il 10/11 con l'ok dell'utente):**
+    - **Facebook:** si legge il riquadro di incorporamento ufficiale (`plugins/video.php`), con il testo del post, i link veri e il file del video da trascrivere. Prima arrivava solo il titolo.
+    - **Sito del cuoco anche dai social:** se la didascalia di un post TikTok, Instagram o Facebook ha il link alla ricetta sul sito o sul blog del cuoco, la ricetta si legge da lì come per YouTube. L'app lo mostra come «Ricetta completa dal sito del cuoco».
+    - **Pagine di accesso:** se TikTok non risponde (troppe richieste) il server dà un errore invece della pagina di accesso. Le pagine di accesso non entrano più in cache, e le righe già salvate vengono ricontrollate a ogni lettura.
+    - **Musica:** le trascrizioni dei video con sola musica (frasi inventate e ripetute come «Grazie a tutti…») si scartano.
 - **Versione 149, Incolla che funziona nell'app, salvataggio diretto e reel di Instagram con il parlato** (segnalazioni dell'utente, con il reel «Torta salata ai funghi» di cucinaconruben).
   - **📋 Incolla nell'app Android:** il WebView non lascia leggere gli appunti alla pagina, quindi il tasto non incollava niente. Ora li legge il codice nativo (`AndroidShare.clip()` in `MainActivity.java`), e la pagina ripiega sul browser negli altri casi (sito, iOS, APK vecchi). Vale per il link, la descrizione del post, il link del video e il backup. Se gli appunti sono vuoti il cursore va nel campo, così si può tenere premuto e incollare.
   - **Salvataggio diretto:** se dal link arrivano nome, almeno due ingredienti e il procedimento, già nel primo passo compare «💾 Salva la ricetta» e l'avviso «Ricetta completa… Puoi salvarla subito». Il tasto per andare avanti diventa «Controlla →» per chi vuole vedere i dettagli. Le ricette incomplete seguono i passi come prima.

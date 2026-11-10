@@ -84,7 +84,7 @@ async function cached(env, kind, key, ttl, make, worth = () => true) {
   const k = await hexSha(`${kind}:${CACHE_V}:${key}`);
   try {
     const row = await env.SYNC.prepare('SELECT v FROM cache WHERE k = ?1 AND exp > ?2').bind(k, Date.now()).first();
-    if (row) return { ...JSON.parse(row.v), cached: true };
+    if (row) { const v = JSON.parse(row.v); if (worth(v)) return { ...v, cached: true }; } // una riga salvata prima di un controllo più severo si rifà
   } catch (e) { console.log('cache lettura', e.message); }
   const v = await make();
   try {
@@ -101,8 +101,10 @@ function cacheUrl(u) {
     return x.href.replace(/\/+$/, ''); // il percorso resta com'è: i codici dei post Instagram distinguono maiuscole e minuscole
   } catch { return String(u); }
 }
-const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : /instagram\.com\/(?:[\w.]+\/)?reels?\//.test(String(b.url)) ? ':parlato' : ''), 3 * DAY, () => preview(env, b),
-  r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html))); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
+// pagine di accesso dei social (TikTok, Instagram, Facebook) arrivate al posto del post
+const LOGIN_RX = /log in or sign up|<title>log in \| tiktok|accedi o iscriviti|make your day/i;
+const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : /instagram\.com\/(?:[\w.]+\/)?reels?\/|facebook\.com|fb\.watch/.test(String(b.url)) ? ':parlato' : ''), 3 * DAY, () => preview(env, b),
+  r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html)) && !LOGIN_RX.test(r.html || '')); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
 const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
   () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length && !(r.result.inferred && !r.result.steps?.length))); // le analisi «indovinate» (ingredienti tipici, nessun passaggio) non si salvano: la prossima volta si riprova
 
@@ -495,7 +497,10 @@ async function transcribe(env, videoUrl, seconds, referer = 'https://www.tiktok.
     if (!r.ok) return '';
     const buf = await r.arrayBuffer();
     if (buf.byteLength > 24e6) return '';
-    return await whisper(env, buf);
+    const t = await whisper(env, buf);
+    // video con sola musica: Whisper inventa frasi ripetute («Grazie a tutti. Grazie a tutti…»), che non sono una ricetta
+    const w = t.toLowerCase().replace(/[^\p{L}\p{N}' ]+/gu, ' ').split(/\s+/).filter(Boolean);
+    return w.length >= 6 && new Set(w).size / w.length < 0.35 ? '' : t;
   } catch { return ''; }
 }
 // Whisper: se c'è la chiave si usa prima Groq (piano gratuito con 8 ore di audio al giorno, nessun addestramento sui dati),
@@ -574,6 +579,17 @@ async function creatorRecipe(desc, title, timeoutMs = 9000) {
   return '';
 }
 
+// Didascalia di un post social con il link alla ricetta sul sito o sul blog del cuoco (es. «RICETTA: https://blog…»):
+// la ricetta si legge da lì come per YouTube. Il «titolo» per riconoscerla è la prima riga col nome del piatto,
+// saltando le righe generiche («Nuova VIDEO RICETTA», «Ingredienti», link, hashtag)
+async function socialSite(desc) {
+  desc = String(desc || '');
+  if (!/https?:\/\/(?!(?:www\.)?(?:instagram|facebook|tiktok|youtube|youtu\.be|linktr))/i.test(desc)) return '';
+  const clean = l => l.replace(/https?:\/\/\S+|#\S+|@\S+/g, '').replace(/[^\p{L}\p{N}' ,.-]/gu, ' ').replace(/\s+/g, ' ').trim();
+  const title = desc.split('\n').map(clean).find(l => words(l).length >= 1 && !/\bvideo\b|^(?:nuova )?ricett[ae]\b|^ingredienti|^procedimento|^per \d/i.test(l)) || clean(desc.split('\n')[0]);
+  try { return await creatorRecipe(desc, title); } catch (e) { console.log('sito del cuoco (social)', e.message); return ''; }
+}
+
 // Gemini guarda il video YouTube (link pubblico passato direttamente all'API) e trascrive ingredienti e passaggi come detti e mostrati.
 // Si usa solo quando il procedimento non è scritto da nessuna parte; consuma quota del piano gratuito, quindi video fino a 25 minuti
 async function ytVideoRecipe(env, id, seconds) {
@@ -642,7 +658,7 @@ async function preview(env, b) {
     }
   }
   // Instagram: la pagina di incorporamento ufficiale (pensata per mostrare i post su altri siti) ha la didascalia completa
-  let embedCaption = '', embedImage = '', igVideo = '', igSeconds = 0;
+  let embedCaption = '', embedImage = '', igVideo = '', igSeconds = 0, igRef = 'https://www.instagram.com/';
   const ig = u.hostname.match(/instagram\.com$/) && u.pathname.match(/^\/(?:[\w.]+\/)?(p|reels?|tv)\/([\w-]+)/);
   if (ig) {
     const e = await get(`https://www.instagram.com/${ig[1] === 'reels' ? 'reel' : ig[1]}/${ig[2]}/embed/captioned/`);
@@ -653,6 +669,17 @@ async function preview(env, b) {
     const vu = e && e.html.match(/video_url\\*":\\*"(https:[^"]+?)\\*"/), vd = e && e.html.match(/video_duration\\*":([\d.]+)/);
     if (vu) { igVideo = vu[1].replace(/\\+u0026/g, '&').replace(/\\/g, ''); igSeconds = vd ? +vd[1] : 0; }
     if (m) embedCaption = unescape(m[1].replace(/<br\s*\/?>/gi, '\n').replace(/<a [^>]*class="CaptionUsername"[^>]*>[\s\S]*?<\/a>/i, '')).replace(/View all \d+ comments\s*$/i, '').trim();
+  }
+  // Facebook: la pagina del video chiede l'accesso, ma il riquadro di incorporamento ufficiale (plugins/video.php) ha il testo del post,
+  // con i link veri (al posto di l.facebook.com) e il file del video da trascrivere
+  if (/(^|\.)facebook\.com$|(^|\.)fb\.watch$/.test(u.hostname) && /\/videos?\/|\/reel\/|\/watch|fb\.watch/.test(u.hostname + u.pathname + u.search)) {
+    const e = await get(`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(u.href)}&show_text=true&width=500`);
+    const m = e && e.html.match(/data-testid="post_message"[^>]*>([\s\S]*?)<\/div>/);
+    if (m) embedCaption = unescape(m[1]
+      .replace(/<a [^>]*href="https:\/\/l\.facebook\.com\/l\.php\?u=([^&"]+)[^"]*"[^>]*>[\s\S]*?<\/a>/gi, (_, x) => { try { return ' ' + decodeURIComponent(x.replace(/&amp;/g, '&')) + ' '; } catch { return ' '; } })
+      .replace(/<\/p>\s*<p>|<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')).replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').trim();
+    const v = e && (e.html.match(/"sd_src(?:_no_ratelimit)?\\*":\\*"(https:[^"]+?)\\*"/) || e.html.match(/"hd_src(?:_no_ratelimit)?\\*":\\*"(https:[^"]+?)\\*"/));
+    if (v) { igVideo = v[1].replace(/\\+u0025/g, '%').replace(/\\+u0026/g, '&').replace(/\\/g, ''); igSeconds = 120; igRef = 'https://www.facebook.com/'; } // la durata non c'è: il limite vero è il peso del file (24 MB)
   }
   // TikTok: la pagina del video chiede l'accesso e oEmbed non dà più il testo; la pagina di incorporamento ha didascalia, autore e copertina
   let tk = null;
@@ -669,11 +696,12 @@ async function preview(env, b) {
       if (v) tk = { text: str(v.itemInfos?.text, 6000), author: str(v.authorInfos?.nickName || v.authorInfos?.uniqueId, 80), image: str((v.itemInfos?.covers || [])[0], 1000), url: id ? `https://www.tiktok.com/@${v.authorInfos?.uniqueId || 'tiktok'}/video/${id}` : u.href,
         video: str((v.itemInfos?.video?.urls || [])[0], 2000), seconds: +v.itemInfos?.video?.videoMeta?.duration || 0 };
     } catch {}
+    if (id && !tk) throw Object.assign(new Error('TikTok non risponde, riprova tra qualche minuto'), { status: 502 });
     if (tk) {
-      // il parlato del video, trascritto: nei reel la ricetta spesso è solo detta a voce
-      const transcript = b.transcribe === false ? '' : await transcribe(env, tk.video, tk.seconds);
+      // il parlato del video, trascritto (nei reel la ricetta spesso è solo detta a voce), e la ricetta sul sito del cuoco se la didascalia ha il link
+      const [transcript, site] = await Promise.all([b.transcribe === false ? '' : transcribe(env, tk.video, tk.seconds), socialSite(tk.text)]);
       const esc = v => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-      return { html: `<html><head><title>${esc(tk.text.split('\n')[0].slice(0, 140))}</title><meta property="og:title" content="${esc(tk.text)}"><meta property="og:site_name" content="${esc(tk.author)}"><meta property="og:image" content="${esc(tk.image)}"></head></html>`, url: tk.url, transcript };
+      return { html: `<html><head><title>${esc(tk.text.split('\n')[0].slice(0, 140))}</title><meta property="og:title" content="${esc(tk.text)}"><meta property="og:site_name" content="${esc(tk.author)}"><meta property="og:image" content="${esc(tk.image)}">${site}</head></html>`, url: tk.url, transcript, site: !!site };
     }
   }
   const page = await get(u);
@@ -692,8 +720,11 @@ async function preview(env, b) {
     + tag('og:description', embedCaption.length > meta('og:description').length ? embedCaption : meta('og:description'))
     + ld.map(x => `<script type="application/ld+json">${x}</script>`).join('') + '</head></html>';
   // Reel di Instagram: come per TikTok si trascrive il parlato (Groq prima, Workers AI di riserva), solo video fino a 4 minuti
-  const transcript = igVideo && b.transcribe !== false ? await transcribe(env, igVideo, igSeconds, 'https://www.instagram.com/') : '';
-  return transcript ? { html: mini, url: r.url, transcript } : { html: mini, url: r.url };
+  const desc = embedCaption.length > meta('og:description').length ? embedCaption : meta('og:description');
+  const [transcript, site] = await Promise.all([igVideo && b.transcribe !== false ? transcribe(env, igVideo, igSeconds, igRef) : '', ld.length ? '' : socialSite(desc)]);
+  const out = { html: site ? mini.replace('</head>', site + '</head>') : mini, url: r.url };
+  if (transcript) out.transcript = transcript; if (site) out.site = true;
+  return out;
 }
 
 // Traduzione in italiano di una ricetta strutturata (dataset UniTools, CC BY-SA 4.0): solo titolo, descrizione,
