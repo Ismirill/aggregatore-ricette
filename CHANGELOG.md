@@ -14,7 +14,7 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
   - **YouTube (server):** in un video oltre i 3 minuti due righe di appunti nella descrizione non contano più come procedimento, e Gemini guarda il video. A Gemini è chiesto di scrivere passaggi completi, unendo le frasi brevi della stessa azione. Tutti i passaggi iniziano con la maiuscola.
   - **Post a foto di Instagram (app):** se nel post ci sono solo gli ingredienti, il messaggio dice di scrivere il procedimento a mano, e non più che è «solo detto nel video».
   - **Memoria delle analisi (server):** le analisi già salvate vengono rifatte con le regole nuove alla prossima richiesta.
-  - Provato in locale su focaccia, pasta alla Norma, cassoeula, marmellata, arrosticini e risotto alla pescatora. Le due correzioni di YouTube richiedono Gemini, che il server locale non ha: si provano online dopo la pubblicazione.
+  - Provato in locale su focaccia, pasta alla Norma, cassoeula, marmellata, arrosticini e risotto alla pescatora. Riprovati online dopo la pubblicazione, con il server nuovo: corretti anche stracotto (14 passaggi completi invece di 27 spezzettati) e pane senza glutine (12 passaggi). Restano due difetti: nei tortellini i passaggi presi dal video comprendono l'elenco degli ingredienti e qualche battuta del cuoco, e la pasta alla Norma è segnata completa con le sole melanzane.
 
 ## 2026-11-10
 
