@@ -1364,7 +1364,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=157; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=158; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2727,15 +2727,15 @@ async function readRecipe(url,overwrite){
   const n=(a.ingredients||[]).length;
   showPv(n?`Trovati ${n} ingredienti`:a.transcript?'Trascritto il parlato del video':'Ingredienti non trovati: aggiungili tu se vuoi');
   // Video YouTube con la stessa ricetta sul sito del cuoco: ingredienti, procedimento, persone e tempo arrivano da lì così come sono
-  if(a.fromSite&&a.stepsFromSchema&&a.steps?.length&&n>=3&&aiOn()&&looksEnglish([f.title.value,f.ingredients.value,f.steps.value].join('\n'))){
+  if(a.fromSite&&a.stepsFromSchema&&a.steps?.length&&n>=2&&aiOn()&&looksEnglish([f.title.value,f.ingredients.value,f.steps.value].join('\n'))){
     showPv('Ricetta in inglese dal sito del cuoco: la traduco…');
     try{const ing=lines(f.ingredients.value),st=lines(f.steps.value);
       const t=(await server('/translate-recipe',{recipe:{name:f.title.value,summary:'',ingredients:ing.map(x=>({name:x,note:''})),steps:st}})).result;
       if(f.url.value!==url)return;
-      if(t?.ingredients?.length===ing.length&&t.steps?.length===st.length){f.title.value=dishName(t.name)||f.title.value;f.ingredients.value=t.ingredients.map(x=>fixUnit(x.name)).join('\n');f.steps.value=t.steps.join('\n')}
+      if(t?.ingredients?.length===ing.length&&t.steps?.length===st.length){f.title.value=dishName(t.name)||f.title.value;f.ingredients.value=t.ingredients.map(x=>fixUnit(String(x.name).replace(/\s*\]\([^)]*\)?\s*$/,''))).join('\n');f.steps.value=t.steps.join('\n')}
     }catch{}
   }
-  if(a.fromSite&&a.stepsFromSchema&&a.steps?.length&&n>=3){showPv(`Ricetta completa dal sito del cuoco · ${n} ingredienti · ${a.steps.length} passaggi${a.servings?` · per ${a.servings}`:''}${a.time?` · ${a.time} min`:''}`);return}
+  if(a.fromSite&&a.stepsFromSchema&&a.steps?.length&&n>=2){showPv(`Ricetta completa dal sito del cuoco · ${n} ingredienti · ${a.steps.length} passaggi${a.servings?` · per ${a.servings}`:''}${a.time?` · ${a.time} min`:''}`);return}
   // Post social o pagine senza dati strutturati: completa con l'AI se la chiave è configurata
   if(aiOn()&&(['TikTok','Instagram','YouTube','Facebook','Pinterest'].includes(sourceOf(url))||n<3)){
     showPv('Analisi AI della ricetta…');
@@ -2758,7 +2758,7 @@ async function readRecipe(url,overwrite){
       if(r.servings&&(overwrite||!editing||!f.servings.value))f.servings.value=r.servings;
       if(r.country){f.country.value=r.country;f.region.value=r.region}
       setDiets(r.diets);
-      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata${a.transcript?' (didascalia + parlato del video)':''} · ${r.ingredients.length} ingredienti${!r.time?' · tempo non indicato nel post':r.timeHow==='sommato'?` · tempo ≈ ${r.time} min, somma dei passaggi (riposi, cotture, forno)`:r.timeHow==='stimato'?` · tempo ≈ ${r.time} min, stimato dai passaggi${r.timeNote?` (${r.timeNote})`:''}`:r.timeHow==='video'?` · tempo ${r.time} min, detto nel video`:` · tempo ${r.time} min, indicato nel post`}${r.fromVideo?' · ingredienti e passaggi trascritti guardando il video: controllali':a.fromSite&&a.stepsFromSchema?' · procedimento dal sito del cuoco':!r.steps.length&&['YouTube','Instagram','Facebook'].includes(sourceOf(url))?' · il procedimento è solo detto nel video: guardalo e scrivilo tu nel passo «Preparazione»':''}`);
+      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata${a.transcript?' (didascalia + parlato del video)':''} · ${r.ingredients.length} ingredienti${!r.time?' · tempo non indicato nel post':r.timeHow==='sommato'?` · tempo ≈ ${r.time} min, somma dei passaggi (riposi, cotture, forno)`:r.timeHow==='stimato'?` · tempo ≈ ${r.time} min, stimato dai passaggi${r.timeNote?` (${r.timeNote})`:''}`:r.timeHow==='video'?` · tempo ${r.time} min, detto nel video`:` · tempo ${r.time} min, indicato nel post`}${r.fromVideo?' · ingredienti e passaggi trascritti guardando il video: controllali':a.fromSite&&a.stepsFromSchema?' · procedimento dal sito del cuoco':!r.steps.length&&/instagram\.com\/(?:[\w.]+\/)?p\//i.test(url)&&!a.transcript?' · nel post ci sono solo gli ingredienti: il procedimento scrivilo tu nel passo «Preparazione»':!r.steps.length&&['YouTube','Instagram','Facebook'].includes(sourceOf(url))?' · il procedimento è solo detto nel video: guardalo e scrivilo tu nel passo «Preparazione»':''}`);
     }catch(e){showPv(aiErr(e))}
   }
 }

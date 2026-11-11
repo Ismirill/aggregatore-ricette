@@ -4,6 +4,18 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-11
+
+- **Versione 158, correzioni dalla quinta prova su 30 video** (richiesta dell'utente: altre 30 prove del motore che riconosce le ricette). Su 30 video nuovi 22 ricette erano utilizzabili e 8 incomplete o sbagliate; il foglio con una riga per video è in `docs/prove/prova-30-video-5-2026-11-11.md`.
+  - **Copertine AVIF (server):** un video di Facebook con la copertina in formato AVIF dava «Servizio AI non disponibile». Ora il server passa ai modelli solo JPEG, PNG, WebP e GIF, e se un modello rifiuta l'immagine rifà l'analisi con il solo testo. La focaccia genovese della prova esce con 8 ingredienti e 12 passaggi.
+  - **Video fino a 10 minuti (server):** il parlato veniva trascritto solo fino a 4 minuti. Ora fino a 10, sempre sui primi 24 MB del video: su un video lungo si ottiene l'inizio del procedimento invece di niente.
+  - **Tempo (server):** il tempo minimo sommava tutte le durate dette nel video, anche «in frigo 24 ore» detto per una variante (cassoeula: 1741 minuti). Ora, quando c'è il parlato, conta le durate dei passaggi estratti (250 minuti). Riconosce anche «un'oretta».
+  - **Traduzione (server e app):** i nomi descrittivi si traducono sempre («Mermelada de mandarina» diventa «Marmellata di mandarini»), restano solo i nomi propri dei piatti. Una ricetta in inglese presa dal sito del cuoco viene tradotta anche se ha solo 2 ingredienti (prima ne servivano 3). Tolto il residuo «](…)» che a volte restava in fondo a un ingrediente tradotto.
+  - **YouTube (server):** in un video oltre i 3 minuti due righe di appunti nella descrizione non contano più come procedimento, e Gemini guarda il video. A Gemini è chiesto di scrivere passaggi completi, unendo le frasi brevi della stessa azione. Tutti i passaggi iniziano con la maiuscola.
+  - **Post a foto di Instagram (app):** se nel post ci sono solo gli ingredienti, il messaggio dice di scrivere il procedimento a mano, e non più che è «solo detto nel video».
+  - **Memoria delle analisi (server):** le analisi già salvate vengono rifatte con le regole nuove alla prossima richiesta.
+  - Provato in locale su focaccia, pasta alla Norma, cassoeula, marmellata, arrosticini e risotto alla pescatora. Le due correzioni di YouTube richiedono Gemini, che il server locale non ha: si provano online dopo la pubblicazione.
+
 ## 2026-11-10
 
 - **Versione 157, sul telefono tipi di piatto e cucine stanno dentro «Filtri»** (richiesta dell'utente: guadagnare le due righe sotto la ricerca e rendere la pagina più pulita).

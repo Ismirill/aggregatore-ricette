@@ -106,7 +106,7 @@ const LOGIN_RX = /log in or sign up|<title>log in \| tiktok|accedi o iscriviti|m
 // p3: letture rifatte con le correzioni del 10/11 (video oltre 24 MB, niente falso parlato, blog linkati)
 const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : ':p3'), 3 * DAY, () => preview(env, b),
   r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html)) && !LOGIN_RX.test(r.html || '') && !r.retry); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
-const ANALYZE_V = 3; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
+const ANALYZE_V = 4; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
 const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([ANALYZE_V, str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
   () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length && !(r.result.inferred && !r.result.steps?.length))); // le analisi «indovinate» (ingredienti tipici, nessun passaggio) non si salvano: la prossima volta si riprova
 
@@ -116,7 +116,8 @@ async function imagePart(url) {
     if (!/^https:\/\//.test(url)) return null;
     const r = await fetch(url);
     const type = r.headers.get('content-type') || '';
-    if (!r.ok || !type.startsWith('image/')) return null;
+    // solo i formati che i modelli leggono: una copertina AVIF (Facebook) faceva fallire tutta l'analisi
+    if (!r.ok || !/^image\/(?:jpe?g|png|webp|gif)\b/i.test(type)) return null;
     const buf = await r.arrayBuffer();
     if (buf.byteLength > 4e6) return null;
     let bin = ''; const bytes = new Uint8Array(buf);
@@ -161,7 +162,7 @@ Titolo/didascalia (e, se presente, la trascrizione di ciò che viene detto nel v
 Sei un trascrittore fedele, non un cuoco: riporta SOLO ciò che è scritto nel testo (hashtag compresi: #cannellini, #carote sono ingredienti) o chiaramente visibile nell'immagine allegata. Non aggiungere dosi, tempi, porzioni o passaggi che non ci sono. Meglio un campo vuoto di un dato inventato.
 Se c'è il «Parlato nel video», ciò che il cuoco dice vale come testo scritto: le dosi dette a voce in lettere vanno scritte in cifre («due etti di farina» → "200 g farina", «mezzo litro di latte» → "500 ml latte", «tre uova» → "3 uova", «un cucchiaio» → "1 cucchiaio"), e i passaggi raccontati a voce vanno in steps, in ordine, uno per voce. La trascrizione automatica può avere errori di ascolto: correggi solo quelli evidenti.
 Guarda bene l'immagine: se mostra il piatto, elenca gli ingredienti che si riconoscono con certezza (es. fagioli bianchi, carote a dadini, patate, pasta corta, pane); se contiene testo sovrimpresso (titolo, elenco di ingredienti, dosi), trascrivilo e usalo come se fosse nel post.
-Estrai i dati in italiano. Se il post è in un'altra lingua (inglese, spagnolo…), traduci in italiano titolo, ingredienti e passaggi: i nomi di piatti noti restano com'è d'uso in Italia («Arancini», «Tacos»), «chicken» → pollo, «bell peppers» → peperoni. I numeri delle dosi restano esattamente quelli del post e si traducono solo le unità: cup/cups → tazza/tazze, tbsp → cucchiaio, tsp → cucchiaino, lb → libbra, oz → oncia, clove → spicchio; nei passaggi le temperature in °F si scrivono in °C se il post le dà anche in °C, altrimenti si convertono (425°F → 220°C).
+Estrai i dati in italiano. Se il post è in un'altra lingua (inglese, spagnolo…), traduci in italiano titolo, ingredienti e passaggi: i nomi di piatti noti restano com'è d'uso in Italia («Arancini», «Tacos», «Pad Thai», «Paella»), ma i nomi descrittivi si traducono sempre («Mermelada de mandarina» → "Marmellata di mandarini", «Tarte aux pommes» → "Torta di mele", «700 g de mandarina» → "700 g mandarini"), «chicken» → pollo, «bell peppers» → peperoni. I numeri delle dosi restano esattamente quelli del post e si traducono solo le unità: cup/cups → tazza/tazze, tbsp → cucchiaio, tsp → cucchiaino, lb → libbra, oz → oncia, clove → spicchio; nei passaggi le temperature in °F si scrivono in °C se il post le dà anche in °C, altrimenti si convertono (425°F → 220°C).
 - title: SOLO il nome del piatto, senza hashtag, emoji, aggettivi pubblicitari o commenti: «Carbonara vegana, la più buona del mondo» → "Carbonara vegana"; «Come fare la pasta alla norma perfetta» → "Pasta alla norma". Il nome deve restare specifico, con gli ingredienti o la variante che lo distinguono: «Pizza in 1h 45 ~ Basilico, Limone, Parmigiano & Pepe nero» → "Pizza basilico, limone e parmigiano", non solo "Pizza"; «Pane fatto in casa in due passaggi» → "Pane fatto in casa", non solo "Pane".
 - cat: uno tra ${cats.map(c => `"${c}"`).join(', ')}.
 - servings: per quante persone sono le dosi, SOLO se scritto nel post ("per 4 persone", "4 porzioni", "ingredienti per 2"…); altrimenti 0. "per 10 minuti" non è una porzione.
@@ -177,14 +178,19 @@ Estrai i dati in italiano. Se il post è in un'altra lingua (inglese, spagnolo�
 - is_recipe: false se il post non riguarda una ricetta o un piatto.
 Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diets":[],"country":"","region":"","time":0,"time_how":"","time_note":"","inferred":false,"seen":[],"ingredients":[],"steps":[]}`;
   const img = b.image ? await imagePart(str(b.image, 2000)) : null;
-  const r0 = await aiJson(env, prompt, img), r = r0 && faithful(r0, text);
+  // se il modello rifiuta l'immagine (formato o contenuto), l'analisi si rifà con il solo testo invece di fallire
+  let r0;
+  try { r0 = await aiJson(env, prompt, img); }
+  catch (e) { if (!img) throw e; console.log('analisi senza immagine:', str(e.message, 200)); r0 = await aiJson(env, prompt, null); }
+  const r = r0 && faithful(r0, text);
   // YouTube: se il procedimento non è scritto né nella descrizione né sul sito del cuoco, Gemini guarda il video
   // i «capitoli» del video (00:00 Preparazione del sugo…) non sono un procedimento: si tolgono dai passaggi (sono le righe del testo che iniziano con un orario)
   const norm = x => String(x).trim().toLowerCase().replace(/[.\s]+$/, '');
   const chapters = new Set((text.match(/^\s*(?:\d{1,2}:)?\d{1,2}:\d{2}\s*[-–—)]?\s*\S.*$/gm) || []).map(l => norm(l.replace(/^\s*[\d:]+\s*[-–—)]?\s*/, ''))));
   if (r && chapters.size && Array.isArray(r.steps)) r.steps = r.steps.filter(x => !chapters.has(norm(x)));
   // passaggi veri = almeno due frasi di una certa lunghezza
-  const realSteps = (r?.steps || []).filter(x => String(x).trim().length >= 30).length >= 2;
+  // (in un video oltre i 3 minuti ne servono almeno tre: due righe di appunti, «Il ripieno va preparato il giorno prima», non bastano)
+  const realSteps = (r?.steps || []).filter(x => String(x).trim().length >= 30).length >= ((+b.seconds || 0) > 180 ? 3 : 2);
   const yid = r && r.is_recipe !== false && !b.haveSteps && !realSteps ? ytIdOf(b.url) : '';
   if (yid) try {
     const v = await ytVideoRecipe(env, yid, +b.seconds || 0);
@@ -199,6 +205,8 @@ Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diet
     }
   } catch (e) { console.log('video Gemini', e.message); }
   if (r && r.title) r.title = dishName(r.title);
+  // i passaggi presi dal parlato arrivano spesso in minuscolo («fare le melanzane a strisce»): iniziano con la maiuscola
+  if (r && Array.isArray(r.steps)) r.steps = r.steps.map(x => String(x).trim()).filter(Boolean).map(x => x.charAt(0).toUpperCase() + x.slice(1));
   return { result: r };
 }
 
@@ -233,9 +241,9 @@ function timesIn(text) {
   const t = String(text).toLowerCase().replace(/[’′]/g, "'"), res = { total: 0, sum: 0, max: 0, n: 0 };
   for (const sent of t.split(/(?<=[.!?\n])\s+|\n+/)) {
     let best = 0;
-    for (const m of sent.matchAll(/(mezz'?\s?ora|mezzora|un'ora|quarto d'ora|tre quarti d'ora)|(\d+(?:[.,]\d+)?|\b(?:un[ao]?|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|dodici|quindici|venti(?:cinque)?|trenta|quaranta(?:cinque)?|cinquanta|sessanta)\b|\b(?:una\s+)?(decina|dozzina|quindicina|ventina|trentina|quarantina|cinquantina)\s+di)\s*('|min\b|minut\w*|ore\b|ora\b|h\b|hour\w*|hrs?\b)/g)) {
+    for (const m of sent.matchAll(/(mezz'?\s?ora|mezzora|un'or(?:a|etta)|quarto d'ora|tre quarti d'ora)|(\d+(?:[.,]\d+)?|\b(?:un[ao]?|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|dodici|quindici|venti(?:cinque)?|trenta|quaranta(?:cinque)?|cinquanta|sessanta)\b|\b(?:una\s+)?(decina|dozzina|quindicina|ventina|trentina|quarantina|cinquantina)\s+di)\s*('|min\b|minut\w*|ore\b|ora\b|h\b|hour\w*|hrs?\b)/g)) {
       let mins;
-      if (m[1]) mins = { "mezz'ora": 30, 'mezz ora': 30, mezzora: 30, "un'ora": 60, "quarto d'ora": 15, "tre quarti d'ora": 45 }[m[1]] || 30;
+      if (m[1]) mins = { "mezz'ora": 30, 'mezz ora': 30, mezzora: 30, "un'ora": 60, "un'oretta": 60, "quarto d'ora": 15, "tre quarti d'ora": 45 }[m[1]] || 30;
       else {
         const w = m[3] || m[2].replace(/^una\s+/, '').trim(), n = /^\d/.test(w) ? parseFloat(w.replace(',', '.')) : NUM_IT[w] || 0;
         mins = Math.round(n * (/^(or|h\b|hour|hr)/.test(m[4]) ? 60 : 1));
@@ -263,9 +271,12 @@ function faithful(r, text) {
   else {
     // Il totale si ricostruisce dai passaggi: le durate scritte sono un pavimento (mai sotto la loro somma), le stime per i
     // passaggi senza durata un tetto ragionevole (mezz'ora a passaggio). Dentro questi limiti vale il conto del modello.
-    const floor = tm.sum, ceil = tm.sum + 30 * Math.max(steps, 1) + 30;
+    // Con il parlato del video contano le durate dei passaggi estratti: a voce si nominano anche tempi che non fanno parte
+    // del procedimento (una variante, «in frigo per 24 ore» detto alla fine), e la somma di tutto il testo gonfiava il totale.
+    const said = spoken && steps >= 3 ? Math.min(tm.sum, timesIn(r.steps.filter(Boolean).join('\n')).sum) : tm.sum;
+    const floor = said, ceil = said + 30 * Math.max(steps, 1) + 30;
     if (r.time < floor) r.time = floor; else if (r.time > ceil) r.time = ceil;
-    r.time_how = r.time > tm.sum ? 'stimato' : tm.n > 1 ? 'sommato' : 'indicato';
+    r.time_how = r.time > said ? 'stimato' : tm.n > 1 ? 'sommato' : 'indicato';
     if (r.time_how !== 'stimato') r.time_note = '';
   }
   if (!SERV_RX.test(text) || !r.servings || !nums.has(String(r.servings))) r.servings = sv;
@@ -494,7 +505,7 @@ const PREVIEW_UA = 'Gnamina/1.0 (+https://gnamina.it/)';
 // Trascrizione del parlato di un video (Whisper su Workers AI). Solo video brevi e non troppo pesanti: la quota è condivisa.
 async function transcribe(env, videoUrl, seconds, referer = 'https://www.tiktok.com/') {
   try {
-    if (!env?.AI || !/^https:\/\//.test(videoUrl) || !seconds || seconds > 240) return '';
+    if (!env?.AI || !/^https:\/\//.test(videoUrl) || !seconds || seconds > 600) return '';
     // solo i primi 24 MB: i video dei social hanno l'indice all'inizio, quindi anche un pezzo si legge (es. 92 s di un reel di 125 s da 31 MB)
     const r = await fetch(videoUrl, { headers: { 'User-Agent': PREVIEW_UA, Referer: referer, Range: 'bytes=0-23999999' } });
     if (!r.ok) return '';
@@ -602,6 +613,7 @@ async function ytVideoRecipe(env, id, seconds) {
   if (!env.GEMINI_KEY || !id || (seconds && seconds > 1500)) return null;
   const prompt = `Guarda questo video di cucina e trascrivi fedelmente la ricetta così come viene detta e mostrata: sei un trascrittore, non un cuoco. Rispondi in italiano, SOLO con JSON:
 {"is_recipe":true,"title":"nome del piatto","servings":0,"time":0,"ingredients":["quantità unità ingrediente, come detto o mostrato (es. \"400 g spaghetti\", \"3 spicchi aglio\"); solo il nome se la dose non viene detta"],"steps":["un passaggio per voce, in ordine, con le parole del cuoco, comprese temperature e tempi detti"]}
+steps: ogni passaggio è una frase completa, con la maiuscola all'inizio e il punto alla fine, che descrive un'azione compiuta: unisci nella stessa voce le frasi brevi della stessa azione («puliamo la cipolla», «la tagliamo in otto pezzi» → "Puliamo la cipolla e la tagliamo in otto pezzi."), e lascia fuori i commenti che non sono istruzioni. Di norma bastano da 5 a 15 passaggi.
 servings: per quante persone, solo se detto, altrimenti 0. time: minuti totali dall'inizio al piatto pronto solo se detto o chiaramente deducibile dai tempi detti, altrimenti 0. Non inventare dosi, tempi o passaggi non detti né mostrati. is_recipe false se il video non è una ricetta.`;
   const body = { contents: [{ parts: [{ file_data: { file_uri: `https://www.youtube.com/watch?v=${id}` } }, { text: prompt }] }],
     generationConfig: { temperature: 0.2, maxOutputTokens: 4000, responseMimeType: 'application/json', mediaResolution: 'MEDIA_RESOLUTION_LOW' } };
