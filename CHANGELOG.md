@@ -13,7 +13,7 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
   - **Passaggi presi dal video (server):** a Gemini è chiesto di lasciare fuori dai passaggi l'elenco degli ingredienti detto a voce, i saluti e le battute del cuoco (nei tortellini della quinta prova finivano tra i passaggi).
   - **Video trascritti solo in parte (server e app):** quando di un video lungo si è potuta trascrivere solo la prima parte, l'app non scrive più «Ricetta completa» e non propone il salvataggio veloce: avvisa che il procedimento può essere incompleto e chiede di guardare il video (pasta alla Norma della quinta prova).
   - **Memoria (server):** le letture dei post e le analisi già salvate vengono rifatte con le regole nuove alla prossima richiesta.
-  - Provato in locale: per il reel della torta il video del blog viene trovato e passato all'analisi, senza passaggi finti; la pasta alla Norma è segnata come parziale; struffoli e cassoeula restano complete. I passaggi presi da Gemini si provano online dopo la pubblicazione, perché il server locale non ha la chiave.
+  - Provato in locale: per il reel della torta il video del blog viene trovato e passato all'analisi, senza passaggi finti; la pasta alla Norma è segnata come parziale; struffoli e cassoeula restano complete. Riprovato online dopo la pubblicazione: il reel della torta esce completo, con i 12 ingredienti con le dosi e 19 passaggi presi dal video del blog; i tortellini hanno 9 passaggi puliti invece di 26 con elenco e battute; la maionese 4 passaggi invece di 7; lo stracotto resta completo (15 passaggi); la pasta alla Norma è segnata come parziale.
 
 ## 2026-11-11
 
