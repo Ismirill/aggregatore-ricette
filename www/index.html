@@ -1080,7 +1080,8 @@ function parseLd(t){
 function stepsOf(ins){
   if(!ins)return [];
   if(typeof ins==='string')return lines(strip(ins.replace(/<\/(p|li)>|<br\s*\/?>/gi,'\n')).replace(/ (?=\d+\. )/g,'\n'));
-  return [].concat(ins).flatMap(s=>typeof s==='string'?[strip(s)]:s.itemListElement?stepsOf(s.itemListElement):[strip(s.text||s.name)]).filter(Boolean);
+  // un passaggio senza parole («-», «.», «1») è un segnaposto del blog sotto una foto, non un'istruzione: si scarta
+  return [].concat(ins).flatMap(s=>typeof s==='string'?[strip(s)]:s.itemListElement?stepsOf(s.itemListElement):[strip(s.text||s.name)]).filter(x=>/\p{L}{2}/u.test(x||''));
 }
 function parseHtml(html){
   const d=new DOMParser().parseFromString(html,'text/html');
@@ -1091,6 +1092,8 @@ function parseHtml(html){
   // la didascalia più completa tra titolo e descrizione (Facebook mette quella intera nel titolo della pagina)
   const caption=[clean(m('og:title')),clean(d.title),clean(m('og:description')),clean(m('description'))].sort((a,b)=>b.length-a.length)[0]||'';
   const out={title:[clean(m('og:title')),clean(m('twitter:title')),clean(d.title)].find(t=>!junkTitle(t))||'',image:m('og:image')||m('twitter:image')||'',author:m('og:site_name'),caption};
+  // il video YouTube della ricetta trovato dal server sulla pagina del blog del cuoco, quando il blog non scrive il procedimento
+  if(/^[\w-]{11}$/.test(m('gn:yt')))out.siteVideo=m('gn:yt');
   let r=null;
   d.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{if(!r)r=findRecipe(parseLd(s.textContent))});
   if(r){
@@ -1147,13 +1150,14 @@ async function analyze(url,pasted){
       const useful=g=>g&&(g.ingredients?.length||(g.caption&&g.caption.length>40&&!/^(instagram|tiktok|facebook|log in|accedi|login)\b/i.test(g.caption)&&!/log in or sign up|accedi o iscriviti|make your day/i.test(g.caption)));
       if(!social)try{const res=await fetch(url,{signal:ctl.signal});html=await res.text();fin=res.url;if(!useful(parseHtml(html)))html=''}catch{}
       let transcript='';
-      let site=false;
+      let site=false,partial=false;
       const pre=out; // quello letto prima dal browser (TikTok: titolo dall'oEmbed), da tenere se il server non riesce
-      if(!html&&aiOn())try{const p=await server('/preview',{url});html=p.html;fin=p.url;transcript=String(p.transcript||'');site=!!p.site}catch(e){if(e?.status===502&&e.message)readErr=e.message}
+      if(!html&&aiOn())try{const p=await server('/preview',{url});html=p.html;fin=p.url;transcript=String(p.transcript||'');partial=!!p.partial;site=!!p.site}catch(e){if(e?.status===502&&e.message)readErr=e.message}
       if(!html&&!social)try{const res=await fetch(url,{signal:ctl.signal});html=await res.text();fin=res.url}catch{}
       out=parseHtml(html||'<html></html>');
       if(!useful(out)&&!out.title)out={};
       if(!html&&pre.caption&&!out.caption)out={...pre};
+      if(transcript&&partial)out.partial=true; // del video lungo il server ha potuto trascrivere solo la prima parte
       if(transcript)out.transcript=transcript; // parlato del video (TikTok, reel di Instagram), trascritto dal server
       if(site)out.fromSite=true; // ricetta letta dal sito o dal blog del cuoco linkato nella didascalia
       if(fin&&fin!==url)out.finalUrl=fin;
@@ -1267,7 +1271,7 @@ const aiErr=e=>e?.status===429?(/giornalier|quota|limite/i.test(e.message||'')?'
 
 // Estrae i dati di una ricetta da un post social (didascalia + copertina, analizzati dal server)
 async function aiAnalyze(d){
-  const {result:r}=await server('/analyze',{url:d.url,source:sourceOf(d.url),author:d.author,caption:d.caption||d.title,image:d.image,cats,seconds:d.seconds||0,haveSteps:!!d.haveSteps});
+  const {result:r}=await server('/analyze',{url:d.url,source:sourceOf(d.url),author:d.author,caption:d.caption||d.title,image:d.image,cats,seconds:d.seconds||0,haveSteps:!!d.haveSteps,...(d.yt?{yt:d.yt}:{})});
   if(!r)throw new Error('Risposta AI non valida');
   return {servings:Math.min(100,Math.max(0,parseInt(r.servings)||0)),is_recipe:r.is_recipe!==false,title:r.title||'',cat:r.cat||'',diets:(r.diets||[]).filter(x=>DIETS.includes(x)),country:r.country||'',region:r.region||'',
     time:+r.time||0,timeHow:String(r.time_how||''),timeNote:String(r.time_note||''),inferred:r.inferred===true,fromVideo:r.from_video===true,ingredients:(r.ingredients||[]).map(String),steps:(r.steps||[]).map(String)};
@@ -1364,7 +1368,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=158; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=159; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2701,7 +2705,7 @@ function showPv(msg){$('#pv').innerHTML=(extra.image?`<img src="${esc(extra.imag
 // Ricetta presa da un link e già completa (nome, almeno 2 ingredienti, procedimento): nel primo passo compare subito «Salva la ricetta»,
 // così non serve passare da tutti i passi; «Controlla →» resta per chi vuole vedere i dettagli
 function quickSaveUI(){const f=$('#f');if(rSteps[rStep]!=='src')return false;
-  const on=!editing&&!extra.contest&&addMode==='link'&&!!f.title.value.trim()&&lines(f.ingredients.value).length>=2&&lines(f.steps.value).length>=1;
+  const on=!editing&&!extra.contest&&addMode==='link'&&!!f.title.value.trim()&&lines(f.ingredients.value).length>=2&&lines(f.steps.value).length>=1&&!extra.partial;
   $('#rSave').hidden=!on;$('#rNext').classList.toggle('pri',!on);$('#rNext').textContent=on?'Controlla →':'Avanti →';
   if(!editing&&addMode==='link')$('#urlMeta').textContent=on?'La ricetta è completa: premi «Salva la ricetta». Con «Controlla» vedi e cambi i dettagli.':'Appena c\'è il link, Gnamina legge la ricetta da sola. Poi premi «Avanti» e controlla.';return on}
 async function runAnalysis(url,overwrite){
@@ -2716,7 +2720,7 @@ async function readRecipe(url,overwrite){
   const a=await analyze(url,f.caption.value.trim());
   if(f.url.value!==url)return;
   if(!a){$('#capL').hidden=false;showPv(readErr?readErr+(social?'. Intanto puoi copiare la descrizione del post e incollarla qui sotto':''):social?'Non riesco a leggere il post: copia la sua descrizione e incollala qui sotto':'Non riesco a leggere la pagina: compila tu i dati');if(social)f.caption.focus();return}
-  const img0=extra.image;Object.assign(extra,{image:String(extra.image||'').startsWith('data:')?extra.image:a.image||extra.image,author:a.author||extra.author,caption:a.caption||extra.caption,transcript:a.transcript||'',videoId:a.videoId||extra.videoId,videoEmbed:a.videoEmbed||extra.videoEmbed,finalUrl:a.finalUrl||extra.finalUrl});if(extra.image!==img0)covCredit();
+  const img0=extra.image;Object.assign(extra,{image:String(extra.image||'').startsWith('data:')?extra.image:a.image||extra.image,author:a.author||extra.author,caption:a.caption||extra.caption,transcript:a.transcript||'',partial:!!a.partial,videoId:a.videoId||extra.videoId,videoEmbed:a.videoEmbed||extra.videoEmbed,finalUrl:a.finalUrl||extra.finalUrl});if(extra.image!==img0)covCredit();
   const put=(el,v)=>{if(v&&(overwrite||!el.value))el.value=v};
   if(a.title&&(overwrite||junkTitle(f.title.value)))f.title.value=dishName(a.title);put(f.time,a.time);put(f.servings,a.servings);
   put(f.ingredients,(a.ingredients||[]).join('\n'));put(f.steps,(a.steps||[]).join('\n'));
@@ -2742,7 +2746,7 @@ async function readRecipe(url,overwrite){
     try{
       // didascalia + parlato del video: ciò che il cuoco dice a voce vale come testo del post
       const cap=[a.caption,a.transcript?'Parlato nel video:\n'+a.transcript:''].filter(Boolean).join('\n\n');
-      const r=await aiAnalyze({url,title:f.title.value,caption:cap,image:a.image,author:a.author,seconds:a.seconds,haveSteps:!!(a.stepsFromSchema&&a.steps?.length)});
+      const r=await aiAnalyze({url,title:f.title.value,caption:cap,image:a.image,author:a.author,seconds:a.seconds,haveSteps:!!(a.stepsFromSchema&&a.steps?.length),yt:a.stepsFromSchema&&a.steps?.length?'':a.siteVideo});
       if(f.url.value!==url)return;
       if(!r.is_recipe){showPv('L\'AI non trova una ricetta in questo post');return}
       // nella ricetta nuova vince il nome dell'AI: la prima riga della didascalia spesso non è il nome del piatto («Tiramisù salva la ricetta», «Nuova VIDEO RICETTA»)
@@ -2758,7 +2762,7 @@ async function readRecipe(url,overwrite){
       if(r.servings&&(overwrite||!editing||!f.servings.value))f.servings.value=r.servings;
       if(r.country){f.country.value=r.country;f.region.value=r.region}
       setDiets(r.diets);
-      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata${a.transcript?' (didascalia + parlato del video)':''} · ${r.ingredients.length} ingredienti${!r.time?' · tempo non indicato nel post':r.timeHow==='sommato'?` · tempo ≈ ${r.time} min, somma dei passaggi (riposi, cotture, forno)`:r.timeHow==='stimato'?` · tempo ≈ ${r.time} min, stimato dai passaggi${r.timeNote?` (${r.timeNote})`:''}`:r.timeHow==='video'?` · tempo ${r.time} min, detto nel video`:` · tempo ${r.time} min, indicato nel post`}${r.fromVideo?' · ingredienti e passaggi trascritti guardando il video: controllali':a.fromSite&&a.stepsFromSchema?' · procedimento dal sito del cuoco':!r.steps.length&&/instagram\.com\/(?:[\w.]+\/)?p\//i.test(url)&&!a.transcript?' · nel post ci sono solo gli ingredienti: il procedimento scrivilo tu nel passo «Preparazione»':!r.steps.length&&['YouTube','Instagram','Facebook'].includes(sourceOf(url))?' · il procedimento è solo detto nel video: guardalo e scrivilo tu nel passo «Preparazione»':''}`);
+      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata${a.transcript?' (didascalia + parlato del video)':''} · ${r.ingredients.length} ingredienti${a.partial?' · attenzione: il video è lungo e ho potuto trascrivere solo la prima parte, il procedimento può essere incompleto: guarda il video e completa i passaggi':''}${!r.time?' · tempo non indicato nel post':r.timeHow==='sommato'?` · tempo ≈ ${r.time} min, somma dei passaggi (riposi, cotture, forno)`:r.timeHow==='stimato'?` · tempo ≈ ${r.time} min, stimato dai passaggi${r.timeNote?` (${r.timeNote})`:''}`:r.timeHow==='video'?` · tempo ${r.time} min, detto nel video`:` · tempo ${r.time} min, indicato nel post`}${r.fromVideo?' · ingredienti e passaggi trascritti guardando il video: controllali':a.fromSite&&a.stepsFromSchema&&a.steps?.length?' · procedimento dal sito del cuoco':!r.steps.length&&/instagram\.com\/(?:[\w.]+\/)?p\//i.test(url)&&!a.transcript?' · nel post ci sono solo gli ingredienti: il procedimento scrivilo tu nel passo «Preparazione»':!r.steps.length&&['YouTube','Instagram','Facebook'].includes(sourceOf(url))?' · il procedimento è solo detto nel video: guardalo e scrivilo tu nel passo «Preparazione»':''}`);
     }catch(e){showPv(aiErr(e))}
   }
 }
@@ -3003,6 +3007,7 @@ $('#f').onsubmit=e=>{
   e.preventDefault();const f=e.target,url=extractUrl(f.url.value)||f.url.value;
   const video=f.video.value.trim();
   if(video&&!ytId(video)){f.video.setCustomValidity('Serve il link di un video YouTube (youtube.com o youtu.be)');f.video.reportValidity();return}
+  delete extra.partial; // serve solo durante la lettura del link, non va salvato nella ricetta
   const rec={...extra,id:editing?.id||Date.now().toString(36),created:editing?.created||Date.now(),t:Date.now(),url,video,
     title:f.title.value.trim(),cat:f.cat.value,time:+f.time.value||null,servings:+f.servings.value||null,diets:getDiets(),country:f.country.value.trim(),region:f.region.value.trim(),
     rating:formRating,ingredients:lines(f.ingredients.value),steps:lines(f.steps.value),

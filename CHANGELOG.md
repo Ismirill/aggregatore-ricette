@@ -4,6 +4,17 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-12
+
+- **Versione 159, il procedimento dal video del blog e le ultime correzioni della quinta prova** (segnalazione dell'utente: dal reel Facebook della torta rovesciata alla ricotta non usciva la preparazione).
+  - **Causa:** la didascalia del reel rimanda al blog della cuoca su GialloZafferano. Lì la scheda ha sei passaggi fatti solo di un trattino sotto le foto, e l'app li contava come procedimento: «Ricetta completa · 6 passaggi», tutti «-».
+  - **Passaggi senza parole (app):** un passaggio fatto solo di «-», «.» o un numero viene scartato.
+  - **Video del blog (server e app):** quando il blog del cuoco ha la scheda ma non il procedimento scritto, il server cerca il video YouTube incorporato nella pagina e lo fa guardare a Gemini. Gli ingredienti con le dosi restano quelli scritti nel post o sul blog. Il messaggio non dice più «procedimento dal sito del cuoco» se sul sito il procedimento non c'è.
+  - **Passaggi presi dal video (server):** a Gemini è chiesto di lasciare fuori dai passaggi l'elenco degli ingredienti detto a voce, i saluti e le battute del cuoco (nei tortellini della quinta prova finivano tra i passaggi).
+  - **Video trascritti solo in parte (server e app):** quando di un video lungo si è potuta trascrivere solo la prima parte, l'app non scrive più «Ricetta completa» e non propone il salvataggio veloce: avvisa che il procedimento può essere incompleto e chiede di guardare il video (pasta alla Norma della quinta prova).
+  - **Memoria (server):** le letture dei post e le analisi già salvate vengono rifatte con le regole nuove alla prossima richiesta.
+  - Provato in locale: per il reel della torta il video del blog viene trovato e passato all'analisi, senza passaggi finti; la pasta alla Norma è segnata come parziale; struffoli e cassoeula restano complete. I passaggi presi da Gemini si provano online dopo la pubblicazione, perché il server locale non ha la chiave.
+
 ## 2026-11-11
 
 - **Versione 158, correzioni dalla quinta prova su 30 video** (richiesta dell'utente: altre 30 prove del motore che riconosce le ricette). Su 30 video nuovi 22 ricette erano utilizzabili e 8 incomplete o sbagliate; il foglio con una riga per video è in `docs/prove/prova-30-video-5-2026-11-11.md`.

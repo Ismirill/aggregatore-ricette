@@ -104,10 +104,12 @@ function cacheUrl(u) {
 // pagine di accesso dei social (TikTok, Instagram, Facebook) arrivate al posto del post
 const LOGIN_RX = /log in or sign up|<title>log in \| tiktok|accedi o iscriviti|make your day/i;
 // p3: letture rifatte con le correzioni del 10/11 (video oltre 24 MB, niente falso parlato, blog linkati)
-const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : ':p3'), 3 * DAY, () => preview(env, b),
+const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : ':p4'), 3 * DAY, () => preview(env, b),
   r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html)) && !LOGIN_RX.test(r.html || '') && !r.retry); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
-const ANALYZE_V = 4; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
-const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([ANALYZE_V, str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30)]), 30 * DAY,
+// b.yt: il video YouTube della stessa ricetta, trovato sulla pagina del blog del cuoco quando il blog non scrive il procedimento
+const siteYtOf = b => /^[\w-]{11}$/.test(String(b.yt || '')) ? String(b.yt) : '';
+const ANALYZE_V = 5; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
+const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([ANALYZE_V, str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30), ...(siteYtOf(b) ? [siteYtOf(b)] : [])]), 30 * DAY,
   () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length && !(r.result.inferred && !r.result.steps?.length))); // le analisi «indovinate» (ingredienti tipici, nessun passaggio) non si salvano: la prossima volta si riprova
 
 // Scarica la copertina del post (lato server non ci sono blocchi CORS)
@@ -191,15 +193,17 @@ Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diet
   // passaggi veri = almeno due frasi di una certa lunghezza
   // (in un video oltre i 3 minuti ne servono almeno tre: due righe di appunti, «Il ripieno va preparato il giorno prima», non bastano)
   const realSteps = (r?.steps || []).filter(x => String(x).trim().length >= 30).length >= ((+b.seconds || 0) > 180 ? 3 : 2);
-  const yid = r && r.is_recipe !== false && !b.haveSteps && !realSteps ? ytIdOf(b.url) : '';
+  // se il link non è di YouTube ma il blog del cuoco ha il video della ricetta (b.yt), Gemini guarda quello
+  const yid = r && r.is_recipe !== false && !b.haveSteps && !realSteps ? ytIdOf(b.url) || siteYtOf(b) : '';
   if (yid) try {
-    const v = await ytVideoRecipe(env, yid, +b.seconds || 0);
+    const v = await ytVideoRecipe(env, yid, ytIdOf(b.url) ? +b.seconds || 0 : 0);
     if (v && v.is_recipe !== false) {
       const st = (Array.isArray(v.steps) ? v.steps : []).map(x => str(x, 600).trim()).filter(Boolean).slice(0, 30);
       if (st.length) { r.steps = st; r.from_video = true; }
       const vt = str(v.title, 120).trim(); if (vt && (!r.title || r.title === r.title.toUpperCase() || r.title.length > 60)) r.title = vt; // «GNOCCHI AI FRUTTI DI MARE: la RICETTA…» → il nome del piatto
+      // dal video del blog (b.yt) si prendono i passaggi: gli ingredienti scritti nel post o sul blog hanno le dosi e restano
       const ing = (Array.isArray(v.ingredients) ? v.ingredients : []).map(x => str(x, 120).trim()).filter(Boolean).slice(0, 40);
-      if (ing.length && (r.inferred || !r.ingredients.length || ing.length > r.ingredients.length + 2)) { r.ingredients = ing; r.inferred = false; r.seen = []; r.from_video = true; }
+      if (ing.length && (r.inferred || !r.ingredients.length || (ytIdOf(b.url) && ing.length > r.ingredients.length + 2))) { r.ingredients = ing; r.inferred = false; r.seen = []; r.from_video = true; }
       if (!r.servings && +v.servings > 0 && +v.servings <= 100) r.servings = Math.round(+v.servings);
       if (!r.time && +v.time > 0 && +v.time <= 1440) { r.time = Math.round(+v.time); r.time_how = 'video'; r.time_note = ''; }
     }
@@ -503,7 +507,8 @@ Rispondi solo con JSON: {"items":[{"name":"","grams":0,"kcal":0,"protein":0,"car
 // (titolo, descrizione, immagine) e i blocchi schema.org Recipe.
 const PREVIEW_UA = 'Gnamina/1.0 (+https://gnamina.it/)';
 // Trascrizione del parlato di un video (Whisper su Workers AI). Solo video brevi e non troppo pesanti: la quota è condivisa.
-async function transcribe(env, videoUrl, seconds, referer = 'https://www.tiktok.com/') {
+// info.partial diventa true se del video si è potuta scaricare (e quindi trascrivere) solo la prima parte
+async function transcribe(env, videoUrl, seconds, referer = 'https://www.tiktok.com/', info = {}) {
   try {
     if (!env?.AI || !/^https:\/\//.test(videoUrl) || !seconds || seconds > 600) return '';
     // solo i primi 24 MB: i video dei social hanno l'indice all'inizio, quindi anche un pezzo si legge (es. 92 s di un reel di 125 s da 31 MB)
@@ -511,12 +516,16 @@ async function transcribe(env, videoUrl, seconds, referer = 'https://www.tiktok.
     if (!r.ok) return '';
     const buf = await r.arrayBuffer();
     if (buf.byteLength > 24e6) return '';
+    // «Content-Range: bytes 0-23999999/31000000»: il file intero è più grande del pezzo scaricato
+    const whole = +((r.headers.get('content-range') || '').split('/')[1] || 0);
     // video con sola musica: Whisper inventa frasi di chiusura dei sottotitoli («Grazie a tutti», «Sottotitoli creati dalla comunità Amara.org», «Musica»)
     const t = (await whisper(env, buf)).replace(/\b(?:musica|grazie a tutti|grazie per la visione|grazie per l'attenzione|sottotitoli (?:creati|a cura) [^.]*|amara\.org|iscriviti al canale)\b[.!,]?/gi, ' ').replace(/\s+/g, ' ').trim();
     if (t.split(' ').filter(w => /\p{L}{2}/u.test(w)).length < 6) return '';
     // video con sola musica: Whisper inventa frasi ripetute («Grazie a tutti. Grazie a tutti…»), che non sono una ricetta
     const w = t.toLowerCase().replace(/[^\p{L}\p{N}' ]+/gu, ' ').split(/\s+/).filter(Boolean);
-    return w.length >= 6 && new Set(w).size / w.length < 0.35 ? '' : t;
+    if (w.length >= 6 && new Set(w).size / w.length < 0.35) return '';
+    if (whole > buf.byteLength) info.partial = true;
+    return t;
   } catch (e) { console.log('trascrizione non riuscita', e.message); return null; } // null = da riprovare (non va in cache)
 }
 // Whisper: se c'è la chiave si usa prima Groq (piano gratuito con 8 ore di audio al giorno, nessun addestramento sui dati),
@@ -543,6 +552,8 @@ const ytIdOf = url => { try { const u = new URL(url); if (!/(^|\.)(youtube\.com|
 // strutturati (schema.org Recipe) con il procedimento scritto. Si cerca sul sito il titolo del video («?s=», WordPress e simili),
 // si legge la pagina più somigliante e la si accetta se è lo stesso piatto: titolo sovrapponibile e, quando il video elenca gli
 // ingredienti, gli stessi ingredienti (le dosi possono differire, es. per un numero diverso di persone: vale la lista del sito)
+// i passaggi di una scheda schema.org, come testo (stringa, elenco di HowToStep o di sezioni)
+const ldSteps = ins => !ins ? [] : typeof ins === 'string' ? [ins] : [].concat(ins).flatMap(s => typeof s === 'string' ? [s] : s && s.itemListElement ? ldSteps(s.itemListElement) : [String(s && (s.text || s.name) || '')]);
 async function creatorRecipe(desc, title, timeoutMs = 9000) {
   const stopAt = Date.now() + timeoutMs, left = () => Math.max(500, stopAt - Date.now());
   const fx = (url, opt = {}) => fetch(url, { ...opt, headers: { 'User-Agent': PREVIEW_UA, 'Accept-Language': 'it-IT,it;q=0.9', ...(opt.headers || {}) }, redirect: 'follow', signal: AbortSignal.timeout(left()) }).catch(() => null);
@@ -578,7 +589,10 @@ async function creatorRecipe(desc, title, timeoutMs = 9000) {
           if (hit < Math.max(2, Math.ceil(descNames.size / 2))) { console.log('sito del cuoco: ingredienti diversi', u, hit, '/', descNames.size); continue; }
         }
         console.log('sito del cuoco: ricetta trovata', u);
-        return `<script type="application/ld+json">${JSON.stringify(rec).replace(/<\//g, '<\\/')}</script><meta property="gn:site" content="${u.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">`;
+        // il blog ha la scheda ma non il procedimento scritto (passaggi «-» sotto le foto): se nella pagina c'è il video YouTube della ricetta, lo si segnala all'app
+        const written = ldSteps(rec.recipeInstructions).some(x => /\p{L}{2}/u.test(x));
+        const yt = written ? '' : (ph.match(/youtube(?:-nocookie)?\.com\/embed\/([\w-]{11})/) || [])[1] || '';
+        return `<script type="application/ld+json">${JSON.stringify(rec).replace(/<\//g, '<\\/')}</script><meta property="gn:site" content="${u.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">${yt ? `<meta property="gn:yt" content="${yt}">` : ''}`;
       }
       return '';
   };
@@ -614,6 +628,7 @@ async function ytVideoRecipe(env, id, seconds) {
   const prompt = `Guarda questo video di cucina e trascrivi fedelmente la ricetta così come viene detta e mostrata: sei un trascrittore, non un cuoco. Rispondi in italiano, SOLO con JSON:
 {"is_recipe":true,"title":"nome del piatto","servings":0,"time":0,"ingredients":["quantità unità ingrediente, come detto o mostrato (es. \"400 g spaghetti\", \"3 spicchi aglio\"); solo il nome se la dose non viene detta"],"steps":["un passaggio per voce, in ordine, con le parole del cuoco, comprese temperature e tempi detti"]}
 steps: ogni passaggio è una frase completa, con la maiuscola all'inizio e il punto alla fine, che descrive un'azione compiuta: unisci nella stessa voce le frasi brevi della stessa azione («puliamo la cipolla», «la tagliamo in otto pezzi» → "Puliamo la cipolla e la tagliamo in otto pezzi."), e lascia fuori i commenti che non sono istruzioni. Di norma bastano da 5 a 15 passaggi.
+Un passaggio è un'azione di cucina (tagliare, mescolare, impastare, cuocere, far riposare, servire). NON sono passaggi, e non vanno in steps: l'elenco degli ingredienti detto a voce («un etto di mortadella», «parmigiano reggiano»: vanno solo in ingredients), i saluti, le battute, i racconti e le opinioni del cuoco («siamo nella Pork Valley», «il ripieno il giorno dopo è tutta un'altra cosa»). Un consiglio su come fare si tiene, scritto come istruzione («Il ripieno è meglio prepararlo il giorno prima.»).
 servings: per quante persone, solo se detto, altrimenti 0. time: minuti totali dall'inizio al piatto pronto solo se detto o chiaramente deducibile dai tempi detti, altrimenti 0. Non inventare dosi, tempi o passaggi non detti né mostrati. is_recipe false se il video non è una ricetta.`;
   const body = { contents: [{ parts: [{ file_data: { file_uri: `https://www.youtube.com/watch?v=${id}` } }, { text: prompt }] }],
     generationConfig: { temperature: 0.2, maxOutputTokens: 4000, responseMimeType: 'application/json', mediaResolution: 'MEDIA_RESOLUTION_LOW' } };
@@ -719,9 +734,10 @@ async function preview(env, b) {
     if (id && !tk) throw Object.assign(new Error('TikTok non risponde, riprova tra qualche minuto'), { status: 502 });
     if (tk) {
       // il parlato del video, trascritto (nei reel la ricetta spesso è solo detta a voce), e la ricetta sul sito del cuoco se la didascalia ha il link
-      const [tr, site] = await Promise.all([b.transcribe === false ? '' : transcribe(env, tk.video, tk.seconds), socialSite(tk.text)]), transcript = tr || '';
+      const info = {};
+      const [tr, site] = await Promise.all([b.transcribe === false ? '' : transcribe(env, tk.video, tk.seconds, undefined, info), socialSite(tk.text)]), transcript = tr || '';
       const esc = v => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-      return { html: `<html><head><title>${esc(tk.text.split('\n')[0].slice(0, 140))}</title><meta property="og:title" content="${esc(tk.text)}"><meta property="og:site_name" content="${esc(tk.author)}"><meta property="og:image" content="${esc(tk.image)}">${site}</head></html>`, url: tk.url, transcript, site: !!site, ...(tr === null ? { retry: true } : {}) };
+      return { html: `<html><head><title>${esc(tk.text.split('\n')[0].slice(0, 140))}</title><meta property="og:title" content="${esc(tk.text)}"><meta property="og:site_name" content="${esc(tk.author)}"><meta property="og:image" content="${esc(tk.image)}">${site}</head></html>`, url: tk.url, transcript, site: !!site, ...(tr === null ? { retry: true } : {}), ...(info.partial && transcript ? { partial: true } : {}) };
     }
   }
   const page = await get(u);
@@ -741,9 +757,10 @@ async function preview(env, b) {
     + ld.map(x => `<script type="application/ld+json">${x}</script>`).join('') + '</head></html>';
   // Reel di Instagram: come per TikTok si trascrive il parlato (Groq prima, Workers AI di riserva), solo video fino a 4 minuti
   const desc = embedCaption.length > meta('og:description').length ? embedCaption : meta('og:description');
-  const [transcript, site] = await Promise.all([igVideo && b.transcribe !== false ? transcribe(env, igVideo, igSeconds, igRef) : '', ld.length ? '' : socialSite(desc)]);
+  const info = {};
+  const [transcript, site] = await Promise.all([igVideo && b.transcribe !== false ? transcribe(env, igVideo, igSeconds, igRef, info) : '', ld.length ? '' : socialSite(desc)]);
   const out = { html: site ? mini.replace('</head>', site + '</head>') : mini, url: r.url };
-  if (transcript) out.transcript = transcript; if (site) out.site = true; if (transcript === null) out.retry = true;
+  if (transcript) out.transcript = transcript; if (transcript && info.partial) out.partial = true; if (site) out.site = true; if (transcript === null) out.retry = true;
   return out;
 }
 
