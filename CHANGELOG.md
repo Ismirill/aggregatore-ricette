@@ -6,6 +6,13 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-13
 
+- **Versione 161, il passo del link più pulito e il pulsante «Nuova ricetta» più pieno** (richiesta dell'utente).
+  - **Pulsante «Nuova ricetta»:** sul telefono resta sopra le ricette ma è meno trasparente (colore all'80% invece che al 60%).
+  - **Passo del link:** solo il campo con «Incolla», una barra che scorre mentre Gnamina legge la ricetta, e un solo pulsante in fondo, largo quanto lo schermo. Non c'è più «Analizza il link»: la lettura parte da sola quando si incolla o si scrive il link. Non c'è più «Indietro» in fondo, perché c'è la freccia in alto.
+  - **«Salva la ricetta»** resta spento finché la lettura non è completa (nome, almeno 2 ingredienti, procedimento). Quando si accende, sotto compare la scritta «Controlla prima di salvare» per chi vuole vedere i dettagli.
+  - **Se la ricetta non si legge tutta,** il pulsante diventa «Inserisci manualmente» e porta ai passi da compilare, con quello che è stato letto già scritto. Solo in quel caso, per Instagram e Facebook, compare il riquadro per incollare la descrizione del post.
+  - **Provato nel browser a misura di telefono:** struffoli da TikTok (barra, poi «Salva la ricetta» acceso) e coda alla vaccinara da Instagram (procedimento solo detto nel video: «Inserisci manualmente», poi il passo del nome con gli 11 ingredienti letti).
+
 - **Versione 160, l'AI del telefono legge le ricette gratis** (richiesta dell'utente: far usare a ogni persona l'AI gratuita che ha già, in modo semplicissimo; prima prova, non ancora pubblicata).
   - **Come funziona:** quando si importa un post, prima prova l'AI dentro il telefono; se non c'è, o la ricetta esce incompleta, la legge il server come prima. L'utente non deve fare niente: nessuna chiave, nessun account in più. Nelle Impostazioni una riga dice cosa usa il telefono, con una casella per spegnerla; il messaggio finale dice «letta dal telefono».
   - **iPhone (iOS 26 con Apple Intelligence):** modello di Apple dentro il telefono con la generazione guidata (il modello riempie una scheda fissa: titolo, persone, minuti, tipo di piatto, ingredienti, passaggi).

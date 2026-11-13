@@ -129,7 +129,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px}
 .btn:disabled{opacity:.4}
 .fab{position:fixed;right:16px;bottom:calc(5.7rem + env(safe-area-inset-bottom));padding:0 24px;height:3.3rem;border-radius:999px;border:none;background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 88%,#fff),var(--acc) 60%,color-mix(in srgb,var(--acc) 85%,#000));color:#fff;font:inherit;font-size:1.02rem;font-weight:700;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px color-mix(in srgb,var(--acc) 45%,transparent),inset 0 1px 0 #fff3;cursor:pointer;z-index:4;white-space:nowrap;transition:transform .15s,box-shadow .15s}.fab:hover{transform:translateY(-1px);box-shadow:0 14px 30px color-mix(in srgb,var(--acc) 50%,transparent),inset 0 1px 0 #fff3}.fab:active{transform:translateY(0)}
 /* Sul telefono il pulsante galleggia sopra le ricette: semitrasparente, così si vede cosa c'è sotto (sul computer sta nella barra ed è pieno) */
-body>.fab{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 60%,transparent),color-mix(in srgb,var(--acc) 52%,transparent));-webkit-backdrop-filter:blur(1.5px) saturate(1.2);backdrop-filter:blur(1.5px) saturate(1.2);box-shadow:0 6px 18px color-mix(in srgb,var(--acc) 20%,transparent),inset 0 0 0 1px #ffffff45;text-shadow:0 1px 2px #0007}
+body>.fab{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 80%,transparent),color-mix(in srgb,var(--acc) 72%,transparent));-webkit-backdrop-filter:blur(1.5px) saturate(1.2);backdrop-filter:blur(1.5px) saturate(1.2);box-shadow:0 6px 18px color-mix(in srgb,var(--acc) 20%,transparent),inset 0 0 0 1px #ffffff45;text-shadow:0 1px 2px #0007}
 body>.fab:hover{box-shadow:0 8px 22px color-mix(in srgb,var(--acc) 26%,transparent),inset 0 0 0 1px #ffffff55}
 
 /* ---------- Navigazione in basso ---------- */
@@ -158,6 +158,15 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 .checks label:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 9%,var(--card))}
 .checks input{margin:0}
 .pv{display:flex;gap:10px;align-items:center;min-height:20px;font-size:.85rem;color:var(--mut)}
+/* Lettura del link in corso: barra che scorre finché Gnamina non ha finito (il passo del link ha solo campo, barra e un pulsante) */
+.lnkProg{height:8px;border-radius:99px;background:color-mix(in srgb,var(--acc) 15%,var(--card));overflow:hidden;margin:2px 0 4px}
+.lnkProg i{display:block;height:100%;width:35%;border-radius:99px;background:var(--acc);animation:lnkRun 1.3s ease-in-out infinite}
+@keyframes lnkRun{0%{transform:translateX(-110%)}100%{transform:translateX(320%)}}
+@media (prefers-reduced-motion:reduce){.lnkProg i{animation:none;width:100%;opacity:.5}}
+#rSave:disabled{opacity:.45;cursor:default;box-shadow:none}
+#wizNav.lnk>span{flex:1;flex-direction:column;align-items:stretch;gap:4px}
+#wizNav.lnk #rSave,#wizNav.lnk #rNext.pri{width:100%;justify-content:center;min-height:3.2rem;font-size:1.05rem}
+#wizNav.lnk #rNext:not(.pri){order:2;border:0;background:none;box-shadow:none;color:var(--mut);text-decoration:underline;font-weight:600}
 .pv img{width:64px;height:64px;object-fit:cover;border-radius:12px}.pv.noImg img{display:none}.pv.noImg{min-height:0}
 .cov{display:flex;gap:12px;align-items:flex-start;margin:4px 0 2px}.covRow{display:flex;gap:6px;align-items:center}.covRow .covImg{width:52px;height:52px;border-radius:12px;font-size:.6rem;padding:3px;line-height:1.2}.covRow .btn{flex:1;min-width:0;max-width:11rem;padding:9px 4px;font-size:.84rem;white-space:nowrap}.covRow #covDel{flex:none;width:38px;padding:0;color:var(--acc);font-size:1rem}@media (max-width:400px){.covRow .btn{font-size:.78rem;gap:3px}}.covGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;margin-top:10px}.covOpt{padding:0;border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--bg2);cursor:pointer;font:inherit;display:grid;color:var(--mut)}.covOpt img{width:100%;aspect-ratio:1;object-fit:cover;display:block}.covOpt span{font-size:.66rem;padding:3px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.covOpt:active{transform:scale(.97)}.covImg{width:96px;height:96px;border-radius:14px;background:var(--bg2);border:1px solid var(--bd);flex:none;display:grid;place-items:center;font-size:.75rem;color:var(--mut);text-align:center;padding:6px;overflow:hidden}.covImg img{width:100%;height:100%;object-fit:cover;border-radius:10px}
 .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:14px}
@@ -787,6 +796,7 @@ details summary{cursor:pointer}
     <section class="step" data-s="src">
       <h3 id="srcH"></h3>
       <label id="urlL">Link del video o della ricetta<span class="inl" style="margin:0"><input name="url" type="url" placeholder="Incolla qui il link…"><button type="button" class="btn" id="pasteUrl">📋 Incolla</button></span></label>
+      <div class="lnkProg" id="lnkProg" hidden role="progressbar" aria-label="Lettura della ricetta in corso"><i></i></div>
       <div class="row hint" id="urlRow" style="justify-content:flex-start;margin:0;align-items:center;gap:12px"><button type="button" class="btn pri" id="analyzeBtn">🔍 Analizza il link</button><span class="meta" id="urlMeta">Appena c'è il link, Gnamina legge la ricetta da sola. Poi premi «Avanti» e controlla.</span></div>
       <label id="capL" hidden>Descrizione del post <span class="meta" style="font-weight:400">— se l'app non la legge da sola: tieni premuto il testo del post, copialo e incollalo qui</span>
         <span class="inl" style="margin:0;align-items:flex-start"><textarea name="caption" rows="3" placeholder="Ingredienti, dosi, procedimento…"></textarea><button type="button" class="btn" id="pasteCap">📋 Incolla</button></span></label>
@@ -1450,7 +1460,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=160; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=161; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2611,6 +2621,7 @@ function setMode(m,fromUser){
   $('#photoL').hidden=m!=='photo';$('#fileL').hidden=m!=='file';$('#voiceL').hidden=m!=='voice';if(m!=='voice')dictStop(true);$('#srcAfter').hidden=m==='link';
   // In modifica di una ricetta presa da un link, il primo passo serve a rileggerla dal link se Gnamina l'aveva capita male
   const rel=!!editing&&m==='link';$('#srcH').textContent=rel?'Da dove viene la ricetta':SRC_H[m]||'';$('#analyzeBtn').textContent=rel?'↻ Rianalizza dal link':'🔍 Analizza il link';$('#urlMeta').textContent=rel?'Se Gnamina l\'ha letta male, premi «Rianalizza»: titolo, ingredienti e procedimento vengono riletti dal link, poi li controlli nei passi seguenti.':'Appena c\'è il link, Gnamina legge la ricetta da sola. Poi premi «Avanti» e controlla.';
+  if(m==='link'){LINKST='idle';LINKURL=''}
   rSteps=stepsFor(m);rGo(0);
   if(fromUser){if(m==='link'&&DESK)f.url.focus();if(m==='photo')$('#ocrIn').click();if(m==='file')$('#fileIn').click()}
 }
@@ -2627,7 +2638,7 @@ function rGo(k){
   $('#rDots').innerHTML=Array.from({length:N},(_,j)=>`<i class="${j===i?'on':j<i?'done':''}"></i>`).join('');
   $('#rStepLbl').textContent=`Passo ${i+1} di ${N}`;
   $('#rBackTop').style.visibility=$('#rBack').style.visibility=i>0?'visible':'hidden';
-  const last=rStep===rSteps.length-1;$('#rNext').hidden=last;$('#rSave').hidden=!last;$('#rNext').classList.add('pri');$('#rNext').textContent='Avanti →';
+  const last=rStep===rSteps.length-1;$('#rBack').hidden=false;$('#wizNav').classList.remove('lnk');$('#rSave').disabled=false;$('#rNext').hidden=last;$('#rSave').hidden=!last;$('#rNext').classList.add('pri');$('#rNext').textContent='Avanti →';
   if(key==='src')quickSaveUI();
   if(key==='end')endUI();if(last)endSum();
   $('#dlg').scrollTop=0;
@@ -2786,19 +2797,36 @@ async function covSearch(){
 function showPv(msg){$('#pv').innerHTML=(extra.image?`<img src="${esc(extra.image)}" alt="" referrerpolicy="no-referrer">`:'')+`<span>${esc(msg||sourceOf($('#f').url.value))}</span>`}
 // Ricetta presa da un link e già completa (nome, almeno 2 ingredienti, procedimento): nel primo passo compare subito «Salva la ricetta»,
 // così non serve passare da tutti i passi; «Controlla →» resta per chi vuole vedere i dettagli
+// Passo del link (ricetta nuova): solo il campo con «Incolla», la barra mentre Gnamina legge e un pulsante. «Salva la ricetta»
+// resta spento finché la lettura non è completa; se non riesce diventa «Inserisci manualmente» e porta ai passi da compilare.
+// LINKST: idle (nessun link) | busy (lettura in corso) | done (lettura finita, completa o no)
+let LINKST='idle',LINKURL='';
 function quickSaveUI(){const f=$('#f');if(rSteps[rStep]!=='src')return false;
   const on=!editing&&!extra.contest&&addMode==='link'&&!!f.title.value.trim()&&lines(f.ingredients.value).length>=2&&lines(f.steps.value).length>=1&&!extra.partial;
-  $('#rSave').hidden=!on;$('#rNext').classList.toggle('pri',!on);$('#rNext').textContent=on?'Controlla →':'Avanti →';
-  if(!editing&&addMode==='link')$('#urlMeta').textContent=on?'La ricetta è completa: premi «Salva la ricetta». Con «Controlla» vedi e cambi i dettagli.':'Appena c\'è il link, Gnamina legge la ricetta da sola. Poi premi «Avanti» e controlla.';return on}
+  const lk=!editing&&!extra.contest&&addMode==='link';
+  $('#analyzeBtn').hidden=lk;$('#lnkProg').hidden=!(lk&&LINKST==='busy');
+  $('#wizNav').classList.toggle('lnk',lk);
+  if(!lk){$('#rSave').hidden=!on;$('#rNext').classList.toggle('pri',!on);$('#rNext').textContent=on?'Controlla →':'Avanti →';return on}
+  const st=LINKST==='busy'?'busy':on?'ok':LINKST==='done'?'fail':'idle';
+  $('#capL').hidden=!(st==='fail'&&(['Facebook','Instagram'].includes(sourceOf(f.url.value))||f.caption.value.trim()));
+  $('#rBack').hidden=true; // c'è già la freccia in alto
+  $('#rSave').hidden=st==='fail';$('#rSave').disabled=st!=='ok';
+  $('#rNext').hidden=st==='idle'||st==='busy';$('#rNext').classList.toggle('pri',st==='fail');
+  $('#rNext').textContent=st==='fail'?'✍️ Inserisci manualmente':'Controlla prima di salvare';
+  $('#urlMeta').textContent=st==='busy'?'Sto leggendo la ricetta: qualche secondo…':st==='ok'?'La ricetta è completa: premi «Salva la ricetta».'
+    :st==='fail'?'Non sono riuscita a leggere tutta la ricetta: premi «Inserisci manualmente» e completala tu.':'Incolla il link: Gnamina legge la ricetta da sola.';
+  return on}
 async function runAnalysis(url,overwrite){
-  await readRecipe(url,overwrite);
+  LINKST='busy';LINKURL=url;quickSaveUI();
+  try{await readRecipe(url,overwrite)}finally{if(LINKURL===url)LINKST='done'}
   if($('#f').url.value===url&&quickSaveUI()){const f=$('#f'),n=lines(f.ingredients.value).length,st=lines(f.steps.value).length;
     showPv(`Ricetta completa: «${f.title.value.trim()}» · ${n} ingredienti · ${st} passagg${st===1?'io':'i'}${extra.aiBy?(extra.aiBy==='cloud'?' · letta con l\'AI di Apple':' · letta dal telefono'):''}. Puoi salvarla subito`)}
 }
 async function readRecipe(url,overwrite){
   const f=$('#f');showPv('Analizzo la ricetta…');
   const social=['Facebook','Instagram'].includes(sourceOf(url));
-  $('#capL').hidden=!social&&!f.caption.value;
+  // nel passo del link il riquadro della descrizione compare solo se la lettura non riesce (vedi quickSaveUI)
+  $('#capL').hidden=(!social&&!f.caption.value)||(!editing&&addMode==='link'&&LINKST==='busy');
   const a=await analyze(url,f.caption.value.trim());
   if(f.url.value!==url)return;
   if(!a){$('#capL').hidden=false;showPv(readErr?readErr+(social?'. Intanto puoi copiare la descrizione del post e incollarla qui sotto':''):social?'Non riesco a leggere il post: copia la sua descrizione e incollala qui sotto':'Non riesco a leggere la pagina: compila tu i dati');if(social)f.caption.focus();return}
@@ -2850,7 +2878,11 @@ async function readRecipe(url,overwrite){
     }catch(e){showPv(aiErr(e))}
   }
 }
-$('#f').url.addEventListener('change',e=>{const u=extractUrl(e.target.value);if(u){e.target.value=u;$('#capL').hidden=!['Facebook','Instagram'].includes(sourceOf(u))&&!$('#f').caption.value;runAnalysis(u,false)}});
+$('#f').url.addEventListener('change',e=>{const u=extractUrl(e.target.value);if(u&&!(u===LINKURL&&LINKST!=='idle')){e.target.value=u;$('#capL').hidden=!['Facebook','Instagram'].includes(sourceOf(u))&&!$('#f').caption.value;runAnalysis(u,false)}});
+let urlTyping;
+$('#f').url.addEventListener('input',e=>{clearTimeout(urlTyping);
+  if(!e.target.value.trim()){if(!editing){LINKST='idle';LINKURL='';quickSaveUI()}return}
+  urlTyping=setTimeout(()=>{const u=extractUrl(e.target.value);if(u&&u!==LINKURL)e.target.dispatchEvent(new Event('change'))},900)});
 $('#pasteCap').onclick=async()=>{try{const t=await readClip();if(t){$('#f').caption.value=t;const u=extractUrl($('#f').url.value);if(u)runAnalysis(u,true)}else{toast('Tieni premuto nel campo e scegli Incolla');$('#f').caption.focus()}}catch{toast('Tieni premuto nel campo e scegli Incolla')}};
 $('#f').caption.addEventListener('change',()=>{const u=extractUrl($('#f').url.value);if(u&&$('#f').caption.value.trim().length>20)runAnalysis(u,true)});
 $('#analyzeBtn').onclick=()=>{const u=extractUrl($('#f').url.value);if(!u){toast('Incolla prima un link');return}$('#f').url.value=u;runAnalysis(u,!!editing)};
