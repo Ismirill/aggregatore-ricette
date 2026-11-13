@@ -874,6 +874,8 @@ details summary{cursor:pointer}
   <section class="sec"><h3>Zona per i prezzi</h3><p class="meta" id="zoneInfo">Costi calcolati con i prezzi medi ufficiali (Osservatorio Prezzi del Ministero) della tua provincia.</p>
     <select id="zoneSel" aria-label="Provincia per i prezzi"><option value="">Automatica (posizione approssimativa)</option></select>
     <div class="grid2" style="margin-top:8px"><button class="btn" id="gpsBtn">📍 Usa la mia posizione</button><button class="btn" id="zoneReset">Automatica</button></div></section>
+  <section class="sec"><h3>Intelligenza artificiale</h3><p class="meta" id="laiInfo">Controllo se questo telefono sa leggere le ricette da solo…</p>
+    <label class="meta" style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="laiOn" checked> Usa l'AI del telefono quando c'è</label></section>
   <section class="sec"><h3>Ricette su tutti i tuoi dispositivi</h3><div id="syncBox"></div></section>
   <section class="sec"><h3>Backup su file</h3><p class="meta">Salva tutte le ricette in un file e tienilo dove vuoi: su iCloud Drive o Google Drive, nel telefono o sul computer. Per ripristinarle apri il file da qui.</p>
     <div class="grid2"><button class="btn pri" id="expFile">💾 Salva file</button><button class="btn" id="impFile">📂 Apri file</button></div><input type="file" id="impIn" accept=".json,application/json,text/plain" hidden>
@@ -1269,8 +1271,88 @@ async function server(path,body,auth){
 // 429 dal server: o troppe richieste dallo stesso telefono (15 al minuto) o quota gratuita giornaliera dell'AI esaurita (si rinnova alle 2 di notte, ora italiana)
 const aiErr=e=>e?.status===429?(/giornalier|quota|limite/i.test(e.message||'')?'Il servizio AI gratuito è al limite in questo momento: riprova tra qualche minuto':'Troppe richieste, riprova tra un minuto'):e?.message||'Servizio AI non disponibile';
 
+// AI del telefono, gratis e senza server: Gemini Nano su Android 8+ (AndroidShare.localAi) e Apple Intelligence su iPhone
+// (webkit.messageHandlers.localAi, modello dentro il telefono; quello sui server Apple richiede un permesso, vedi AppDelegate.swift).
+// Risponde la parte nativa con window.onLocalAi(id, ok, testo). Stato: available | downloading | unavailable | off.
+const LAI={wait:{},n:0,state:'',kind:'',at:0};
+window.onLocalAi=(id,ok,text)=>{const w=LAI.wait[id];if(!w)return;delete LAI.wait[id];clearTimeout(w.t);ok?w.ok(String(text??'')):w.ko(new Error(String(text||'AI del telefono non disponibile')))};
+const laiBridge=()=>!!(window.AndroidShare?.localAi||window.webkit?.messageHandlers?.localAi);
+function laiCall(op,prompt='',max=1500,ms=95000){return new Promise((ok,ko)=>{
+  if(!laiBridge())return ko(new Error('unavailable'));
+  const id='l'+(++LAI.n),t=setTimeout(()=>{delete LAI.wait[id];ko(new Error('AI del telefono: tempo scaduto'))},ms);
+  LAI.wait[id]={ok,ko,t};
+  try{if(window.AndroidShare?.localAi)AndroidShare.localAi(id,op,prompt,max);else webkit.messageHandlers.localAi.postMessage({id,op,prompt,max})}
+  catch(e){clearTimeout(t);delete LAI.wait[id];ko(e)}
+})}
+async function laiStatus(force){
+  if(load('laiOff',false))return LAI.state='off';
+  if(!force&&LAI.at&&Date.now()-LAI.at<10*60e3)return LAI.state;
+  let s='unavailable';
+  try{if(laiBridge())s=await laiCall('status','',0,25000)}catch{}
+  const [st,kind]=String(s).split(':');
+  LAI.state=st==='downloadable'?'downloading':st;LAI.kind=kind||(window.AndroidShare?.localAi?'nano':'device');LAI.at=Date.now();
+  // Android: il modello si scarica la prima volta (lo gestisce il sistema); intanto le ricette le legge il server
+  if(st==='downloadable')laiCall('download','',0,25000).catch(()=>{});
+  return LAI.state;
+}
+const LAI_MAX=6000; // caratteri: il modello del telefono legge circa 4.000 token in tutto, risposta compresa
+const laiPrompt=(title,text)=>`Sei un assistente di cucina. Dal testo qui sotto (la descrizione di un post di cucina e, se c'è, il parlato del video) estrai la ricetta così come è scritta o detta, senza inventare niente.
+Rispondi SOLO con un oggetto JSON, senza altro testo:
+{"is_recipe":true,"title":"nome del piatto","servings":0,"time":0,"cat":"Antipasti|Primi|Secondi|Contorni|Piatti unici|Lievitati|Dolci|Altro","ingredients":["dose e ingrediente, uno per voce"],"steps":["un passaggio per voce, frase completa"]}
+Regole: scrivi in italiano. ingredients: solo quelli nominati nel testo, con la dose se c'è. steps: azioni di cucina in ordine, non saluti, hashtag o inviti a seguire il profilo. servings (persone) e time (minuti totali) solo se detti, altrimenti 0. is_recipe false se il testo non contiene una ricetta.
+Titolo del post: ${title}
+Testo:
+---
+${text}
+---`;
+// JSON di un modello piccolo: a volte mancano le virgolette sulle chiavi («servings":0», «steps":[»); si riparano solo le chiavi note
+const jsonIn=s=>{const m=String(s||'').match(/\{[\s\S]*\}/);if(!m)return null;
+  try{return JSON.parse(m[0])}catch{}
+  try{return JSON.parse(m[0].replace(/([{,]\s*)"?(is_recipe|title|servings|time|cat|ingredients|steps)"?\s*:/g,'$1"$2":'))}catch{return null}};
+// gli ingredienti devono comparire nel testo: un modello piccolo, se non li trova, a volte li inventa (allora decide il server)
+const plainIt=s=>String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function laiFaithful(ing,text){const t=plainIt(text);let n=0;
+  for(const x of ing){const w=plainIt(x).replace(/[^a-z ]/g,' ').split(/\s+/).filter(w=>w.length>=4).sort((a,b)=>b.length-a.length)[0];if(!w||t.includes(w.slice(0,5)))n++}
+  return n>=Math.ceil(ing.length*0.7)}
+// i passaggi non devono essere l'elenco degli ingredienti ripetuto, e le loro parole devono venire dal testo (non inventate)
+function laiStepsOk(st,ing,text){
+  const norm=x=>plainIt(x).replace(/^[\s\-–•*\d.)]+/,'').replace(/\s+/g,' ').trim(),ingSet=new Set(ing.map(norm));
+  if(st.filter(x=>ingSet.has(norm(x))).length>=st.length/2)return false;
+  const t=plainIt(text),words=st.flatMap(x=>plainIt(x).replace(/[^a-z ]/g,' ').split(/\s+/).filter(w=>w.length>=6));
+  return !words.length||words.filter(w=>t.includes(w.slice(0,5))).length>=words.length*0.6}
+// completezza: un modello piccolo a volte salta ingredienti o riassume il procedimento in una riga. Se il testo ha più dosi
+// che ingredienti trovati, o un testo lungo dà uno o due passaggi, decide il server (prova sul Mac del 13/11/2026, 23 post)
+const LAI_QTY=/(?:^|[\s(•\-–*])(\d+(?:[.,/]\d+)?|mezz[oa]|un[oa]?|due|tre|quattro|cinque|sei)\s?(?:g|gr|grammi|kg|ml|cl|l|litr[oi]|cucchia(?:i|io|ini|ino)|bicchier[ei]|tazz[ae]|spicch[io]|bustin[ae]|pizzic[oh]i?|fett[ae]|foglie?|rametti?|uova|uovo|tuorl[io]|vasett[oi]|q\.?b\.?)\b/gi;
+const laiComplete=(ing,st,text)=>ing.length>=(text.match(LAI_QTY)||[]).length*0.8&&!(st.length<=2&&text.length>1200);
+async function laiAnalyze(d){
+  const text=String(d.caption||'').trim();
+  if(text.length<60||text.length>LAI_MAX||d.yt)return null; // troppo corto (serve la copertina) o troppo lungo per il telefono
+  if(sourceOf(d.url||'')==='YouTube'&&!d.haveSteps)return null; // il server può far guardare il video a Gemini
+  if(await laiStatus()!=='available')return null;
+  const t0=Date.now();let r;
+  // iPhone: generazione guidata (il modello riempie una scheda fissa, vedi LocalAI.recipe); Android: risposta JSON da leggere
+  const ask=window.AndroidShare?.localAi?laiPrompt(d.title||'',text):`Titolo del post: ${d.title||''}\nTesto:\n---\n${text}\n---`;
+  try{r=jsonIn(await laiCall('recipe',ask,1500))}catch(e){console.log('AI del telefono:',e.message);return null}
+  if(!r||r.is_recipe===false)return null; // nel dubbio decide il server
+  const ing=(r.ingredients||[]).map(x=>String(x).trim()).filter(Boolean),st=(r.steps||[]).map(x=>String(x).trim()).filter(x=>/\p{L}{2}/u.test(x));
+  if(ing.length<2||!st.length||!laiFaithful(ing,text)||!laiStepsOk(st,ing,text)||!laiComplete(ing,st,text))return null;
+  console.log('AI del telefono:',LAI.kind,Date.now()-t0,'ms');
+  return {servings:Math.min(100,Math.max(0,parseInt(r.servings)||0)),is_recipe:true,title:String(r.title||''),diets:[],country:'',region:'',
+    time:Math.max(0,+r.time||0),timeHow:'',timeNote:'',inferred:false,fromVideo:false,ingredients:ing,steps:st,local:LAI.kind,
+    cat:(Array.isArray(r.cat)?String(r.cat[0]||''):String(r.cat||'')).replace(/.*\|.*/,'')};
+}
+async function laiInfo(){const el=$('#laiInfo');if(!el)return;$('#laiOn').checked=!load('laiOff',false);
+  const st=await laiStatus(true);
+  el.textContent=st==='off'?'Spenta: le ricette le legge sempre il server di Gnamina.'
+    :st==='available'?(LAI.kind==='cloud'?'Questo iPhone legge le ricette con l\'AI di Apple, gratis: non consuma le analisi di Gnamina.':'Questo telefono legge le ricette da solo, gratis e senza internet: non consuma le analisi di Gnamina.')
+    :st==='downloading'?'Il telefono sta scaricando la sua AI: per ora le ricette le legge il server di Gnamina.'
+    :'Questo dispositivo non ha un\'AI propria: le ricette le legge il server di Gnamina.'}
+$('#laiOn').onchange=e=>{save('laiOff',!e.target.checked);LAI.at=0;laiInfo()};
+
 // Estrae i dati di una ricetta da un post social (didascalia + copertina, analizzati dal server)
 async function aiAnalyze(d){
+  const loc=await laiAnalyze(d).catch(()=>null);
+  if(loc)return loc;
   const {result:r}=await server('/analyze',{url:d.url,source:sourceOf(d.url),author:d.author,caption:d.caption||d.title,image:d.image,cats,seconds:d.seconds||0,haveSteps:!!d.haveSteps,...(d.yt?{yt:d.yt}:{})});
   if(!r)throw new Error('Risposta AI non valida');
   return {servings:Math.min(100,Math.max(0,parseInt(r.servings)||0)),is_recipe:r.is_recipe!==false,title:r.title||'',cat:r.cat||'',diets:(r.diets||[]).filter(x=>DIETS.includes(x)),country:r.country||'',region:r.region||'',
@@ -1368,7 +1450,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=159; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=160; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2711,7 +2793,7 @@ function quickSaveUI(){const f=$('#f');if(rSteps[rStep]!=='src')return false;
 async function runAnalysis(url,overwrite){
   await readRecipe(url,overwrite);
   if($('#f').url.value===url&&quickSaveUI()){const f=$('#f'),n=lines(f.ingredients.value).length,st=lines(f.steps.value).length;
-    showPv(`Ricetta completa: «${f.title.value.trim()}» · ${n} ingredienti · ${st} passagg${st===1?'io':'i'}. Puoi salvarla subito`)}
+    showPv(`Ricetta completa: «${f.title.value.trim()}» · ${n} ingredienti · ${st} passagg${st===1?'io':'i'}${extra.aiBy?(extra.aiBy==='cloud'?' · letta con l\'AI di Apple':' · letta dal telefono'):''}. Puoi salvarla subito`)}
 }
 async function readRecipe(url,overwrite){
   const f=$('#f');showPv('Analizzo la ricetta…');
@@ -2746,9 +2828,11 @@ async function readRecipe(url,overwrite){
     try{
       // didascalia + parlato del video: ciò che il cuoco dice a voce vale come testo del post
       const cap=[a.caption,a.transcript?'Parlato nel video:\n'+a.transcript:''].filter(Boolean).join('\n\n');
+      extra.aiBy='';
       const r=await aiAnalyze({url,title:f.title.value,caption:cap,image:a.image,author:a.author,seconds:a.seconds,haveSteps:!!(a.stepsFromSchema&&a.steps?.length),yt:a.stepsFromSchema&&a.steps?.length?'':a.siteVideo});
       if(f.url.value!==url)return;
       if(!r.is_recipe){showPv('L\'AI non trova una ricetta in questo post');return}
+      extra.aiBy=r.local||'';
       // nella ricetta nuova vince il nome dell'AI: la prima riga della didascalia spesso non è il nome del piatto («Tiramisù salva la ricetta», «Nuova VIDEO RICETTA»)
       if(r.title&&(overwrite||!editing||junkTitle(f.title.value)||f.title.value.length>80))f.title.value=dishName(r.title);
       if(cats.includes(r.cat))f.cat.value=BASE_RX.test(f.title.value.trim())?'Altro':r.cat;
@@ -2762,7 +2846,7 @@ async function readRecipe(url,overwrite){
       if(r.servings&&(overwrite||!editing||!f.servings.value))f.servings.value=r.servings;
       if(r.country){f.country.value=r.country;f.region.value=r.region}
       setDiets(r.diets);
-      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata${a.transcript?' (didascalia + parlato del video)':''} · ${r.ingredients.length} ingredienti${a.partial?' · attenzione: il video è lungo e ho potuto trascrivere solo la prima parte, il procedimento può essere incompleto: guarda il video e completa i passaggi':''}${!r.time?' · tempo non indicato nel post':r.timeHow==='sommato'?` · tempo ≈ ${r.time} min, somma dei passaggi (riposi, cotture, forno)`:r.timeHow==='stimato'?` · tempo ≈ ${r.time} min, stimato dai passaggi${r.timeNote?` (${r.timeNote})`:''}`:r.timeHow==='video'?` · tempo ${r.time} min, detto nel video`:` · tempo ${r.time} min, indicato nel post`}${r.fromVideo?' · ingredienti e passaggi trascritti guardando il video: controllali':a.fromSite&&a.stepsFromSchema&&a.steps?.length?' · procedimento dal sito del cuoco':!r.steps.length&&/instagram\.com\/(?:[\w.]+\/)?p\//i.test(url)&&!a.transcript?' · nel post ci sono solo gli ingredienti: il procedimento scrivilo tu nel passo «Preparazione»':!r.steps.length&&['YouTube','Instagram','Facebook'].includes(sourceOf(url))?' · il procedimento è solo detto nel video: guardalo e scrivilo tu nel passo «Preparazione»':''}`);
+      showPv(r.inferred?'Analisi AI: il post non scrive gli ingredienti, elencati quelli tipici senza dosi':`Analisi AI completata${r.local?(r.local==='cloud'?' con l\'AI di Apple':' dal telefono'):''}${a.transcript?' (didascalia + parlato del video)':''} · ${r.ingredients.length} ingredienti${a.partial?' · attenzione: il video è lungo e ho potuto trascrivere solo la prima parte, il procedimento può essere incompleto: guarda il video e completa i passaggi':''}${!r.time?' · tempo non indicato nel post':r.timeHow==='sommato'?` · tempo ≈ ${r.time} min, somma dei passaggi (riposi, cotture, forno)`:r.timeHow==='stimato'?` · tempo ≈ ${r.time} min, stimato dai passaggi${r.timeNote?` (${r.timeNote})`:''}`:r.timeHow==='video'?` · tempo ${r.time} min, detto nel video`:` · tempo ${r.time} min, indicato nel post`}${r.fromVideo?' · ingredienti e passaggi trascritti guardando il video: controllali':a.fromSite&&a.stepsFromSchema&&a.steps?.length?' · procedimento dal sito del cuoco':!r.steps.length&&/instagram\.com\/(?:[\w.]+\/)?p\//i.test(url)&&!a.transcript?' · nel post ci sono solo gli ingredienti: il procedimento scrivilo tu nel passo «Preparazione»':!r.steps.length&&['YouTube','Instagram','Facebook'].includes(sourceOf(url))?' · il procedimento è solo detto nel video: guardalo e scrivilo tu nel passo «Preparazione»':''}`);
     }catch(e){showPv(aiErr(e))}
   }
 }
@@ -3008,6 +3092,7 @@ $('#f').onsubmit=e=>{
   const video=f.video.value.trim();
   if(video&&!ytId(video)){f.video.setCustomValidity('Serve il link di un video YouTube (youtube.com o youtu.be)');f.video.reportValidity();return}
   delete extra.partial; // serve solo durante la lettura del link, non va salvato nella ricetta
+  delete extra.aiBy;
   const rec={...extra,id:editing?.id||Date.now().toString(36),created:editing?.created||Date.now(),t:Date.now(),url,video,
     title:f.title.value.trim(),cat:f.cat.value,time:+f.time.value||null,servings:+f.servings.value||null,diets:getDiets(),country:f.country.value.trim(),region:f.region.value.trim(),
     rating:formRating,ingredients:lines(f.ingredients.value),steps:lines(f.steps.value),
@@ -3153,7 +3238,7 @@ const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${e
 const setTheme=t=>{try{localStorage.setItem('theme',t||'auto')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme;themeColor()}; // predefinito: Trattoria scura; Automatico solo se scelto
 $('#themeSeg').onchange=e=>setTheme(e.target.value);
 $('#styleSeg').onchange=e=>{try{localStorage.setItem('style',e.target.value)}catch{}document.documentElement.dataset.style=e.target.value;window.righeRun?.()};
-$('#setBtn').onclick=()=>{const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();accUI();syncUI();if(aiOn())initZone();$('#set').showModal()};
+$('#setBtn').onclick=()=>{laiInfo();const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();accUI();syncUI();if(aiOn())initZone();$('#set').showModal()};
 $('#camBtn').onclick=()=>$('#camIn').click();
 $('#camIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)photoSearch(f)};
 $('#setClose').onclick=()=>$('#set').close();

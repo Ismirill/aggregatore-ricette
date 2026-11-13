@@ -1,5 +1,9 @@
 import UIKit
 import Capacitor
+import WebKit
+#if canImport(FoundationModels)
+import FoundationModels
+#endif
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -94,3 +98,96 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         _ = ApplicationDelegateProxy.shared.application(UIApplication.shared, continue: userActivity, restorationHandler: { _ in })
     }
 }
+
+// AI di Apple per leggere le ricette, gratis per l'utente: il modello dentro il telefono (iOS 26 con Apple Intelligence).
+// Con iOS 27 c'è anche il modello grande sui server Apple (PrivateCloudComputeLanguageModel, con una quota per persona e
+// LanguageModelSession(model:)), ma serve il permesso com.apple.developer.private-cloud-compute, che Apple concede su
+// richiesta: senza, l'app si chiude con un errore fatale (provato sul simulatore iOS 27.2 il 13/11/2026). Va aggiunto solo
+// a permesso ottenuto e quando GitHub compila con Xcode 27 (oggi usa Xcode 26.6, che non ha quella classe).
+// La pagina chiama webkit.messageHandlers.localAi.postMessage({id, op: "status" | "run", prompt, max})
+// e riceve la risposta con window.onLocalAi(id, ok, testo), come su Android (MainActivity.localAi).
+class GnaminaViewController: CAPBridgeViewController, WKScriptMessageHandler {
+    override func capacitorDidLoad() {
+        super.capacitorDidLoad()
+        webView?.configuration.userContentController.add(self, name: "localAi")
+    }
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard let d = message.body as? [String: Any], let id = d["id"] as? String else { return }
+        let op = d["op"] as? String ?? "status", prompt = d["prompt"] as? String ?? "", max = d["max"] as? Int ?? 1500
+        Task { @MainActor in
+            var ok = true, res = ""
+            do { res = try await LocalAI.handle(op: op, prompt: prompt, max: max) } catch { ok = false; res = String(describing: error) }
+            self.reply(id, ok, res)
+        }
+    }
+
+    private func reply(_ id: String, _ ok: Bool, _ text: String) {
+        guard let data = try? JSONSerialization.data(withJSONObject: [id, text]), let args = String(data: data, encoding: .utf8) else { return }
+        // args = ["id","testo"]: si passano i due valori già in formato JavaScript
+        webView?.evaluateJavaScript("(function(a){window.onLocalAi&&onLocalAi(a[0],\(ok),a[1])})(\(args))", completionHandler: nil)
+    }
+}
+
+enum LocalAI {
+    static func handle(op: String, prompt: String, max: Int) async throws -> String {
+        #if canImport(FoundationModels)
+        if op == "recipe" { return try await recipe(prompt, max) }
+        if op == "run" { return try await run(prompt, max) }
+        return status()
+        #else
+        return "unavailable"
+        #endif
+    }
+
+    #if canImport(FoundationModels)
+    // "available:device" (dentro il telefono) | "downloading" | "unavailable"
+    static func status() -> String {
+        if #available(iOS 26.0, *) {
+            let m = SystemLanguageModel.default
+            switch m.availability {
+            case .available: return m.supportsLocale(Locale(identifier: "it_IT")) ? "available:device" : "unavailable"
+            case .unavailable(.modelNotReady): return "downloading"
+            default: return "unavailable"
+            }
+        }
+        return "unavailable"
+    }
+
+    static func run(_ prompt: String, _ max: Int) async throws -> String {
+        if #available(iOS 26.0, *) {
+            let opts = GenerationOptions(temperature: 0.2, maximumResponseTokens: Swift.max(200, Swift.min(max, 2000)))
+            if case .available = SystemLanguageModel.default.availability {
+                return try await LanguageModelSession().respond(to: prompt, options: opts).content
+            }
+        }
+        throw NSError(domain: "Gnamina", code: 1, userInfo: [NSLocalizedDescriptionKey: "unavailable"])
+    }
+
+    // Ricetta con la generazione guidata: il modello riempie la scheda RicettaAI invece di scrivere JSON libero, che il modello
+    // piccolo sbagliava in 12 casi su 23 (prova sul Mac del 13/11/2026). Risponde con il JSON della scheda.
+    static func recipe(_ text: String, _ max: Int) async throws -> String {
+        guard #available(iOS 26.0, *), case .available = SystemLanguageModel.default.availability else {
+            throw NSError(domain: "Gnamina", code: 1, userInfo: [NSLocalizedDescriptionKey: "unavailable"])
+        }
+        let instr = "Sei un assistente di cucina. Dal testo che ricevi (la descrizione di un post di cucina e, se c'è, il parlato del video) estrai la ricetta così come è scritta o detta, in italiano, senza inventare niente: non aggiungere ingredienti o passaggi che il testo non contiene."
+        let opts = GenerationOptions(temperature: 0.2, maximumResponseTokens: Swift.max(200, Swift.min(max, 2000)))
+        let c = try await LanguageModelSession(instructions: instr).respond(to: text, generating: RicettaAI.self, options: opts).content
+        let d: [String: Any] = ["is_recipe": c.is_recipe, "title": c.title, "servings": c.servings, "time": c.time, "cat": c.cat, "ingredients": c.ingredients, "steps": c.steps]
+        return String(data: try JSONSerialization.data(withJSONObject: d), encoding: .utf8) ?? "{}"
+    }
+    #endif
+}
+
+#if canImport(FoundationModels)
+@available(iOS 26.0, *)
+@Generable struct RicettaAI {
+    @Guide(description: "true se il testo contiene una ricetta") var is_recipe: Bool
+    @Guide(description: "nome del piatto, in italiano") var title: String
+    @Guide(description: "numero di persone se detto, altrimenti 0") var servings: Int
+    @Guide(description: "minuti totali se detti, altrimenti 0") var time: Int
+    @Guide(.anyOf(["Antipasti", "Primi", "Secondi", "Contorni", "Piatti unici", "Lievitati", "Dolci", "Altro"])) var cat: String
+    @Guide(description: "gli ingredienti nominati nel testo, uno per voce, con la dose se c'è") var ingredients: [String]
+    @Guide(description: "i passaggi del procedimento, uno per voce, frasi complete in ordine; vuoto se il testo non spiega come si fa. Mai l'elenco degli ingredienti") var steps: [String]
+}
+#endif

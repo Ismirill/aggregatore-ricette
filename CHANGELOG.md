@@ -4,6 +4,18 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-13
+
+- **Versione 160, l'AI del telefono legge le ricette gratis** (richiesta dell'utente: far usare a ogni persona l'AI gratuita che ha già, in modo semplicissimo; prima prova, non ancora pubblicata).
+  - **Come funziona:** quando si importa un post, prima prova l'AI dentro il telefono; se non c'è, o la ricetta esce incompleta, la legge il server come prima. L'utente non deve fare niente: nessuna chiave, nessun account in più. Nelle Impostazioni una riga dice cosa usa il telefono, con una casella per spegnerla; il messaggio finale dice «letta dal telefono».
+  - **iPhone (iOS 26 con Apple Intelligence):** modello di Apple dentro il telefono con la generazione guidata (il modello riempie una scheda fissa: titolo, persone, minuti, tipo di piatto, ingredienti, passaggi).
+  - **Android 8 e successivi con Gemini Nano** (Pixel 9 e 10, Galaxy recenti, Xiaomi 15, vivo X200 e X300): ML Kit Prompt API (beta). L'app resta installabile da Android 5.1: la libreria si usa solo da Android 8 in su. L'APK cresce di 2 MB; il modello lo scarica il sistema.
+  - **Cosa resta al server:** video YouTube senza procedimento scritto (li guarda Gemini), post con poco testo (serve la copertina), testi oltre 6.000 caratteri, trascrizione del parlato.
+  - **Controlli sulla risposta del telefono:** almeno 2 ingredienti e un passaggio, ingredienti e parole dei passaggi presenti nel testo (niente invenzioni), passaggi diversi dall'elenco degli ingredienti, tanti ingredienti quante le dosi scritte, e non uno o due passaggi per un testo lungo. Altrimenti decide il server.
+  - **Prova (modello di Apple, sul Mac, 23 post social della quinta prova):** con JSON libero 12 risposte su 23 avevano virgolette mancanti; con la generazione guidata e i controlli il telefono risolve 11 post su 23, quasi tutti completi come quelli del server, e gli altri 12 passano al server. Tempo medio 8 secondi. Sul simulatore iPhone (iOS 27.2) gli struffoli escono con 5 ingredienti e 4 passaggi «letta dal telefono» (il server: 6 e 4).
+  - **Non provato:** Gemini Nano su un telefono vero (non gira sul simulatore Android, e su questo Mac manca l'immagine di sistema); su Android la risposta è JSON libero, riparato nelle virgolette.
+  - **Modello grande sui server Apple (iOS 27):** c'è, gratis con una quota per persona, ma serve un permesso che Apple concede su richiesta; senza, l'app si chiude. Il codice non lo usa: è descritto in `AppDelegate.swift` per quando ci sarà il permesso e GitHub compilerà con Xcode 27.
+
 ## 2026-11-12
 
 - **Versione 159, il procedimento dal video del blog e le ultime correzioni della quinta prova** (segnalazione dell'utente: dal reel Facebook della torta rovesciata alla ricotta non usciva la preparazione).

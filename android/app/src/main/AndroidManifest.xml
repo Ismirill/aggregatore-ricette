@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- L'AI del telefono (ML Kit GenAI) richiede Android 8 e porta Play Services 18.9 (Android 6): l'app resta installabile da Android 5.1,
+         usa l'AI solo da 8 in su (LocalAi); su Android 5.1 Google non aggiorna più i Play Services, quindi l'accesso Google lì era già a rischio -->
+    <uses-sdk tools:overrideLibrary="com.google.mlkit.genai.prompt,com.google.mlkit.genai.common,com.google.mlkit.genai.schema,com.google.android.gms.common" />
 
     <application
         android:allowBackup="true"

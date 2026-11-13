@@ -608,5 +608,25 @@ public class MainActivity extends BridgeActivity {
             i.putExtra(Intent.EXTRA_TITLE, name);
             runOnUiThread(() -> startActivityForResult(i, SAVE_FILE));
         }
+
+        // AI del telefono (Gemini Nano, vedi LocalAi): op = "status" | "download" | "run". La risposta arriva alla pagina
+        // con window.onLocalAi(id, ok, testo); su Android sotto l'8 (API 26) la risposta è sempre "unavailable".
+        @JavascriptInterface
+        public void localAi(String id, String op, String prompt, int maxTokens) {
+            new Thread(() -> {
+                boolean ok = true;
+                String res;
+                try {
+                    if (android.os.Build.VERSION.SDK_INT < 26) res = "unavailable";
+                    else if ("status".equals(op)) res = LocalAi.status();
+                    else if ("download".equals(op)) { LocalAi.download(); res = "downloading"; }
+                    else res = LocalAi.run(prompt == null ? "" : prompt, maxTokens);
+                } catch (Throwable e) {
+                    ok = false;
+                    res = String.valueOf(e.getMessage());
+                }
+                js("window.onLocalAi&&onLocalAi(" + JSONObject.quote(id) + "," + ok + "," + JSONObject.quote(res) + ")");
+            }).start();
+        }
     }
 }
