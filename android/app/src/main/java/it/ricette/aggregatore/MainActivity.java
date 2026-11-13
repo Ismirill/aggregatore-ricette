@@ -45,6 +45,8 @@ public class MainActivity extends BridgeActivity {
     // Aggiornamento dell'app: l'APK nuovo si scarica dentro l'app (DownloadManager) e alla fine si apre l'installazione di Android
     private long apkDl = -1;
     private android.content.BroadcastReceiver apkRx;
+    // WebView fuori schermo che contiene le pagine da stampare (libro di cucina)
+    private android.webkit.WebView printView;
 
     // Cancella gli APK scaricati per l'aggiornamento: all'avvio (la versione nuova è già installata) e prima di un nuovo download
     private void cleanApks() {
@@ -422,6 +424,47 @@ public class MainActivity extends BridgeActivity {
                 if (on) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             });
+        }
+
+        // Stampa del libro di cucina (o di una ricetta): la pagina prepara l'HTML già impaginato, qui un WebView fuori schermo lo
+        // carica e lo passa al servizio di stampa di Android, che offre la stampante e «Salva come PDF». size = "a4" | "a5"
+        @JavascriptInterface
+        public void printHtml(String html, String name, String size) {
+            runOnUiThread(() -> {
+                android.webkit.WebView w = new android.webkit.WebView(MainActivity.this);
+                printView = w; // il riferimento resta finché la stampa non è partita
+                w.setWebViewClient(new android.webkit.WebViewClient() {
+                    @Override public void onPageFinished(android.webkit.WebView v, String url) {
+                        // un attimo in più per i caratteri scaricati da Google Fonts e le foto
+                        v.postDelayed(() -> {
+                            try {
+                                android.print.PrintManager pm = (android.print.PrintManager) getSystemService(PRINT_SERVICE);
+                                String job = (name == null || name.isEmpty()) ? "Ricettario Gnamina" : name;
+                                android.print.PrintAttributes attrs = new android.print.PrintAttributes.Builder()
+                                    .setMediaSize("a5".equals(size) ? android.print.PrintAttributes.MediaSize.ISO_A5 : android.print.PrintAttributes.MediaSize.ISO_A4)
+                                    .setMinMargins(android.print.PrintAttributes.Margins.NO_MARGINS).build();
+                                pm.print(job, v.createPrintDocumentAdapter(job), attrs);
+                            } catch (Exception e) {
+                                js("window.toast&&toast('Stampa non riuscita: " + String.valueOf(e.getMessage()).replace("'", "") + "')");
+                            }
+                        }, 1500);
+                    }
+                });
+                w.loadDataWithBaseURL("https://gnamina.it/", html, "text/html", "utf-8", null);
+            });
+        }
+
+        // Copia un testo negli appunti (link della ricetta, codice ricettario, backup): nel WebView navigator.clipboard spesso rifiuta
+        @JavascriptInterface
+        public boolean copyText(String text) {
+            java.util.concurrent.FutureTask<Boolean> ft = new java.util.concurrent.FutureTask<>(() -> {
+                android.content.ClipboardManager cm = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                if (cm == null) return false;
+                cm.setPrimaryClip(android.content.ClipData.newPlainText("Gnamina", text == null ? "" : text));
+                return true;
+            });
+            runOnUiThread(ft);
+            try { return ft.get(2, java.util.concurrent.TimeUnit.SECONDS); } catch (Exception e) { return false; }
         }
 
         // Il testo negli appunti per il tasto «📋 Incolla»: nel WebView navigator.clipboard.readText non funziona.

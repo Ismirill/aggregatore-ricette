@@ -110,9 +110,45 @@ class GnaminaViewController: CAPBridgeViewController, WKScriptMessageHandler {
     override func capacitorDidLoad() {
         super.capacitorDidLoad()
         webView?.configuration.userContentController.add(self, name: "localAi")
+        webView?.configuration.userContentController.add(self, name: "printHtml")
+    }
+
+    // Stampa del libro di cucina: l'HTML arriva già impaginato (pagine A4 o A5), un WKWebView nascosto lo carica e il
+    // pannello di stampa di Apple lo stampa con AirPrint o lo salva in PDF. Il formato della pagina lo fissa PageRenderer.
+    private var printWeb: WKWebView?
+    private var printLoader: PrintLoader?
+    private func printHTML(_ html: String, name: String, size: String) {
+        let w = WKWebView(frame: CGRect(x: 0, y: 0, width: 800, height: 1100))
+        w.alpha = 0.01
+        view.insertSubview(w, at: 0)
+        let loader = PrintLoader { [weak self] web in
+            let paper = size == "a5" ? CGSize(width: 419.5, height: 595.3) : CGSize(width: 595.3, height: 841.9)
+            let r = PageRenderer(paper: paper)
+            r.addPrintFormatter(web.viewPrintFormatter(), startingAtPageAt: 0)
+            let info = UIPrintInfo(dictionary: nil)
+            info.outputType = .general
+            info.jobName = name
+            let pc = UIPrintInteractionController.shared
+            pc.printInfo = info
+            pc.printPageRenderer = r
+            pc.present(animated: true) { _, _, _ in
+                self?.printWeb?.removeFromSuperview()
+                self?.printWeb = nil
+                self?.printLoader = nil
+            }
+        }
+        w.navigationDelegate = loader
+        printWeb = w
+        printLoader = loader
+        w.loadHTMLString(html, baseURL: URL(string: "https://gnamina.it/"))
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        if message.name == "printHtml" {
+            guard let d = message.body as? [String: Any], let html = d["html"] as? String else { return }
+            printHTML(html, name: d["name"] as? String ?? "Ricettario Gnamina", size: d["size"] as? String ?? "a4")
+            return
+        }
         guard let d = message.body as? [String: Any], let id = d["id"] as? String else { return }
         let op = d["op"] as? String ?? "status", prompt = d["prompt"] as? String ?? "", max = d["max"] as? Int ?? 1500
         Task { @MainActor in
@@ -191,3 +227,20 @@ enum LocalAI {
     @Guide(description: "i passaggi del procedimento, uno per voce, frasi complete in ordine; vuoto se il testo non spiega come si fa. Mai l'elenco degli ingredienti") var steps: [String]
 }
 #endif
+
+// Avvisa quando l'HTML da stampare è caricato (con un attimo in più per caratteri e foto)
+final class PrintLoader: NSObject, WKNavigationDelegate {
+    let done: (WKWebView) -> Void
+    init(_ done: @escaping (WKWebView) -> Void) { self.done = done }
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { self.done(webView) }
+    }
+}
+
+// Pagine della misura giusta (A4 o A5, in punti) e senza margini: le pagine HTML hanno già i loro
+final class PageRenderer: UIPrintPageRenderer {
+    let paper: CGSize
+    init(paper: CGSize) { self.paper = paper; super.init() }
+    override var paperRect: CGRect { CGRect(origin: .zero, size: paper) }
+    override var printableRect: CGRect { CGRect(origin: .zero, size: paper) }
+}

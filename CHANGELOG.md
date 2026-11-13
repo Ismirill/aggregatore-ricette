@@ -4,6 +4,18 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-14
+
+- **Versione 162, il libro di cucina da stampare e il link che si copia** (richieste dell'utente).
+  - **Copia del link (segnalazione):** l'icona del lettore YouTube dentro la ricetta diceva «Impossibile copiare il link negli appunti», perché al riquadro del video mancava il permesso di scrivere negli appunti. Ora ce l'ha. In più nella ricetta c'è il pulsante «📋 Copia il link» dell'app, che nell'APK passa da Android (il WebView rifiuta gli appunti del browser). La stessa copia sicura vale per codice ricettario, backup e didascalie.
+  - **Segnalibro «Nel libro»:** sulle schede delle tue ricette (in alto a destra) e dentro la ricetta («🔖 Metti nel libro»). Nel libro vanno le ricette con il segnalibro.
+  - **Numeri che non cambiano:** una ricetta che entra nel libro prende la lettera della sezione e il numero successivo (P14 = quattordicesimo primo). Se la togli, il suo numero non passa ad altre. Se cambia sezione, prende un numero nella sezione nuova.
+  - **Pagina «📖 Il mio libro»** (dal primo bottone tra i tipi di piatto in «Le mie»): titolo e dedica; le ricette divise per sezione con la spunta, «Tutte» e «Nessuna» e lo stato (nuova, cambiata, stampata il…); lo stile (Gnamina, Grandi caratteri, Quaderno della nonna, Trattoria, Classico, Moderno) con l'anteprima di copertina e ricetta; il formato (quaderno A4 con 4 fori, quaderno A5 con 2 fori, libro rilegato con i numeri di pagina); foto sì o no, righe per gli appunti, fronte e retro. La prima volta, se le ricette sono al massimo 30, sono già tutte nel libro.
+  - **Stampa:** tutto il libro (copertina, dedica, indice, una pagina d'inizio per ogni sezione, ricette), oppure solo le nuove e le cambiate con l'indice aggiornato, oppure solo le nuove. Una ricetta lunga continua sulla pagina dopo, con i numeri dei passaggi che proseguono. Dopo la stampa le ricette risultano stampate; «Non le ho stampate» annulla. Dalla ricetta, «🖨 Stampa la ricetta» stampa solo quella, con il suo numero se è nel libro.
+  - **Come si stampa:** sul sito con il menu di stampa del browser (anche «Salva come PDF»), nell'APK con il servizio di stampa di Android, su iPhone con il pannello di stampa di Apple (AirPrint o PDF).
+  - **Provato:** nel browser segnalibro, pagina del libro, spunte, numeri, stato dopo la stampa e annullamento, copia del link e stampa della singola ricetta. Con cinque ricette di prova (una di 22 passaggi) Chrome stampa in PDF tutti e sei gli stili in A4, il Gnamina in A5 e il Moderno rilegato, con le pagine attese e nessuna pagina vuota in più. Android e iOS compilano.
+  - **Non provato:** la stampa su un telefono vero. Su Android il servizio di stampa e su iPhone il pannello di Apple sono scritti ma non provati: il simulatore iPhone non si è avviato. Il codice QR per aprire il video dalla pagina stampata non c'è ancora.
+
 ## 2026-11-13
 
 - **Versione 161, il passo del link più pulito e il pulsante «Nuova ricetta» più pieno** (richiesta dell'utente).

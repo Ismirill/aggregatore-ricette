@@ -164,6 +164,29 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 @keyframes lnkRun{0%{transform:translateX(-110%)}100%{transform:translateX(320%)}}
 @media (prefers-reduced-motion:reduce){.lnkProg i{animation:none;width:100%;opacity:.5}}
 #rSave:disabled{opacity:.45;cursor:default;box-shadow:none}
+/* Libro di cucina: segnalibro sulla scheda (pieno = nel libro) e pagina «Il mio libro» */
+.ribBtn{position:absolute;right:8px;top:0;z-index:3;width:34px;height:42px;border:0;padding:0 6px 8px;background:none;cursor:pointer;display:flex;align-items:flex-start;justify-content:center}
+.ribBtn svg{width:22px;height:30px;fill:color-mix(in srgb,var(--card) 70%,transparent);stroke:#fff;stroke-width:1.6;filter:drop-shadow(0 1px 2px #0006)}
+.ribBtn.on svg{fill:var(--acc);stroke:color-mix(in srgb,var(--acc) 70%,#000)}
+.thumb:has(.ribBtn) .aiTag{top:44px}
+.libChip{border-color:var(--acc)!important}
+#libro .libSec{margin:10px 0 4px}
+#libro .libSecH{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:6px 0;border-bottom:2px solid var(--bd)}
+#libro .libSecH b{font-size:1.02rem}
+#libro .libRow{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid color-mix(in srgb,var(--bd) 60%,transparent);font-weight:400;margin:0}
+#libro .libRow input{width:22px;height:22px;flex:none;margin:0;accent-color:var(--acc)}
+#libro .libT{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#libro .libNo{font-weight:700;color:var(--acc);font-size:.85rem}
+#libro .libTag{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+#libro .libTag.new{background:#fde7bd;color:#7a4a00}#libro .libTag.mod{background:#f8d7d2;color:#8a1f12}#libro .libTag.ok{background:color-mix(in srgb,var(--bd) 50%,transparent);color:var(--mut)}
+#libro .libSeg{flex-wrap:wrap}#libro .libSeg small{font-weight:400;opacity:.75}
+#libro .libChk{display:flex;gap:10px;align-items:flex-start;font-weight:400;margin:8px 0 0}#libro .libChk input{width:20px;height:20px;flex:none;margin:2px 0 0;accent-color:var(--acc)}
+#libro .libOpt{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1.5px solid var(--bd);border-radius:12px;margin:8px 0 0;font-weight:400}
+#libro .libOpt:has(input:checked){border-color:var(--acc)}#libro .libOpt.dis{opacity:.5}
+#libro .libOpt input{width:20px;height:20px;flex:none;margin:2px 0 0;accent-color:var(--acc)}#libro .libOpt b{display:block}#libro .libOpt small{color:var(--mut)}
+#libro .libPrev{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:380px;margin:12px 0 0}
+#libro .libPrev .libdoc>div{display:contents}
+#libro .libRibI svg{width:12px;height:15px;fill:var(--acc);vertical-align:-2px}
 #wizNav.lnk>span{flex:1;flex-direction:column;align-items:stretch;gap:4px}
 #wizNav.lnk #rSave,#wizNav.lnk #rNext.pri{width:100%;justify-content:center;min-height:3.2rem;font-size:1.05rem}
 #wizNav.lnk #rNext:not(.pri){order:2;border:0;background:none;box-shadow:none;color:var(--mut);text-decoration:underline;font-weight:600}
@@ -876,6 +899,10 @@ details summary{cursor:pointer}
   <section class="sec" id="acctProf"><h3 id="profH">Il tuo profilo Gnammer</h3><div id="profBox"></div></section>
   <input type="file" id="profPhoto" accept="image/*" hidden>
 </dialog>
+<dialog id="libro">
+  <div class="dhead stk"><h2>📖 Il mio libro di cucina</h2><button class="icon" id="libClose" aria-label="Chiudi">✕</button></div>
+  <div id="libBody"></div>
+</dialog>
 <dialog id="set">
   <div class="dhead stk"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi">✕</button></div>
   <section class="sec"><h3>Aspetto</h3><div class="seg" id="styleSeg" style="margin-bottom:8px"><label><input type="radio" name="style" value="trattoria"><span>Trattoria</span></label><label><input type="radio" name="style" value="crema"><span>Crema</span></label><label><input type="radio" name="style" value="quaderno"><span>Quaderno</span></label></div><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div><p class="meta quadNote">Il Quaderno è sempre chiaro, come il sito: Chiaro e Scuro valgono per Trattoria e Crema.</p></section>
@@ -1460,7 +1487,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=161; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=162; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1729,7 +1756,7 @@ function card(i){
   const gara=i.contest?`<div class="badges"><span class="bdg gara">🏆 In gara</span></div>`:'';
   return `<div class="item" data-id="${i.id}"${pubId(i)?` data-pub="${esc(pubId(i))}"`:''}>
     <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${i.imgGen?'<span class="aiTag" title="Immagine generata con l\'AI">AI</span>':''}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
-      <span class="cat">${esc(i.cat||'Altro')}</span>${vid?'<span class="play" title="Con video">▶</span>':''}${canRate(i)?svOf(i):''}</div>
+      <span class="cat">${esc(i.cat||'Altro')}</span>${vid?'<span class="play" title="Con video">▶</span>':''}${canRate(i)?svOf(i):''}${isMine(i)&&libOk(i)?`<button type="button" class="ribBtn${i.inBook?' on':''}" data-rib="${esc(i.id)}" aria-pressed="${!!i.inBook}" aria-label="${i.inBook?'Nel libro di cucina: tocca per togliere':'Metti nel libro di cucina'}">${RIB_SVG}</button>`:''}</div>
     <div class="b"><h3>${esc(i.title||i.url)}</h3>
       <div class="facts">${facts.map(f=>`<span>${f}</span>`).join('')}</div>${gara}</div></div>`;
 }
@@ -1776,7 +1803,7 @@ function render(){
   const showIntl=view==='book'&&cur==='Internazionali',showBk=view==='book'&&cur==='Colazione',showIta=view==='book'&&cur==='Italiane'&&!q;
   const data=showIntl?src().filter(isIntl):showBk?BK:showIta?src().filter(i=>!isIntl(i)):src();
   const counts={};src().forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);if(view==='book'&&book){counts['Internazionali']=book.filter(isIntl).length;counts['Italiane']=book.length-counts['Internazionali']}if(view==='book')counts['Colazione']=BK.length;
-  $('#chips').innerHTML=[...(view==='book'?['Italiane']:[]),'Tutte',...(view==='book'?['Colazione','Internazionali']:[]),...cats].filter(c=>c==='Tutte'||counts[c]).map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${c==='Italiane'?'🇮🇹 ':c==='Internazionali'?'🌍 ':c==='Colazione'?'☕ ':''}${esc(c)}<small>${c==='Tutte'?src().length:counts[c]}</small></button>`).join('');
+  $('#chips').innerHTML=(view==='mine'&&items.some(libOk)?`<button class="chip libChip" data-lib="1">📖 Il mio libro<small>${items.filter(i=>i.inBook&&libOk(i)).length}</small></button>`:'')+[...(view==='book'?['Italiane']:[]),'Tutte',...(view==='book'?['Colazione','Internazionali']:[]),...cats].filter(c=>c==='Tutte'||counts[c]).map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${c==='Italiane'?'🇮🇹 ':c==='Internazionali'?'🌍 ':c==='Colazione'?'☕ ':''}${esc(c)}<small>${c==='Tutte'?src().length:counts[c]}</small></button>`).join('');
   // seconda riga per le colazioni: classiche, dolci, salate
   if(showBk){const KL={classica:'Classiche',dolce:'Dolci',salata:'Salate'};if(cur2&&!KL[cur2])cur2='';
     $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutte<small>${BK.length}</small></button>`+Object.entries(KL).map(([k,l])=>`<button class="chip${k===cur2?' on':''}" data-p="${k}">${l}<small>${BK.filter(r=>r.kind===k).length}</small></button>`).join('')}
@@ -2299,7 +2326,14 @@ function showPlan(P){
     $('#shopCopy').onclick=()=>copyText(SHOP_TXT,'Lista copiata');
     $('#shopShare').onclick=()=>shareText('Lista della spesa',SHOP_TXT,$('#shopAlt'))};
 }
-async function copyText(t,msg){try{await navigator.clipboard.writeText(t);toast(msg)}catch{prompt('Copia il testo:',t)}}
+// Scrive negli appunti: nell'APK con Android (il WebView spesso rifiuta navigator.clipboard), altrimenti con il browser,
+// e come ultima prova con un campo di testo selezionato (Safari vecchi). true se è riuscita.
+async function clipWrite(t){t=String(t??'');
+  try{if(window.AndroidShare?.copyText&&AndroidShare.copyText(t))return true}catch{}
+  try{await navigator.clipboard.writeText(t);return true}catch{}
+  try{const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);const ok=document.execCommand('copy');ta.remove();if(ok)return true}catch{}
+  return false}
+async function copyText(t,msg){if(await clipWrite(t))toast(msg);else prompt('Copia il testo:',t)}
 // Condivide un testo: app Android (menu di condivisione del sistema), browser con Web Share, altrimenti WhatsApp / e-mail / copia
 async function shareText(title,text,alt){
   if(window.AndroidShare?.send){AndroidShare.send(title,text);return}
@@ -2425,12 +2459,16 @@ function openDetail(i){
   // I pulsanti in fondo: una griglia a due colonne, tutti della stessa misura
   const acts=[];
   if(i.url&&i.source!=='Gnamina'&&i.source!=='Aggregatore Ricette')acts.push(`<a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">🔗 ${i.linked?'Apri su GialloZafferano':'Apri originale'}</a>`);
+  const lnk=i.url&&i.source!=='Gnamina'&&i.source!=='Aggregatore Ricette'?i.url:i.video||'';
+  if(lnk)acts.push(`<button type="button" class="btn" id="dCopy" data-u="${esc(lnk)}">📋 Copia il link</button>`);
   acts.push(`<a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">▶ Cerca su YouTube</a>`);
   if(!(i.pronto||i.colazione))acts.push(i.book?'<button class="btn pri" id="dSave">💾 Salva nelle mie</button>':'<button class="btn" id="dEdit">✏️ Modifica</button>');
+  if(isMine(i)&&libOk(i))acts.push(`<button type="button" class="btn" id="dLib">${i.inBook?`🔖 Nel libro · ${esc(i.bookNo||'')}`:'🔖 Metti nel libro'}</button>`);
+  if(libOk(i))acts.push('<button type="button" class="btn" id="dPrint">🖨 Stampa la ricetta</button>');
   acts.push(`<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button>`);
   $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button><div class="dcols"><div class="dmain">
     ${i.clips?.length?`<div class="clipPl" id="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p><p class="row" style="justify-content:flex-start;gap:8px;margin:0 0 10px"><button type="button" class="btn pri" data-vc="share">📤 Pubblica</button><button type="button" class="btn" data-vc="save">💾 Salva nel rullino</button></p></div>`
-      :e?`<iframe class="video ${e.v?'v':'h'}" src="${esc(e.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
+      :e?`<iframe class="video ${e.v?'v':'h'}" src="${esc(e.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
       :i.image?`<div class="heroWrap"><img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;hero&quot; style=&quot;display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)&quot;>${em}</div>'"></div>`
       :`<div class="heroWrap"><div class="hero" style="display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)">${em}</div></div>`}
     <h2 style="margin-top:12px">${esc(i.title||i.url)}</h2>
@@ -2463,6 +2501,9 @@ function openDetail(i){
     draw();
   }
   $('#dClose').onclick=$('#dX').onclick=()=>$('#det').close();
+  if($('#dCopy'))$('#dCopy').onclick=e=>copyText(e.currentTarget.dataset.u,'Link copiato negli appunti');
+  if($('#dLib'))$('#dLib').onclick=e=>{const it=libToggle(i.id);if(!it)return;e.currentTarget.textContent=it.inBook?`🔖 Nel libro · ${it.bookNo}`:'🔖 Metti nel libro';toast(it.inBook?`Nel libro di cucina come ${it.bookNo}`:'Tolta dal libro di cucina');render()};
+  if($('#dPrint'))$('#dPrint').onclick=()=>libPrint([items.find(x=>x.id===i.id)||i],'one',{name:i.title,numbered:!!i.inBook});
   if($('#dCook'))$('#dCook').onclick=()=>cookOpen(i);
   if(i.clips?.length){clipPlayer(i.clipKey,i.clips,$('#clipPl'));$('#clipPl').onclick=e=>{const b=e.target.closest('[data-vc]');if(b)(b.dataset.vc==='share'?clipsShare:clipsSave)(i.clipKey,i.clips,i.title)}}
   if($('#dEdit'))$('#dEdit').onclick=()=>{$('#det').close();openForm(i)};
@@ -3104,7 +3145,7 @@ window.onVideoDone=(ok,action)=>toast(ok?(action==='save'?'Video salvato nella G
 async function clipsShare(key,clips,title){
   let files;try{files=await clipFiles(key,clips,title)}catch{toast('Il video non è su questo dispositivo');return}
   const cap=`${title||'La mia ricetta'} 🍅 Ricetta su Gnamina ${SITE}\n#gnamina #ricetta #cucinaitaliana`;
-  let copied=false;try{await navigator.clipboard.writeText(cap);copied=true}catch{}
+  let copied=await clipWrite(cap);
   if(window.AndroidShare?.videoBegin){toast('Preparo il video…');for(const f of files)await androidVideo('share',f,cap);return}
   if(navigator.canShare?.({files})){try{await navigator.share({files,title:title||'Video della ricetta',text:cap});if(copied)toast('Didascalia copiata: nella descrizione tieni premuto e scegli Incolla')}catch(e){if(e.name!=='AbortError')toast('Condivisione non riuscita')}return}
   files.forEach(dlFile);toast('Video scaricato: caricalo su TikTok, Instagram, Facebook o YouTube dal computer');
@@ -3163,7 +3204,7 @@ async function shareSocial(it,net){const S=SOC[net];if(!S)return;const title=it.
   if(it.clips?.length){try{files=await clipFiles(it.clipKey,it.clips,title)}catch{toast('Il video non è su questo telefono: condivido la foto')}}
   if(!files.length&&it.image){try{const b=await (await fetch(it.image)).blob();if(b.size)files=[new File([b],'gnamina-'+(title.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,40)||'ricetta')+'.jpg',{type:b.type||'image/jpeg'})]}catch{}}
   if(net==='youtube'&&!it.clips?.length){toast(it.video?'Il video è già su YouTube':'Per YouTube serve il video: registralo con «Modifica → Registra il video con la guida»');if(!it.video)return}
-  let copied=false;try{await navigator.clipboard.writeText(cap);copied=true}catch{}
+  let copied=await clipWrite(cap);
   const hint=copied?`Didascalia copiata: in ${S.n} tieni premuto nella descrizione e scegli Incolla`:`Scegli ${S.n}`;
   if(window.AndroidShare?.shareTo){ // app Android: direttamente nell'app scelta
     if(files.length){toast(`Apro ${S.n}…`);for(const f of files){AndroidShare.videoBegin(f.name,(f.type||'video/mp4').split(';')[0]);const CH=768*1024;for(let o=0;o<f.size;o+=CH)AndroidShare.videoChunk(await blobB64(f.slice(o,o+CH)));AndroidShare.videoEndTo(S.pkg,S.n,cap)}}
@@ -3260,10 +3301,436 @@ function filtUI(){const narrow=innerWidth<900,open=!$('.filters').hidden;
   document.documentElement.classList.toggle('fOpen',open);$('#fBtn').classList.toggle('on',n>0||open);$('#fBtn').lastChild.textContent=n?`Filtri · ${n}`:'Filtri'}
 $('#fDone').onclick=()=>{$('.filters').hidden=true;$('#fBtn').setAttribute('aria-expanded','false');filtUI();scrollTo({top:0,behavior:'smooth'})};
 $('#fBtn').onclick=()=>{const f=$('.filters');f.hidden=!f.hidden;$('#fBtn').setAttribute('aria-expanded',!f.hidden);filtUI()};
-$('#chips').onclick=e=>{const c=e.target.closest('.chip');if(c){cur=c.dataset.c;cur2='';render()}};
+/* ---------- Libro di cucina da stampare: nel libro vanno le ricette con il segnalibro (inBook). Ogni ricetta del libro ha un
+   numero che non cambia (bookNo: lettera della sezione + numero, P14 = quattordicesimo primo) e ricorda la stampa (printed:
+   quando, con quale contenuto e numero), così si ristampano solo le ricette nuove o cambiate. Le pagine si impaginano qui
+   (stili e formati della proposta del 13/11/2026) e si stampano con il menu di stampa del telefono o del browser. ---------- */
+const LIB_CSS=`.libdoc .page *{margin:0;padding:0;box-sizing:border-box}
+.libdoc{font-size:16px;line-height:1.4;color:#222;text-align:left}
+.libdoc.print .page{width:210mm;height:297mm;aspect-ratio:auto;box-shadow:none;border-radius:0}
+.libdoc.print.fmt-a5 .page{width:148mm;height:210mm}
+.libdoc .page{container-type:inline-size;width:100%;aspect-ratio:210/297;position:relative;overflow:hidden;
+  box-shadow:0 1px 2px rgba(0,0,0,.18),0 8px 22px rgba(40,25,10,.16);border-radius:2px;background:#fff;color:#222}
+.libdoc .pg{position:absolute;inset:0;padding:7cqw 7cqw 8cqw;display:flex;flex-direction:column;gap:2.4cqw;overflow:hidden}
+.libdoc .page h1,.libdoc .page h2,.libdoc .page h3,.libdoc .page h4{font-family:inherit;font-weight:700}
+.libdoc .holes{display:none}
+.libdoc .rings .pg{padding-left:13cqw}
+.libdoc .rings .holes{display:flex;position:absolute;left:3.2cqw;top:0;bottom:0;flex-direction:column;justify-content:center;gap:var(--hg,13cqw);z-index:3}
+.libdoc .rings .holes i{width:3.4cqw;height:3.4cqw;border-radius:50%;background:var(--desk);box-shadow:inset 0 .3cqw .5cqw rgba(0,0,0,.35)}
+.libdoc .a5 .holes{--hg:38cqw}
+.libdoc .pnum{display:none}
+.libdoc .bookf .pnum{display:block;position:absolute;bottom:3.2cqw;left:0;right:0;text-align:center;font-size:2.2cqw;opacity:.7;z-index:3}
+.libdoc .bookf .pg{padding-left:9cqw}
+.libdoc .page img{display:block;width:100%;height:100%;object-fit:cover}
+.libdoc .qr{width:9cqw;height:9cqw;flex:none;background:#fff}
+.libdoc .qr svg{display:block;width:100%;height:100%}
+.libdoc .r-cat{font-size:2.3cqw;letter-spacing:.14em;text-transform:uppercase}
+.libdoc .r-title{font-size:7cqw;line-height:1.02;margin:0}
+.libdoc .r-meta{display:flex;flex-wrap:wrap;gap:1.4cqw;font-size:2.4cqw}
+.libdoc .r-photo{height:30cqw;flex:none;overflow:hidden}
+.libdoc .r-body{display:grid;grid-template-columns:36% 1fr;gap:4cqw;min-height:0;flex:1;overflow:hidden}
+.libdoc .r-h{font-size:2.5cqw;letter-spacing:.12em;text-transform:uppercase;margin:0 0 1.4cqw}
+.libdoc .r-ing,.libdoc .r-steps{margin:0;padding:0;list-style:none;font-size:2.35cqw;line-height:1.38}
+.libdoc .r-ing li{padding:.5cqw 0}
+.libdoc .r-steps{display:grid;gap:1.3cqw;counter-reset:s}
+.libdoc .r-steps li{counter-increment:s;position:relative;padding-left:4.6cqw}
+.libdoc .r-steps li::before{content:counter(s);position:absolute;left:0;top:0}
+.libdoc .r-note{display:grid;gap:3cqw;margin-top:auto}
+.libdoc .r-note i{display:block;border-bottom:.25cqw dotted currentColor;opacity:.45;height:0}
+.libdoc .r-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:3cqw;font-size:2cqw;margin-top:auto}
+.libdoc .r-foot p{max-width:70%}
+.libdoc .cv-photo{overflow:hidden}
+.libdoc .dv-list{list-style:none;margin:0;padding:0;font-size:2.8cqw;display:grid;gap:1.4cqw}
+.libdoc .dv-list li,.libdoc .ix-list li{display:flex;gap:1.6cqw;align-items:baseline}
+.libdoc .dv-list li span:first-child,.libdoc .ix-list li span:first-child{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.libdoc .ix-cols{columns:2;column-gap:5cqw;font-size:2.3cqw}
+.libdoc .ix-sec{break-inside:avoid;margin-bottom:3cqw}
+.libdoc .ix-sec h4{margin:0 0 1cqw;font-size:2.7cqw}
+.libdoc .ix-list{list-style:none;margin:0;padding:0;display:grid;gap:.6cqw}
+.libdoc .more{display:none}
+.libdoc .s-gnamina .page{background:#fffaf5;color:#2b211b;font-family:"Nunito",sans-serif}
+.libdoc .s-gnamina .r-title,.libdoc .s-gnamina .cv-title,.libdoc .s-gnamina .dv-title,.libdoc .s-gnamina .ix-title{font-family:"Fredoka",sans-serif;font-weight:600;color:#d6362b}
+.libdoc .s-gnamina .r-cat{color:#d6362b;font-weight:800}
+.libdoc .s-gnamina .r-meta span{background:#fde7bd;padding:.8cqw 2cqw;border-radius:9cqw;font-weight:700}
+.libdoc .s-gnamina .r-photo{border-radius:4cqw}
+.libdoc .s-gnamina .r-h{font-family:"Fredoka",sans-serif;font-weight:600;letter-spacing:0;text-transform:none;font-size:3.2cqw;color:#d6362b}
+.libdoc .s-gnamina .r-ing{background:#fff1d8;border-radius:3cqw;padding:2.4cqw 2.8cqw}
+.libdoc .s-gnamina .r-ing li::before{content:"";display:inline-block;width:1.4cqw;height:1.4cqw;border-radius:50%;background:#e9a23b;margin-right:1.4cqw;vertical-align:.2cqw}
+.libdoc .s-gnamina .r-steps li::before{background:#d6362b;color:#fff;border-radius:50%;width:3.4cqw;height:3.4cqw;display:grid;place-items:center;font-weight:800;font-size:2cqw;top:.1cqw}
+.libdoc .s-gnamina .cover .pg{background:#d6362b;color:#fff;justify-content:center;align-items:center;text-align:center;gap:3cqw}
+.libdoc .s-gnamina .cover .cv-photo{width:52cqw;height:52cqw;border-radius:50%;border:2cqw solid #fff;box-shadow:0 0 0 1.4cqw #e9a23b}
+.libdoc .s-gnamina .cover .cv-kicker{font-size:3.4cqw;font-weight:700;opacity:.9}
+.libdoc .s-gnamina .cover .cv-title{color:#fff;font-size:11cqw;line-height:1}
+.libdoc .s-gnamina .cover .cv-sub{font-size:3cqw;max-width:70cqw}
+.libdoc .s-gnamina .cover .cv-year{font-family:"Fredoka";font-size:3cqw;background:#e9a23b;color:#5a2a00;padding:1cqw 3.4cqw;border-radius:9cqw}
+.libdoc .s-gnamina .divider .pg{justify-content:center;gap:4cqw}
+.libdoc .s-gnamina .dv-num{width:22cqw;height:22cqw;border-radius:50%;background:#e9a23b;color:#fff;font:600 12cqw/22cqw "Fredoka";text-align:center}
+.libdoc .s-gnamina .dv-title{font-size:15cqw;line-height:1}
+.libdoc .s-gnamina .dv-list span:last-child{color:#d6362b;font-weight:800}
+.libdoc .s-gnamina .ix-title{font-size:9cqw}
+.libdoc .s-gnamina .ix-sec h4{font-family:"Fredoka";font-weight:600;color:#d6362b}
+.libdoc .s-nonna .page{background:#f7f0de;color:#3b2d22;font-family:"Lora",serif}
+.libdoc .s-nonna .page::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(to bottom,transparent 0 4.3cqw,rgba(70,110,170,.22) 4.3cqw 4.5cqw);pointer-events:none}
+.libdoc .s-nonna .page::after{content:"";position:absolute;top:0;bottom:0;left:calc(var(--ml,7cqw) - 2cqw);width:.3cqw;background:rgba(200,60,50,.45)}
+.libdoc .s-nonna .rings .page::after,.libdoc .s-nonna .page.rings::after{--ml:13cqw}
+.libdoc .s-nonna .r-title,.libdoc .s-nonna .cv-title,.libdoc .s-nonna .dv-title,.libdoc .s-nonna .ix-title,.libdoc .s-nonna .r-h,.libdoc .s-nonna .ix-sec h4{font-family:"Caveat",cursive;font-weight:700;color:#24406b;letter-spacing:0;text-transform:none}
+.libdoc .s-nonna .r-title{font-size:9cqw}
+.libdoc .s-nonna .r-h{font-size:5cqw;margin:0}
+.libdoc .s-nonna .r-cat{font-family:"Caveat";font-size:4cqw;letter-spacing:0;text-transform:none;color:#a23a2c}
+.libdoc .s-nonna .r-meta{font-style:italic}
+.libdoc .s-nonna .r-meta span+span::before{content:"· ";}
+.libdoc .s-nonna .r-photo{height:24cqw;width:56%;align-self:center;background:#fff;padding:1.6cqw 1.6cqw 5cqw;transform:rotate(-2deg);box-shadow:0 .6cqw 1.6cqw rgba(0,0,0,.25);overflow:visible;position:relative}
+.libdoc .s-nonna .r-photo::before{content:"";position:absolute;top:-2cqw;left:38%;width:22%;height:4cqw;background:rgba(240,225,170,.85);transform:rotate(3deg)}
+.libdoc .s-nonna .r-ing li::before{content:"– "}
+.libdoc .s-nonna .r-steps li::before{content:counter(s) ".";font-family:"Caveat";font-weight:700;font-size:3.6cqw;color:#24406b;top:-.6cqw}
+.libdoc .s-nonna .r-ing,.libdoc .s-nonna .r-steps{line-height:1.55}
+.libdoc .s-nonna .r-steps{gap:.6cqw}
+.libdoc .s-nonna .cover .pg{background:#c9a77c;justify-content:center;align-items:center;text-align:center}
+.libdoc .s-nonna .cover .pg::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.18),transparent 60%),repeating-linear-gradient(35deg,rgba(0,0,0,.03) 0 .4cqw,transparent .4cqw 1.2cqw)}
+.libdoc .s-nonna .cover .cv-label{position:relative;background:#fffdf5;border:.4cqw solid #24406b;border-radius:3cqw;padding:5cqw 6cqw;box-shadow:0 1cqw 2cqw rgba(0,0,0,.2);display:grid;gap:1.4cqw;width:74cqw;background-image:repeating-linear-gradient(to bottom,transparent 0 5.6cqw,rgba(70,110,170,.25) 5.6cqw 5.8cqw)}
+.libdoc .s-nonna .cover .cv-photo{display:none}
+.libdoc .s-nonna .cover .cv-kicker{font-family:"Caveat";font-size:5cqw;color:#a23a2c}
+.libdoc .s-nonna .cover .cv-title{font-size:13cqw;line-height:.95}
+.libdoc .s-nonna .cover .cv-sub{font-style:italic;font-size:2.8cqw}
+.libdoc .s-nonna .cover .cv-year{font-family:"Caveat";font-size:5cqw;color:#24406b}
+.libdoc .s-nonna .divider .pg{justify-content:center}
+.libdoc .s-nonna .dv-num{font-family:"Caveat";font-size:7cqw;color:#a23a2c}
+.libdoc .s-nonna .dv-title{font-size:20cqw;line-height:.9;text-decoration:underline wavy #a23a2c .5cqw;text-underline-offset:3cqw}
+.libdoc .s-nonna .dv-list{font-size:3cqw;margin-top:5cqw}
+.libdoc .s-nonna .ix-title{font-size:12cqw}
+.libdoc .s-nonna .ix-sec h4{font-size:4.4cqw}
+.libdoc .s-tratt .page{background:#fffdf8;color:#1f1a17;font-family:"Bitter",serif}
+.libdoc .s-tratt .gingham{background-color:#fff;background-image:linear-gradient(90deg,rgba(190,30,30,.55) 50%,transparent 50%),linear-gradient(rgba(190,30,30,.55) 50%,transparent 50%);background-size:5cqw 5cqw}
+.libdoc .s-tratt .recipe .pg{padding-top:13cqw}
+.libdoc .s-tratt .recipe .page-band{position:absolute;left:0;right:0;top:0;height:7cqw}
+.libdoc .s-tratt .r-title,.libdoc .s-tratt .cv-title,.libdoc .s-tratt .dv-title,.libdoc .s-tratt .ix-title,.libdoc .s-tratt .r-h,.libdoc .s-tratt .ix-sec h4{font-family:"Oswald",sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.02em}
+.libdoc .s-tratt .r-title{font-size:8cqw;border-bottom:.5cqw solid #b3261e;padding-bottom:1.6cqw}
+.libdoc .s-tratt .r-cat{color:#b3261e;font-family:"Oswald";font-weight:500}
+.libdoc .s-tratt .r-meta{font-family:"Oswald";text-transform:uppercase;letter-spacing:.06em;font-size:2.4cqw}
+.libdoc .s-tratt .r-meta span+span::before{content:"✕";color:#b3261e;margin-right:1.4cqw;font-size:1.8cqw}
+.libdoc .s-tratt .r-photo{border:1.2cqw solid #fff;outline:.3cqw solid #1f1a17;height:28cqw}
+.libdoc .s-tratt .r-h{color:#b3261e;font-size:3cqw}
+.libdoc .s-tratt .r-ing li{border-bottom:.25cqw dotted #b8a99a}
+.libdoc .s-tratt .r-steps li::before{font-family:"Oswald";font-weight:600;color:#b3261e;font-size:3.4cqw;top:-.5cqw}
+.libdoc .s-tratt .cover .pg{justify-content:center;align-items:center;text-align:center}
+.libdoc .s-tratt .cover .cv-label{background:#fffdf8;border-radius:50%;width:76cqw;padding:13cqw 6cqw;display:grid;gap:1.6cqw;justify-items:center;box-shadow:0 0 0 1.2cqw #fffdf8,0 0 0 1.6cqw #1f1a17}
+.libdoc .s-tratt .cover .cv-photo{display:none}
+.libdoc .s-tratt .cover .cv-kicker{font-family:"Oswald";text-transform:uppercase;letter-spacing:.3em;font-size:2.6cqw;color:#b3261e}
+.libdoc .s-tratt .cover .cv-title{font-size:11cqw;line-height:1}
+.libdoc .s-tratt .cover .cv-sub{font-style:italic;font-size:2.6cqw;max-width:52cqw}
+.libdoc .s-tratt .cover .cv-year{font-family:"Oswald";font-size:2.6cqw;letter-spacing:.3em}
+.libdoc .s-tratt .divider .pg{justify-content:center;padding-top:30cqw}
+.libdoc .s-tratt .divider .page-band{position:absolute;left:0;right:0;top:0;height:22cqw}
+.libdoc .s-tratt .dv-num{font-family:"Oswald";font-size:4cqw;color:#b3261e;letter-spacing:.2em}
+.libdoc .s-tratt .dv-title{font-size:17cqw;line-height:.95}
+.libdoc .s-tratt .dv-list li{border-bottom:.25cqw dotted #b8a99a;padding-bottom:1cqw}
+.libdoc .s-tratt .dv-list span:last-child{font-family:"Oswald";color:#b3261e}
+.libdoc .s-tratt .ix-title{font-size:10cqw;border-bottom:.5cqw solid #b3261e}
+.libdoc .s-tratt .ix-sec h4{color:#b3261e;font-size:3cqw}
+.libdoc .s-class .page{background:#fbf8f1;color:#1d1a17;font-family:"EB Garamond",serif}
+.libdoc .s-class .r-title,.libdoc .s-class .cv-title,.libdoc .s-class .dv-title,.libdoc .s-class .ix-title{font-family:"Cormorant Garamond",serif;font-weight:600;font-style:italic}
+.libdoc .s-class .recipe .pg{text-align:left}
+.libdoc .s-class .r-cat{text-align:center;color:#7a1f2b;font-variant:small-caps;text-transform:lowercase;letter-spacing:.2em;font-size:2.8cqw}
+.libdoc .s-class .r-title{text-align:center;font-size:8.6cqw}
+.libdoc .s-class .r-meta{justify-content:center;font-style:italic;font-size:2.6cqw;border-top:.25cqw solid #1d1a17;border-bottom:.25cqw solid #1d1a17;padding:1.2cqw 0;box-shadow:0 .8cqw 0 -.5cqw #1d1a17,0 -.8cqw 0 -.5cqw #1d1a17}
+.libdoc .s-class .r-meta span+span::before{content:"❦ ";color:#7a1f2b}
+.libdoc .s-class .r-photo{height:24cqw;width:56%;align-self:center;border:.25cqw solid #1d1a17;padding:1cqw;background:#fbf8f1}
+.libdoc .s-class .r-h{font-variant:small-caps;text-transform:lowercase;letter-spacing:.16em;color:#7a1f2b;font-size:3cqw;font-weight:600}
+.libdoc .s-class .r-ing,.libdoc .s-class .r-steps{font-size:2.6cqw}
+.libdoc .s-class .r-steps li::before{content:counter(s,upper-roman) ".";color:#7a1f2b;font-style:italic}
+.libdoc .s-class .r-steps li{padding-left:5.6cqw}
+.libdoc .s-class .cover .pg{justify-content:center;align-items:center;text-align:center;gap:3cqw}
+.libdoc .s-class .cover .pg::before{content:"";position:absolute;inset:5cqw;border:.3cqw solid #7a1f2b;box-shadow:inset 0 0 0 1cqw #fbf8f1,inset 0 0 0 1.25cqw #7a1f2b}
+.libdoc .s-class .rings.cover .pg::before{left:11cqw}
+.libdoc .s-class .cover .cv-photo{width:34cqw;height:44cqw;border-radius:50%;border:.3cqw solid #1d1a17;padding:1.2cqw;background:#fbf8f1}
+.libdoc .s-class .cover .cv-photo img{border-radius:50%}
+.libdoc .s-class .cover .cv-kicker{font-variant:small-caps;text-transform:lowercase;letter-spacing:.3em;font-size:3cqw;color:#7a1f2b}
+.libdoc .s-class .cover .cv-title{font-size:11cqw;line-height:1}
+.libdoc .s-class .cover .cv-sub{font-style:italic;font-size:3cqw;max-width:60cqw}
+.libdoc .s-class .cover .cv-year{font-size:3cqw;letter-spacing:.3em}
+.libdoc .s-class .divider .pg{justify-content:center;align-items:center;text-align:center}
+.libdoc .s-class .dv-num{font-family:"Cormorant Garamond";font-size:16cqw;color:#7a1f2b;line-height:1}
+.libdoc .s-class .dv-title{font-size:13cqw}
+.libdoc .s-class .dv-title::after{content:"❦";display:block;font-size:5cqw;color:#7a1f2b;font-style:normal;margin-top:2cqw}
+.libdoc .s-class .dv-list{width:80%;text-align:left;font-size:2.8cqw}
+.libdoc .s-class .dv-list span:last-child{font-style:italic}
+.libdoc .s-class .ix-title{text-align:center;font-size:10cqw}
+.libdoc .s-class .ix-sec h4{font-variant:small-caps;text-transform:lowercase;letter-spacing:.16em;color:#7a1f2b}
+.libdoc .s-mod .page{background:#fff;color:#16181d;font-family:"DM Sans",sans-serif}
+.libdoc .s-mod .sectab{position:absolute;right:0;width:4cqw;height:20cqw;background:var(--sc,#e8a33d);z-index:4}
+.libdoc .s-mod .tab-primi{top:42cqw}
+.libdoc .s-mod .recipe .pg{padding-top:0}
+.libdoc .s-mod .recipe .r-photo{order:-1;margin:0 -7cqw 1cqw;height:40cqw}
+.libdoc .s-mod .rings.recipe .r-photo{margin-left:-13cqw}
+.libdoc .s-mod .bookf.recipe .r-photo{margin-left:-9cqw}
+.libdoc .s-mod .r-title{font-weight:700;font-size:7.6cqw;letter-spacing:-.02em}
+.libdoc .s-mod .r-cat{color:#b06f06;font-weight:700}
+.libdoc .s-mod .r-meta span{border:.25cqw solid #d9dce3;border-radius:1.4cqw;padding:.6cqw 1.6cqw;font-weight:500}
+.libdoc .s-mod .r-h{font-weight:700;color:#16181d;font-size:2.2cqw}
+.libdoc .s-mod .r-ing li{border-bottom:.25cqw solid #eef0f3}
+.libdoc .s-mod .r-steps li::before{font-weight:700;color:#b06f06}
+.libdoc .s-mod .cover .pg{padding:0}
+.libdoc .s-mod .cover .cv-photo{position:absolute;inset:0}
+.libdoc .s-mod .cover .cv-box{position:absolute;left:0;right:0;bottom:0;background:#fff;padding:6cqw 7cqw 8cqw;display:grid;gap:1.4cqw}
+.libdoc .s-mod .rings.cover .cv-box{padding-left:13cqw}
+.libdoc .s-mod .cover .cv-kicker{font-size:2.6cqw;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#b06f06}
+.libdoc .s-mod .cover .cv-title{font-size:11cqw;font-weight:700;letter-spacing:-.03em;line-height:.95}
+.libdoc .s-mod .cover .cv-sub{font-size:2.8cqw;color:#555b66}
+.libdoc .s-mod .cover .cv-year{font-size:2.6cqw;font-weight:700}
+.libdoc .s-mod .divider .pg{background:#e8a33d;justify-content:flex-end;color:#2a1a00}
+.libdoc .s-mod .dv-num{font-size:30cqw;font-weight:700;line-height:.8;letter-spacing:-.05em;opacity:.35}
+.libdoc .s-mod .dv-title{font-size:16cqw;font-weight:700;letter-spacing:-.04em;line-height:.9}
+.libdoc .s-mod .dv-list{font-size:2.8cqw;font-weight:500}
+.libdoc .s-mod .ix-title{font-size:9cqw;font-weight:700;letter-spacing:-.03em}
+.libdoc .s-mod .ix-sec h4{display:flex;align-items:center;gap:1.4cqw}
+.libdoc .s-mod .ix-sec h4::before{content:"";width:2.4cqw;height:2.4cqw;border-radius:.6cqw;background:var(--sc)}
+.libdoc .s-big .page{background:#fff;color:#000;font-family:"Atkinson Hyperlegible",sans-serif}
+.libdoc .s-big .r-photo{display:none}
+.libdoc .s-big .r-cat{font-size:3cqw;font-weight:700;letter-spacing:.08em}
+.libdoc .s-big .r-title{font-size:9cqw;font-weight:700}
+.libdoc .s-big .r-meta{font-size:3.4cqw;font-weight:700;gap:3cqw}
+.libdoc .s-big .r-meta span{border:.5cqw solid #000;padding:.6cqw 2cqw;border-radius:1.4cqw}
+.libdoc .s-big .r-body{grid-template-columns:1fr;gap:3cqw}
+.libdoc .s-big .r-h{font-size:3.6cqw;font-weight:700;letter-spacing:.06em;border-bottom:.6cqw solid #000;padding-bottom:.8cqw}
+.libdoc .s-big .r-ing{font-size:3.5cqw;line-height:1.4;columns:2;column-gap:4cqw}
+.libdoc .s-big .r-ing li{break-inside:avoid;padding-left:5.4cqw;position:relative}
+.libdoc .s-big .r-ing li::before{content:"";position:absolute;left:0;top:1.3cqw;width:3cqw;height:3cqw;border:.5cqw solid #000;border-radius:.6cqw}
+.libdoc .s-big .r-steps{font-size:3.5cqw;line-height:1.4;gap:2.4cqw}
+.libdoc .s-big .r-steps li{padding-left:7cqw}
+.libdoc .s-big .r-steps li::before{background:#000;color:#fff;width:5cqw;height:5cqw;display:grid;place-items:center;font-weight:700;font-size:3.2cqw;border-radius:1cqw;top:0}
+.libdoc .s-big .r-note,.libdoc .s-big .r-foot{display:none}
+.libdoc .s-big .more{display:block;position:absolute;left:0;right:0;bottom:0;padding:9cqw 7cqw 4cqw;background:linear-gradient(transparent,#fff 45%);font-size:3.2cqw;font-weight:700;text-align:right;z-index:2}
+.libdoc .s-big .bookf .more{padding-bottom:7cqw}
+.libdoc .s-big .cover .pg{justify-content:center;gap:3cqw;border:1.6cqw solid #000}
+.libdoc .s-big .cover .cv-photo{height:52cqw}
+.libdoc .s-big .cover .cv-kicker{font-size:4.4cqw;font-weight:700}
+.libdoc .s-big .cover .cv-title{font-size:12cqw;font-weight:700;line-height:1}
+.libdoc .s-big .cover .cv-sub{font-size:3.8cqw}
+.libdoc .s-big .cover .cv-year{font-size:3.8cqw;font-weight:700}
+.libdoc .s-big .divider .pg{justify-content:center;gap:4cqw}
+.libdoc .s-big .dv-num{font-size:6cqw;font-weight:700}
+.libdoc .s-big .dv-title{font-size:17cqw;font-weight:700;line-height:1;border-bottom:1.2cqw solid #000;padding-bottom:2cqw}
+.libdoc .s-big .dv-list{font-size:4cqw;gap:2.4cqw}
+.libdoc .s-big .dv-list span:last-child{font-weight:700}
+.libdoc .s-big .ix-title{font-size:10cqw;font-weight:700}
+.libdoc .s-big .ix-cols{columns:1;font-size:3.4cqw}
+.libdoc .s-big .ix-sec h4{font-size:4cqw}
+.libdoc .s-big .ix-list{grid-template-columns:1fr 1fr;column-gap:4cqw}
+.libdoc .s-big .ix-only-few li:nth-child(n+5){display:none}
+.libdoc{--desk:#e9e0d6}
+.libdoc .ix-cols{column-fill:auto;flex:1;min-height:0;overflow:hidden}
+.libdoc .r-steps{counter-reset:s var(--s0,0)}
+.libdoc .cont .r-title{font-size:5.2cqw}
+.libdoc .r-foot p{max-width:100%}
+.libdoc .dedica .pg{justify-content:center;align-items:center;text-align:center}
+.libdoc .dedica p{font-size:5cqw;font-style:italic;max-width:70cqw;margin:0}
+.libdoc .notes h4{font-size:3cqw;margin:0 0 3cqw;font-weight:700}
+.libdoc .notes .nl{border-bottom:.25cqw solid rgba(120,110,100,.35);height:7.5cqw;flex:none}
+.libdoc .dv-more{font-size:2.6cqw;opacity:.7;margin:0}
+.libdoc .ix-list>li{min-width:0}
+.libdoc .s-big .r-body{align-content:start}
+.libdoc .s-big .ix-list{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}`;
+const LIB_FONTS='https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;700;800&family=Caveat:wght@600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Oswald:wght@500;600&family=Bitter:wght@400;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap';
+const LIB_STYLES=[['gnamina','Gnamina',['Fredoka','Nunito']],['big','Grandi caratteri',['Atkinson Hyperlegible']],['nonna','Quaderno della nonna',['Caveat','Lora']],['tratt','Trattoria',['Oswald','Bitter']],['class','Classico',['Cormorant Garamond','EB Garamond']],['mod','Moderno',['DM Sans']]];
+const LIB_FMTS=[['a4','Quaderno A4','4 fori'],['a5','Quaderno A5','2 fori'],['book','Libro rilegato','spirale o brossura']];
+const LIB_LET={Antipasti:'A',Primi:'P',Secondi:'S',Contorni:'C','Piatti unici':'U',Lievitati:'L',Dolci:'D',Altro:'X'};
+const LIB_COL={Antipasti:'#6aa84f',Primi:'#e8a33d',Secondi:'#c0504d',Contorni:'#4f9a94','Piatti unici':'#8a6d3b',Lievitati:'#c98a2e',Dolci:'#8e6bbf',Altro:'#7b8794'};
+let LIB=Object.assign({title:'',dedica:'',style:'gnamina',fmt:'a4',photo:true,notes:true,duplex:false,init:false,last:null},load('libro',{}));
+const libSave=()=>save('libro',LIB);
+const libLetter=c=>LIB_LET[c]||(String(c||'X').normalize('NFD').replace(/[^A-Za-z]/g,'')[0]||'X').toUpperCase();
+const libNum=n=>+(String(n||'').match(/\d+$/)||[0])[0];
+const libOk=i=>!!(i&&(i.title||'').trim()&&(i.ingredients?.length||i.steps?.length));
+// il numero arriva quando la ricetta entra nel libro; se cambia sezione ne prende uno nuovo nella sezione nuova
+function libAssign(i){const L=libLetter(i.cat||'Altro');if(i.bookNo&&i.bookNo[0]===L)return;
+  i.bookNo=L+(Math.max(0,...items.filter(x=>x.bookNo&&x.bookNo[0]===L).map(x=>libNum(x.bookNo)))+1)}
+function libToggle(id,on){const i=items.find(x=>x.id===id);if(!i)return null;i.inBook=on??!i.inBook;if(i.inBook)libAssign(i);i.t=Date.now();saveItems();return i}
+// impronta del contenuto stampato: se cambia dopo la stampa, la ricetta va ristampata
+const libSig=i=>{const s=JSON.stringify([i.title,i.cat,i.servings,i.time,i.ingredients,i.steps,i.note,i.author,String(i.image||'').slice(-60)]);let h=7;for(let k=0;k<s.length;k++)h=(h*31+s.charCodeAt(k))|0;return h.toString(36)};
+const libState=i=>!i.printed?'new':(i.printed.sig!==libSig(i)||i.printed.no!==i.bookNo)?'mod':'ok';
+const libOrder=(a,b)=>{const ca=cats.indexOf(a.cat||'Altro'),cb=cats.indexOf(b.cat||'Altro');return (ca<0?99:ca)-(cb<0?99:cb)||libNum(a.bookNo)-libNum(b.bookNo)};
+const libItems=()=>items.filter(i=>i.inBook&&libOk(i)).sort(libOrder);
+function libInit(){if(LIB.init)return;LIB.init=true;
+  const ok=items.filter(libOk);
+  if(ok.length<=30&&!ok.some(i=>i.inBook)){ok.sort((a,b)=>libOrder({...a,bookNo:0},{...b,bookNo:0})||(a.created||0)-(b.created||0)).forEach(i=>{i.inBook=true;libAssign(i);i.t=Date.now()});saveItems()}
+  libSave()}
+function libCss(){if(!$('#libCss')){const s=document.createElement('style');s.id='libCss';s.textContent=LIB_CSS;document.head.appendChild(s)}}
+async function libFonts(style){
+  if(!$('#libFonts')){const l=document.createElement('link');l.id='libFonts';l.rel='stylesheet';l.href=LIB_FONTS;
+    await new Promise(r=>{l.onload=l.onerror=r;document.head.appendChild(l);setTimeout(r,4000)})}
+  const fam=(LIB_STYLES.find(s=>s[0]===style)||LIB_STYLES[0])[2];
+  try{await Promise.race([Promise.all(fam.flatMap(f=>[document.fonts.load(`400 16px "${f}"`),document.fonts.load(`700 16px "${f}"`)])),new Promise(r=>setTimeout(r,4000))])}catch{}
+}
+/* --- Pagine --- */
+function libFrame(cls,inner,o){
+  const holes=o.fmt==='book'?'':`<div class="holes">${'<i></i>'.repeat(o.fmt==='a4'?4:2)}</div>`;
+  return `<div class="page ${cls} ${o.fmt==='book'?'bookf':'rings '+o.fmt}">${holes}${inner}<span class="pnum"></span></div>`}
+const libBand=(o,kind)=>o.style==='tratt'?'<div class="page-band gingham"></div>':o.style==='mod'&&kind?`<i class="sectab" style="--sc:${LIB_COL[kind]||'#e8a33d'};top:${30+((cats.indexOf(kind)+8)%8)*8}cqw"></i>`:'';
+function libCover(o,list){
+  const img=(list.find(i=>i.image)||{}).image,g=o.style==='tratt'?' gingham':'';
+  const label=`<p class="cv-kicker">${LIB.title?'Ricettario':'Le ricette di casa'}</p><h1 class="cv-title">${esc(LIB.title||'Il mio ricettario')}</h1><p class="cv-sub">${list.length} ricett${list.length===1?'a':'e'} raccolte con Gnamina</p><p class="cv-year">${new Date().getFullYear()}</p>`;
+  const photo=img?`<div class="cv-photo"><img src="${esc(img)}" alt=""></div>`:'';
+  const inner=o.style==='mod'?`<div class="pg">${photo}<div class="cv-box">${label}</div></div>`:o.style==='nonna'||o.style==='tratt'?`<div class="pg${g}">${photo}<div class="cv-label">${label}</div></div>`:`<div class="pg">${photo}${label}</div>`;
+  return libFrame('cover',inner,o)}
+const libDedica=(o,t)=>libFrame('dedica',`<div class="pg"><p>${esc(t)}</p></div>`,o);
+const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+function libDivider(o,sec,n,list){
+  const num=o.style==='class'?ROMAN[n-1]||n:o.style==='tratt'?'Sezione '+n:o.style==='nonna'?'parte '+n:n;
+  const rows=list.slice(0,14).map(i=>`<li><span>${esc(i.title)}</span><span>${esc(i.bookNo||'')}</span></li>`).join('');
+  return libFrame('divider',`${libBand(o,sec)}<div class="pg"><p class="dv-num">${num}</p><h2 class="dv-title">${esc(sec)}</h2><ol class="dv-list">${rows}</ol>${list.length>14?`<p class="dv-more">e altre ${list.length-14}</p>`:''}</div>`,o)}
+function libIndexPage(o,entries,first){
+  const secs=[];for(const e of entries){let s=secs.find(x=>x.n===e.sec);if(!s)secs.push(s={n:e.sec,l:[]});s.l.push(e)}
+  return libFrame('index',`<div class="pg"><h2 class="ix-title">${first?'Indice':'Indice (continua)'}</h2><div class="ix-cols">${secs.map(s=>`<div class="ix-sec" style="--sc:${LIB_COL[s.n]||'#7b8794'}"><h4>${esc(s.n)}</h4><ul class="ix-list">${s.l.map(e=>`<li><span>${esc(e.t)}</span><span>${esc(e.no)}</span></li>`).join('')}</ul></div>`).join('')}</div></div>`,o)}
+function libMeta(i){const tm=timing(i),m=[];if(+i.servings)m.push(`${+i.servings} person${+i.servings===1?'a':'e'}`);if(tm?.t)m.push(fmtMin(tm.t));if(tm&&DIFF[tm.d])m.push(DIFF[tm.d]);return m.map(x=>`<span>${esc(x)}</span>`).join('')}
+function libFoot(i){const who=[i.author&&`di ${i.author}`,i.source&&!['Gnamina','Aggregatore Ricette'].includes(i.source)&&`da ${i.source}`].filter(Boolean).join(' · ');
+  return `<div class="r-foot"><p>${who?esc('Ricetta '+who)+' · ':''}Gnamina, la tua app di cucina</p></div>`}
+function libRecipeHtml(i,o,p){ // p: {ing, steps, s0, first, notes}
+  const cat=`${esc(i.cat||'Altro')}${i.bookNo&&o.numbered?' · '+esc(i.bookNo):''}`;
+  const head=p.first?`<p class="r-cat">${cat}</p><h3 class="r-title">${esc(i.title)}</h3><div class="r-meta">${libMeta(i)}</div>${o.photo&&i.image&&o.style!=='big'?`<div class="r-photo"><img src="${esc(i.image)}" alt=""></div>`:''}`
+    :`<p class="r-cat">${cat}</p><h3 class="r-title">${esc(i.title)} (continua)</h3>`;
+  const one=!p.first&&!p.ing.length; // pagina di continuazione con i soli passaggi: una colonna
+  const ingCol=one?'':`<div><p class="r-h">${p.ing.length?'Ingredienti':''}</p><ul class="r-ing">${p.ing.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+  const stCol=`<div><p class="r-h">${p.steps.length?'Preparazione':''}</p><ol class="r-steps" style="--s0:${p.s0}">${p.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></div>`;
+  const notes=p.notes&&o.notes?`<div class="r-note">${'<i></i>'.repeat(3)}</div>`:'';
+  return libFrame('recipe'+(p.first?'':' cont'),`${libBand(o,i.cat||'Altro')}<div class="pg">${head}<div class="r-body"${one?' style="grid-template-columns:1fr"':''}>${ingCol}${stCol}</div>${notes}${libFoot(i)}</div>`,o)}
+const libNotesPage=(o,i)=>libFrame('notes',`<div class="pg"><h4>Appunti${i?' · '+esc(i.title):''}</h4>${'<div class="nl"></div>'.repeat(30)}</div>`,o);
+// controlla se una pagina messa nel contenitore di lavoro sborda
+function libOver(el){const b=el.querySelector('.r-body,.ix-cols');if(!b)return false;
+  if(b.classList.contains('ix-cols'))return b.scrollWidth>b.clientWidth+2||b.scrollHeight>b.clientHeight+2;
+  return b.scrollHeight>b.clientHeight+1||[...b.children].some(c=>c.scrollHeight>c.clientHeight+1)}
+function libNode(work,html){work.insertAdjacentHTML('beforeend',html);return work.lastElementChild}
+// una ricetta su una o più pagine: si spostano passaggi (poi ingredienti) sulla pagina seguente finché non c'è posto
+function libRecipePages(work,i,o){
+  let ing=(i.ingredients||[]).map(String),st=(i.steps||[]).map(String),s0=0,first=true;const out=[];
+  for(let guard=0;guard<12;guard++){
+    let p={ing,steps:st,s0,first,notes:true},el=libNode(work,libRecipeHtml(i,o,p));
+    if(libOver(el)){p.notes=false;el.remove();el=libNode(work,libRecipeHtml(i,o,p))}
+    let ni=ing.length,ns=st.length;
+    const twoCol=getComputedStyle(el.querySelector('.r-body')).gridTemplateColumns.split(' ').length>1;
+    while(libOver(el)&&ni+ns>1){
+      const b=el.querySelector('.r-body'),ci=b.children.length>1?b.children[0]:null;
+      const ingOver=twoCol&&ci?ci.scrollHeight>ci.clientHeight+1:false;
+      if((ingOver||ns===0)&&ni>1)ni--;else if(ns>0&&(ns>1||ni>0))ns--;else if(ni>1)ni--;else break;
+      el.remove();el=libNode(work,libRecipeHtml(i,o,{...p,ing:ing.slice(0,ni),steps:st.slice(0,ns)}));
+    }
+    out.push(el.outerHTML);el.remove();
+    if(ni>=ing.length&&ns>=st.length)break;
+    s0+=ns;ing=ing.slice(ni);st=st.slice(ns);first=false;
+  }
+  return out}
+function libIndexPages(work,o,list){
+  let entries=list.map(i=>({sec:i.cat||'Altro',t:i.title,no:i.bookNo||''}));const out=[];let first=true;
+  for(let guard=0;guard<20&&entries.length;guard++){
+    let n=entries.length,el=libNode(work,libIndexPage(o,entries,first));
+    while(libOver(el)&&n>1){n=Math.max(1,n-(n>40?4:1));el.remove();el=libNode(work,libIndexPage(o,entries.slice(0,n),first))}
+    out.push(el.outerHTML);el.remove();entries=entries.slice(n);first=false}
+  return out}
+// mode: all (tutto il libro) | update (nuove e cambiate, con l'indice) | new (solo nuove) | one (una ricetta)
+async function libBuild(recs,mode,opt={}){
+  const o={style:LIB.style,fmt:LIB.fmt,photo:LIB.photo,notes:LIB.notes,numbered:mode!=='one'||!!opt.numbered};
+  libCss();await libFonts(o.style);
+  const work=document.createElement('div');work.className='libdoc print fmt-'+(o.fmt==='a5'?'a5':'a4');work.style.cssText='position:fixed;left:-20000px;top:0;visibility:hidden;pointer-events:none';
+  const inner=document.createElement('div');inner.className='s-'+o.style;work.appendChild(inner);document.body.appendChild(work);
+  const pages=[],book=libItems(),ring=o.fmt!=='book';
+  try{
+    if(mode==='all'){pages.push(libCover(o,book));if((LIB.dedica||'').trim())pages.push(libDedica(o,LIB.dedica.trim()))}
+    if(mode==='all'||mode==='update')pages.push(...libIndexPages(inner,o,book));
+    let lastSec='',secN=0;const secs=[...new Set(book.map(i=>i.cat||'Altro'))];
+    for(const i of recs){const sec=i.cat||'Altro';
+      // divisorio della sezione: nel libro intero sempre; negli aggiornamenti solo per una sezione che prima non era mai stata stampata
+      if(mode!=='one'&&sec!==lastSec){lastSec=sec;secN=secs.indexOf(sec)+1;
+        const inSec=book.filter(x=>(x.cat||'Altro')===sec);
+        if(mode==='all'||!inSec.some(x=>x.printed&&!recs.includes(x)))pages.push(libDivider(o,sec,secN,inSec))}
+      const rp=libRecipePages(inner,i,o);pages.push(...rp);
+      if(ring&&LIB.duplex&&rp.length%2)pages.push(libNotesPage(o,i))}
+  }finally{work.remove()}
+  // numeri di pagina (solo nel libro rilegato, copertina esclusa)
+  let html=pages.join('');
+  if(!ring){let n=0;html=html.replace(/<span class="pnum"><\/span>/g,()=>{n++;return n===1&&mode==='all'?'<span class="pnum"></span>':`<span class="pnum">${n}</span>`})}
+  const size=o.fmt==='a5'?'A5':'A4',[w,h]=o.fmt==='a5'?['148mm','210mm']:['210mm','297mm'];
+  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>${esc(opt.name||'Ricettario Gnamina')}</title><link rel="stylesheet" href="${LIB_FONTS}"><style>${LIB_CSS}
+@page{size:${size};margin:0}html,body{margin:0;padding:0;background:#fff}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.libdoc.print .page{width:${w};height:${h};aspect-ratio:auto;box-shadow:none;border-radius:0;break-after:page;page-break-after:always;margin:0}
+.libdoc.print .rings .holes i{background:none;box-shadow:none;border:.25cqw solid #b9b2aa}
+@media screen{body{background:#ddd}.libdoc.print .page{margin:0 auto 8mm;box-shadow:0 1px 6px #0004}}
+</style></head><body><div class="libdoc print fmt-${o.fmt==='a5'?'a5':'a4'}"><div class="s-${o.style}">${html}</div></div></body></html>`}
+// stampa: APK (servizio di stampa di Android), iPhone (pannello di stampa di Apple), browser (menu di stampa, anche «Salva come PDF»)
+function libPrintHtml(html,name,size){
+  try{if(window.AndroidShare?.printHtml){AndroidShare.printHtml(html,name,size);return}}catch{}
+  try{if(window.webkit?.messageHandlers?.printHtml){webkit.messageHandlers.printHtml.postMessage({html,name,size});return}}catch{}
+  const fr=document.createElement('iframe');fr.setAttribute('aria-hidden','true');fr.style.cssText='position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0';
+  fr.onload=async()=>{try{await Promise.race([fr.contentDocument.fonts?.ready,new Promise(r=>setTimeout(r,3000))]);await new Promise(r=>setTimeout(r,400));fr.contentWindow.focus();fr.contentWindow.print()}catch{toast('Stampa non riuscita: riprova')}setTimeout(()=>fr.remove(),120000)};
+  document.body.appendChild(fr);fr.srcdoc=html}
+async function libPrint(recs,mode,opt={}){
+  recs=recs.filter(libOk);if(!recs.length&&mode!=='all'&&mode!=='update'){toast('Niente da stampare');return}
+  toast('Preparo le pagine…');
+  let html;try{html=await libBuild(recs,mode,opt)}catch(e){console.log('libro',e);toast('Non sono riuscita a preparare le pagine');return}
+  libPrintHtml(html,opt.name||(LIB.title||'Ricettario Gnamina'),LIB.fmt==='a5'?'a5':'a4');
+  // le ricette del libro risultano stampate (si può annullare dalla pagina del libro)
+  const mark=recs.filter(i=>i.inBook&&items.includes(i));
+  if(mark.length){const now=Date.now();LIB.last={at:now,prev:mark.map(i=>[i.id,i.printed||null])};
+    mark.forEach(i=>{i.printed={at:now,sig:libSig(i),no:i.bookNo}});saveItems();libSave();if($('#libro')?.open)libRender()}
+}
+/* --- Pagina «Il mio libro» --- */
+const libDate=t=>new Date(t).toLocaleDateString('it-IT',{day:'numeric',month:'numeric'});
+function libOpen(){libInit();libCss();libRender();if(!$('#libro').open)$('#libro').showModal();libFonts(LIB.style).then(()=>libPreview())}
+function libPreview(){const box=$('#libPrev');if(!box)return;const list=libItems(),o={style:LIB.style,fmt:LIB.fmt,photo:LIB.photo,notes:LIB.notes,numbered:true};
+  const r=list[0]||items.find(libOk);
+  box.innerHTML=`<div class="libdoc"><div class="s-${o.style}">${libCover(o,list)}${r?libRecipeHtml(r,o,{ing:(r.ingredients||[]).map(String),steps:(r.steps||[]).map(String),s0:0,first:true,notes:true}):''}</div></div>`}
+function libRender(){
+  const el=$('#libBody');if(!el)return;
+  const mine=items.filter(libOk),book=libItems(),secs=[...new Set(mine.map(i=>i.cat||'Altro'))].sort((a,b)=>{const x=cats.indexOf(a),y=cats.indexOf(b);return (x<0?99:x)-(y<0?99:y)});
+  const nNew=book.filter(i=>libState(i)==='new').length,nMod=book.filter(i=>libState(i)==='mod').length,anyPrinted=book.some(i=>i.printed);
+  const mode=LIB.mode&&['update','new','all'].includes(LIB.mode)&&(LIB.mode!=='update'||anyPrinted)?LIB.mode:anyPrinted?'update':'all';
+  const tag=i=>{if(!i.inBook)return '';const s=libState(i);return s==='new'?'<span class="libTag new">nuova</span>':s==='mod'?'<span class="libTag mod">cambiata</span>':`<span class="libTag ok">stampata il ${libDate(i.printed.at)}</span>`};
+  const radio=(v,t,sub,dis)=>`<label class="libOpt${dis?' dis':''}"><input type="radio" name="libMode" value="${v}"${mode===v?' checked':''}${dis?' disabled':''}><span><b>${t}</b><small>${sub}</small></span></label>`;
+  el.innerHTML=`
+  <section class="sec"><p class="meta" style="margin-top:0">Nel libro vanno le ricette con il segnalibro <span class="libRibI">${RIB_SVG}</span>. Lo metti qui sotto con la spunta, oppure toccando il segnalibro sulla scheda della ricetta.</p>
+    <label>Titolo del libro<input id="libTitle" maxlength="60" placeholder="Es. Le ricette di nonna Lucia" value="${esc(LIB.title)}"></label>
+    <label>Dedica (facoltativa)<input id="libDed" maxlength="120" placeholder="Es. Per Giulia e Marco" value="${esc(LIB.dedica)}"></label></section>
+  <section class="sec"><h3>Le ricette · ${book.length} nel libro</h3>
+    ${mine.length?secs.map(s=>{const l=mine.filter(i=>(i.cat||'Altro')===s).sort((a,b)=>(a.inBook&&b.inBook?libNum(a.bookNo)-libNum(b.bookNo):0)||(b.inBook?1:0)-(a.inBook?1:0)),n=l.filter(i=>i.inBook).length;
+      return `<div class="libSec"><div class="libSecH"><b>${esc(s)}</b><span class="meta">${n} di ${l.length}</span><button type="button" class="lnk" data-all="${esc(s)}">Tutte</button><button type="button" class="lnk" data-none="${esc(s)}">Nessuna</button></div>
+        ${l.map(i=>`<label class="libRow"><input type="checkbox" data-id="${esc(i.id)}"${i.inBook?' checked':''}><span class="libT">${esc(i.title)}</span>${i.inBook?`<span class="libNo">${esc(i.bookNo||'')}</span>`:''}${tag(i)}</label>`).join('')}</div>`}).join('')
+      :'<p class="meta">Non ci sono ancora ricette tue con ingredienti o procedimento: salvane qualcuna e torna qui.</p>'}</section>
+  <section class="sec"><h3>Lo stile</h3><div class="seg libSeg">${LIB_STYLES.map(([k,n])=>`<label><input type="radio" name="libStyle" value="${k}"${LIB.style===k?' checked':''}><span>${n}</span></label>`).join('')}</div>
+    <div class="libPrev" id="libPrev"></div></section>
+  <section class="sec"><h3>Il formato</h3><div class="seg libSeg">${LIB_FMTS.map(([k,n,s])=>`<label><input type="radio" name="libFmt" value="${k}"${LIB.fmt===k?' checked':''}><span>${n}<small> · ${s}</small></span></label>`).join('')}</div>
+    <p class="meta">${LIB.fmt==='book'?'Senza fori, con i numeri di pagina: da far rilegare in copisteria o con un servizio di stampa online.':'Ogni ricetta comincia su un foglio nuovo, con i fori già segnati: una ricetta nuova si aggiunge senza toccare le altre.'}</p>
+    <label class="libChk"><input type="checkbox" id="libPhoto"${LIB.photo?' checked':''}> Con le foto delle ricette</label>
+    <label class="libChk"><input type="checkbox" id="libNotes"${LIB.notes?' checked':''}> Righe per gli appunti</label>
+    ${LIB.fmt==='book'?'':`<label class="libChk"><input type="checkbox" id="libDuplex"${LIB.duplex?' checked':''}> Stampo fronte e retro (sul retro delle ricette di una pagina restano le righe per gli appunti)</label>`}</section>
+  <section class="sec"><h3>Stampa</h3>
+    ${radio('update','Nuove e cambiate, con l\'indice',`${nNew+nMod} ricett${nNew+nMod===1?'a':'e'} (${nNew} nuov${nNew===1?'a':'e'}, ${nMod} cambiat${nMod===1?'a':'e'}) e l'indice aggiornato`,!anyPrinted)}
+    ${radio('new','Solo le nuove',`${nNew} ricett${nNew===1?'a':'e'}`,!nNew)}
+    ${radio('all','Tutto il libro',`copertina, indice, sezioni e ${book.length} ricett${book.length===1?'a':'e'}`,!book.length)}
+    <button type="button" class="btn pri" id="libGo" style="width:100%;margin-top:10px"${book.length?'':' disabled'}>🖨 Prepara e stampa</button>
+    <p class="meta" style="margin:8px 0 0">Si apre il menu di stampa: stampante di casa, oppure «Salva come PDF» da portare in copisteria o mandare su WhatsApp.</p>
+    ${LIB.last&&Date.now()-LIB.last.at<7*864e5?`<p class="meta" style="margin:8px 0 0">${LIB.last.prev.length} ricett${LIB.last.prev.length===1?'a risulta stampata':'e risultano stampate'} il ${libDate(LIB.last.at)}. <button type="button" class="lnk" id="libUndo">Non le ho stampate</button></p>`:''}</section>`;
+  el.querySelectorAll('.libRow input').forEach(c=>c.onchange=()=>{libToggle(c.dataset.id,c.checked);libRender();render()});
+  el.querySelectorAll('[data-all],[data-none]').forEach(b=>b.onclick=()=>{const s=b.dataset.all||b.dataset.none,on=!!b.dataset.all;
+    items.filter(i=>libOk(i)&&(i.cat||'Altro')===s&&!!i.inBook!==on).sort((a,b)=>(a.created||0)-(b.created||0)).forEach(i=>{i.inBook=on;if(on)libAssign(i);i.t=Date.now()});saveItems();libRender();render()});
+  $('#libTitle').onchange=e=>{LIB.title=e.target.value.trim();libSave();libPreview()};
+  $('#libDed').onchange=e=>{LIB.dedica=e.target.value.trim();libSave()};
+  el.querySelectorAll('[name=libStyle]').forEach(r=>r.onchange=async()=>{LIB.style=r.value;libSave();await libFonts(LIB.style);libPreview()});
+  el.querySelectorAll('[name=libFmt]').forEach(r=>r.onchange=()=>{LIB.fmt=r.value;libSave();libRender()});
+  el.querySelectorAll('[name=libMode]').forEach(r=>r.onchange=()=>{LIB.mode=r.value;libSave()});
+  $('#libPhoto').onchange=e=>{LIB.photo=e.target.checked;libSave();libPreview()};
+  $('#libNotes').onchange=e=>{LIB.notes=e.target.checked;libSave();libPreview()};
+  if($('#libDuplex'))$('#libDuplex').onchange=e=>{LIB.duplex=e.target.checked;libSave()};
+  $('#libGo').onclick=()=>{const m=(el.querySelector('[name=libMode]:checked')||{}).value||'all',b=libItems();
+    const recs=m==='all'?b:m==='new'?b.filter(i=>libState(i)==='new'):b.filter(i=>libState(i)!=='ok');
+    if(m!=='all'&&!recs.length&&m==='new'){toast('Non ci sono ricette nuove da stampare');return}
+    libPrint(recs,m)};
+  if($('#libUndo'))$('#libUndo').onclick=()=>{for(const [id,p] of LIB.last.prev){const i=items.find(x=>x.id===id);if(i){if(p)i.printed=p;else delete i.printed}}LIB.last=null;saveItems();libSave();libRender();toast('Ok: risultano da stampare')};
+  libPreview()}
+const RIB_SVG='<svg viewBox="0 0 16 20" aria-hidden="true"><path d="M2 1h12v18l-6-4-6 4z"/></svg>';
+$('#libClose').onclick=()=>$('#libro').close();
+
+$('#chips').onclick=e=>{const c=e.target.closest('.chip');if(!c)return;if(c.dataset.lib){libOpen();return}cur=c.dataset.c;cur2='';render()};
 $('#chips2').onclick=e=>{const c=e.target.closest('.chip');if(c){cur2=c.dataset.p;render()}};
 $('#list').onclick=e=>{if(lpFired){lpFired=false;return} // il tocco che chiude una pressione lunga non apre la scheda
   const m=e.target.closest('.more');if(m){e.stopPropagation();openItemMenu(m.closest('.item').dataset.id);return}
+  const rb=e.target.closest('.ribBtn');if(rb){e.stopPropagation();const i=libToggle(rb.dataset.rib);if(i){rb.classList.toggle('on',!!i.inBook);rb.setAttribute('aria-pressed',!!i.inBook);toast(i.inBook?`Nel libro di cucina come ${i.bookNo}`:'Tolta dal libro di cucina');navCounts?.();if(view==='mine')render()}return}
   const w=e.target.closest('.wbtn');if(w){if(w.dataset.w==='add')openForm();else $(`#tabs .tab[data-v=${w.dataset.w}]`).click();return}const it=e.target.closest('.item');if(it)openDetail([...src(),...BK,...(book||[])].find(i=>i.id===it.dataset.id))};
 const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${esc(c)}</span>`).join('')};
 // Tema: Automatico segue il sistema, Chiaro e Scuro restano fissi
@@ -3275,7 +3742,7 @@ $('#camBtn').onclick=()=>$('#camIn').click();
 $('#camIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)photoSearch(f)};
 $('#setClose').onclick=()=>$('#set').close();
 $('#catF').onsubmit=e=>{e.preventDefault();const c=e.target.c.value.trim();if(c&&!cats.includes(c)){cats.splice(cats.length-1,0,c);save('cats',cats);save('catsT',Date.now());queueSync();render();showCats();toast('Tipo aggiunto')}e.target.reset()};
-$('#exp').onclick=async()=>{try{await navigator.clipboard.writeText(JSON.stringify({cats,items}));toast('Backup copiato negli appunti')}catch{prompt('Copia questo testo:',JSON.stringify({cats,items}))}};
+$('#exp').onclick=()=>copyText(JSON.stringify({cats,items}),'Backup copiato negli appunti');
 // Ripristino da testo o file: aggiunge le ricette che mancano (stesso id = già presente) e i tipi di piatto
 function importBackup(t){
   try{const d=JSON.parse(t),ids=new Set(items.map(i=>i.id)),add=(d.items||[]).filter(i=>i&&i.id&&i.title&&!ids.has(i.id));
@@ -3367,7 +3834,7 @@ function syncUI(status){
     return}
   const last=SY.last?new Date(SY.last).toLocaleString('it-IT',{dateStyle:'short',timeStyle:'short'}):'mai';
   box.innerHTML=`<p class="meta">Il tuo codice ricettario. Sull'altro dispositivo apri Impostazioni → «Ho già un codice» e scrivilo: le ricette si uniscono e restano aggiornate.</p><div class="syCode">${fmtCode(SY.code)}</div><p class="meta" id="syStat">${esc(status||'Ultima sincronizzazione: '+last)}</p><div class="grid2"><button class="btn" id="syCopy">Copia</button><button class="btn" id="syShare">Condividi</button><button class="btn" id="syNow">Sincronizza ora</button><button class="btn" id="syOff">Scollega</button></div>`;
-  $('#syCopy').onclick=async()=>{try{await navigator.clipboard.writeText(fmtCode(SY.code));toast('Codice copiato')}catch{prompt('Copia il codice:',fmtCode(SY.code))}};
+  $('#syCopy').onclick=()=>copyText(fmtCode(SY.code),'Codice copiato');
   $('#syShare').onclick=()=>shareText('Codice ricettario Gnamina',`Il mio codice ricettario Gnamina: ${fmtCode(SY.code)}\nPer collegare un dispositivo apri ${SITE}?codice=${SY.code}`);
   $('#syNow').onclick=()=>doSync();
   $('#syOff').onclick=()=>{if(confirm('Scollegare questo dispositivo? Le ricette restano qui, ma non si aggiornano più con gli altri.')){SY=null;try{localStorage.removeItem('sync')}catch{}syKeys=null;syncUI()}};
