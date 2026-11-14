@@ -186,7 +186,8 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 #libro .libNo{font-weight:700;color:var(--acc);font-size:.85rem}
 #libro .libTag{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
 #libro .libTag.new{background:#fde7bd;color:#7a4a00}#libro .libTag.mod{background:#f8d7d2;color:#8a1f12}#libro .libTag.ok{background:color-mix(in srgb,var(--bd) 50%,transparent);color:var(--mut)}
-#libro .libSeg{flex-wrap:wrap}#libro .libSeg small{font-weight:400;opacity:.75}
+#libro .libSeg{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;padding:4px}
+#libro .libSeg label{min-width:0}#libro .libSeg span{display:block;text-align:center;white-space:normal;line-height:1.2;padding:9px 6px}#libro .libSeg small{font-weight:400;opacity:.75}
 #libro .libChk{display:flex;gap:10px;align-items:flex-start;font-weight:400;margin:8px 0 0}#libro .libChk input{width:20px;height:20px;flex:none;margin:2px 0 0;accent-color:var(--acc)}
 #libro .libOpt{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1.5px solid var(--bd);border-radius:12px;margin:8px 0 0;font-weight:400}
 #libro .libOpt:has(input:checked){border-color:var(--acc)}#libro .libOpt.dis{opacity:.5}
@@ -1506,7 +1507,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=165; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=166; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1607,7 +1608,7 @@ function goView(v){
   view=v;cur=view==='book'?'Italiane':'Tutte';cur2=''; // il Ricettario parte dalle ricette italiane
   $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
   const bud=view==='budget',home=view==='home',lib=view==='libro',alt=bud||home||lib;['#sbar','#chips','#list'].forEach(x=>$(x).hidden=alt);$('#add').hidden=alt;if(alt){$('#chips2').hidden=true;$('.filters').hidden=true;filtUI()}$('#budget').hidden=!bud;$('#home').hidden=!home;$('#libro').hidden=!lib;filtUI();
-  $('#vTitle').textContent={home:'La sfida',mine:'Le mie ricette',book:'Ricettario',budget:'Il mio menu',libro:'Il mio libro di cucina'}[view];window.scrollTo(0,0);
+  $('#vTitle').textContent={home:'La sfida',mine:'Le mie ricette',book:'Ricettario',budget:'Il mio menu',libro:'Il mio libro'}[view];window.scrollTo(0,0);
   if(home){renderHome();loadBook();return}
   if(lib){libInit();libCss();libRender();libFonts(LIB.style).then(()=>libPreview());return}
   if(bud){loadBook();loadPT();initBudget();return}
@@ -1776,7 +1777,7 @@ function card(i){
   const gara=i.contest?`<div class="badges"><span class="bdg gara">🏆 In gara</span></div>`:'';
   return `<div class="item" data-id="${i.id}"${pubId(i)?` data-pub="${esc(pubId(i))}"`:''}>
     <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${i.imgGen?'<span class="aiTag" title="Immagine generata con l\'AI">AI</span>':''}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
-      <span class="cat">${esc(i.cat||'Altro')}</span>${vid?'<span class="play" title="Con video">▶</span>':''}${canRate(i)?svOf(i):''}${isMine(i)&&libOk(i)?`<button type="button" class="ribBtn${i.inBook?' on':''}" data-rib="${esc(i.id)}" aria-pressed="${!!i.inBook}" aria-label="${i.inBook?'Nel libro di cucina: tocca per togliere':'Metti nel libro di cucina'}">${RIB_SVG}</button>`:''}</div>
+      <span class="cat">${esc(i.cat||'Altro')}</span>${vid?'<span class="play" title="Con video">▶</span>':''}${canRate(i)?svOf(i):''}${libOk(libSync(i))&&!i.pronto&&!i.colazione?`<button type="button" class="ribBtn${i.inBook?' on':''}" data-rib="${esc(i.id)}" aria-pressed="${!!i.inBook}" aria-label="${i.inBook?'Nel libro di cucina: tocca per togliere':'Metti nel libro di cucina'}">${RIB_SVG}</button>`:''}</div>
     <div class="b"><h3>${esc(i.title||i.url)}</h3>
       <div class="facts">${facts.map(f=>`<span>${f}</span>`).join('')}</div>${gara}</div></div>`;
 }
@@ -2483,7 +2484,8 @@ function openDetail(i){
   if(lnk)acts.push(`<button type="button" class="btn" id="dCopy" data-u="${esc(lnk)}">📋 Copia il link</button>`);
   acts.push(`<a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">▶ Cerca su YouTube</a>`);
   if(!(i.pronto||i.colazione))acts.push(i.book?'<button class="btn pri" id="dSave">💾 Salva nelle mie</button>':'<button class="btn" id="dEdit">✏️ Modifica</button>');
-  if(isMine(i)&&libOk(i))acts.push(`<button type="button" class="btn" id="dLib">${i.inBook?`🔖 Nel libro · ${esc(i.bookNo||'')}`:'🔖 Metti nel libro'}</button>`);
+  libSync(i);
+  if(libOk(i)&&!i.pronto&&!i.colazione)acts.push(`<button type="button" class="btn" id="dLib">${i.inBook?`🔖 Nel libro · ${esc(i.bookNo||'')}`:'🔖 Metti nel libro'}</button>`);
   if(libOk(i))acts.push('<button type="button" class="btn" id="dPrint">🖨 Stampa la ricetta</button>');
   acts.push(`<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button>`);
   $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button><div class="dcols"><div class="dmain">
@@ -3557,24 +3559,31 @@ const LIB_STYLES=[['gnamina','Gnamina',['Fredoka','Nunito']],['big','Grandi cara
 const LIB_FMTS=[['a4','Quaderno A4','4 fori'],['a5','Quaderno A5','2 fori'],['book','Libro rilegato','spirale o brossura']];
 const LIB_LET={Antipasti:'A',Primi:'P',Secondi:'S',Contorni:'C','Piatti unici':'U',Lievitati:'L',Dolci:'D',Altro:'X'};
 const LIB_COL={Antipasti:'#6aa84f',Primi:'#e8a33d',Secondi:'#c0504d',Contorni:'#4f9a94','Piatti unici':'#8a6d3b',Lievitati:'#c98a2e',Dolci:'#8e6bbf',Altro:'#7b8794'};
-let LIB=Object.assign({title:'',dedica:'',style:'gnamina',fmt:'a4',photo:true,notes:true,duplex:false,init:false,last:null},load('libro',{}));
+let LIB=Object.assign({title:'',dedica:'',style:'gnamina',fmt:'a4',photo:true,notes:true,duplex:false,init:false,last:null,ext:{}},load('libro',{}));
+if(!LIB.ext||typeof LIB.ext!=='object')LIB.ext={};
+// Ricette del Ricettario (non tue) nel libro: segnalibro, numero e stampa stanno in LIB.ext[id] e si copiano sulla ricetta quando serve
+const libMine=i=>items.some(x=>x.id===i.id);
+function libSync(i){if(!i||libMine(i))return i;const e=LIB.ext[i.id];if(e){i.inBook=true;i.bookNo=e.bookNo;if(e.printed)i.printed=e.printed;else delete i.printed}else{delete i.inBook;delete i.printed}return i}
 const libSave=()=>save('libro',LIB);
 const libLetter=c=>LIB_LET[c]||(String(c||'X').normalize('NFD').replace(/[^A-Za-z]/g,'')[0]||'X').toUpperCase();
 const libNum=n=>+(String(n||'').match(/\d+$/)||[0])[0];
 const libOk=i=>!!(i&&(i.title||'').trim()&&(i.ingredients?.length||i.steps?.length));
 // il numero arriva quando la ricetta entra nel libro; se cambia sezione ne prende uno nuovo nella sezione nuova
 function libAssign(i){const L=libLetter(i.cat||'Altro');if(i.bookNo&&i.bookNo[0]===L)return;
-  i.bookNo=L+(Math.max(0,...items.filter(x=>x.bookNo&&x.bookNo[0]===L).map(x=>libNum(x.bookNo)))+1)}
-function libToggle(id,on){const i=items.find(x=>x.id===id);if(!i)return null;i.inBook=on??!i.inBook;if(i.inBook)libAssign(i);i.t=Date.now();saveItems();return i}
+  const used=[...items.map(x=>x.bookNo),...Object.values(LIB.ext).map(e=>e.bookNo)].filter(n=>n&&n[0]===L);
+  i.bookNo=L+(Math.max(0,...used.map(libNum))+1)}
+function libToggle(id,on){
+  const mine=items.find(x=>x.id===id);
+  if(mine){mine.inBook=on??!mine.inBook;if(mine.inBook)libAssign(mine);mine.t=Date.now();saveItems();return mine}
+  const i=findAny(id);if(!i)return null;libSync(i);const want=on??!i.inBook;
+  if(want){libAssign(i);LIB.ext[id]={bookNo:i.bookNo,printed:LIB.ext[id]?.printed||null,at:Date.now()}}else{delete LIB.ext[id];delete i.inBook}
+  libSave();return libSync(i)}
 // impronta del contenuto stampato: se cambia dopo la stampa, la ricetta va ristampata
 const libSig=i=>{const s=JSON.stringify([i.title,i.cat,i.servings,i.time,i.ingredients,i.steps,i.note,i.author,String(i.image||'').slice(-60)]);let h=7;for(let k=0;k<s.length;k++)h=(h*31+s.charCodeAt(k))|0;return h.toString(36)};
 const libState=i=>!i.printed?'new':(i.printed.sig!==libSig(i)||i.printed.no!==i.bookNo)?'mod':'ok';
 const libOrder=(a,b)=>{const ca=cats.indexOf(a.cat||'Altro'),cb=cats.indexOf(b.cat||'Altro');return (ca<0?99:ca)-(cb<0?99:cb)||libNum(a.bookNo)-libNum(b.bookNo)};
-const libItems=()=>items.filter(i=>i.inBook&&libOk(i)).sort(libOrder);
-function libInit(){if(LIB.init)return;LIB.init=true;
-  const ok=items.filter(libOk);
-  if(ok.length<=30&&!ok.some(i=>i.inBook)){ok.sort((a,b)=>libOrder({...a,bookNo:0},{...b,bookNo:0})||(a.created||0)-(b.created||0)).forEach(i=>{i.inBook=true;libAssign(i);i.t=Date.now()});saveItems()}
-  libSave()}
+const libItems=()=>[...items.filter(i=>i.inBook&&libOk(i)),...Object.keys(LIB.ext).map(id=>libSync(findAny(id))).filter(i=>i&&!libMine(i)&&libOk(i))].sort(libOrder);
+function libInit(){if(!book)loadBook().then(()=>{if(view==='libro')libRender()})}
 function libCss(){if(!$('#libCss')){const s=document.createElement('style');s.id='libCss';s.textContent=LIB_CSS;document.head.appendChild(s)}}
 async function libFonts(style){
   if(!$('#libFonts')){const l=document.createElement('link');l.id='libFonts';l.rel='stylesheet';l.href=LIB_FONTS;
@@ -3688,9 +3697,9 @@ async function libPrint(recs,mode,opt={}){
   let html;try{html=await libBuild(recs,mode,opt)}catch(e){console.log('libro',e);toast('Non sono riuscita a preparare le pagine');return}
   libPrintHtml(html,opt.name||(LIB.title||'Ricettario Gnamina'),LIB.fmt==='a5'?'a5':'a4');
   // le ricette del libro risultano stampate (si può annullare dalla pagina del libro)
-  const mark=recs.filter(i=>i.inBook&&items.includes(i));
+  const mark=recs.filter(i=>i.inBook);
   if(mark.length){const now=Date.now();LIB.last={at:now,prev:mark.map(i=>[i.id,i.printed||null])};
-    mark.forEach(i=>{i.printed={at:now,sig:libSig(i),no:i.bookNo}});saveItems();libSave();if(!$('#libro').hidden)libRender()}
+    mark.forEach(i=>{i.printed={at:now,sig:libSig(i),no:i.bookNo};if(!libMine(i)&&LIB.ext[i.id])LIB.ext[i.id].printed=i.printed});saveItems();libSave();if(!$('#libro').hidden)libRender()}
 }
 /* --- Pagina «Il mio libro» --- */
 const libDate=t=>new Date(t).toLocaleDateString('it-IT',{day:'numeric',month:'numeric'});
@@ -3700,7 +3709,7 @@ function libPreview(){const box=$('#libPrev');if(!box)return;const list=libItems
   box.innerHTML=`<div class="libdoc"><div class="s-${o.style}">${libCover(o,list)}${r?libRecipeHtml(r,o,{ing:(r.ingredients||[]).map(String),steps:(r.steps||[]).map(String),s0:0,first:true,notes:true}):''}</div></div>`}
 function libRender(){
   const el=$('#libBody');if(!el)return;
-  const mine=items.filter(libOk),book=libItems(),secs=[...new Set(mine.map(i=>i.cat||'Altro'))].sort((a,b)=>{const x=cats.indexOf(a),y=cats.indexOf(b);return (x<0?99:x)-(y<0?99:y)});
+  const book=libItems(),bsecs=[...new Set(book.map(i=>i.cat||'Altro'))];
   const nNew=book.filter(i=>libState(i)==='new').length,nMod=book.filter(i=>libState(i)==='mod').length,anyPrinted=book.some(i=>i.printed);
   const mode=LIB.mode&&['update','new','all'].includes(LIB.mode)&&(LIB.mode!=='update'||anyPrinted)?LIB.mode:anyPrinted?'update':'all';
   const tag=i=>{if(!i.inBook)return '';const s=libState(i);return s==='new'?'<span class="libTag new">nuova</span>':s==='mod'?'<span class="libTag mod">cambiata</span>':`<span class="libTag ok">stampata il ${libDate(i.printed.at)}</span>`};
@@ -3708,11 +3717,11 @@ function libRender(){
   el.innerHTML=`
   <section class="sec"><h3>Lo stile</h3><div class="seg libSeg">${LIB_STYLES.map(([k,n])=>`<label><input type="radio" name="libStyle" value="${k}"${LIB.style===k?' checked':''}><span>${n}</span></label>`).join('')}</div>
     <div class="libPrev" id="libPrev"></div></section>
-  <section class="sec"><h3>Le ricette · ${book.length} nel libro</h3><p class="meta" style="margin-top:0">Nel libro vanno le ricette con il segnalibro <span class="libRibI">${RIB_SVG}</span>: lo metti qui con la spunta, oppure toccando il segnalibro sulla scheda della ricetta.</p>
-    ${mine.length?secs.map(s=>{const l=mine.filter(i=>(i.cat||'Altro')===s).sort((a,b)=>(a.inBook&&b.inBook?libNum(a.bookNo)-libNum(b.bookNo):0)||(b.inBook?1:0)-(a.inBook?1:0)),n=l.filter(i=>i.inBook).length;
-      return `<div class="libSec"><div class="libSecH"><b>${esc(s)}</b><span class="meta">${n} di ${l.length}</span><button type="button" class="lnk" data-all="${esc(s)}">Tutte</button><button type="button" class="lnk" data-none="${esc(s)}">Nessuna</button></div>
-        ${l.map(i=>`<label class="libRow"><input type="checkbox" data-id="${esc(i.id)}"${i.inBook?' checked':''}><span class="libT">${esc(i.title)}</span>${i.inBook?`<span class="libNo">${esc(i.bookNo||'')}</span>`:''}${tag(i)}</label>`).join('')}</div>`}).join('')
-      :'<p class="meta">Non ci sono ancora ricette tue con ingredienti o procedimento: salvane qualcuna e torna qui.</p>'}</section>
+  <section class="sec"><h3>Le ricette · ${book.length} nel libro</h3><p class="meta" style="margin-top:0">Ci sono le ricette con il segnalibro <span class="libRibI">${RIB_SVG}</span>. Togli la spunta per toglierne una.</p>
+    ${book.length?bsecs.map(s=>{const l=book.filter(i=>(i.cat||'Altro')===s);
+      return `<div class="libSec"><div class="libSecH"><b>${esc(s)}</b><span class="meta">${l.length}</span></div>
+        ${l.map(i=>`<label class="libRow"><input type="checkbox" data-id="${esc(i.id)}" checked aria-label="Togli dal libro"><span class="libT">${esc(i.title)}${libMine(i)?'':'<small class="meta"> · dal Ricettario</small>'}</span><span class="libNo">${esc(i.bookNo||'')}</span>${tag(i)}</label>`).join('')}</div>`}).join('')
+      :'<p class="meta">Il libro è vuoto. Tocca il segnalibro sulla foto di una ricetta, in «Le mie» o nel Ricettario, e la ritrovi qui.</p>'}</section>
   <section class="sec"><h3>Il formato</h3><div class="seg libSeg">${LIB_FMTS.map(([k,n,s])=>`<label><input type="radio" name="libFmt" value="${k}"${LIB.fmt===k?' checked':''}><span>${n}<small> · ${s}</small></span></label>`).join('')}</div>
     <p class="meta">${LIB.fmt==='book'?'Senza fori, con i numeri di pagina: da far rilegare in copisteria o con un servizio di stampa online.':'Ogni ricetta comincia su un foglio nuovo, con i fori già segnati: una ricetta nuova si aggiunge senza toccare le altre.'}</p>
     <label class="libChk"><input type="checkbox" id="libPhoto"${LIB.photo?' checked':''}> Con le foto delle ricette</label>
@@ -3728,9 +3737,7 @@ function libRender(){
     <button type="button" class="btn pri" id="libGo" style="width:100%;margin-top:10px"${book.length?'':' disabled'}>🖨 Prepara e stampa</button>
     <p class="meta" style="margin:8px 0 0">Si apre il menu di stampa: stampante di casa, oppure «Salva come PDF» da portare in copisteria o mandare su WhatsApp.</p>
     ${LIB.last&&Date.now()-LIB.last.at<7*864e5?`<p class="meta" style="margin:8px 0 0">${LIB.last.prev.length} ricett${LIB.last.prev.length===1?'a risulta stampata':'e risultano stampate'} il ${libDate(LIB.last.at)}. <button type="button" class="lnk" id="libUndo">Non le ho stampate</button></p>`:''}</section>`;
-  el.querySelectorAll('.libRow input').forEach(c=>c.onchange=()=>{libToggle(c.dataset.id,c.checked);libRender();render()});
-  el.querySelectorAll('[data-all],[data-none]').forEach(b=>b.onclick=()=>{const s=b.dataset.all||b.dataset.none,on=!!b.dataset.all;
-    items.filter(i=>libOk(i)&&(i.cat||'Altro')===s&&!!i.inBook!==on).sort((a,b)=>(a.created||0)-(b.created||0)).forEach(i=>{i.inBook=on;if(on)libAssign(i);i.t=Date.now()});saveItems();libRender();render()});
+  el.querySelectorAll('.libRow input').forEach(c=>c.onchange=()=>{libToggle(c.dataset.id,c.checked);toast('Tolta dal libro: rimettila col segnalibro sulla ricetta');libRender()});
   $('#libTitle').onchange=e=>{LIB.title=e.target.value.trim();libSave();libPreview()};
   $('#libDed').onchange=e=>{LIB.dedica=e.target.value.trim();libSave()};
   el.querySelectorAll('[name=libStyle]').forEach(r=>r.onchange=async()=>{LIB.style=r.value;libSave();await libFonts(LIB.style);libPreview()});
@@ -3743,7 +3750,7 @@ function libRender(){
     const recs=m==='all'?b:m==='new'?b.filter(i=>libState(i)==='new'):b.filter(i=>libState(i)!=='ok');
     if(m!=='all'&&!recs.length&&m==='new'){toast('Non ci sono ricette nuove da stampare');return}
     libPrint(recs,m)};
-  if($('#libUndo'))$('#libUndo').onclick=()=>{for(const [id,p] of LIB.last.prev){const i=items.find(x=>x.id===id);if(i){if(p)i.printed=p;else delete i.printed}}LIB.last=null;saveItems();libSave();libRender();toast('Ok: risultano da stampare')};
+  if($('#libUndo'))$('#libUndo').onclick=()=>{for(const [id,p] of LIB.last.prev){const i=items.find(x=>x.id===id);if(i){if(p)i.printed=p;else delete i.printed}else if(LIB.ext[id])LIB.ext[id].printed=p||null}LIB.last=null;saveItems();libSave();libRender();toast('Ok: risultano da stampare')};
   libPreview()}
 const RIB_SVG='<svg viewBox="0 0 16 20" aria-hidden="true"><path d="M2 1h12v18l-6-4-6 4z"/></svg>';
 

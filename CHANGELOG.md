@@ -6,6 +6,13 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-14
 
+- **Versione 166, il libro con le ricette del Ricettario e solo quelle col segnalibro** (richiesta dell'utente).
+  - **Segnalibro anche nel Ricettario:** sulla foto delle ricette del Ricettario e dentro la ricetta («🔖 Metti nel libro»), così il libro può avere anche ricette che piacciono e non sono tue. Il segnalibro, il numero e la stampa di queste ricette restano su questo telefono (non passano ancora agli altri dispositivi).
+  - **Nel libro solo le ricette col segnalibro:** non si aggiungono più tutte da sole la prima volta; la sezione Libro mostra solo quelle segnate, divise per sezione, con «dal Ricettario» per quelle non tue. Togliendo la spunta si toglie dal libro.
+  - **Scritte sovrapposte:** i nomi degli stili nella sezione Libro andavano uno sopra l'altro; ora stanno in riquadri che vanno a capo. Il titolo in alto è «Il mio libro».
+  - **Prossimo passo:** il nuovo ordine della sezione, da scegliere tra dieci proposte.
+  - **Provato nel browser:** segnalibro su due ricette del Ricettario e una tua, sezione con le tre ricette, stampa con le tre ricette segnate come stampate.
+
 - **Versione 165, la sezione Libro nel menu e la stampa che parte su Android** (segnalazioni dell'utente).
   - **Stampa che non faceva niente (APK):** il comando di stampa veniva messo in coda sul WebView fuori schermo, che non è attaccato a una finestra, e quindi non partiva mai. Ora parte dal gestore dell'attività. Vale per «Stampa la ricetta» e per la stampa del libro.
   - **Sezione «Libro» nel menu in basso** (quinto pulsante, tra Ricettario e Il mio menu): prima lo stile con l'anteprima, poi le ricette messe nel libro con le spunte, il formato, la copertina (titolo e dedica) e la stampa. Il bottone «📖 Il mio libro» in «Le mie» porta qui.
