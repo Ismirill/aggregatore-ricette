@@ -6,6 +6,12 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-14
 
+- **Versione 173, filtri di ricerca ordinati** (l'utente: decine di voci che confondono).
+  - **Gruppi con il titolo:** Tipo di piatto, Ordina per, Tempo, Difficoltà, Dieta, Costo a persona, Voto e Zona. Al posto di sette tendine ci sono pulsanti; sul telefono ogni gruppo sta su una riga che si scorre col dito.
+  - **Meno voci:** nella dieta le quattro più usate (Vegano, Vegetariano, Senza glutine, Ipocalorico); tra i paesi del Ricettario si vedono gli otto con più ricette e «+ altri N paesi» per gli altri.
+  - **In fondo:** «Azzera» (solo se c'è un filtro attivo) e «Mostra N ricette», con il numero che si aggiorna mentre si sceglie.
+  - **Provato:** istantanee di Chrome a misura di telefono nel Ricettario.
+
 - **Versione 172, scritta Gnamina più grande** (richiesta dell'utente): nella testata del telefono la scritta passa da 30 a 42 px di altezza; sui telefoni più stretti si riduce da sola per non toccare i tasti ai lati.
 
 - **Versione 171, nuova testata e fotocamera al centro della barra** (scelta dell'utente: proposta B con la scritta per esteso).

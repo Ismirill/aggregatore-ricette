@@ -78,6 +78,7 @@ header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88
 @media (max-width:899px){
 :root:not(.fOpen) #chips,:root:not(.fOpen) #chips2{display:none!important}
 :root.fOpen #chips,:root.fOpen #chips2{flex-wrap:wrap;overflow:visible;gap:8px}
+@media (max-width:899px){:root.fOpen #chips,:root.fOpen #chips2{flex-wrap:nowrap;overflow-x:auto;gap:6px}:root.fOpen #chips::before,:root.fOpen #chips2::before{position:absolute;top:2px;left:0}:root.fOpen #chips2::before{top:12px}:root.fOpen #chips2{padding-top:36px}:root.fOpen #chips,:root.fOpen #chips2{position:relative;padding-top:24px}}
 :root.fOpen #chips2{border-top:1.5px dashed var(--bd);margin-top:10px;padding-top:10px}
 :root.fOpen #chips2::before{content:attr(data-lbl);flex-basis:100%;font-size:.78rem;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
 :root.fOpen header{max-height:calc(100svh - 84px);overflow-y:auto;overscroll-behavior:contain}
@@ -166,6 +167,19 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 @keyframes lnkRun{0%{transform:translateX(-110%)}100%{transform:translateX(320%)}}
 @media (prefers-reduced-motion:reduce){.lnkProg i{animation:none;width:100%;opacity:.5}}
 #rSave:disabled{opacity:.45;cursor:default;box-shadow:none}
+/* filtri a gruppi */
+.filters{display:block}
+.filters>select{display:none}
+#fPanel{display:grid;gap:12px}
+.fg>b{display:block;font-size:.74rem;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin:0 0 6px}
+.fgc{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -10px;padding:0 10px 2px}.fgc::-webkit-scrollbar{display:none}.fc{flex:none}
+.fc{border:1.5px solid var(--bd);background:var(--card);color:var(--fg);border-radius:99px;padding:7px 12px;font:inherit;font-size:.86rem;font-weight:700;cursor:pointer}
+.fc.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+#fZoneG select{display:block;width:100%;max-width:100%;box-sizing:border-box;margin:0;padding:9px 28px 9px 12px;font-size:max(16px,1rem);border-radius:12px}
+.fFoot{display:flex;gap:8px;margin-top:14px;position:sticky;bottom:0;padding:8px 0 4px;background:color-mix(in srgb,var(--bg) 92%,transparent)}
+.fFoot .btn{flex:1;min-height:2.9rem}#fReset{flex:0 0 auto}
+:root.fOpen #chips::before{content:"Tipo di piatto";flex-basis:100%;font-size:.74rem;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.chipMore{border-style:dashed!important}
 /* ---------- Testata e barra del telefono (14/11, proposta B): coppa della Sfida a sinistra, scritta Gnamina al centro, impostazioni e profilo a destra;
    in basso Le mie, Ricettario, la fotocamera rotonda al centro, Libro e Menu ---------- */
 .brand .wm,#cupBtn,.ncam{display:none}
@@ -855,7 +869,8 @@ details summary{cursor:pointer}
     <select id="fCost"><option value="0">Ogni costo</option><option value="1">€ Fino a 1 € a persona</option><option value="2">€ Fino a 2 € a persona</option><option value="4">€ Fino a 4 € a persona</option></select>
     <select id="fRate"><option value="0">Ogni voto</option><option value="3">★ 3+</option><option value="4">★ 4+</option><option value="5">★ 5</option></select>
     <select id="fSort"><option value="new">In evidenza / più recenti</option><option value="fast">Più veloci</option><option value="easy">Più facili</option><option value="cheap">Più economiche</option><option value="rate">Più votate</option><option value="az">A–Z</option></select>
-    <button type="button" class="btn pri" id="fDone">Mostra le ricette</button>
+    <div id="fPanel"></div>
+    <div class="fFoot"><button type="button" class="btn" id="fReset">Azzera</button><button type="button" class="btn pri" id="fDone">Mostra le ricette</button></div>
   </div>
 </header>
 <nav class="nav" id="tabs"><div class="nbrand"><img src="icon-192.png" alt="" width="192" height="192"><div><b>Gnamina</b><small>La tua app di cucina</small></div></div><div class="nsec" id="secLbl">Sezioni</div><button class="tab" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie<span class="cnt"></span></button><button class="tab on" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Sfida</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario<span class="cnt"></span></button><button type="button" class="ncam" id="navCam" aria-label="Foto di un piatto: Gnamina trova la ricetta"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span>Foto</button><button class="tab" data-v="libro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11v18l-5.5-3.5L6 21z"/></svg>Libro</button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v7M10 3v7M17 3c-2 2-3 4-3 7h3v11"/></svg>Il mio menu</button><div class="nsec">Strumenti</div><div id="ntools"></div><div class="nfoot">Versione <span id="navVer"></span> · <a href="benvenuto.html" style="color:inherit">Cos'è Gnamina</a></div></nav>
@@ -1614,7 +1629,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=172; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=173; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1980,7 +1995,7 @@ function render(){
   // seconda riga: i paesi, con bandiera e numero di ricette
   if(showIntl){const pc={};data.forEach(i=>{const k=i.country;pc[k]=(pc[k]||0)+1});
     const ord=Object.entries(pc).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));if(cur2&&!pc[cur2])cur2='';
-    $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutti i paesi<small>${data.length}</small></button>`+ord.map(([k,n])=>{const it=data.find(i=>i.country===k);return `<button class="chip${k===cur2?' on':''}" data-p="${esc(k)}">${flag(ccOf(it))} ${esc(k)}<small>${n}</small></button>`}).join('');}
+    $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutti i paesi<small>${data.length}</small></button>`+(CH2ALL?ord:ord.filter((o,j)=>j<8||o[0]===cur2)).map(([k,n])=>{const it=data.find(i=>i.country===k);return `<button class="chip${k===cur2?' on':''}" data-p="${esc(k)}">${flag(ccOf(it))} ${esc(k)}<small>${n}</small></button>`}).join('')+(!CH2ALL&&ord.length>8?`<button class="chip chipMore" data-more="1">+ altri ${ord.length-8} paesi</button>`:'');}
   // seconda riga per le italiane: i tipi di piatto
   if(showIta){const tc={};data.forEach(i=>tc[i.cat]=(tc[i.cat]||0)+1);if(cur2&&!tc[cur2])cur2='';
     $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutte<small>${data.length}</small></button>`+cats.filter(c=>tc[c]).map(c=>`<button class="chip${c===cur2?' on':''}" data-p="${esc(c)}">${esc(c)}<small>${tc[c]}</small></button>`).join('')}
@@ -1990,6 +2005,7 @@ function render(){
   const list=data.filter(i=>(cur==='Tutte'||i.cat===cur||(showIntl&&(!cur2||i.country===cur2))||(cur==='Italiane'&&(!showIta||!cur2||i.cat===cur2)))&&(!showBk||!cur2||i.kind===cur2)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(!ft||timing(i).t<=ft)&&(!fdf||(fdf===3?timing(i).d===3:timing(i).d<=fdf))&&(!fc||((perPerson(i)?.eur??99)<=fc))
       &&(!q||[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q)))
     .sort(sorter(fs,!!q));
+  LIST_N=list.length;
   const nGz=view==='book'&&book?book.filter(x=>x.linked).length:0;
   const nPu=view==='book'&&book?book.filter(x=>x.source==='Regione Puglia').length:0,nWo=view==='book'&&book?book.filter(x=>x.world).length:0,nAr=view==='book'&&book?book.filter(x=>x.artusi).length:0,nLi=view==='book'&&book?book.filter(x=>x.libera&&x.source!=='Gnamina').length:0,nGn=view==='book'&&book?book.filter(x=>x.source==='Gnamina').length:0;
   const lic=view==='mine'&&items.length?`<p class="lic">Le ricette salvate da te restano tue: per quelle importate da un link la fonte originale è indicata nella scheda, insieme alla foto e al suo autore.</p>${fontiDati()}`
@@ -3477,9 +3493,26 @@ function navCounts(){const m=$('#tabs [data-v=mine] .cnt'),b=$('#tabs [data-v=bo
 // Filtri nascosti dietro un pulsante; il pulsante si colora se ce n'è qualcuno attivo
 function filtUI(){const narrow=innerWidth<900,open=!$('.filters').hidden;
   const n=['#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate'].filter(x=>$(x).value&&$(x).value!=='0').length+(narrow?(cur!==(view==='book'?'Italiane':'Tutte')?1:0)+(cur2?1:0):0);
-  document.documentElement.classList.toggle('fOpen',open);$('#fBtn').classList.toggle('on',n>0||open);$('#fBtn').lastChild.textContent=n?`Filtri · ${n}`:'Filtri'}
+  document.documentElement.classList.toggle('fOpen',open);$('#fBtn').classList.toggle('on',n>0||open);$('#fBtn').lastChild.textContent=n?`Filtri · ${n}`:'Filtri';
+  $('#fDone').textContent=`Mostra ${LIST_N} ricett${LIST_N===1?'a':'e'}`;$('#fReset').hidden=!n}
+
+/* Filtri ordinati (14/11): gruppi con il titolo e scelte a pulsanti al posto di sette tendine; le tendine restano nascoste e tengono lo stato */
+const FGROUPS=[['fSort','Ordina per',[['new','In evidenza'],['fast','Più veloci'],['easy','Più facili'],['cheap','Più economiche'],['rate','Più votate'],['az','A–Z']]],
+  ['fTime','Tempo',[['0','Qualsiasi'],['15','15 min'],['30','30 min'],['60','1 ora']]],
+  ['fDiff','Difficoltà',[['0','Qualsiasi'],['1','Facili'],['2','Facili o medie'],['3','Impegnative']]],
+  ['fDiet','Dieta',[['','Qualsiasi'],...MAIN_DIETS.map(d=>[d,d])]],
+  ['fCost','Costo a persona',[['0','Qualsiasi'],['1','Fino a 1 €'],['2','Fino a 2 €'],['4','Fino a 4 €']]],
+  ['fRate','Voto',[['0','Qualsiasi'],['3','★ 3+'],['4','★ 4+'],['5','★ 5']]]];
+let LIST_N=0,CH2ALL=false;
+function filtPanel(){const box=$('#fPanel');if(!box||$('.filters').hidden)return;
+  box.innerHTML=FGROUPS.map(([id,lbl,opts])=>{const sel=$('#'+id),o=opts||[...sel.options].map(x=>[x.value,x.value?x.textContent:'Qualsiasi']);
+    return `<div class="fg"><b>${lbl}</b><div class="fgc">${o.map(([v,t])=>`<button type="button" class="fc${sel.value===v?' on':''}" data-f="${id}" data-v="${esc(v)}">${esc(t)}</button>`).join('')}</div></div>`}).join('')
+    +`<div class="fg" id="fZoneG"><b>Zona</b></div>`;
+  $('#fZoneG').append($('#fZone'))}
+$('#fPanel').onclick=e=>{const b=e.target.closest('.fc');if(!b)return;const sel=$('#'+b.dataset.f);sel.value=b.dataset.v;sel.dispatchEvent(new Event('input'));filtPanel()};
+$('#fReset').onclick=()=>{$('#fSort').value='new';['#fTime','#fDiff','#fCost','#fRate'].forEach(x=>$(x).value='0');$('#fDiet').value='';$('#fZone').value='';cur=view==='book'?'Italiane':'Tutte';cur2='';CH2ALL=false;render();filtUI();filtPanel()};
 $('#fDone').onclick=()=>{$('.filters').hidden=true;$('#fBtn').setAttribute('aria-expanded','false');filtUI();scrollTo({top:0,behavior:'smooth'})};
-$('#fBtn').onclick=()=>{const f=$('.filters');f.hidden=!f.hidden;$('#fBtn').setAttribute('aria-expanded',!f.hidden);filtUI()};
+$('#fBtn').onclick=()=>{const f=$('.filters');f.hidden=!f.hidden;$('#fBtn').setAttribute('aria-expanded',!f.hidden);filtUI();filtPanel()};
 /* ---------- Libro di cucina da stampare: nel libro vanno le ricette con il segnalibro (inBook). Ogni ricetta del libro ha un
    numero che non cambia (bookNo: lettera della sezione + numero, P14 = quattordicesimo primo) e ricorda la stampa (printed:
    quando, con quale contenuto e numero), così si ristampano solo le ricette nuove o cambiate. Le pagine si impaginano qui
@@ -3961,7 +3994,7 @@ function libRender(){
 const RIB_SVG='<svg viewBox="0 0 16 20" aria-hidden="true"><path d="M2 1h12v18l-6-4-6 4z"/></svg>';
 
 $('#chips').onclick=e=>{const c=e.target.closest('.chip');if(!c)return;if(c.dataset.lib){libOpen();return}cur=c.dataset.c;cur2='';MAGALL=false;render()};
-$('#chips2').onclick=e=>{const c=e.target.closest('.chip');if(c){cur2=c.dataset.p;render()}};
+$('#chips2').onclick=e=>{const c=e.target.closest('.chip');if(!c)return;if(c.dataset.more){CH2ALL=true;render();return}cur2=c.dataset.p;render()};
 $('#list').onclick=e=>{if(lpFired){lpFired=false;return} // il tocco che chiude una pressione lunga non apre la scheda
   const m=e.target.closest('.more');if(m){e.stopPropagation();openItemMenu(m.closest('.item').dataset.id);return}
   const rb=e.target.closest('.ribBtn');if(rb){e.stopPropagation();const i=libToggle(rb.dataset.rib);if(i){rb.classList.toggle('on',!!i.inBook);rb.setAttribute('aria-pressed',!!i.inBook);toast(i.inBook?`Nel libro di cucina come ${i.bookNo}`:'Tolta dal libro di cucina');navCounts?.();if(view==='mine')render()}return}
