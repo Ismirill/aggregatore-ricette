@@ -198,6 +198,34 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 .magWide{flex:none;width:250px;display:flex;flex-direction:row;gap:10px;align-items:center;background:var(--card);border-radius:16px;padding:8px;box-shadow:var(--sh);cursor:pointer}
 .magWide img,.magWide .magNo{width:76px;height:76px;border-radius:12px;object-fit:cover;flex:none;display:grid;place-items:center;font-size:1.8rem;background:var(--bg2)}
 .magWide b{display:block;font-family:var(--serif);font-size:.98rem;line-height:1.2}.magWide small{color:var(--mut);font-weight:700;font-size:.75rem;display:block}
+/* Rivista compatta (14/11): meno margini ai lati e tra le parti, come nelle app di cucina; foto che si muovono piano */
+:root[data-style=rivista] header{padding:calc(6px + env(safe-area-inset-top)) 10px 6px}
+:root[data-style=rivista] .searchbar{margin-top:6px}
+:root[data-style=rivista] .chips{padding-top:6px}
+:root[data-style=rivista] main{padding:8px 10px}
+:root[data-style=rivista] .list{gap:14px 8px}
+:root[data-style=rivista] .magGrid{gap:14px 8px}
+:root[data-style=rivista] .list>.item .b,:root[data-style=rivista] .magGrid>.item .b{padding:6px 2px 0;gap:2px}
+:root[data-style=rivista] .list>.item .thumb,:root[data-style=rivista] .magGrid>.item .thumb{border-radius:14px}
+:root[data-style=rivista] .magSlide{aspect-ratio:4/3.7;border-radius:18px;margin:0}
+:root[data-style=rivista] .magHero{gap:8px}
+:root[data-style=rivista] .magSh{margin:16px 2px 8px}
+:root[data-style=rivista] .magSh h3{font-size:1.12rem}
+:root[data-style=rivista] .magCats{gap:10px}
+:root[data-style=rivista] .magCat{width:64px}:root[data-style=rivista] .magCat img,:root[data-style=rivista] .magCat .magNo{width:60px;height:60px}
+.magReels{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0 4px}.magReels::-webkit-scrollbar{display:none}
+.magReel{flex:none;width:118px;aspect-ratio:9/16;position:relative;border-radius:14px;overflow:hidden;box-shadow:0 6px 14px #3c230f30;cursor:pointer;background:#2a211c}
+.magReel img,.magReel .magVid,.magSlide .magVid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.magSlide .magVid{z-index:0}.magSlide .magTx{z-index:2}
+.magReel::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0000 50%,#000b)}
+.magReel b{position:absolute;left:8px;right:8px;bottom:8px;z-index:2;color:#fff;font-family:var(--serif);font-size:.82rem;line-height:1.15;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.magSrc{position:absolute;left:7px;top:7px;z-index:2;font-size:.6rem;font-weight:800;color:#fff;background:#0007;padding:2px 7px;border-radius:99px}
+.magPlay{position:absolute;right:7px;top:7px;z-index:2;width:24px;height:24px;border-radius:50%;background:#fffe}
+.magPlay::before{content:"";position:absolute;left:9px;top:7px;border-style:solid;border-width:5px 0 5px 8px;border-color:transparent transparent transparent #2a211c}
+img.kb{will-change:transform}
+img.kb.kbOn{animation:kb 9s ease-in-out infinite alternate}
+@keyframes kb{from{transform:scale(1.02) translate(0,0)}to{transform:scale(1.13) translate(-2.5%,-2%)}}
+@media (prefers-reduced-motion:reduce){img.kb.kbOn{animation:none}}
 .magTm{display:inline-block;margin-top:5px;background:#e6f0e0;color:#3f7a2e;font-weight:800;font-size:.7rem;padding:2px 8px;border-radius:99px}
 .fbHero{display:block;position:relative;text-decoration:none;color:#fff;aspect-ratio:9/12;max-height:62vh;overflow:hidden;border-radius:var(--r,16px)}
 .fbHero .hero{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;aspect-ratio:auto;border-radius:0}
@@ -1568,7 +1596,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=169; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=170; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1886,7 +1914,9 @@ let MAGALL=false;
 function magHome(list){
   const withImg=list.filter(i=>i.image);
   const rated=withImg.filter(i=>(i.rating||0)>=4).sort((a,b)=>(b.rating||0)-(a.rating||0));
-  const hero=[...rated,...withImg.filter(i=>!rated.includes(i))].slice(0,3);
+  const hero=[...rated,...withImg.filter(i=>!rated.includes(i))].slice(0,5);
+  const vids=list.filter(i=>i.image&&(i.clips?.length||embedOf(i))).slice(0,12);
+  const src=i=>i.clips?.length?'Il tuo video':i.source&&!['Gnamina','Aggregatore Ricette'].includes(i.source)?i.source:'Video';
   const lbl=i=>(i.rating||0)>=4?'La più amata':i===withImg[0]?'Ultima salvata':'Da rifare';
   const fact=i=>{const tm=(i.ingredients?.length||i.steps?.length)?timing(i):null;return [tm&&'⏱ '+fmtMin(tm.t),+i.servings&&'👥 '+i.servings+' person'+(+i.servings===1?'a':'e'),i.rating&&'★ '+i.rating].filter(Boolean).map(x=>`<span>${esc(String(x))}</span>`).join('')};
   const cnt={};list.forEach(i=>{const c=i.cat||'Altro';(cnt[c]=cnt[c]||[]).push(i)});
@@ -1894,10 +1924,12 @@ function magHome(list){
   const quick=list.filter(i=>(i.ingredients?.length||i.steps?.length)&&timing(i).t&&timing(i).t<=30).slice(0,10);
   const recent=list.slice(0,6);
   return `<div class="magBlk">
-    ${hero.length?`<div class="magHero" id="magHero">${hero.map(i=>`<div class="item magSlide" data-id="${esc(i.id)}"><img src="${esc(i.image)}" alt="" referrerpolicy="no-referrer"><div class="magTx"><span class="magEye">${lbl(i)}</span><h2>${esc(i.title)}</h2><div class="magF">${fact(i)}</div></div></div>`).join('')}</div>
+    ${hero.length?`<div class="magHero" id="magHero">${hero.map(i=>`<div class="item magSlide" data-id="${esc(i.id)}"${i.clips?.length&&i.clipKey?` data-clip="${esc(i.clipKey)}"`:''}><img class="kb" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer"><div class="magTx"><span class="magEye">${lbl(i)}</span><h2>${esc(i.title)}</h2><div class="magF">${fact(i)}</div></div></div>`).join('')}</div>
       ${hero.length>1?`<div class="magDots">${hero.map((_,k)=>`<i${k?'':' class="on"'}></i>`).join('')}</div>`:''}`:''}
     ${cs.length>1?`<div class="magSh"><h3>Per tipo di piatto</h3><button type="button" class="lnk" data-mall="1">Tutte ${list.length}</button></div>
       <div class="magCats">${cs.map(c=>{const im=(cnt[c].find(i=>i.image)||{}).image;return `<button type="button" class="magCat" data-mcat="${esc(c)}">${im?`<img src="${esc(im)}" alt="" referrerpolicy="no-referrer">`:`<span class="magNo">${look(cnt[c][0])[0]}</span>`}<b>${esc(c)}</b><small>${cnt[c].length}</small></button>`}).join('')}</div>`:''}
+    ${vids.length?`<div class="magSh"><h3>Video da guardare</h3><span class="meta">${vids.length}</span></div>
+      <div class="magReels">${vids.map(i=>`<div class="item magReel" data-id="${esc(i.id)}"${i.clips?.length&&i.clipKey?` data-clip="${esc(i.clipKey)}"`:''}><img class="kb" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer"><span class="magPlay"></span><span class="magSrc">${esc(src(i))}</span><b>${esc(i.title)}</b></div>`).join('')}</div>`:''}
     <div class="magSh"><h3>Salvate di recente</h3><button type="button" class="lnk" data-mall="1">Vedi tutte</button></div>
     <div class="magGrid">${recent.map(card).join('')}</div>
     ${quick.length?`<div class="magSh"><h3>Pronte in 30 minuti</h3></div><div class="magRow">${quick.map(i=>`<div class="item magWide" data-id="${esc(i.id)}">${i.image?`<img src="${esc(i.image)}" alt="" referrerpolicy="no-referrer">`:`<span class="magNo">${look(i)[0]}</span>`}<div><b>${esc(i.title)}</b><small>${esc(i.cat||'')}</small><span class="magTm">⏱ ${fmtMin(timing(i).t)}</span></div></div>`).join('')}</div>`:''}
@@ -1905,7 +1937,17 @@ function magHome(list){
 function magWire(){
   $('#list').querySelectorAll('[data-mcat]').forEach(b=>b.onclick=e=>{e.stopPropagation();cur=b.dataset.mcat;render();scrollTo({top:0})});
   $('#list').querySelectorAll('[data-mall]').forEach(b=>b.onclick=e=>{e.stopPropagation();MAGALL=true;render();scrollTo({top:0})});
-  const h=$('#magHero');if(h){const d=[...document.querySelectorAll('.magDots i')];h.onscroll=()=>{const k=Math.round(h.scrollLeft/h.clientWidth);d.forEach((x,j)=>x.classList.toggle('on',j===k))}}}
+  const h=$('#magHero');if(h){const d=[...document.querySelectorAll('.magDots i')];h.onscroll=()=>{const k=Math.round(h.scrollLeft/h.clientWidth);d.forEach((x,j)=>x.classList.toggle('on',j===k))};
+    clearInterval(window.magAuto);let still=false;h.addEventListener('touchstart',()=>still=true,{passive:true});h.addEventListener('pointerdown',()=>still=true);
+    if(d.length>1&&!matchMedia('(prefers-reduced-motion: reduce)').matches)window.magAuto=setInterval(()=>{if(still||!document.body.contains(h)||document.hidden)return;const k=Math.round(h.scrollLeft/h.clientWidth);h.scrollTo({left:((k+1)%d.length)*h.clientWidth,behavior:'smooth'})},4500)}
+  // il video girato con l'app parte muto, in ciclo, sopra la foto (solo sul telefono che l'ha registrato)
+  $('#list').querySelectorAll('[data-clip]').forEach(async el=>{try{const c=await clipGet(el.dataset.clip+':0');if(!c?.blob)return;const v=document.createElement('video');Object.assign(v,{muted:true,loop:true,playsInline:true,autoplay:true,src:URL.createObjectURL(c.blob)});v.setAttribute('playsinline','');v.className='magVid';el.prepend(v);v.play?.().catch(()=>{})}catch{}});
+  magKb()}
+// zoom lento sulle foto mentre sono sullo schermo (come le copertine animate delle app di cucina); fermo se il telefono chiede meno animazioni
+let magIo=null;
+function magKb(){if(matchMedia('(prefers-reduced-motion: reduce)').matches||!('IntersectionObserver' in window))return;
+  magIo?.disconnect();magIo=new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('kbOn',e.isIntersecting)),{rootMargin:'40px'});
+  $('#list').querySelectorAll('img.kb,.thumb img').forEach((im,k)=>{im.classList.add('kb');im.style.animationDelay=(-(k*1.7)%9)+'s';magIo.observe(im)})}
 function render(){
   navCounts();
   const q=$('#q').value.trim().toLowerCase(),fd=$('#fDiet').value,fz=$('#fZone').value,fr=+$('#fRate').value,ft=+$('#fTime').value,fdf=+$('#fDiff').value,fc=+$('#fCost').value,fs=$('#fSort').value;
@@ -1939,7 +1981,7 @@ function render(){
   $('#list').innerHTML=vet+(mag?magHome(list):list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
     :`<div class="empty">${q?noResults(q):view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':welcome()}</div>`)+(lic?`<details class="lic fonti"><summary>Fonti e licenze</summary>${lic}</details>`:'');
-  if(mag)magWire();
+  if(mag)magWire();else if(MAG())magKb();
   $('#list').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>$(`#tabs .tab[data-v=${b.dataset.goto}]`).click());
   $('#list').querySelectorAll('.vtile[data-vid]').forEach(t=>{t.onclick=()=>{const b=findAny(t.dataset.vid);if(b)openDetail(b)};t.onkeydown=e=>{if(e.key==='Enter')t.click()}});
   $('#list').querySelectorAll('.vcat[data-vcat]').forEach(b=>b.onclick=()=>{const c=b.dataset.vcat;if(c==='Internazionali'){cur='Internazionali';cur2=''}else{cur='Italiane';cur2=c}render();scrollTo({top:0,behavior:'smooth'})});

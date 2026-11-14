@@ -6,6 +6,13 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-14
 
+- **Versione 170, Rivista più compatta e con le immagini in movimento** (l'utente: troppi spazi vuoti, poco «da app ufficiale», servono immagini che si muovono).
+  - **Più compatta:** margini ai lati di 10 px invece di 16, testata, ricerca e titoli delle sezioni più vicini, griglia più fitta, tipi di piatto più piccoli, foto in evidenza meno alta.
+  - **Foto in movimento:** le foto sullo schermo fanno un lento zoom, come le copertine animate delle app di cucina (fermo se il telefono chiede meno animazioni). Le ricette in evidenza, fino a cinque, scorrono da sole ogni 4,5 secondi e si fermano quando le tocchi.
+  - **«Video da guardare»:** una fila di schede verticali come i reel, con le ricette che hanno un video (TikTok, Instagram, YouTube, Facebook o girato con l'app), con la fonte e il tasto play.
+  - **Il tuo video in anteprima:** se la ricetta ha un video girato con l'app, nell'evidenza e nella fila dei video parte muto e in ciclo sopra la foto (solo sul telefono che l'ha registrato). I video dei social non si possono riprodurre così: lì si muove la foto.
+  - **Provato:** istantanea di Chrome a misura di telefono con otto ricette di prova, quattro con video.
+
 - **Versione 169, lo stile Rivista al posto di Quaderno** (scelta dell'utente: l'esempio 3, «rivista di cucina»).
   - **Nome:** nelle Impostazioni lo stile «Quaderno» diventa «Rivista»; chi lo aveva scelto passa a Rivista da solo.
   - **«Le mie ricette» come una rivista** (quando non si cerca e non si filtra, con almeno 4 ricette): in alto le ricette in evidenza, grandi e da scorrere (la più amata, l'ultima salvata), poi i tipi di piatto in cerchio con la foto, «Salvate di recente» in griglia a due colonne e «Pronte in 30 minuti» da scorrere. Toccando un tipo o «Vedi tutte» si passa alla griglia completa.
