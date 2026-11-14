@@ -164,10 +164,13 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 @keyframes lnkRun{0%{transform:translateX(-110%)}100%{transform:translateX(320%)}}
 @media (prefers-reduced-motion:reduce){.lnkProg i{animation:none;width:100%;opacity:.5}}
 #rSave:disabled{opacity:.45;cursor:default;box-shadow:none}
-.fbHero{display:block;position:relative;text-decoration:none;color:#fff}
-.fbHero .hero{min-height:200px;object-fit:cover}
-.fbPlay{position:absolute;inset:auto 12px 12px 12px;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 16px;border-radius:14px;background:#1877f2;font-weight:800;font-size:1.05rem;box-shadow:0 6px 18px #0005}
-.fbPlay b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#fff;color:#1877f2;font-size:.9rem}
+.fbHero{display:block;position:relative;text-decoration:none;color:#fff;aspect-ratio:9/12;max-height:62vh;overflow:hidden;border-radius:var(--r,16px)}
+.fbHero .hero{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;aspect-ratio:auto;border-radius:0}
+.fbHero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0000 55%,#0008)}
+.fbEm{position:absolute;inset:0;display:grid;place-items:center;font-size:4rem}
+.fbPlay{position:absolute;left:50%;top:50%;width:68px;height:68px;margin:-34px 0 0 -34px;border-radius:50%;background:#000a;border:2px solid #fffc;z-index:1;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.fbPlay::before{content:"";position:absolute;left:27px;top:21px;border-style:solid;border-width:13px 0 13px 21px;border-color:transparent transparent transparent #fff}
+.fbLbl{position:absolute;left:12px;bottom:10px;z-index:1;font-size:.85rem;font-weight:700;text-shadow:0 1px 3px #000a}
 /* Libro di cucina: segnalibro sulla scheda (pieno = nel libro) e pagina «Il mio libro» */
 .ribBtn{position:absolute;right:8px;top:0;z-index:3;width:34px;height:42px;border:0;padding:0 6px 8px;background:none;cursor:pointer;display:flex;align-items:flex-start;justify-content:center}
 .ribBtn svg{width:22px;height:30px;fill:color-mix(in srgb,var(--card) 70%,transparent);stroke:#fff;stroke-width:1.6;filter:drop-shadow(0 1px 2px #0006)}
@@ -1481,9 +1484,19 @@ async function repairThumbs(){
 /* ---------- Video ---------- */
 // Facebook: molti video non si possono incorporare (lo decide l'autore o Facebook, per la musica) e il riquadro mostrerebbe
 // «Non disponibile» senza che l'app possa saperlo. Si mostra la copertina con un tasto che apre il video originale su Facebook.
-function fbHero(i,c1,c2,em){const u=esc(i.finalUrl||i.url||'');
-  const bg=i.image?`<img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:`<div class="hero" style="display:grid;place-items:center;font-size:4rem;aspect-ratio:16/9;background:linear-gradient(135deg,${c1}66,${c2}77)">${em}</div>`;
-  return `<a class="heroWrap fbHero" href="${u}" target="_blank" rel="noopener">${bg}<span class="fbPlay"><b>▶</b>Guarda il video su Facebook</span></a>`}
+function fbHero(i,c1,c2,em){const u=esc(i.finalUrl||i.url||''),im=String(i.image||'');
+  const src=im&&isSocialImg(im)&&aiOn()?AI_URL+'/thumb?u='+encodeURIComponent(im):im;
+  return `<a class="heroWrap fbHero" href="${u}" target="_blank" rel="noopener" data-fbu="${u}" style="background:linear-gradient(135deg,${c1}66,${c2}77)" aria-label="Guarda il video su Facebook">
+    ${src?`<img class="hero" src="${esc(src)}" alt="" referrerpolicy="no-referrer">`:`<span class="fbEm">${em}</span>`}<span class="fbPlay" aria-hidden="true"></span><span class="fbLbl">▶ Video su Facebook</span></a>`}
+// copertina mancante o scaduta: si riprende quella aggiornata del post (tramite il server) e si conserva nella ricetta
+async function fbHeroFix(a,i){
+  const img=a.querySelector('img');
+  const fix=async()=>{try{const p=await server('/preview',{url:i.finalUrl||i.url,transcribe:false});const g=parseHtml(p.html||'').image;if(!g)return;
+    const kept=await keepThumb(g);const ni=a.querySelector('img')||Object.assign(document.createElement('img'),{className:'hero',alt:''});ni.src=kept;if(!ni.parentNode){a.querySelector('.fbEm')?.remove();a.prepend(ni)}
+    const it=items.find(x=>x.id===i.id);if(it&&kept.startsWith('data:')){it.image=kept;saveItems()}}catch{}};
+  if(!img){if(aiOn())fix();return}
+  img.onerror=()=>{img.remove();if(aiOn())fix()};
+}
 function embedOf(i){
   const u=i.video||i.finalUrl||i.url||'';let m; // i.video: il video girato dall'utente, sul suo canale YouTube
   if(m=u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/))return {src:'https://www.youtube-nocookie.com/embed/'+m[1],v:/shorts/.test(u)};
@@ -1496,7 +1509,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=163; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=164; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2511,6 +2524,7 @@ function openDetail(i){
     draw();
   }
   $('#dClose').onclick=$('#dX').onclick=()=>$('#det').close();
+  if($('#dv .fbHero'))fbHeroFix($('#dv .fbHero'),i);
   if($('#dCopy'))$('#dCopy').onclick=e=>copyText(e.currentTarget.dataset.u,'Link copiato negli appunti');
   if($('#dLib'))$('#dLib').onclick=e=>{const it=libToggle(i.id);if(!it)return;e.currentTarget.textContent=it.inBook?`🔖 Nel libro · ${it.bookNo}`:'🔖 Metti nel libro';toast(it.inBook?`Nel libro di cucina come ${it.bookNo}`:'Tolta dal libro di cucina');render()};
   if($('#dPrint'))$('#dPrint').onclick=()=>libPrint([items.find(x=>x.id===i.id)||i],'one',{name:i.title,numbered:!!i.inBook});

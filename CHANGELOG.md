@@ -6,6 +6,10 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-14
 
+- **Versione 164, l'anteprima dei video di Facebook** (l'utente: il tasto blu della 163 era brutto, ci vuole un'anteprima).
+  - Al posto della barra blu c'è la copertina del reel a tutta grandezza, con il tasto play rotondo al centro e la scritta «▶ Video su Facebook»: toccandola si apre il video originale.
+  - Se la copertina salvata è scaduta o manca, l'app ne riprende una aggiornata dal post tramite il server e la conserva nella ricetta (provato con il reel della torta rovesciata).
+
 - **Versione 163, i video di Facebook si guardano sull'originale** (segnalazione dell'utente: nella ricetta della torta rovesciata il riquadro diceva «Non disponibile: questo video non può essere incorporato»).
   - **Causa:** l'autore del reel, o Facebook per via della musica, non permette di mostrare il video su altri siti. Il riquadro ufficiale di Facebook non dà nemmeno il file, quindi dentro l'app non si può proprio riprodurre, e l'app non può sapere in anticipo quali video sono bloccati.
   - **Correzione:** per le ricette prese da Facebook in alto c'è la copertina con il tasto blu «▶ Guarda il video su Facebook», che apre il video originale nell'app Facebook o nel browser.
