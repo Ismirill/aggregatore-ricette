@@ -6,6 +6,12 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-14
 
+- **Versione 167, la sezione Libro riordinata (proposta 9)** (scelta dell'utente tra dieci proposte).
+  - **In alto** un riquadro con quante ricette ci sono nel libro e quante sono da stampare.
+  - **Tre righe da toccare:** «Lo stile» (con la copertina vera in miniatura; apre le sei copertine tra cui scegliere e l'anteprima di una ricetta), «Le ricette» (quelle col segnalibro, per sezione, con la spunta per toglierle), «Il formato e la copertina» (A4, A5 o libro, foto, righe per gli appunti, fronte e retro, titolo e dedica). Ognuna si apre in una pagina con «‹ Il mio libro» per tornare.
+  - **In fondo i tasti di stampa:** «Stampa il libro» la prima volta; dopo, «Stampa le N da aggiornare» (nuove o cambiate, con l'indice) e «Stampa tutto il libro».
+  - **Provato:** nel browser e in un'istantanea di Chrome a misura di telefono.
+
 - **Versione 166, il libro con le ricette del Ricettario e solo quelle col segnalibro** (richiesta dell'utente).
   - **Segnalibro anche nel Ricettario:** sulla foto delle ricette del Ricettario e dentro la ricetta («🔖 Metti nel libro»), così il libro può avere anche ricette che piacciono e non sono tue. Il segnalibro, il numero e la stampa di queste ricette restano su questo telefono (non passano ancora agli altri dispositivi).
   - **Nel libro solo le ricette col segnalibro:** non si aggiungono più tutte da sole la prima volta; la sezione Libro mostra solo quelle segnate, divise per sezione, con «dal Ricettario» per quelle non tue. Togliendo la spunta si toglie dal libro.

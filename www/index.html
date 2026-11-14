@@ -195,6 +195,22 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 #libro .libPrev{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:380px;margin:12px 0 0}
 #libro .libPrev .libdoc>div{display:contents}
 #libro .libRibI svg{width:12px;height:15px;fill:var(--acc);vertical-align:-2px}
+#libro .libSum{display:grid;gap:2px;padding:14px 16px;border-radius:16px;background:var(--card);border:1px solid var(--bd);margin:6px 0 12px}
+#libro .libBig{font-family:var(--serif,Fraunces,serif);font-size:1.9rem;line-height:1.1;color:var(--acc)}
+#libro .libLine{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;margin:0 0 8px;border-radius:14px;border:1px solid var(--bd);background:var(--card);color:var(--fg);font:inherit;cursor:pointer;min-height:58px}
+#libro .libL{flex:1;min-width:0;font-weight:700;font-size:1.02rem}
+#libro .libV{color:var(--mut);font-weight:600;white-space:nowrap}
+#libro .libIco{width:30px;display:grid;place-items:center;font-size:1.2rem;flex:none}#libro .libIco svg{width:18px;height:24px;fill:var(--acc)}
+#libro .libMini{width:30px;flex:none;display:block;border-radius:3px;overflow:hidden;box-shadow:0 1px 3px #0003}
+#libro .libMini .page{box-shadow:none}
+#libro .libPrint{display:grid;gap:8px;margin-top:16px}#libro .libPrint .btn{width:100%;min-height:3.1rem;font-size:1.02rem}#libro .libPrint p{margin:0}
+#libro .libBack{border:0;background:none;color:var(--acc);font:inherit;font-weight:700;padding:6px 0;cursor:pointer}
+#libro .libPgT{margin:4px 0 10px}
+#libro .libStyles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+#libro .libSty{display:grid;gap:6px;justify-items:center;padding:8px 6px;border-radius:12px;border:2px solid transparent;background:var(--card);color:var(--fg);font:inherit;cursor:pointer}
+#libro .libSty.on{border-color:var(--acc)}#libro .libSty b{font-size:.82rem;line-height:1.2;text-align:center}
+#libro .libSty .libMini{width:100%;max-width:90px}
+#libro .libFmts{display:grid;gap:0}
 #wizNav.lnk>span{flex:1;flex-direction:column;align-items:stretch;gap:4px}
 #wizNav.lnk #rSave,#wizNav.lnk #rNext.pri{width:100%;justify-content:center;min-height:3.2rem;font-size:1.05rem}
 #wizNav.lnk #rNext:not(.pri){order:2;border:0;background:none;box-shadow:none;color:var(--mut);text-decoration:underline;font-weight:600}
@@ -754,7 +770,7 @@ details summary{cursor:pointer}
 <nav class="nav" id="tabs"><div class="nbrand"><img src="icon-192.png" alt="" width="192" height="192"><div><b>Gnamina</b><small>La tua app di cucina</small></div></div><div class="nsec" id="secLbl">Sezioni</div><button class="tab" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie<span class="cnt"></span></button><button class="tab on" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Sfida</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario<span class="cnt"></span></button><button class="tab" data-v="libro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11v18l-5.5-3.5L6 21z"/></svg>Libro</button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v7M10 3v7M17 3c-2 2-3 4-3 7h3v11"/></svg>Il mio menu</button><div class="nsec">Strumenti</div><div id="ntools"></div><div class="nfoot">Versione <span id="navVer"></span> · <a href="benvenuto.html" style="color:inherit">Cos'è Gnamina</a></div></nav>
 <main><div class="list" id="list"></div>
 <section id="home" hidden></section>
-<section id="libro" hidden><p class="meta" style="margin:0 0 4px">Scegli lo stile, controlla le ricette che hai messo nel libro e stampa: tutto il libro o solo quelle nuove.</p><div id="libBody"></div></section>
+<section id="libro" hidden><div id="libBody"></div></section>
 <section id="budget" hidden>
   <div class="bhead"><h2>Il menu giusto per il tuo budget</h2><p>Rispondi a sei domande: preparo un menu con i piatti italiani di tutti i giorni, bilanciato e con frutta e verdura di stagione. Alla fine puoi variarlo quante volte vuoi.</p></div>
   <form id="bForm" class="bform">
@@ -1507,7 +1523,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=166; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=167; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1610,7 +1626,7 @@ function goView(v){
   const bud=view==='budget',home=view==='home',lib=view==='libro',alt=bud||home||lib;['#sbar','#chips','#list'].forEach(x=>$(x).hidden=alt);$('#add').hidden=alt;if(alt){$('#chips2').hidden=true;$('.filters').hidden=true;filtUI()}$('#budget').hidden=!bud;$('#home').hidden=!home;$('#libro').hidden=!lib;filtUI();
   $('#vTitle').textContent={home:'La sfida',mine:'Le mie ricette',book:'Ricettario',budget:'Il mio menu',libro:'Il mio libro'}[view];window.scrollTo(0,0);
   if(home){renderHome();loadBook();return}
-  if(lib){libInit();libCss();libRender();libFonts(LIB.style).then(()=>libPreview());return}
+  if(lib){LIBPAGE='';libInit();libCss();libRender();libFonts(LIB.style).then(()=>libPreview());return}
   if(bud){loadBook();loadPT();initBudget();return}
   $('#q').placeholder=view==='book'?'Cerca tra le ricette del ricettario…':'Cerca titolo, ingrediente, etichetta…';
   if(view==='book')loadBook();fillSelects();render()}
@@ -3707,51 +3723,63 @@ function libOpen(){if(view!=='libro')goView('libro');else{libInit();libCss();lib
 function libPreview(){const box=$('#libPrev');if(!box)return;const list=libItems(),o={style:LIB.style,fmt:LIB.fmt,photo:LIB.photo,notes:LIB.notes,numbered:true};
   const r=list[0]||items.find(libOk);
   box.innerHTML=`<div class="libdoc"><div class="s-${o.style}">${libCover(o,list)}${r?libRecipeHtml(r,o,{ing:(r.ingredients||[]).map(String),steps:(r.steps||[]).map(String),s0:0,first:true,notes:true}):''}</div></div>`}
+// Sezione Libro (proposta 9 scelta il 14/11/2026): un riquadro con quante ricette ci sono e quante sono da stampare, tre righe
+// da toccare (lo stile, le ricette, il formato e la copertina) che aprono la loro pagina, e i tasti di stampa in fondo
+let LIBPAGE='';
+function libGoPage(p){LIBPAGE=p;libRender();window.scrollTo(0,0)}
 function libRender(){
   const el=$('#libBody');if(!el)return;
   const book=libItems(),bsecs=[...new Set(book.map(i=>i.cat||'Altro'))];
-  const nNew=book.filter(i=>libState(i)==='new').length,nMod=book.filter(i=>libState(i)==='mod').length,anyPrinted=book.some(i=>i.printed);
-  const mode=LIB.mode&&['update','new','all'].includes(LIB.mode)&&(LIB.mode!=='update'||anyPrinted)?LIB.mode:anyPrinted?'update':'all';
-  const tag=i=>{if(!i.inBook)return '';const s=libState(i);return s==='new'?'<span class="libTag new">nuova</span>':s==='mod'?'<span class="libTag mod">cambiata</span>':`<span class="libTag ok">stampata il ${libDate(i.printed.at)}</span>`};
-  const radio=(v,t,sub,dis)=>`<label class="libOpt${dis?' dis':''}"><input type="radio" name="libMode" value="${v}"${mode===v?' checked':''}${dis?' disabled':''}><span><b>${t}</b><small>${sub}</small></span></label>`;
-  el.innerHTML=`
-  <section class="sec"><h3>Lo stile</h3><div class="seg libSeg">${LIB_STYLES.map(([k,n])=>`<label><input type="radio" name="libStyle" value="${k}"${LIB.style===k?' checked':''}><span>${n}</span></label>`).join('')}</div>
-    <div class="libPrev" id="libPrev"></div></section>
-  <section class="sec"><h3>Le ricette · ${book.length} nel libro</h3><p class="meta" style="margin-top:0">Ci sono le ricette con il segnalibro <span class="libRibI">${RIB_SVG}</span>. Togli la spunta per toglierne una.</p>
-    ${book.length?bsecs.map(s=>{const l=book.filter(i=>(i.cat||'Altro')===s);
-      return `<div class="libSec"><div class="libSecH"><b>${esc(s)}</b><span class="meta">${l.length}</span></div>
+  const todo=book.filter(i=>libState(i)!=='ok'),anyPrinted=book.some(i=>i.printed);
+  const sty=LIB_STYLES.find(s=>s[0]===LIB.style)||LIB_STYLES[0],fmt=LIB_FMTS.find(f=>f[0]===LIB.fmt)||LIB_FMTS[0];
+  const o={style:LIB.style,fmt:LIB.fmt,photo:LIB.photo,notes:LIB.notes,numbered:true};
+  const mini=st=>`<span class="libMini"><span class="libdoc"><span class="s-${st}" style="display:contents">${libCover({...o,style:st,fmt:'book'},book)}</span></span></span>`;
+  const back=t=>`<button type="button" class="libBack" data-pg="">‹ Il mio libro</button><h3 class="libPgT">${t}</h3>`;
+  const tag=i=>{const s=libState(i);return s==='new'?'<span class="libTag new">nuova</span>':s==='mod'?'<span class="libTag mod">cambiata</span>':`<span class="libTag ok">stampata il ${libDate(i.printed.at)}</span>`};
+  let h='';
+  if(LIBPAGE==='stile'){
+    h=back('Lo stile')+`<div class="libStyles">${LIB_STYLES.map(([k,n])=>`<button type="button" class="libSty${LIB.style===k?' on':''}" data-sty="${k}">${mini(k)}<b>${n}</b></button>`).join('')}</div>
+      <p class="meta">Così viene una ricetta nello stile scelto:</p><div class="libPrev" id="libPrev"></div>`;
+  }else if(LIBPAGE==='ricette'){
+    h=back(`Le ricette · ${book.length}`)+`<p class="meta" style="margin-top:0">Ci sono le ricette con il segnalibro <span class="libRibI">${RIB_SVG}</span>, tue o del Ricettario. Togli la spunta per toglierne una.</p>
+      ${book.length?bsecs.map(s=>{const l=book.filter(i=>(i.cat||'Altro')===s);
+        return `<div class="libSec"><div class="libSecH"><b>${esc(s)}</b><span class="meta">${l.length}</span></div>
         ${l.map(i=>`<label class="libRow"><input type="checkbox" data-id="${esc(i.id)}" checked aria-label="Togli dal libro"><span class="libT">${esc(i.title)}${libMine(i)?'':'<small class="meta"> · dal Ricettario</small>'}</span><span class="libNo">${esc(i.bookNo||'')}</span>${tag(i)}</label>`).join('')}</div>`}).join('')
-      :'<p class="meta">Il libro è vuoto. Tocca il segnalibro sulla foto di una ricetta, in «Le mie» o nel Ricettario, e la ritrovi qui.</p>'}</section>
-  <section class="sec"><h3>Il formato</h3><div class="seg libSeg">${LIB_FMTS.map(([k,n,s])=>`<label><input type="radio" name="libFmt" value="${k}"${LIB.fmt===k?' checked':''}><span>${n}<small> · ${s}</small></span></label>`).join('')}</div>
-    <p class="meta">${LIB.fmt==='book'?'Senza fori, con i numeri di pagina: da far rilegare in copisteria o con un servizio di stampa online.':'Ogni ricetta comincia su un foglio nuovo, con i fori già segnati: una ricetta nuova si aggiunge senza toccare le altre.'}</p>
-    <label class="libChk"><input type="checkbox" id="libPhoto"${LIB.photo?' checked':''}> Con le foto delle ricette</label>
-    <label class="libChk"><input type="checkbox" id="libNotes"${LIB.notes?' checked':''}> Righe per gli appunti</label>
-    ${LIB.fmt==='book'?'':`<label class="libChk"><input type="checkbox" id="libDuplex"${LIB.duplex?' checked':''}> Stampo fronte e retro (sul retro delle ricette di una pagina restano le righe per gli appunti)</label>`}</section>
-  <section class="sec"><h3>La copertina</h3>
-    <label>Titolo del libro<input id="libTitle" maxlength="60" placeholder="Es. Le ricette di nonna Lucia" value="${esc(LIB.title)}"></label>
-    <label>Dedica (facoltativa)<input id="libDed" maxlength="120" placeholder="Es. Per Giulia e Marco" value="${esc(LIB.dedica)}"></label></section>
-  <section class="sec"><h3>Stampa</h3>
-    ${radio('update','Nuove e cambiate, con l\'indice',`${nNew+nMod} ricett${nNew+nMod===1?'a':'e'} (${nNew} nuov${nNew===1?'a':'e'}, ${nMod} cambiat${nMod===1?'a':'e'}) e l'indice aggiornato`,!anyPrinted)}
-    ${radio('new','Solo le nuove',`${nNew} ricett${nNew===1?'a':'e'}`,!nNew)}
-    ${radio('all','Tutto il libro',`copertina, indice, sezioni e ${book.length} ricett${book.length===1?'a':'e'}`,!book.length)}
-    <button type="button" class="btn pri" id="libGo" style="width:100%;margin-top:10px"${book.length?'':' disabled'}>🖨 Prepara e stampa</button>
-    <p class="meta" style="margin:8px 0 0">Si apre il menu di stampa: stampante di casa, oppure «Salva come PDF» da portare in copisteria o mandare su WhatsApp.</p>
-    ${LIB.last&&Date.now()-LIB.last.at<7*864e5?`<p class="meta" style="margin:8px 0 0">${LIB.last.prev.length} ricett${LIB.last.prev.length===1?'a risulta stampata':'e risultano stampate'} il ${libDate(LIB.last.at)}. <button type="button" class="lnk" id="libUndo">Non le ho stampate</button></p>`:''}</section>`;
+      :'<p class="meta">Il libro è vuoto. Tocca il segnalibro sulla foto di una ricetta, in «Le mie» o nel Ricettario, e la ritrovi qui.</p>'}`;
+  }else if(LIBPAGE==='formato'){
+    h=back('Il formato e la copertina')+`<div class="libFmts">${LIB_FMTS.map(([k,n,s])=>`<label class="libOpt"><input type="radio" name="libFmt" value="${k}"${LIB.fmt===k?' checked':''}><span><b>${n}</b><small>${s}</small></span></label>`).join('')}</div>
+      <p class="meta">${LIB.fmt==='book'?'Senza fori, con i numeri di pagina: da far rilegare in copisteria o con un servizio di stampa online.':'Ogni ricetta comincia su un foglio nuovo, con i fori già segnati: una ricetta nuova si aggiunge senza toccare le altre.'}</p>
+      <label class="libChk"><input type="checkbox" id="libPhoto"${LIB.photo?' checked':''}> Con le foto delle ricette</label>
+      <label class="libChk"><input type="checkbox" id="libNotes"${LIB.notes?' checked':''}> Righe per gli appunti</label>
+      ${LIB.fmt==='book'?'':`<label class="libChk"><input type="checkbox" id="libDuplex"${LIB.duplex?' checked':''}> Stampo fronte e retro</label>`}
+      <h3 class="libPgT" style="margin-top:18px">La copertina</h3>
+      <label>Titolo del libro<input id="libTitle" maxlength="60" placeholder="Es. Le ricette di nonna Lucia" value="${esc(LIB.title)}"></label>
+      <label>Dedica (facoltativa)<input id="libDed" maxlength="120" placeholder="Es. Per Giulia e Marco" value="${esc(LIB.dedica)}"></label>`;
+  }else{
+    const upd=anyPrinted&&todo.length;
+    h=`<div class="libSum"><span class="meta">Il tuo libro</span><b class="libBig">${book.length} ricett${book.length===1?'a':'e'}</b><span class="meta">${!book.length?'Metti il segnalibro sulle ricette che vuoi stampare':!anyPrinted?'Non hai ancora stampato niente':todo.length?`${todo.length} da stampare (nuove o cambiate)`:'Tutte già stampate'}</span></div>
+      <button type="button" class="libLine" data-pg="stile">${mini(LIB.style)}<span class="libL">Lo stile</span><span class="libV">${sty[1]} ›</span></button>
+      <button type="button" class="libLine" data-pg="ricette"><span class="libIco">${RIB_SVG}</span><span class="libL">Le ricette</span><span class="libV">${book.length} ›</span></button>
+      <button type="button" class="libLine" data-pg="formato"><span class="libIco">📄</span><span class="libL">Il formato e la copertina</span><span class="libV">${fmt[1].replace('Quaderno ','')} ›</span></button>
+      <div class="libPrint">
+        <button type="button" class="btn pri" id="libGo" data-m="${upd?'update':'all'}"${book.length?'':' disabled'}>🖨 ${upd?`Stampa le ${todo.length} da aggiornare`:'Stampa il libro'}</button>
+        ${anyPrinted?'<button type="button" class="btn" id="libAll">Stampa tutto il libro</button>':''}
+        <p class="meta">${upd?'Escono le ricette nuove o cambiate e l\'indice aggiornato, da aggiungere al quaderno.':'Si apre il menu di stampa: stampante di casa, oppure «Salva come PDF» per la copisteria.'}</p>
+        ${LIB.last&&Date.now()-LIB.last.at<7*864e5?`<p class="meta">${LIB.last.prev.length} ricett${LIB.last.prev.length===1?'a risulta stampata':'e risultano stampate'} il ${libDate(LIB.last.at)}. <button type="button" class="lnk" id="libUndo">Non le ho stampate</button></p>`:''}
+      </div>`;
+  }
+  el.innerHTML=h;
+  el.querySelectorAll('[data-pg]').forEach(b=>b.onclick=()=>libGoPage(b.dataset.pg));
+  el.querySelectorAll('[data-sty]').forEach(b=>b.onclick=async()=>{LIB.style=b.dataset.sty;libSave();el.querySelectorAll('[data-sty]').forEach(x=>x.classList.toggle('on',x===b));await libFonts(LIB.style);libPreview()});
   el.querySelectorAll('.libRow input').forEach(c=>c.onchange=()=>{libToggle(c.dataset.id,c.checked);toast('Tolta dal libro: rimettila col segnalibro sulla ricetta');libRender()});
-  $('#libTitle').onchange=e=>{LIB.title=e.target.value.trim();libSave();libPreview()};
-  $('#libDed').onchange=e=>{LIB.dedica=e.target.value.trim();libSave()};
-  el.querySelectorAll('[name=libStyle]').forEach(r=>r.onchange=async()=>{LIB.style=r.value;libSave();await libFonts(LIB.style);libPreview()});
   el.querySelectorAll('[name=libFmt]').forEach(r=>r.onchange=()=>{LIB.fmt=r.value;libSave();libRender()});
-  el.querySelectorAll('[name=libMode]').forEach(r=>r.onchange=()=>{LIB.mode=r.value;libSave()});
-  $('#libPhoto').onchange=e=>{LIB.photo=e.target.checked;libSave();libPreview()};
-  $('#libNotes').onchange=e=>{LIB.notes=e.target.checked;libSave();libPreview()};
+  if($('#libTitle')){$('#libTitle').onchange=e=>{LIB.title=e.target.value.trim();libSave()};$('#libDed').onchange=e=>{LIB.dedica=e.target.value.trim();libSave()}}
+  if($('#libPhoto')){$('#libPhoto').onchange=e=>{LIB.photo=e.target.checked;libSave()};$('#libNotes').onchange=e=>{LIB.notes=e.target.checked;libSave()}}
   if($('#libDuplex'))$('#libDuplex').onchange=e=>{LIB.duplex=e.target.checked;libSave()};
-  $('#libGo').onclick=()=>{const m=(el.querySelector('[name=libMode]:checked')||{}).value||'all',b=libItems();
-    const recs=m==='all'?b:m==='new'?b.filter(i=>libState(i)==='new'):b.filter(i=>libState(i)!=='ok');
-    if(m!=='all'&&!recs.length&&m==='new'){toast('Non ci sono ricette nuove da stampare');return}
-    libPrint(recs,m)};
+  if($('#libGo'))$('#libGo').onclick=e=>{const m=e.currentTarget.dataset.m,b=libItems();libPrint(m==='all'?b:b.filter(i=>libState(i)!=='ok'),m)};
+  if($('#libAll'))$('#libAll').onclick=()=>libPrint(libItems(),'all');
   if($('#libUndo'))$('#libUndo').onclick=()=>{for(const [id,p] of LIB.last.prev){const i=items.find(x=>x.id===id);if(i){if(p)i.printed=p;else delete i.printed}else if(LIB.ext[id])LIB.ext[id].printed=p||null}LIB.last=null;saveItems();libSave();libRender();toast('Ok: risultano da stampare')};
-  libPreview()}
+  if($('#libPrev'))libPreview()}
 const RIB_SVG='<svg viewBox="0 0 16 20" aria-hidden="true"><path d="M2 1h12v18l-6-4-6 4z"/></svg>';
 
 $('#chips').onclick=e=>{const c=e.target.closest('.chip');if(!c)return;if(c.dataset.lib){libOpen();return}cur=c.dataset.c;cur2='';render()};
