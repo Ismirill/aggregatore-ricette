@@ -6,6 +6,13 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-14
 
+- **Versione 168, la copertina del libro personalizzata** (richiesta dell'utente).
+  - **Nuova riga «La copertina»** nella sezione Libro, con l'anteprima della copertina che cambia mentre si sceglie.
+  - **Il titolo:** si sceglie l'inizio («Il ricettario di…», «Il libro di cucina di…», «Le ricette di…», «In cucina con…») e il nome. Il nome è già quello del profilo Gnammer o dell'account, e si può cambiare; «Usa il mio nome» lo rimette.
+  - **L'immagine:** la foto di una ricetta del libro, uno di dieci disegni a tema cucina (pentola, pomodori, mattarello, mestolo e cucchiaio, frusta, torta, pane, moka, basilico, pizza) oppure una foto caricata dal telefono.
+  - **La dedica** è passata qui; «Il formato» ora ha solo formato e opzioni di stampa.
+  - **Provato:** istantanea di Chrome a misura di telefono della pagina della copertina.
+
 - **Versione 167, la sezione Libro riordinata (proposta 9)** (scelta dell'utente tra dieci proposte).
   - **In alto** un riquadro con quante ricette ci sono nel libro e quante sono da stampare.
   - **Tre righe da toccare:** «Lo stile» (con la copertina vera in miniatura; apre le sei copertine tra cui scegliere e l'anteprima di una ricetta), «Le ricette» (quelle col segnalibro, per sezione, con la spunta per toglierle), «Il formato e la copertina» (A4, A5 o libro, foto, righe per gli appunti, fronte e retro, titolo e dedica). Ognuna si apre in una pagina con «‹ Il mio libro» per tornare.
