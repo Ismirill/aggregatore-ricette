@@ -166,6 +166,23 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 @keyframes lnkRun{0%{transform:translateX(-110%)}100%{transform:translateX(320%)}}
 @media (prefers-reduced-motion:reduce){.lnkProg i{animation:none;width:100%;opacity:.5}}
 #rSave:disabled{opacity:.45;cursor:default;box-shadow:none}
+/* ---------- Testata e barra del telefono (14/11, proposta B): coppa della Sfida a sinistra, scritta Gnamina al centro, impostazioni e profilo a destra;
+   in basso Le mie, Ricettario, la fotocamera rotonda al centro, Libro e Menu ---------- */
+.brand .wm,#cupBtn,.ncam{display:none}
+@media (max-width:899px){
+  header .top{position:relative;justify-content:flex-end;gap:8px;min-height:2.6rem}
+  header .top .brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);flex:none;pointer-events:none}
+  header .top .brand .mark,header .top .brand>div{display:none}
+  header .top .brand .wm{display:block;height:30px;width:auto}
+  #cupBtn{display:grid;margin-right:auto;position:relative}
+  #cupBtn.on{border-color:var(--acc);color:var(--acc)}
+  .cupDot{position:absolute;right:2px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--acc);border:2px solid var(--card)}
+  header .top #camBtn{display:none!important}
+  .nav .tab[data-v=home]{display:none}
+  .ncam{display:flex;flex:0 0 68px;flex-direction:column;align-items:center;gap:2px;border:0;background:none;font:inherit;font-size:.72rem;font-weight:700;color:var(--acc);cursor:pointer;padding:0;margin-top:-28px}
+  .ncam span{width:58px;height:58px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;box-shadow:0 8px 18px color-mix(in srgb,var(--acc) 45%,transparent);border:4px solid var(--card)}
+  .ncam svg{width:26px;height:26px}
+}
 /* ---------- Stile Rivista: schede come in una rivista di cucina (foto quadrata arrotondata, titolo sotto), sezioni in «Le mie ricette» ---------- */
 :root[data-style=rivista] .list{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 12px}
 @media (min-width:700px){:root[data-style=rivista] .list{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}}
@@ -821,7 +838,8 @@ details summary{cursor:pointer}
 <body>
 <header>
   <div class="top">
-    <div class="brand"><img class="mark" src="icon-192.png" alt="Gnamina" width="192" height="192"><div><h1 id="vTitle">Le mie ricette</h1></div></div>
+    <button class="icon" id="cupBtn" aria-label="La sfida della settimana"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><i class="cupDot" hidden></i></button>
+    <div class="brand"><img class="mark" src="icon-192.png" alt="Gnamina" width="192" height="192"><img class="wm" src="logo.svg" alt="Gnamina" width="402" height="128"><div><h1 id="vTitle">Le mie ricette</h1></div></div>
     <button class="icon" id="camBtn" aria-label="Trova ricette da una foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg><span class="lbl">Foto di un piatto</span></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden>
     <button class="icon user" id="userBtn" aria-label="Il tuo profilo"><span id="userAv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span></button>
     <button class="icon" id="setBtn" aria-label="Impostazioni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="lbl">Impostazioni</span></button>
@@ -840,7 +858,7 @@ details summary{cursor:pointer}
     <button type="button" class="btn pri" id="fDone">Mostra le ricette</button>
   </div>
 </header>
-<nav class="nav" id="tabs"><div class="nbrand"><img src="icon-192.png" alt="" width="192" height="192"><div><b>Gnamina</b><small>La tua app di cucina</small></div></div><div class="nsec" id="secLbl">Sezioni</div><button class="tab" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie<span class="cnt"></span></button><button class="tab on" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Sfida</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario<span class="cnt"></span></button><button class="tab" data-v="libro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11v18l-5.5-3.5L6 21z"/></svg>Libro</button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v7M10 3v7M17 3c-2 2-3 4-3 7h3v11"/></svg>Il mio menu</button><div class="nsec">Strumenti</div><div id="ntools"></div><div class="nfoot">Versione <span id="navVer"></span> · <a href="benvenuto.html" style="color:inherit">Cos'è Gnamina</a></div></nav>
+<nav class="nav" id="tabs"><div class="nbrand"><img src="icon-192.png" alt="" width="192" height="192"><div><b>Gnamina</b><small>La tua app di cucina</small></div></div><div class="nsec" id="secLbl">Sezioni</div><button class="tab" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie<span class="cnt"></span></button><button class="tab on" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Sfida</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario<span class="cnt"></span></button><button type="button" class="ncam" id="navCam" aria-label="Foto di un piatto: Gnamina trova la ricetta"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span>Foto</button><button class="tab" data-v="libro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11v18l-5.5-3.5L6 21z"/></svg>Libro</button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v7M10 3v7M17 3c-2 2-3 4-3 7h3v11"/></svg>Il mio menu</button><div class="nsec">Strumenti</div><div id="ntools"></div><div class="nfoot">Versione <span id="navVer"></span> · <a href="benvenuto.html" style="color:inherit">Cos'è Gnamina</a></div></nav>
 <main><div class="list" id="list"></div>
 <section id="home" hidden></section>
 <section id="libro" hidden><div id="libBody"></div></section>
@@ -1596,7 +1614,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=170; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=171; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1695,7 +1713,7 @@ function saveFromBook(i){
 }
 function goView(v){
   view=v;cur=view==='book'?'Italiane':'Tutte';cur2=''; // il Ricettario parte dalle ricette italiane
-  $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
+  $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.v===v));$('#cupBtn')?.classList.toggle('on',v==='home');cupDot();
   const bud=view==='budget',home=view==='home',lib=view==='libro',alt=bud||home||lib;['#sbar','#chips','#list'].forEach(x=>$(x).hidden=alt);$('#add').hidden=alt;if(alt){$('#chips2').hidden=true;$('.filters').hidden=true;filtUI()}$('#budget').hidden=!bud;$('#home').hidden=!home;$('#libro').hidden=!lib;filtUI();
   $('#vTitle').textContent={home:'La sfida',mine:'Le mie ricette',book:'Ricettario',budget:'Il mio menu',libro:'Il mio libro'}[view];window.scrollTo(0,0);
   if(home){renderHome();loadBook();return}
@@ -3448,7 +3466,11 @@ const deskQ=matchMedia('(min-width:900px)'),addHome=$('#add').nextSibling;
 function placeDesk(){const d=deskQ.matches,nav=$('#tabs');
   const sito=!!document.documentElement.dataset.sito; // sul sito anche il profilo va nella testata
   if(d){nav.insertBefore($('#add'),$('#secLbl'));$('#ntools').append(...(sito?[$('#camBtn'),$('#setBtn'),$('#userBtn')]:[$('#camBtn'),$('#setBtn')]))}
-  else{document.body.insertBefore($('#add'),addHome);$('.top').append($('#camBtn'),$('#userBtn'),$('#setBtn'))}}
+  else{document.body.insertBefore($('#add'),addHome);$('.top').append($('#camBtn'),$('#setBtn'),$('#userBtn'))}}
+// Telefono (14/11): la Sfida è la coppa in alto a sinistra (con il pallino se c'è una sfida aperta), la fotocamera è il tasto rotondo al centro della barra
+$('#cupBtn').onclick=()=>goView('home');
+$('#navCam').onclick=()=>$('#camIn').click();
+function cupDot(){try{$('.cupDot').hidden=!(typeof CONTEST!=='undefined'&&CONTEST&&['join','taste'].includes(contestPhase(CONTEST)))}catch{}}
 deskQ.addEventListener('change',placeDesk);placeDesk();$('#navVer').textContent=APP_VERSION;
 function navCounts(){const m=$('#tabs [data-v=mine] .cnt'),b=$('#tabs [data-v=book] .cnt');if(m)m.textContent=items.length||'';if(b)b.textContent=book?book.length+BK.length:''}
 ['#q','#fDiet','#fZone','#fTime','#fDiff','#fCost','#fRate','#fSort'].forEach(s=>$(s).addEventListener('input',()=>{render();filtUI()}));

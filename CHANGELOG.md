@@ -6,6 +6,12 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-14
 
+- **Versione 171, nuova testata e fotocamera al centro della barra** (scelta dell'utente: proposta B con la scritta per esteso).
+  - **Testata del telefono:** al centro la scritta «Gnamina» (come sul sito), a sinistra la coppa della Sfida (con un pallino quando c'è una sfida aperta), a destra impostazioni e profilo. Non c'è più l'icona con il titolo della sezione accanto.
+  - **Barra in basso:** Le mie, Ricettario, la fotocamera (tasto rotondo al centro, per trovare ricette da una foto), Libro e Il mio menu. La Sfida si apre dalla coppa in alto. «Nuova ricetta» resta il pulsante galleggiante.
+  - **Su computer e tablet largo** non cambia niente (barra laterale come prima).
+  - **Provato:** istantanee di Chrome a misura di telefono nell'app (stili Rivista e Trattoria) e nel sito dal telefono.
+
 - **Versione 170, Rivista più compatta e con le immagini in movimento** (l'utente: troppi spazi vuoti, poco «da app ufficiale», servono immagini che si muovono).
   - **Più compatta:** margini ai lati di 10 px invece di 16, testata, ricerca e titoli delle sezioni più vicini, griglia più fitta, tipi di piatto più piccoli, foto in evidenza meno alta.
   - **Foto in movimento:** le foto sullo schermo fanno un lento zoom, come le copertine animate delle app di cucina (fermo se il telefono chiede meno animazioni). Le ricette in evidenza, fino a cinque, scorrono da sole ogni 4,5 secondi e si fermano quando le tocchi.
