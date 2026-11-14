@@ -435,8 +435,9 @@ public class MainActivity extends BridgeActivity {
                 printView = w; // il riferimento resta finché la stampa non è partita
                 w.setWebViewClient(new android.webkit.WebViewClient() {
                     @Override public void onPageFinished(android.webkit.WebView v, String url) {
-                        // un attimo in più per i caratteri scaricati da Google Fonts e le foto
-                        v.postDelayed(() -> {
+                        // un attimo in più per i caratteri scaricati da Google Fonts e le foto. Con l'Handler dell'attività:
+                        // v.postDelayed su un WebView non attaccato a una finestra resta in coda e non parte mai (stampa che non si apriva)
+                        ui.postDelayed(() -> {
                             try {
                                 android.print.PrintManager pm = (android.print.PrintManager) getSystemService(PRINT_SERVICE);
                                 String job = (name == null || name.isEmpty()) ? "Ricettario Gnamina" : name;

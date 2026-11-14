@@ -6,6 +6,12 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-14
 
+- **Versione 165, la sezione Libro nel menu e la stampa che parte su Android** (segnalazioni dell'utente).
+  - **Stampa che non faceva niente (APK):** il comando di stampa veniva messo in coda sul WebView fuori schermo, che non è attaccato a una finestra, e quindi non partiva mai. Ora parte dal gestore dell'attività. Vale per «Stampa la ricetta» e per la stampa del libro.
+  - **Sezione «Libro» nel menu in basso** (quinto pulsante, tra Ricettario e Il mio menu): prima lo stile con l'anteprima, poi le ricette messe nel libro con le spunte, il formato, la copertina (titolo e dedica) e la stampa. Il bottone «📖 Il mio libro» in «Le mie» porta qui.
+  - **Segnalibro sulle schede:** semitrasparente anche quando è acceso, così sotto si vede la foto.
+  - **Provato:** nel browser a misura di telefono (sezione, ordine, spunte, anteprima, cinque pulsanti che entrano nello schermo). La stampa su Android vero non è ancora provata.
+
 - **Versione 164, l'anteprima dei video di Facebook** (l'utente: il tasto blu della 163 era brutto, ci vuole un'anteprima).
   - Al posto della barra blu c'è la copertina del reel a tutta grandezza, con il tasto play rotondo al centro e la scritta «▶ Video su Facebook»: toccandola si apre il video originale.
   - Se la copertina salvata è scaduta o manca, l'app ne riprende una aggiornata dal post tramite il server e la conserva nella ricetta (provato con il reel della torta rovesciata).
