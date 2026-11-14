@@ -164,6 +164,10 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 @keyframes lnkRun{0%{transform:translateX(-110%)}100%{transform:translateX(320%)}}
 @media (prefers-reduced-motion:reduce){.lnkProg i{animation:none;width:100%;opacity:.5}}
 #rSave:disabled{opacity:.45;cursor:default;box-shadow:none}
+.fbHero{display:block;position:relative;text-decoration:none;color:#fff}
+.fbHero .hero{min-height:200px;object-fit:cover}
+.fbPlay{position:absolute;inset:auto 12px 12px 12px;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 16px;border-radius:14px;background:#1877f2;font-weight:800;font-size:1.05rem;box-shadow:0 6px 18px #0005}
+.fbPlay b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#fff;color:#1877f2;font-size:.9rem}
 /* Libro di cucina: segnalibro sulla scheda (pieno = nel libro) e pagina «Il mio libro» */
 .ribBtn{position:absolute;right:8px;top:0;z-index:3;width:34px;height:42px;border:0;padding:0 6px 8px;background:none;cursor:pointer;display:flex;align-items:flex-start;justify-content:center}
 .ribBtn svg{width:22px;height:30px;fill:color-mix(in srgb,var(--card) 70%,transparent);stroke:#fff;stroke-width:1.6;filter:drop-shadow(0 1px 2px #0006)}
@@ -1475,6 +1479,11 @@ async function repairThumbs(){
 }
 
 /* ---------- Video ---------- */
+// Facebook: molti video non si possono incorporare (lo decide l'autore o Facebook, per la musica) e il riquadro mostrerebbe
+// «Non disponibile» senza che l'app possa saperlo. Si mostra la copertina con un tasto che apre il video originale su Facebook.
+function fbHero(i,c1,c2,em){const u=esc(i.finalUrl||i.url||'');
+  const bg=i.image?`<img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:`<div class="hero" style="display:grid;place-items:center;font-size:4rem;aspect-ratio:16/9;background:linear-gradient(135deg,${c1}66,${c2}77)">${em}</div>`;
+  return `<a class="heroWrap fbHero" href="${u}" target="_blank" rel="noopener">${bg}<span class="fbPlay"><b>▶</b>Guarda il video su Facebook</span></a>`}
 function embedOf(i){
   const u=i.video||i.finalUrl||i.url||'';let m; // i.video: il video girato dall'utente, sul suo canale YouTube
   if(m=u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/))return {src:'https://www.youtube-nocookie.com/embed/'+m[1],v:/shorts/.test(u)};
@@ -1487,7 +1496,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=162; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=163; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2468,6 +2477,7 @@ function openDetail(i){
   acts.push(`<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button>`);
   $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button><div class="dcols"><div class="dmain">
     ${i.clips?.length?`<div class="clipPl" id="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p><p class="row" style="justify-content:flex-start;gap:8px;margin:0 0 10px"><button type="button" class="btn pri" data-vc="share">📤 Pubblica</button><button type="button" class="btn" data-vc="save">💾 Salva nel rullino</button></p></div>`
+      :e&&/facebook\.com\/plugins/.test(e.src)?fbHero(i,c1,c2,em)
       :e?`<iframe class="video ${e.v?'v':'h'}" src="${esc(e.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
       :i.image?`<div class="heroWrap"><img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;hero&quot; style=&quot;display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)&quot;>${em}</div>'"></div>`
       :`<div class="heroWrap"><div class="hero" style="display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)">${em}</div></div>`}

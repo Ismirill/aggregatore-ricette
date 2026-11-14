@@ -6,6 +6,10 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-14
 
+- **Versione 163, i video di Facebook si guardano sull'originale** (segnalazione dell'utente: nella ricetta della torta rovesciata il riquadro diceva «Non disponibile: questo video non può essere incorporato»).
+  - **Causa:** l'autore del reel, o Facebook per via della musica, non permette di mostrare il video su altri siti. Il riquadro ufficiale di Facebook non dà nemmeno il file, quindi dentro l'app non si può proprio riprodurre, e l'app non può sapere in anticipo quali video sono bloccati.
+  - **Correzione:** per le ricette prese da Facebook in alto c'è la copertina con il tasto blu «▶ Guarda il video su Facebook», che apre il video originale nell'app Facebook o nel browser.
+
 - **Versione 162, il libro di cucina da stampare e il link che si copia** (richieste dell'utente).
   - **Copia del link (segnalazione):** l'icona del lettore YouTube dentro la ricetta diceva «Impossibile copiare il link negli appunti», perché al riquadro del video mancava il permesso di scrivere negli appunti. Ora ce l'ha. In più nella ricetta c'è il pulsante «📋 Copia il link» dell'app, che nell'APK passa da Android (il WebView rifiuta gli appunti del browser). La stessa copia sicura vale per codice ricettario, backup e didascalie.
   - **Segnalibro «Nel libro»:** sulle schede delle tue ricette (in alto a destra) e dentro la ricetta («🔖 Metti nel libro»). Nel libro vanno le ricette con il segnalibro.
