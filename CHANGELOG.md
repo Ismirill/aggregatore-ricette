@@ -6,6 +6,8 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-14
 
+- **Versione 172, scritta Gnamina più grande** (richiesta dell'utente): nella testata del telefono la scritta passa da 30 a 42 px di altezza; sui telefoni più stretti si riduce da sola per non toccare i tasti ai lati.
+
 - **Versione 171, nuova testata e fotocamera al centro della barra** (scelta dell'utente: proposta B con la scritta per esteso).
   - **Testata del telefono:** al centro la scritta «Gnamina» (come sul sito), a sinistra la coppa della Sfida (con un pallino quando c'è una sfida aperta), a destra impostazioni e profilo. Non c'è più l'icona con il titolo della sezione accanto.
   - **Barra in basso:** Le mie, Ricettario, la fotocamera (tasto rotondo al centro, per trovare ricette da una foto), Libro e Il mio menu. La Sfida si apre dalla coppa in alto. «Nuova ricetta» resta il pulsante galleggiante.

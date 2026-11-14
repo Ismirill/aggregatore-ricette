@@ -170,10 +170,10 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
    in basso Le mie, Ricettario, la fotocamera rotonda al centro, Libro e Menu ---------- */
 .brand .wm,#cupBtn,.ncam{display:none}
 @media (max-width:899px){
-  header .top{position:relative;justify-content:flex-end;gap:8px;min-height:2.6rem}
+  header .top{position:relative;justify-content:flex-end;gap:8px;min-height:2.9rem}
   header .top .brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);flex:none;pointer-events:none}
   header .top .brand .mark,header .top .brand>div{display:none}
-  header .top .brand .wm{display:block;height:30px;width:auto}
+  header .top .brand .wm{display:block;height:42px;width:auto;max-width:calc(100vw - 230px);object-fit:contain}
   #cupBtn{display:grid;margin-right:auto;position:relative}
   #cupBtn.on{border-color:var(--acc);color:var(--acc)}
   .cupDot{position:absolute;right:2px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--acc);border:2px solid var(--card)}
@@ -1614,7 +1614,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=171; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=172; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
