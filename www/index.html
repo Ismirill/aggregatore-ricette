@@ -12,9 +12,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <script>/* Sul computer e sul tablet largo la prima pagina del sito è il «quaderno» (benvenuto.html); nelle app, sul telefono, con un indirizzo che porta parametri o per chi ha già ricette si entra subito nell'app */
 try{const L=location,app=L.protocol==='capacitor:'||(L.hostname==='localhost'&&!L.port)||!!window.Capacitor||matchMedia('(display-mode: standalone)').matches,mine=(JSON.parse(localStorage.getItem('items')||'[]')||[]).length;
-if(!app)document.documentElement.dataset.sito='1'; // stile «quaderno» del sito su computer e tablet (vedi CSS «Sito»)
+if(!app&&!(localStorage.getItem('style')==='rivista'&&innerWidth<900))document.documentElement.dataset.sito='1'; // stile «quaderno» del sito su computer e tablet (vedi CSS «Sito»)
 if(!app&&!L.search&&!L.hash&&!mine&&matchMedia('(min-width:900px)').matches&&!sessionStorage.getItem('gnApp'))L.replace('benvenuto.html')}catch(e){}</script>
-<script>try{const t=localStorage.getItem("theme")||"dark";if(t!=="auto")document.documentElement.dataset.theme=t;document.documentElement.dataset.style=localStorage.getItem("style")||"trattoria"}catch{document.documentElement.dataset.theme="dark";document.documentElement.dataset.style="trattoria"}
+<script>try{const t=localStorage.getItem("theme")||"dark";if(t!=="auto")document.documentElement.dataset.theme=t;let st=localStorage.getItem("style")||"trattoria";if(st==="quaderno"){st="rivista";localStorage.setItem("style",st)}document.documentElement.dataset.style=st}catch{document.documentElement.dataset.theme="dark";document.documentElement.dataset.style="trattoria"}
 // colore della barra di stato coerente con il tema (scuro predefinito; «Automatico» segue il sistema)
 function themeColor(){const t=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.getElementById("themeColor").content=t==="dark"?"#15120e":"#f7f2ea"}themeColor();matchMedia("(prefers-color-scheme:dark)").addEventListener("change",themeColor);</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,6 +38,8 @@ function themeColor(){const t=document.documentElement.dataset.theme||(matchMedi
 :root[data-style=quaderno]{--bg:#fbf5e9;--bg2:#f4ead6;--card:#fffdf8;--fg:#2b2420;--mut:#6f645a;--acc:#c8301f;--acc2:#e9a23b;--ok:#3f7a2e;--bd:#e6d9c2;--star:#e0a526;
   --sh:0 1px 2px #2b242012,0 10px 24px #2b24201a;--sh2:0 16px 36px #2b242030;--serif:'Nunito',ui-rounded,system-ui,sans-serif;--sans:'Nunito',ui-rounded,system-ui,sans-serif;
   --hand:'Caveat','Bradley Hand','Segoe Print',cursive;--pattern:none;color-scheme:light}
+:root[data-style=rivista]{--bg:#f7f2ea;--bg2:#efe6da;--card:#fffdf9;--fg:#2a211c;--mut:#8a7c70;--acc:#c2502f;--acc2:#e9a23b;--ok:#3f7a2e;--bd:#e8ddcf;--star:#e0a526;
+  --sh:0 1px 2px #2a211c12,0 8px 22px #3c230f1c;--sh2:0 16px 34px #3c230f30;--serif:'Fraunces',Georgia,serif;--sans:'Nunito',ui-rounded,system-ui,sans-serif;--pattern:none;color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{font:-apple-system-body;font-family:var(--sans);-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip} /* su iPhone il testo segue «Dimensione testo» delle Impostazioni; tutte le misure sotto sono in rem, così l'interfaccia cresce insieme */
 body{margin:0;overflow-x:clip;font-family:var(--sans);background:var(--bg);background-image:var(--pattern,none);background-attachment:fixed;color:var(--fg);padding-bottom:calc(5.6rem + env(safe-area-inset-bottom));line-height:1.45}
@@ -164,6 +166,39 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 @keyframes lnkRun{0%{transform:translateX(-110%)}100%{transform:translateX(320%)}}
 @media (prefers-reduced-motion:reduce){.lnkProg i{animation:none;width:100%;opacity:.5}}
 #rSave:disabled{opacity:.45;cursor:default;box-shadow:none}
+/* ---------- Stile Rivista: schede come in una rivista di cucina (foto quadrata arrotondata, titolo sotto), sezioni in «Le mie ricette» ---------- */
+:root[data-style=rivista] .list{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 12px}
+@media (min-width:700px){:root[data-style=rivista] .list{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}}
+:root[data-style=rivista] .list>.item,:root[data-style=rivista] .magGrid>.item{background:none;box-shadow:none;border:0;border-radius:0;overflow:visible;transform:none}
+:root[data-style=rivista] .list>.item .thumb,:root[data-style=rivista] .magGrid>.item .thumb{aspect-ratio:1;border-radius:16px;overflow:hidden;box-shadow:0 6px 16px #3c230f26;font-size:2.4rem}
+:root[data-style=rivista] .list>.item .b,:root[data-style=rivista] .magGrid>.item .b{padding:8px 2px 0}
+:root[data-style=rivista] .list>.item h3,:root[data-style=rivista] .magGrid>.item h3{font-family:var(--serif);font-size:1rem;line-height:1.2;font-weight:700}
+:root[data-style=rivista] .list>.item .facts,:root[data-style=rivista] .magGrid>.item .facts{font-size:.78rem}
+:root[data-style=rivista] .thumb .cat{background:#fffdf9e6;color:var(--fg);border-radius:99px;font-size:.62rem;padding:3px 8px}
+:root[data-style=rivista] .list>.item:hover{transform:translateY(-2px)}
+:root[data-style=rivista] .list>.item .thumb .sv,:root[data-style=rivista] .magGrid>.item .thumb .sv{display:none}
+.magBlk{grid-column:1/-1;min-width:0}
+.magHero{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;scrollbar-width:none;margin:2px 0 0}.magHero::-webkit-scrollbar{display:none}
+.magSlide{flex:0 0 100%;scroll-snap-align:center;position:relative;aspect-ratio:1/1.05;max-height:62svh;border-radius:22px;overflow:hidden;box-shadow:0 14px 30px #3c230f40;cursor:pointer}
+.magSlide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.magSlide::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0000 42%,#000c)}
+.magTx{position:absolute;left:18px;right:18px;bottom:16px;z-index:1;color:#fff}
+.magEye{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;background:var(--acc);padding:5px 10px;border-radius:99px}
+.magTx h2{font-family:var(--serif,Fraunces,serif);font-size:1.85rem;line-height:1.05;margin:10px 0 6px;color:#fff}
+.magF{display:flex;gap:12px;flex-wrap:wrap;font-size:.86rem;font-weight:700;opacity:.92}
+.magDots{display:flex;gap:5px;justify-content:center;margin:10px 0 0}.magDots i{width:6px;height:6px;border-radius:9px;background:var(--bd);transition:width .2s}.magDots i.on{width:18px;background:var(--acc)}
+.magSh{display:flex;justify-content:space-between;align-items:baseline;margin:20px 0 10px}.magSh h3{margin:0;font-family:var(--serif);font-size:1.25rem}.magSh .lnk{font-weight:800}
+.magCats{display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 6px}.magCats::-webkit-scrollbar{display:none}
+.magCat{flex:none;width:74px;display:grid;justify-items:center;gap:2px;border:0;background:none;color:var(--fg);font:inherit;cursor:pointer;padding:0}
+.magCat img,.magCat .magNo{width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid var(--card);box-shadow:0 4px 10px #0002;display:grid;place-items:center;font-size:1.8rem;background:var(--bg2)}
+.magCat b{font-size:.8rem;margin-top:4px}.magCat small{color:var(--mut);font-weight:700;font-size:.72rem}
+.magGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 12px}
+@media (min-width:700px){.magGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.magSlide{flex-basis:70%;aspect-ratio:16/9}}
+.magRow{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 8px}.magRow::-webkit-scrollbar{display:none}
+.magWide{flex:none;width:250px;display:flex;flex-direction:row;gap:10px;align-items:center;background:var(--card);border-radius:16px;padding:8px;box-shadow:var(--sh);cursor:pointer}
+.magWide img,.magWide .magNo{width:76px;height:76px;border-radius:12px;object-fit:cover;flex:none;display:grid;place-items:center;font-size:1.8rem;background:var(--bg2)}
+.magWide b{display:block;font-family:var(--serif);font-size:.98rem;line-height:1.2}.magWide small{color:var(--mut);font-weight:700;font-size:.75rem;display:block}
+.magTm{display:inline-block;margin-top:5px;background:#e6f0e0;color:#3f7a2e;font-weight:800;font-size:.7rem;padding:2px 8px;border-radius:99px}
 .fbHero{display:block;position:relative;text-decoration:none;color:#fff;aspect-ratio:9/12;max-height:62vh;overflow:hidden;border-radius:var(--r,16px)}
 .fbHero .hero{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;aspect-ratio:auto;border-radius:0}
 .fbHero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0000 55%,#0008)}
@@ -522,8 +557,10 @@ details summary{cursor:pointer}
 :root[data-style=quaderno] .list>.item .sv{bottom:auto;top:8px}
 :root[data-style=quaderno] .list>.item .thumb .rt{top:40px}
 :root[data-style=quaderno] .list>.item .aiTag{top:40px}
-:root[data-style=quaderno] .list>.item:nth-child(4n+1){transform:rotate(-.45deg)}:root[data-style=quaderno] .list>.item:nth-child(4n+2){transform:rotate(.4deg)}
-:root[data-style=quaderno] .list>.item:nth-child(4n+3){transform:rotate(.3deg)}:root[data-style=quaderno] .list>.item:nth-child(4n){transform:rotate(-.35deg)}}
+/* polaroid un po' storte, alternate a sinistra e a destra come sul sito da computer: danno movimento (prima erano quasi dritte) */
+:root[data-style=quaderno] #list>.item:nth-child(4n+1),:root[data-sito] #list>.item:nth-child(4n+1){transform:rotate(-1.6deg)}:root[data-style=quaderno] #list>.item:nth-child(4n+2),:root[data-sito] #list>.item:nth-child(4n+2){transform:rotate(1.3deg)}
+:root[data-style=quaderno] #list>.item:nth-child(4n+3),:root[data-sito] #list>.item:nth-child(4n+3){transform:rotate(-1deg)}:root[data-style=quaderno] #list>.item:nth-child(4n),:root[data-sito] #list>.item:nth-child(4n){transform:rotate(1.8deg)}
+:root[data-style=quaderno] .list,:root[data-sito] .list{overflow-x:clip;padding-inline:12px;grid-template-columns:minmax(0,1fr)}}
 /* fogli di quaderno: la sfida, le domande del menu, i giorni del menu, la vetrina del Ricettario */
 :root[data-style=quaderno] .contest,:root[data-style=quaderno] .bform,:root[data-style=quaderno] .vband{background-color:#fffdf8;background-image:linear-gradient(90deg,transparent 34px,#e3867c 34px,#e3867c 36px,transparent 36px);border:0;border-radius:4px;box-shadow:0 12px 26px rgba(43,36,32,.14);color:var(--fg)}
 /* il foglio della sfida è a righe ogni 28 px e ogni scritta poggia sulla sua riga: interlinea di 28 px (il titolo 56, due righe),
@@ -934,7 +971,7 @@ details summary{cursor:pointer}
 </dialog>
 <dialog id="set">
   <div class="dhead stk"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi">✕</button></div>
-  <section class="sec"><h3>Aspetto</h3><div class="seg" id="styleSeg" style="margin-bottom:8px"><label><input type="radio" name="style" value="trattoria"><span>Trattoria</span></label><label><input type="radio" name="style" value="crema"><span>Crema</span></label><label><input type="radio" name="style" value="quaderno"><span>Quaderno</span></label></div><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div><p class="meta quadNote">Il Quaderno è sempre chiaro, come il sito: Chiaro e Scuro valgono per Trattoria e Crema.</p></section>
+  <section class="sec"><h3>Aspetto</h3><div class="seg" id="styleSeg" style="margin-bottom:8px"><label><input type="radio" name="style" value="trattoria"><span>Trattoria</span></label><label><input type="radio" name="style" value="crema"><span>Crema</span></label><label><input type="radio" name="style" value="rivista"><span>Rivista</span></label></div><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div><p class="meta quadNote">Il Quaderno è sempre chiaro, come il sito: Chiaro e Scuro valgono per Trattoria e Crema.</p></section>
   <section class="sec"><h3>Tipi di piatto</h3><div class="badges" id="catList"></div>
     <form id="catF" class="inl"><input name="c" placeholder="Nuovo tipo, es. Lievitati" aria-label="Nuovo tipo di piatto"><button class="btn pri">Aggiungi</button></form></section>
   <section class="sec"><h3>Zona per i prezzi</h3><p class="meta" id="zoneInfo">Costi calcolati con i prezzi medi ufficiali (Osservatorio Prezzi del Ministero) della tua provincia.</p>
@@ -1531,7 +1568,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=168; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=169; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1841,6 +1878,34 @@ function vetrina(){
     <div class="vsec"><p class="occh">Dal Nord al Sud</p><h3>Tutte le ricette <em>italiane</em></h3><p class="meta">Scegli un tipo di piatto qui sopra, oppure cerca per nome o ingrediente</p></div>
   </div>`;
 }
+/* ---------- Stile Rivista (14/11/2026, prende il posto di Quaderno): «Le mie ricette» come una rivista di cucina.
+   In alto le ricette in evidenza (scorrono), poi i tipi di piatto in cerchio, le salvate di recente in griglia e quelle
+   pronte in 30 minuti. Si vede quando non si cerca e non si filtra; toccando un tipo o «Vedi tutte» si torna alla griglia. ---------- */
+const MAG=()=>document.documentElement.dataset.style==='rivista';
+let MAGALL=false;
+function magHome(list){
+  const withImg=list.filter(i=>i.image);
+  const rated=withImg.filter(i=>(i.rating||0)>=4).sort((a,b)=>(b.rating||0)-(a.rating||0));
+  const hero=[...rated,...withImg.filter(i=>!rated.includes(i))].slice(0,3);
+  const lbl=i=>(i.rating||0)>=4?'La più amata':i===withImg[0]?'Ultima salvata':'Da rifare';
+  const fact=i=>{const tm=(i.ingredients?.length||i.steps?.length)?timing(i):null;return [tm&&'⏱ '+fmtMin(tm.t),+i.servings&&'👥 '+i.servings+' person'+(+i.servings===1?'a':'e'),i.rating&&'★ '+i.rating].filter(Boolean).map(x=>`<span>${esc(String(x))}</span>`).join('')};
+  const cnt={};list.forEach(i=>{const c=i.cat||'Altro';(cnt[c]=cnt[c]||[]).push(i)});
+  const cs=cats.filter(c=>cnt[c]).concat(Object.keys(cnt).filter(c=>!cats.includes(c)));
+  const quick=list.filter(i=>(i.ingredients?.length||i.steps?.length)&&timing(i).t&&timing(i).t<=30).slice(0,10);
+  const recent=list.slice(0,6);
+  return `<div class="magBlk">
+    ${hero.length?`<div class="magHero" id="magHero">${hero.map(i=>`<div class="item magSlide" data-id="${esc(i.id)}"><img src="${esc(i.image)}" alt="" referrerpolicy="no-referrer"><div class="magTx"><span class="magEye">${lbl(i)}</span><h2>${esc(i.title)}</h2><div class="magF">${fact(i)}</div></div></div>`).join('')}</div>
+      ${hero.length>1?`<div class="magDots">${hero.map((_,k)=>`<i${k?'':' class="on"'}></i>`).join('')}</div>`:''}`:''}
+    ${cs.length>1?`<div class="magSh"><h3>Per tipo di piatto</h3><button type="button" class="lnk" data-mall="1">Tutte ${list.length}</button></div>
+      <div class="magCats">${cs.map(c=>{const im=(cnt[c].find(i=>i.image)||{}).image;return `<button type="button" class="magCat" data-mcat="${esc(c)}">${im?`<img src="${esc(im)}" alt="" referrerpolicy="no-referrer">`:`<span class="magNo">${look(cnt[c][0])[0]}</span>`}<b>${esc(c)}</b><small>${cnt[c].length}</small></button>`}).join('')}</div>`:''}
+    <div class="magSh"><h3>Salvate di recente</h3><button type="button" class="lnk" data-mall="1">Vedi tutte</button></div>
+    <div class="magGrid">${recent.map(card).join('')}</div>
+    ${quick.length?`<div class="magSh"><h3>Pronte in 30 minuti</h3></div><div class="magRow">${quick.map(i=>`<div class="item magWide" data-id="${esc(i.id)}">${i.image?`<img src="${esc(i.image)}" alt="" referrerpolicy="no-referrer">`:`<span class="magNo">${look(i)[0]}</span>`}<div><b>${esc(i.title)}</b><small>${esc(i.cat||'')}</small><span class="magTm">⏱ ${fmtMin(timing(i).t)}</span></div></div>`).join('')}</div>`:''}
+  </div>`}
+function magWire(){
+  $('#list').querySelectorAll('[data-mcat]').forEach(b=>b.onclick=e=>{e.stopPropagation();cur=b.dataset.mcat;render();scrollTo({top:0})});
+  $('#list').querySelectorAll('[data-mall]').forEach(b=>b.onclick=e=>{e.stopPropagation();MAGALL=true;render();scrollTo({top:0})});
+  const h=$('#magHero');if(h){const d=[...document.querySelectorAll('.magDots i')];h.onscroll=()=>{const k=Math.round(h.scrollLeft/h.clientWidth);d.forEach((x,j)=>x.classList.toggle('on',j===k))}}}
 function render(){
   navCounts();
   const q=$('#q').value.trim().toLowerCase(),fd=$('#fDiet').value,fz=$('#fZone').value,fr=+$('#fRate').value,ft=+$('#fTime').value,fdf=+$('#fDiff').value,fc=+$('#fCost').value,fs=$('#fSort').value;
@@ -1870,9 +1935,11 @@ function render(){
   const lic=view==='mine'&&items.length?`<p class="lic">Le ricette salvate da te restano tue: per quelle importate da un link la fonte originale è indicata nella scheda, insieme alla foto e al suo autore.</p>${fontiDati()}`
     :view==='book'&&book?.length?`<p class="lic">${book.length-nGz-nPu-nWo-nAr-nLi-nGn} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}${nPu?`, ${nPu} ricette tipiche della <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia</a> (CC BY 4.0)`:''}${nWo?`, ${nWo} ricette dal mondo di <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> (CC BY-SA 4.0, tradotte in italiano)`:''}${nAr?`, ${nAr} ricette dall'<a href="https://it.wikisource.org/wiki/La_scienza_in_cucina_e_l%27arte_di_mangiar_bene_(1895)" target="_blank" rel="noopener">Artusi (1895)</a>, pubblico dominio`:''}${nLi?`, ${nLi} da Wikipedia e dal Cookbook di Wikibooks (CC BY-SA 4.0)`:''}${nGn?`, ${nGn} piatti di tutti i giorni scritti per Gnamina`:''}</p>${fontiFoto()}${fontiDati()}`:'';
   const vet=showIta&&!cur2&&!fd&&!fz&&!fr&&!ft&&!fdf&&!fc&&WIDE()?vetrina():'';if(vet&&!TOP)topFetch();
-  $('#list').innerHTML=vet+(list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
+  const mag=MAG()&&view==='mine'&&cur==='Tutte'&&!MAGALL&&!q&&!fd&&!fz&&!fr&&!ft&&!fdf&&!fc&&list.length>=4;
+  $('#list').innerHTML=vet+(mag?magHome(list):list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
     :`<div class="empty">${q?noResults(q):view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':welcome()}</div>`)+(lic?`<details class="lic fonti"><summary>Fonti e licenze</summary>${lic}</details>`:'');
+  if(mag)magWire();
   $('#list').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>$(`#tabs .tab[data-v=${b.dataset.goto}]`).click());
   $('#list').querySelectorAll('.vtile[data-vid]').forEach(t=>{t.onclick=()=>{const b=findAny(t.dataset.vid);if(b)openDetail(b)};t.onkeydown=e=>{if(e.key==='Enter')t.click()}});
   $('#list').querySelectorAll('.vcat[data-vcat]').forEach(b=>b.onclick=()=>{const c=b.dataset.vcat;if(c==='Internazionali'){cur='Internazionali';cur2=''}else{cur='Italiane';cur2=c}render();scrollTo({top:0,behavior:'smooth'})});
@@ -3829,7 +3896,7 @@ function libRender(){
   if($('#libPrev'))libPreview()}
 const RIB_SVG='<svg viewBox="0 0 16 20" aria-hidden="true"><path d="M2 1h12v18l-6-4-6 4z"/></svg>';
 
-$('#chips').onclick=e=>{const c=e.target.closest('.chip');if(!c)return;if(c.dataset.lib){libOpen();return}cur=c.dataset.c;cur2='';render()};
+$('#chips').onclick=e=>{const c=e.target.closest('.chip');if(!c)return;if(c.dataset.lib){libOpen();return}cur=c.dataset.c;cur2='';MAGALL=false;render()};
 $('#chips2').onclick=e=>{const c=e.target.closest('.chip');if(c){cur2=c.dataset.p;render()}};
 $('#list').onclick=e=>{if(lpFired){lpFired=false;return} // il tocco che chiude una pressione lunga non apre la scheda
   const m=e.target.closest('.more');if(m){e.stopPropagation();openItemMenu(m.closest('.item').dataset.id);return}

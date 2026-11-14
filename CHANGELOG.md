@@ -6,6 +6,13 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-14
 
+- **Versione 169, lo stile Rivista al posto di Quaderno** (scelta dell'utente: l'esempio 3, «rivista di cucina»).
+  - **Nome:** nelle Impostazioni lo stile «Quaderno» diventa «Rivista»; chi lo aveva scelto passa a Rivista da solo.
+  - **«Le mie ricette» come una rivista** (quando non si cerca e non si filtra, con almeno 4 ricette): in alto le ricette in evidenza, grandi e da scorrere (la più amata, l'ultima salvata), poi i tipi di piatto in cerchio con la foto, «Salvate di recente» in griglia a due colonne e «Pronte in 30 minuti» da scorrere. Toccando un tipo o «Vedi tutte» si passa alla griglia completa.
+  - **Schede:** foto quadrata arrotondata con il tipo di piatto, titolo sotto in Fraunces, tempo e difficoltà; vale anche per il Ricettario. Colori crema e terracotta, sempre chiari.
+  - **Sito sul telefono:** con lo stile Rivista non si usa più l'aspetto a quaderno del sito; con gli altri stili le polaroid del sito sul telefono sono un po' più storte.
+  - **Provato:** istantanee di Chrome a misura di telefono con otto ricette di prova.
+
 - **Versione 168, la copertina del libro personalizzata** (richiesta dell'utente).
   - **Nuova riga «La copertina»** nella sezione Libro, con l'anteprima della copertina che cambia mentre si sceglie.
   - **Il titolo:** si sceglie l'inizio («Il ricettario di…», «Il libro di cucina di…», «Le ricette di…», «In cucina con…») e il nome. Il nome è già quello del profilo Gnammer o dell'account, e si può cambiare; «Usa il mio nome» lo rimette.
