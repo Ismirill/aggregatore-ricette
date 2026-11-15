@@ -4,6 +4,10 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-15
+
+- **Server: link di condivisione di Facebook** (segnalazione dell'utente: `facebook.com/share/v/1H67LRAJzV/…` non veniva analizzato bene). L'app trovava nome e 9 ingredienti degli gnocchetti di zucca, ma non il procedimento, che nel reel è solo detto a voce: il server riconosceva come video di Facebook solo gli indirizzi con /reel/, /videos/ o /watch, e per i link «share/v» e «share/r» del tasto Condividi non cercava il video da trascrivere. Ora segue il rimando fino al reel vero e trascrive il parlato. Per questi link la memoria del server riparte da capo (chiave `:s2`). Provato sul server locale: il parlato arriva («…oggi ti mostro gli gnocchi autunnali per eccellenza, quelli fatti con la zucca…»). Da pubblicare sul server con `wrangler deploy`.
+
 ## 2026-11-14
 
 - **Versione 173, filtri di ricerca ordinati** (l'utente: decine di voci che confondono).

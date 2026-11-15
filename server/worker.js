@@ -104,7 +104,8 @@ function cacheUrl(u) {
 // pagine di accesso dei social (TikTok, Instagram, Facebook) arrivate al posto del post
 const LOGIN_RX = /log in or sign up|<title>log in \| tiktok|accedi o iscriviti|make your day/i;
 // p3: letture rifatte con le correzioni del 10/11 (video oltre 24 MB, niente falso parlato, blog linkati)
-const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : ':p4'), 3 * DAY, () => preview(env, b),
+// i link di condivisione di Facebook letti prima del 15/11 sono in cache senza il parlato: chiave nuova (:s2) solo per loro
+const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : ':p4') + (/facebook\.com\/share\//.test(String(b.url)) ? ':s2' : ''), 3 * DAY, () => preview(env, b),
   r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html)) && !LOGIN_RX.test(r.html || '') && !r.retry); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
 // b.yt: il video YouTube della stessa ricetta, trovato sulla pagina del blog del cuoco quando il blog non scrive il procedimento
 const siteYtOf = b => /^[\w-]{11}$/.test(String(b.yt || '')) ? String(b.yt) : '';
@@ -704,6 +705,15 @@ async function preview(env, b) {
     const vu = e && e.html.match(/video_url\\*":\\*"(https:[^"]+?)\\*"/), vd = e && e.html.match(/video_duration\\*":([\d.]+)/);
     if (vu) { igVideo = vu[1].replace(/\\+u0026/g, '&').replace(/\\/g, ''); igSeconds = vd ? +vd[1] : 0; }
     if (m) embedCaption = unescape(m[1].replace(/<br\s*\/?>/gi, '\n').replace(/<a [^>]*class="CaptionUsername"[^>]*>[\s\S]*?<\/a>/i, '')).replace(/View all \d+ comments\s*$/i, '').trim();
+  }
+  // Link di condivisione di Facebook (facebook.com/share/v/… o /share/r/…, quelli del tasto Condividi del telefono): rimandano
+  // al reel o al video vero. Si segue il rimando, così sotto vale il ramo dei video (testo del post e parlato da trascrivere)
+  if (/(^|\.)facebook\.com$/.test(u.hostname) && /^\/share\/[vr]\//.test(u.pathname)) {
+    try {
+      const rr = await fetch(u.href, { redirect: 'manual', headers: { 'User-Agent': PREVIEW_UA, 'Accept-Language': 'it-IT,it;q=0.9' } });
+      const loc = rr.headers.get('location');
+      if (loc) { const nu = new URL(loc, u.href); if (/(^|\.)facebook\.com$/.test(nu.hostname)) u = nu; }
+    } catch (e) { console.log('condivisione Facebook', e.message); }
   }
   // Facebook: la pagina del video chiede l'accesso, ma il riquadro di incorporamento ufficiale (plugins/video.php) ha il testo del post,
   // con i link veri (al posto di l.facebook.com) e il file del video da trascrivere
