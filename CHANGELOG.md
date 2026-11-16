@@ -6,6 +6,12 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-16
 
+- **Versione 177, il Libro torna in vista e le icone in alto diventano uguali** (stile C con il Libro 1, scelti dall'utente in `docs/proposte-colori/icone-testata.html`)
+  - **Il Libro sul telefono:** nella 176 il pulsante «📖 Il mio libro» in «Le mie» compariva solo aprendo «Filtri», quindi il Libro era quasi introvabile. Ora c'è un'icona in alto accanto alla coppa della Sfida, che apre il Libro e resta evidenziata finché è aperto.
+  - **Le quattro icone della testata del telefono** (Sfida, Libro, Impostazioni, Profilo): cerchi pieni della stessa misura, ognuno col suo colore (ocra, pomodoro, prezzemolo, carota) e il simbolo bianco; la pagina aperta ha un alone del suo colore. Prima erano una marrone, una bianca, una semitrasparente e una marrone chiara. Il sito nel browser tiene la sua testata.
+  - **Disegno nuovo del Libro:** libro aperto con le righe e una forchetta, anche nella barra laterale del computer.
+  - **Correzione:** nella 176 un commento a metà riga aveva spento il colore della coppa sulla pagina della Sfida e il pallino delle novità; tornano a funzionare.
+  - **Provato:** nella copia dell'app a 375×812, tema scuro e chiaro, apertura del Libro dall'icona e stato evidenziato. Non ancora su un telefono vero.
 - **Versione 176, nuovi colori della cucina: barra a «ciotole», pulsanti vuoti e un benvenuto nuovo** (scelti dall'utente tra le proposte in `docs/proposte-colori/`: palette 4E070C, D22701, FF670E, FDE4CE, AAD15F, stile 4 «Ciotole», icone del set C «Cucina», titolo B, sfondo «Cucina luminosa»).
   - **Barra del telefono:** Le mie, Ricettario, la fotocamera al centro esatto, Chat e Il mio menu, due per lato. Ogni scheda è una ciotola con il suo colore (barbabietola, prezzemolo, carota, crosta) e un'icona nuova: pentola con il cuore, cappello da cuoco, due fumetti, campana del piatto. Le ciotole stanno tutte sulla stessa riga e i disegni sono centrati nel cerchio; quella aperta resta bianca dentro, con simbolo e nome nel suo colore. Il **Libro** sul telefono si apre dal pulsante «📖 Il mio libro» in cima a «Le mie», che ora c'è sempre; sul computer resta nella barra laterale.
   - **Pulsanti della scheda di una ricetta:** tutti vuoti, interno crema e bordo colorato a giro (pomodoro, prezzemolo, carota, barbabietola), stessa altezza anche quando una scritta va su due righe, icone disegnate al posto delle faccine. Anche «Cucina con me» è vuoto, con il bordo verde.

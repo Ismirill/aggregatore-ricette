@@ -1,0 +1,69 @@
+<title>Icone della testata</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Nunito:wght@600;800&display=swap">
+<style>
+:root{--bg:#f6efe6;--fg:#2e1a14;--mut:#7a6457;--bb:#4e070c;--po:#d22701;--ca:#ff670e;--cr:#fde4ce;--pi:#aad15f;--pid:#4d6b17;--to:#e8a877}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#120c0a;--fg:#f6e9de;--mut:#bba494;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#120c0a;--fg:#f6e9de;--mut:#bba494;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:Nunito,system-ui,sans-serif;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-family:Fredoka,Nunito,sans-serif;font-size:1.6rem;margin:0 0 4px;text-wrap:balance}
+.intro{color:var(--mut);margin:0 0 22px;max-width:60ch}
+.opt{margin:0 0 30px}
+.opt h2{font-size:1.1rem;margin:0 0 4px}
+.opt p{margin:0 0 12px;color:var(--mut);max-width:60ch}
+.phones{display:flex;flex-wrap:wrap;gap:14px}
+.ph{width:min(100%,375px);border-radius:22px;overflow:hidden;box-shadow:0 6px 20px #0003}
+.ph.d{background:#1e1512}.ph.l{background:#fbf5ee}
+.bar{position:relative;height:64px;display:flex;align-items:center;gap:8px;padding:0 14px}
+.bar .wm{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:Fredoka,sans-serif;font-size:30px;color:#d22701;letter-spacing:-.5px}
+.sp{flex:1}
+.ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;box-sizing:border-box}
+.ic svg{width:22px;height:22px}
+.cap{display:flex;justify-content:space-between;padding:0 14px 12px;font-size:.7rem;font-weight:800}
+.ph.d .cap{color:#bba494}.ph.l .cap{color:#7a6457}
+/* A: ciotole come la barra in basso */
+.A .ic{border:3.5px solid var(--c);background:var(--cr);color:var(--i)}
+.A .on{background:#fff;border-width:4px}
+/* B: tutte uguali, crema piena */
+.B .d .ic{background:var(--cr);color:var(--bb);border:0}
+.B .l .ic{background:var(--bb);color:var(--cr);border:0}
+.B .on{box-shadow:0 0 0 3px var(--ca)}
+/* C: cerchio colorato pieno, simbolo bianco */
+.C .ic{background:var(--c);color:#fff;border:0;box-shadow:inset 0 -3px 0 #0002}
+.C .on{box-shadow:0 0 0 3px #fff8,inset 0 -3px 0 #0002}
+.l .C .on,.C .l .on{box-shadow:0 0 0 3px #0002}
+.k-cup{--c:#e8a877;--i:#a3541a}.k-lib{--c:#d22701;--i:#d22701}.k-set{--c:#aad15f;--i:#4d6b17}.k-usr{--c:#ff670e;--i:#e85a06}
+.C .k-cup{--c:#e0912f}.C .k-set{--c:#7aa233}
+.books{display:flex;flex-wrap:wrap;gap:18px;margin-top:8px}
+.bk{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.8rem;color:var(--mut)}
+.bk .ic{width:56px;height:56px;border:4px solid #d22701;background:var(--cr);color:#d22701}
+.bk .ic svg{width:28px;height:28px}
+</style>
+
+<h1>Le quattro icone in alto</h1>
+<p class="intro">Coppa della Sfida, Il mio libro, Impostazioni e Profilo, tutte con lo stesso stile. In ogni telefono il Libro è disegnato come «aperto». Più in basso trovi tre disegni nuovi per il Libro.</p>
+
+<template id="icons">
+  <span class="ic k-cup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg></span>
+  <span class="ic k-lib on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C9.6 4.8 6.6 4.3 3 5v13.5c3.6-.7 6.6-.2 9 1.5 2.4-1.7 5.4-2.2 9-1.5V5c-3.6-.7-6.6-.2-9 1.5z"/><path d="M12 6.5V20"/><path d="M6 9.2c1.3-.1 2.5.1 3.6.6M6 12.4c1.3-.1 2.5.1 3.6.6M14.4 9.8c1.1-.5 2.3-.7 3.6-.6"/><path d="M16.2 11.6v4.2M15.2 11.6v1.4a1 1 0 0 0 2 0v-1.4"/></svg></span>
+  <span class="sp"></span>
+  <span class="ic k-set"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
+  <span class="ic k-usr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+</template>
+
+<section class="opt A"><h2>A · Ciotole come la barra in basso</h2><p>Bordo colorato e fondo crema, come le ciotole in basso. Quando la pagina è aperta, il fondo diventa bianco.</p><div class="phones"></div></section>
+<section class="opt B"><h2>B · Tutte uguali, tinta unita</h2><p>Quattro cerchi identici: crema con il simbolo bordeaux sullo sfondo scuro, al contrario sullo sfondo chiaro. Si distinguono solo dal disegno.</p><div class="phones"></div></section>
+<section class="opt C"><h2>C · Cerchi colorati pieni</h2><p>Ogni pulsante ha il suo colore con il simbolo bianco: è la versione più vivace.</p><div class="phones"></div></section>
+
+<section class="opt"><h2>Il disegno del Libro</h2><p>Tre disegni per sostituire quello di adesso. In tutte e tre le proposte qui sopra c'è il primo.</p>
+<div class="books">
+  <div class="bk"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C9.6 4.8 6.6 4.3 3 5v13.5c3.6-.7 6.6-.2 9 1.5 2.4-1.7 5.4-2.2 9-1.5V5c-3.6-.7-6.6-.2-9 1.5z"/><path d="M12 6.5V20"/><path d="M6 9.2c1.3-.1 2.5.1 3.6.6M6 12.4c1.3-.1 2.5.1 3.6.6M14.4 9.8c1.1-.5 2.3-.7 3.6-.6"/><path d="M16.2 11.6v4.2M15.2 11.6v1.4a1 1 0 0 0 2 0v-1.4"/></svg></span>1 · Aperto con forchetta</div>
+  <div class="bk"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5"/><path d="M5 4.5v15A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9.5 12.5a2.5 2.5 0 0 1-.4-5 3 3 0 0 1 5.8 0 2.5 2.5 0 0 1-.4 5z"/><path d="M9.5 12.5V14h5v-1.5"/></svg></span>2 · Chiuso con cappello</div>
+  <div class="bk"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C9.6 4.8 6.6 4.3 3 5v13.5c3.6-.7 6.6-.2 9 1.5 2.4-1.7 5.4-2.2 9-1.5V5c-3.6-.7-6.6-.2-9 1.5z"/><path d="M12 6.5V20"/><path d="M16.5 4.6V11l-1.5-1.2-1.5 1.2V5.3"/></svg></span>3 · Aperto col segnalibro</div>
+</div></section>
+
+<script>
+const t=document.getElementById('icons').innerHTML;
+document.querySelectorAll('.opt.A .phones,.opt.B .phones,.opt.C .phones').forEach(p=>{
+  p.innerHTML=['d','l'].map(m=>`<div class="ph ${m}"><div class="bar">${t}<span class="wm">Gnamina</span></div><div class="cap"><span>${m==='d'?'Tema scuro':'Tema chiaro'}</span><span>Sfida · Libro · Impostazioni · Profilo</span></div></div>`).join('')});
+</script>
