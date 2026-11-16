@@ -203,6 +203,38 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
 @media (min-width:900px){.tab .chatN{position:static;margin-left:auto;border:0}}
 :root[data-sito] .tab .chatN{position:absolute;left:auto;right:-4px;top:-2px;margin:0;border:2px solid #fff}
 @media (max-width:899px){.nav{gap:2px;padding-left:4px;padding-right:4px}.nav .tab{flex:1 1 0;min-width:0;padding:6px 1px;font-size:.68rem;line-height:1.15;text-align:center}.nav .ncam{flex:0 0 64px}}
+/* ---------- Barra del telefono a «ciotole» (v176): colori della cucina (barbabietola, prezzemolo, carota, crosta), icone «Cucina».
+   Due schede a sinistra e due a destra, così la fotocamera sta esattamente al centro; il Libro si apre dal pulsante «Il mio libro» in Le mie.
+   La ciotola della scheda aperta resta bianca dentro, con simbolo e nome nel suo colore. ---------- */
+:root{--k-bb:#4e070c;--k-po:#d22701;--k-ca:#ff670e;--k-cr:#fde4ce;--k-pi:#aad15f;--k-pid:#4d6b17;--k-to:#e8a877}
+@media (max-width:899px){
+  html:root:not([data-sito]) #tabs.nav{align-items:flex-start;gap:0;padding:8px 4px calc(6px + env(safe-area-inset-bottom));background:var(--card);backdrop-filter:none;-webkit-backdrop-filter:none}
+  html:root:not([data-sito]) #tabs .tab[data-v=libro]{display:none}
+  html:root:not([data-sito]) #tabs.nav .tab{--c:var(--k-bb);--i:var(--k-bb);--l:var(--fg);background:none;box-shadow:none;color:var(--l);font-family:'Fredoka',var(--sans);font-weight:600;font-size:.7rem;line-height:1.1;padding:0 1px;gap:5px;justify-content:flex-start}
+  html:root:not([data-sito]) #tabs.nav .tab svg{box-sizing:border-box;width:50px;height:50px;padding:8px;border-radius:50%;border:4px solid var(--c);background:var(--k-cr);color:var(--i);flex:none}
+  html:root:not([data-sito]) #tabs.nav .tab[data-v=mine]{--c:var(--k-bb);--i:var(--k-bb);--on:var(--k-bb)}
+  html:root:not([data-sito]) #tabs.nav .tab[data-v=book]{--c:var(--k-pi);--i:var(--k-pid);--on:var(--k-pid)}
+  html:root:not([data-sito]) #tabs.nav .tab[data-v=chat]{--c:var(--k-ca);--i:#c4470a;--on:#e85a06}
+  html:root:not([data-sito]) #tabs.nav .tab[data-v=budget]{--c:var(--k-to);--i:var(--k-bb);--on:#b8440a}
+  html:root:not([data-sito]) #tabs.nav .tab.on{--l:var(--on);font-weight:700}
+  html:root:not([data-sito]) #tabs.nav .tab.on svg{background:#fff;border-width:5px;color:var(--on);box-shadow:0 3px 10px color-mix(in srgb,var(--c) 40%,transparent)}
+  html:root:not([data-sito]) #tabs .ncam{flex:0 0 72px;margin-top:-22px;gap:5px;font-family:'Fredoka',var(--sans);font-size:.7rem;color:var(--k-po)}
+  html:root:not([data-sito]) #tabs .ncam span{width:62px;height:62px;box-sizing:border-box;background:var(--k-po);border:5px solid var(--k-cr);box-shadow:0 0 0 3px var(--k-po),0 6px 14px rgba(210,39,1,.35)}
+  html:root:not([data-sito]) #tabs .ncam svg{width:30px;height:30px}
+  html:root:not([data-sito]) #tabs .chatN{left:calc(50% + 10px);top:-4px}
+}
+@media (max-width:899px) and (prefers-color-scheme:dark){
+  html:root:not([data-sito]):not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) #tabs.nav .tab[data-v=mine]{--on:#ffb3a8}
+  html:root:not([data-sito]):not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) #tabs.nav .tab[data-v=book]{--on:var(--k-pi)}
+  html:root:not([data-sito]):not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) #tabs.nav .tab[data-v=chat]{--on:#ff8a3d}
+  html:root:not([data-sito]):not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) #tabs.nav .tab[data-v=budget]{--on:var(--k-to)}
+  html:root:not([data-sito]):not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) #tabs.nav .tab.on svg{color:var(--i)}}
+@media (max-width:899px){
+  html:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab[data-v=mine]{--on:#ffb3a8}
+  html:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab[data-v=book]{--on:var(--k-pi)}
+  html:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab[data-v=chat]{--on:#ff8a3d}
+  html:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab[data-v=budget]{--on:var(--k-to)}
+  html:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab.on svg{color:var(--i)}}
 /* Pagina Chat: l'elenco delle conversazioni come su WhatsApp */
 #chats .chTop{display:flex;align-items:center;gap:10px;margin:4px 0 6px}#chats .chTop h2{flex:1;margin:0;font-size:1.5rem}
 #chats .chRow{padding:12px 4px}
@@ -895,6 +927,44 @@ details summary{cursor:pointer}
 :root[data-sito] .sNote ul{font-family:var(--hand);font-weight:500;font-size:24px;line-height:var(--L);margin:0;position:relative;top:8px}
 }
 @media (min-width:900px) and (max-width:1179px){:root[data-sito] .sTitle{font-size:50px;top:19px}:root[data-sito] .contest h2{font-size:46px;top:20px}}
+/* Pulsanti della scheda (v176): tutti vuoti, interno crema e bordo colorato a giro (pomodoro, prezzemolo, carota, barbabietola), stessa altezza */
+:root{--k-in:#fff7ef}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]){--k-in:color-mix(in srgb,#fde4ce 8%,var(--card))}}
+:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]){--k-in:color-mix(in srgb,#fde4ce 8%,var(--card))}
+.dacts{grid-auto-rows:1fr}
+.dacts .btn,.btn.cookBtn{--c:var(--k-po);--t:var(--k-po);background:var(--k-in);border:3px solid var(--c);color:var(--t);box-shadow:none;font-family:'Fredoka',var(--sans);font-weight:600;min-height:3.1rem;line-height:1.15;white-space:normal;text-align:center}
+.dacts .btn:nth-child(4n+2),.btn.cookBtn{--c:var(--k-pi);--t:var(--k-pid)}
+.dacts .btn:nth-child(4n+3){--c:var(--k-ca);--t:#b8440a}
+.dacts .btn:nth-child(4n+4){--c:var(--k-bb);--t:var(--k-bb)}
+.dacts .btn:hover,.btn.cookBtn:hover{border-color:var(--c);filter:brightness(.97)}
+.dacts .kic,.cookBtn .kic{width:19px;height:19px;flex:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) .dacts .btn,:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) .btn.cookBtn{--t:var(--fg)}}
+:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]) .dacts .btn,:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]) .btn.cookBtn{--t:var(--fg)}
+/* Benvenuto al primo avvio (v176): la cuoca scontornata spunta sopra il foglio, sulla sua cucina schiarita; niente X, si sceglie con i due pulsanti.
+   Sempre chiaro, anche con il tema scuro. Sugli schermi bassi lei resta dentro il foglio. */
+#acct.intro{overflow:visible;padding:0;background:#fff8f1;color:#2e1a14;max-height:none}
+#acct.intro .dhead{display:none}
+#acct.intro .aiHero{position:relative;height:150px;border-radius:24px 24px 0 0}
+#acct.intro .aiBg{position:absolute;inset:0;border-radius:inherit;overflow:hidden;background:url(casa/cuoca-cucina.webp) 50% 30%/cover;filter:brightness(1.35) saturate(1.15) blur(2.5px);opacity:.9}
+#acct.intro .aiHero::before{content:"";position:absolute;inset:0;z-index:1;border-radius:inherit;background:linear-gradient(rgba(255,248,241,.1),rgba(255,248,241,.5) 70%,#fff8f1)}
+#acct.intro .aiGirl{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);height:250px;width:auto;max-width:none;z-index:2;filter:drop-shadow(0 10px 14px rgba(78,7,12,.28));-webkit-mask-image:linear-gradient(#000 82%,transparent);mask-image:linear-gradient(#000 82%,transparent);pointer-events:none}
+#acct.intro .aiIn{position:relative;z-index:3;background:#fff8f1;padding:12px 18px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;border-radius:0 0 24px 24px}
+#acct.intro .aiT{margin:0;font-family:'Fredoka',var(--sans);font-weight:700;font-size:1.55rem;line-height:1.1;color:#4e070c;letter-spacing:0}
+#acct.intro .aiT em{font-style:normal;color:#d22701}
+#acct.intro .aiSub{margin:-6px 0 0;font-size:.95rem;color:#6b5346}
+#acct.intro .aiL{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+#acct.intro .aiL li{display:flex;align-items:center;gap:12px;line-height:1.3}
+#acct.intro .aiL b{display:block;font-family:'Fredoka',var(--sans);font-weight:600;font-size:1rem;color:#2e1a14}
+#acct.intro .aiL div span{color:#7d6658;font-size:.84rem}
+#acct.intro .aiB{flex:none;width:46px;height:46px;border-radius:50%;background:#fde4ce;border:4px solid var(--c);color:var(--i);display:grid;place-items:center}
+#acct.intro .aiB svg{width:22px;height:22px}
+#acct.intro .aiB.b1{--c:#ff670e;--i:#c4470a}#acct.intro .aiB.b2{--c:#d22701;--i:#d22701}#acct.intro .aiB.b3{--c:#4e070c;--i:#4e070c}
+#acct.intro .aiGo,#acct.intro .aiNo{font:inherit;font-family:'Fredoka',var(--sans);font-weight:600;width:100%;border-radius:99px;cursor:pointer;min-height:52px}
+#acct.intro .aiGo{background:#d22701;color:#fff;border:0;font-size:1.12rem;box-shadow:0 6px 16px rgba(210,39,1,.3)}
+#acct.intro .aiNo{background:#fff;border:3px solid #e8a877;color:#4e070c;font-size:1rem}
+@media (max-width:620px){#acct.intro{border-radius:24px 24px 0 0}#acct.intro .aiIn{border-radius:0}}
+@media (max-height:700px){#acct.intro .aiHero{height:120px}#acct.intro .aiGirl{height:200px}#acct.intro .aiL div span{display:none}#acct.intro .aiIn{gap:10px}}
+@media (max-height:560px){#acct.intro{overflow-y:auto;max-height:96dvh}#acct.intro .aiHero{overflow:hidden}#acct.intro .aiGirl{height:150px;bottom:-14px}}
 </style>
 </head>
 <body>
@@ -921,7 +991,7 @@ details summary{cursor:pointer}
     <div class="fFoot"><button type="button" class="btn" id="fReset">Azzera</button><button type="button" class="btn pri" id="fDone">Mostra le ricette</button></div>
   </div>
 </header>
-<nav class="nav" id="tabs"><div class="nbrand"><img src="icon-192.png" alt="" width="192" height="192"><div><b>Gnamina</b><small>La tua app di cucina</small></div></div><div class="nsec" id="secLbl">Sezioni</div><button class="tab" data-v="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>Le mie<span class="cnt"></span></button><button class="tab on" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Sfida</button><button class="tab" data-v="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/></svg>Ricettario<span class="cnt"></span></button><button type="button" class="ncam" id="navCam" aria-label="Foto di un piatto: Gnamina trova la ricetta"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span>Foto</button><button class="tab" data-v="chat" aria-label="Chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4.5"/></svg>Chat<i class="chatN" id="chatN" hidden></i></button><button class="tab" data-v="libro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11v18l-5.5-3.5L6 21z"/></svg>Libro</button><button class="tab" data-v="budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v7M10 3v7M17 3c-2 2-3 4-3 7h3v11"/></svg>Il mio menu</button><div class="nsec">Strumenti</div><div id="ntools"></div><div class="nfoot">Versione <span id="navVer"></span> · <a href="benvenuto.html" style="color:inherit">Cos'è Gnamina</a></div></nav>
+<nav class="nav" id="tabs"><div class="nbrand"><img src="icon-192.png" alt="" width="192" height="192"><div><b>Gnamina</b><small>La tua app di cucina</small></div></div><div class="nsec" id="secLbl">Sezioni</div><button class="tab" data-v="mine"><svg viewBox="0 0.65 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 10.5h15V16a4 4 0 0 1-4 4h-7a4 4 0 0 1-4-4z"/><path d="M2.5 10.5h19"/><path d="M9.5 7.5c0-1 .6-1.6 1.2-2.2M13.3 7.5c0-1 .6-1.6 1.2-2.2"/><path d="M12 17.4s-2.1-1.3-2.1-2.5c0-1 1.4-1.5 2.1-.6.7-.9 2.1-.4 2.1.6 0 1.2-2.1 2.5-2.1 2.5z"/></svg>Le mie<span class="cnt"></span></button><button class="tab on" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Sfida</button><button class="tab" data-v="book"><svg viewBox="0 -0.67 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14.5a4 4 0 0 1-.7-7.9 5 5 0 0 1 9.4-1.1 4 4 0 0 1 1.3 9z"/><path d="M7 14.5V19a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-4.5M7 17h10"/></svg>Ricettario<span class="cnt"></span></button><button type="button" class="ncam" id="navCam" aria-label="Foto di un piatto: Gnamina trova la ricetta"><span><svg viewBox="0 0.25 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8.5 7l1.6-2.5h3.8L15.5 7"/><circle cx="12" cy="13.5" r="3.6"/><path d="M17.6 10.2h.01" stroke-width="2.6"/></svg></span>Foto</button><button class="tab" data-v="chat" aria-label="Chat"><svg viewBox="0 -0.75 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3.5h5a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5V14l-3-2.5H14a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z"/><path d="M9.5 8.5H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h.5V19l3-2.5H10a2 2 0 0 0 2-2v-1"/></svg>Chat<i class="chatN" id="chatN" hidden></i></button><button class="tab" data-v="libro"><svg viewBox="0 0.5 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19.5V5a2 2 0 0 1 2-2h12v15H7a2 2 0 0 0-2 2 2 2 0 0 0 2 2h12"/><path d="M12 13.2s-2.6-1.6-2.6-3.3c0-1.3 1.7-1.9 2.6-.8.9-1.1 2.6-.5 2.6.8 0 1.7-2.6 3.3-2.6 3.3z"/></svg>Libro</button><button class="tab" data-v="budget"><svg viewBox="0 2.25 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 17.5a7.5 7.5 0 0 1 15 0"/><path d="M2.5 17.5h19M4 20.5h16"/><path d="M12 10V8.4M10.6 8h2.8"/></svg>Il mio menu</button><div class="nsec">Strumenti</div><div id="ntools"></div><div class="nfoot">Versione <span id="navVer"></span> · <a href="benvenuto.html" style="color:inherit">Cos'è Gnamina</a></div></nav>
 <main><div class="list" id="list"></div>
 <section id="home" hidden></section>
 <section id="libro" hidden><div id="libBody"></div></section>
@@ -1072,9 +1142,18 @@ details summary{cursor:pointer}
 <dialog id="acct">
   <div class="dhead stk"><h2 id="acctT">Il tuo profilo</h2><button class="icon" id="acctX" aria-label="Chiudi">✕</button></div>
   <div id="acctIntro" hidden>
-    <p class="big">Registrati per salvare le tue ricette e ritrovarle su tutti i tuoi dispositivi, partecipare ai contest e votare le ricette degli altri Gnammers.</p>
-    <p class="meta" style="margin:0 0 16px">Bastano la tua email o il tuo account Google. Se preferisci, puoi anche continuare senza registrarti e farlo più avanti.</p>
-    <div class="wact"><button type="button" class="wbtn" id="acctGo"><b>Crea il tuo account o accedi</b><span>Con la tua email o con Google. È gratis.</span></button><button type="button" class="wbtn" id="acctLater" style="border-left-color:var(--bd)"><b>Continua senza account</b><span>Puoi farlo quando vuoi dal tasto in alto a destra</span></button></div>
+    <div class="aiHero"><span class="aiBg"></span><img class="aiGirl" src="casa/cuoca-scontornata.webp" alt="" width="420" height="350"></div>
+    <div class="aiIn">
+      <h2 class="aiT">Benvenuto in <em>Gnamina</em>!</h2>
+      <p class="aiSub">Con l'account gratis puoi anche:</p>
+      <ul class="aiL">
+        <li><span class="aiB b1"><svg viewBox="0 -0.75 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3.5h5a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5V14l-3-2.5H14a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z"/><path d="M9.5 8.5H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h.5V19l3-2.5H10a2 2 0 0 0 2-2v-1"/></svg></span><div><b>Parlare con gli altri Gnammers</b><span>Messaggi, ricette e foto</span></div></li>
+        <li><span class="aiB b2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 20.5h8M12 16.5v4"/><path d="M7 3.5h10v5.5a5 5 0 0 1-10 0z"/><path d="M7 5.5H4.5a3 3 0 0 0 3 4M17 5.5h2.5a3 3 0 0 1-3 4"/></svg></span><div><b>Partecipare alle sfide</b><span>Una nuova ogni settimana, e voti le altre</span></div></li>
+        <li><span class="aiB b3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18.5a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.5 1.6 3.8 3.8 0 0 1-.4 7.4z"/><path d="M12 15.5v-5M9.8 12.6 12 10.4l2.2 2.2"/></svg></span><div><b>Ritrovare le tue ricette</b><span>Su tutti i tuoi telefoni e sul computer</span></div></li>
+      </ul>
+      <button type="button" class="aiGo" id="acctGo">Crea l'account gratis</button>
+      <button type="button" class="aiNo" id="acctLater">Per ora guardo e basta</button>
+    </div>
   </div>
   <section class="sec" id="acctAcc"><h3 id="accH">Account</h3><div id="accBox"></div></section>
   <section class="sec" id="acctProf"><h3 id="profH">Il tuo profilo Gnammer</h3><div id="profBox"></div></section>
@@ -1843,7 +1922,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=175; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=176; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -1942,7 +2021,7 @@ function saveFromBook(i){
 }
 function goView(v){
   view=v;cur=view==='book'?'Italiane':'Tutte';cur2=''; // il Ricettario parte dalle ricette italiane
-  $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.v===v));$('#cupBtn')?.classList.toggle('on',v==='home');cupDot();
+  $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.v===v||(v==='libro'&&x.dataset.v==='mine'&&innerWidth<900&&!document.documentElement.dataset.sito))); // sul telefono il Libro sta dentro «Le mie»$('#cupBtn')?.classList.toggle('on',v==='home');cupDot();
   const bud=view==='budget',home=view==='home',lib=view==='libro',cht=view==='chat',alt=bud||home||lib||cht;['#sbar','#chips','#list'].forEach(x=>$(x).hidden=alt);$('#add').hidden=alt;if(alt){$('#chips2').hidden=true;$('.filters').hidden=true;filtUI()}$('#budget').hidden=!bud;$('#home').hidden=!home;$('#libro').hidden=!lib;$('#chats').hidden=!cht;filtUI();
   $('#vTitle').textContent={home:'La sfida',mine:'Le mie ricette',book:'Ricettario',budget:'Il mio menu',libro:'Il mio libro',chat:'Chat'}[view];window.scrollTo(0,0);
   if(cht){chatPage();chatPoll();chatTick();return}
@@ -1991,7 +2070,7 @@ function profUI(required){const box=$('#profBox');if(!box)return;acctReq=!!requi
   upd()}
 // Il pannello: passi «intro» (primo avvio), «account», «profile» (obbligatorio dopo l'accesso) o «all» (profilo e account insieme)
 let acctMode='all';
-function acctStep(m){acctMode=m;$('#acctIntro').hidden=m!=='intro';$('#acctAcc').hidden=!(m==='account'||m==='all');$('#acctProf').hidden=!(m==='profile'||m==='all');
+function acctStep(m){acctMode=m;$('#acctIntro').hidden=m!=='intro';$('#acct').classList.toggle('intro',m==='intro');$('#acctAcc').hidden=!(m==='account'||m==='all');$('#acctProf').hidden=!(m==='profile'||m==='all');
   $('#acctT').textContent={intro:'Benvenuto in Gnamina',account:'Registrati o accedi',profile:ACC?'Presentati':'Il tuo profilo',all:'Il tuo profilo'}[m];
   $('#acctX').style.visibility=m==='profile'&&ACC?'hidden':'visible'; // dopo l'accesso nome e immagine non si saltano
   if(m!=='intro'){accUI();profUI(m==='profile'&&!!ACC);if(m==='profile'&&!ACC&&accOn()){$('#profBox').insertAdjacentHTML('afterbegin','<p class="meta" style="margin:0 0 10px"><button class="lnk" type="button" id="goAcc">Accedi o crea l\'account</button> per avere le ricette su tutti i tuoi dispositivi.</p>');$('#goAcc').onclick=()=>acctStep('account')}}$('#acct').scrollTop=0}
@@ -2203,7 +2282,7 @@ function render(){
   const showIntl=view==='book'&&cur==='Internazionali',showBk=view==='book'&&cur==='Colazione',showIta=view==='book'&&cur==='Italiane'&&!q;
   const data=showIntl?src().filter(isIntl):showBk?BK:showIta?src().filter(i=>!isIntl(i)):src();
   const counts={};src().forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);if(view==='book'&&book){counts['Internazionali']=book.filter(isIntl).length;counts['Italiane']=book.length-counts['Internazionali']}if(view==='book')counts['Colazione']=BK.length;
-  $('#chips').innerHTML=(view==='mine'&&items.some(libOk)?`<button class="chip libChip" data-lib="1">📖 Il mio libro<small>${items.filter(i=>i.inBook&&libOk(i)).length}</small></button>`:'')+[...(view==='book'?['Italiane']:[]),'Tutte',...(view==='book'?['Colazione','Internazionali']:[]),...cats].filter(c=>c==='Tutte'||counts[c]).map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${c==='Italiane'?'🇮🇹 ':c==='Internazionali'?'🌍 ':c==='Colazione'?'☕ ':''}${esc(c)}<small>${c==='Tutte'?src().length:counts[c]}</small></button>`).join('');
+  $('#chips').innerHTML=(view==='mine'?`<button class="chip libChip" data-lib="1">📖 Il mio libro<small>${items.filter(i=>i.inBook&&libOk(i)).length}</small></button>`:'')+[...(view==='book'?['Italiane']:[]),'Tutte',...(view==='book'?['Colazione','Internazionali']:[]),...cats].filter(c=>c==='Tutte'||counts[c]).map(c=>`<button class="chip${c===cur?' on':''}" data-c="${esc(c)}">${c==='Italiane'?'🇮🇹 ':c==='Internazionali'?'🌍 ':c==='Colazione'?'☕ ':''}${esc(c)}<small>${c==='Tutte'?src().length:counts[c]}</small></button>`).join('');
   // seconda riga per le colazioni: classiche, dolci, salate
   if(showBk){const KL={classica:'Classiche',dolce:'Dolci',salata:'Salate'};if(cur2&&!KL[cur2])cur2='';
     $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutte<small>${BK.length}</small></button>`+Object.entries(KL).map(([k,l])=>`<button class="chip${k===cur2?' on':''}" data-p="${k}">${l}<small>${BK.filter(r=>r.kind===k).length}</small></button>`).join('')}
@@ -2848,6 +2927,9 @@ function sourceLine(i){
   if(i.world)return `Fonte: <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · tradotta in italiano con l'AI`;
   return `Fonte: <a href="${esc(i.url)}" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> · licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · autori nella <a href="${esc(String(i.url).replace('/wiki/','/w/index.php?action=history&title='))}" target="_blank" rel="noopener">cronologia</a>`;
 }
+/* Icone «Cucina» dei pulsanti della scheda (v176): stesso disegno della barra in basso */
+const KI={"mie": "<path d=\"M4.5 10.5h15V16a4 4 0 0 1-4 4h-7a4 4 0 0 1-4-4z\"/><path d=\"M2.5 10.5h19\"/><path d=\"M9.5 7.5c0-1 .6-1.6 1.2-2.2M13.3 7.5c0-1 .6-1.6 1.2-2.2\"/><path d=\"M12 17.4s-2.1-1.3-2.1-2.5c0-1 1.4-1.5 2.1-.6.7-.9 2.1-.4 2.1.6 0 1.2-2.1 2.5-2.1 2.5z\"/>", "chat": "<path d=\"M14 3.5h5a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5V14l-3-2.5H14a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z\"/><path d=\"M9.5 8.5H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h.5V19l3-2.5H10a2 2 0 0 0 2-2v-1\"/>", "lib": "<path d=\"M5 19.5V5a2 2 0 0 1 2-2h12v15H7a2 2 0 0 0-2 2 2 2 0 0 0 2 2h12\"/><path d=\"M12 13.2s-2.6-1.6-2.6-3.3c0-1.3 1.7-1.9 2.6-.8.9-1.1 2.6-.5 2.6.8 0 1.7-2.6 3.3-2.6 3.3z\"/>", "cook": "<path d=\"M7 14.5a4 4 0 0 1-.7-7.9 5 5 0 0 1 9.4-1.1 4 4 0 0 1 1.3 9z\"/><path d=\"M7 14.5V19a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-4.5M7 17h10\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"12\" height=\"12\" rx=\"2.5\"/><path d=\"M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2\"/>", "play": "<rect x=\"2.5\" y=\"5\" width=\"19\" height=\"14\" rx=\"4\"/><path d=\"M10 9.2v5.6l4.8-2.8z\"/>", "edit": "<path d=\"M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z\"/><path d=\"M13.5 6.5l4 4\"/>", "print": "<path d=\"M7 9V3.5h10V9\"/><rect x=\"3\" y=\"9\" width=\"18\" height=\"8\" rx=\"2\"/><path d=\"M7 14h10v6.5H7z\"/>"};
+const kIc=k=>`<svg class="kic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${KI[k]}</svg>`;
 function openDetail(i){
   const e=embedOf(i);
   const [em,c1,c2]=look(i),tm=(i.ingredients?.length||i.steps?.length)?timing(i):null;
@@ -2861,16 +2943,16 @@ function openDetail(i){
   if(i.catBy?.length)fonti.push(`Perché è tra i ${esc(i.cat)}: ${i.catBy.map(b=>esc(b)).join(' · ')} (affidabilità ${esc(i.catConf)})`);
   // I pulsanti in fondo: una griglia a due colonne, tutti della stessa misura
   const acts=[];
-  if(i.url&&i.source!=='Gnamina'&&i.source!=='Aggregatore Ricette')acts.push(`<a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">🔗 ${i.linked?'Apri su GialloZafferano':'Apri originale'}</a>`);
+  if(i.url&&i.source!=='Gnamina'&&i.source!=='Aggregatore Ricette')acts.push(`<a class="btn" href="${esc(i.url)}" target="_blank" rel="noopener">${kIc('link')}${i.linked?'Apri su GialloZafferano':'Apri originale'}</a>`);
   const lnk=i.url&&i.source!=='Gnamina'&&i.source!=='Aggregatore Ricette'?i.url:i.video||'';
-  if(lnk)acts.push(`<button type="button" class="btn" id="dCopy" data-u="${esc(lnk)}">📋 Copia il link</button>`);
-  acts.push(`<a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">▶ Cerca su YouTube</a>`);
-  if(!(i.pronto||i.colazione))acts.push(i.book||i.chatShare?'<button class="btn pri" id="dSave">💾 Salva nelle mie</button>':'<button class="btn" id="dEdit">✏️ Modifica</button>');
-  if(libOk(i)&&!i.chatShare&&accOn())acts.push('<button type="button" class="btn" id="dChat">💬 Manda a un Gnammer</button>');
+  if(lnk)acts.push(`<button type="button" class="btn" id="dCopy" data-u="${esc(lnk)}">${kIc('copy')}Copia il link</button>`);
+  acts.push(`<a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">${kIc('play')}Cerca su YouTube</a>`);
+  if(!(i.pronto||i.colazione))acts.push(i.book||i.chatShare?`<button class="btn" id="dSave">${kIc('mie')}Salva nelle mie</button>`:`<button class="btn" id="dEdit">${kIc('edit')}Modifica</button>`);
+  if(libOk(i)&&!i.chatShare&&accOn())acts.push(`<button type="button" class="btn" id="dChat">${kIc('chat')}Manda a un Gnammer</button>`);
   libSync(i);
-  if(libOk(i)&&!i.pronto&&!i.colazione&&!i.chatShare)acts.push(`<button type="button" class="btn" id="dLib">${i.inBook?`🔖 Nel libro · ${esc(i.bookNo||'')}`:'🔖 Metti nel libro'}</button>`);
-  if(libOk(i)&&!i.chatShare)acts.push('<button type="button" class="btn" id="dPrint">🖨 Stampa la ricetta</button>');
-  acts.push(`<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button>`);
+  if(libOk(i)&&!i.pronto&&!i.colazione&&!i.chatShare)acts.push(`<button type="button" class="btn" id="dLib">${kIc('lib')}${i.inBook?`Nel libro · ${esc(i.bookNo||'')}`:'Metti nel libro'}</button>`);
+  if(libOk(i)&&!i.chatShare)acts.push(`<button type="button" class="btn" id="dPrint">${kIc('print')}Stampa la ricetta</button>`);
+  acts.push(`<button class="btn" id="dClose">Chiudi</button>`);
   $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button><div class="dcols"><div class="dmain">
     ${i.clips?.length?`<div class="clipPl" id="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p><p class="row" style="justify-content:flex-start;gap:8px;margin:0 0 10px"><button type="button" class="btn pri" data-vc="share">📤 Pubblica</button><button type="button" class="btn" data-vc="save">💾 Salva nel rullino</button></p></div>`
       :e&&/facebook\.com\/plugins/.test(e.src)?fbHero(i,c1,c2,em)
@@ -2889,7 +2971,7 @@ function openDetail(i){
     ${i.linked?`<div class="kv"><span>Costo ${esc(i.cost||'n.d.')}</span></div><h3>Ingredienti principali</h3><ul>${i.ingredients.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="meta">Dosi e procedimento sono sulla pagina originale di GialloZafferano.</p>`
     :i.ingredients?.length?`<h3>Ingredienti</h3><div class="srv">Per <button type="button" class="btn" id="sMinus" aria-label="Meno persone">−</button><b id="sN"></b><button type="button" class="btn" id="sPlus" aria-label="Più persone">+</button> <span id="sLbl">persone</span> <span class="meta" id="sOrig"></span></div>
       <div class="nut" id="nut"></div><ul id="ingList"></ul>`:''}
-    ${i.steps?.length?`<h3>Procedimento</h3><button type="button" class="btn pri cookBtn" id="dCook">🔊 Cucina con me: leggo io ingredienti e passaggi</button><ol>${i.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
+    ${i.steps?.length?`<h3>Procedimento</h3><button type="button" class="btn cookBtn" id="dCook">${kIc('cook')}Cucina con me: leggo io ingredienti e passaggi</button><ol>${i.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
     ${i.note?`<h3>Note</h3><p class="cap">${esc(i.note)}</p>`:''}
     ${!i.ingredients?.length&&i.caption?`<h3>Descrizione</h3><p class="cap">${esc(i.caption)}</p>`:''}
     ${fonti.length?`<details class="fonti2"><summary>Fonti e note</summary>${fonti.map(f=>`<p class="lic">${f}</p>`).join('')}${i.artusi?`<details class="meta" style="margin-top:8px"><summary>Testo originale di Artusi: «${esc(i.origTitle)}» (n. ${i.num}, ${esc(i.chapter)})</summary><p class="cap" style="margin-top:6px">${esc(i.text)}</p></details>`:''}</details>`:''}
@@ -2909,7 +2991,7 @@ function openDetail(i){
   $('#dClose').onclick=$('#dX').onclick=()=>$('#det').close();
   if($('#dv .fbHero'))fbHeroFix($('#dv .fbHero'),i);
   if($('#dCopy'))$('#dCopy').onclick=e=>copyText(e.currentTarget.dataset.u,'Link copiato negli appunti');
-  if($('#dLib'))$('#dLib').onclick=e=>{const it=libToggle(i.id);if(!it)return;e.currentTarget.textContent=it.inBook?`🔖 Nel libro · ${it.bookNo}`:'🔖 Metti nel libro';toast(it.inBook?`Nel libro di cucina come ${it.bookNo}`:'Tolta dal libro di cucina');render()};
+  if($('#dLib'))$('#dLib').onclick=e=>{const it=libToggle(i.id);if(!it)return;e.currentTarget.innerHTML=kIc('lib')+(it.inBook?`Nel libro · ${it.bookNo}`:'Metti nel libro');toast(it.inBook?`Nel libro di cucina come ${it.bookNo}`:'Tolta dal libro di cucina');render()};
   if($('#dPrint'))$('#dPrint').onclick=()=>libPrint([items.find(x=>x.id===i.id)||i],'one',{name:i.title,numbered:!!i.inBook});
   if($('#dCook'))$('#dCook').onclick=()=>cookOpen(i);
   if(i.clips?.length){clipPlayer(i.clipKey,i.clips,$('#clipPl'));$('#clipPl').onclick=e=>{const b=e.target.closest('[data-vc]');if(b)(b.dataset.vc==='share'?clipsShare:clipsSave)(i.clipKey,i.clips,i.title)}}
