@@ -6,6 +6,12 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-16
 
+- **Versione 175, la Chat diventa una scheda della barra in basso** (l'utente: la possibilità di parlare con le persone deve diventare l'elemento che caratterizza Gnamina, un punto d'incontro e non solo un'altra app che trasforma i video in ricette).
+  - **Barra del telefono:** Le mie, Ricettario, la fotocamera al centro, **Chat**, Libro e Il mio menu. Sulla scheda Chat c'è il numero dei messaggi da leggere. Le schede sono un po' più strette per starci tutte e sei: provato a 375 px di larghezza. Sul computer «Chat» è tra le sezioni della barra laterale, e sul sito nella testata, con la sua foto d'apertura «Scrivi a chi cucina come te». Il pulsante 💬 in alto della versione 174 è stato tolto.
+  - **La pagina Chat:** tutte le conversazioni come su WhatsApp, con le richieste nuove in cima («Vogliono scriverti») e il pulsante «Nuovo messaggio». Una conversazione si apre a tutto schermo e con «←» si torna all'elenco. Chi non ha l'account trova una pagina che spiega a cosa serve la chat, con il pulsante per entrare o presentarsi.
+  - **Server:** pubblicato il 16/11 (versione a459dd97) con le richieste `/chat/…` della versione 174. Riprovato online: risponde e chiede l'accesso; le tabelle nuove del database si sono create alla prima richiesta.
+  - **Provato:** nel browser a misura di telefono (375 px) e di computer, con il server locale e utenti finti: elenco, numero sulla scheda che si aggiorna da solo, apertura e chiusura della conversazione, «Nuovo messaggio». Non ancora provato su telefoni veri.
+
 - **Versione 174, chat tra Gnammers: «il WhatsApp della cucina»** (richiesta dell'utente: una sezione dove le persone si scrivono personalmente).
   - **Dove sta:** il pulsante 💬 in alto accanto alla coppa, con il numero dei messaggi da leggere; sul computer è tra gli strumenti, con la scritta «Messaggi». Si apre una finestra a tutto schermo sul telefono, con l'elenco delle chat in stile WhatsApp a caratteri grandi.
   - **Come si inizia una chat:** con «💬 Scrivi» accanto ai commenti degli altri sotto le ricette del Ricettario, con «Nuovo» cercando un Gnammer per nome, oppure con «💬 Manda a un Gnammer» nella scheda di una ricetta.
