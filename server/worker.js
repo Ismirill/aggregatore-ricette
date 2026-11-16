@@ -937,6 +937,7 @@ async function account(env, req, b) {
   if (b.delete) {
     await socialTables(env);
     await env.SYNC.batch([...(code ? [env.SYNC.prepare('DELETE FROM docs WHERE k = ?1').bind(await hexSha('gnamina-id:' + code)), env.SYNC.prepare('DELETE FROM users WHERE uid = ?1').bind(u.uid)] : []), env.SYNC.prepare('DELETE FROM profiles WHERE uid = ?1').bind(u.uid), env.SYNC.prepare('DELETE FROM comments WHERE uid = ?1').bind(u.uid), env.SYNC.prepare('DELETE FROM reports WHERE uid = ?1').bind(u.uid)]);
+    await chatForget(env, u.uid);
     return { deleted: true };
   }
   if (!code) {
@@ -1033,6 +1034,7 @@ async function profileSet(env, req, b) {
   if (name.length < 2 || !avatar) throw bad('Servono nome e immagine');
   if (BAD_WORDS.test(name)) throw bad('Questo nome non va bene');
   await env.SYNC.prepare('INSERT INTO profiles (uid,name,avatar,level,t) VALUES (?1,?2,?3,?4,?5) ON CONFLICT(uid) DO UPDATE SET name=excluded.name, avatar=excluded.avatar, level=excluded.level, t=excluded.t').bind(u.uid, name, avatar, level, Date.now()).run();
+  try { await chatTables(env); await myPid(env, u.uid); } catch {}
   return { ok: true, name, avatar, level };
 }
 const fmtComment = (r, me) => ({ id: r.id, name: r.name || 'Gnammer', avatar: r.avatar || '', level: r.level || 0, text: r.text, t: r.t, mine: !!me && r.uid === me });
@@ -1042,7 +1044,10 @@ async function commentsGet(env, req, b) {
   if (!rid) throw bad('Ricetta mancante');
   let me = ''; if (req.headers.get('Authorization')) { try { me = (await verifyUser(env, req)).uid; } catch {} }
   const rows = await env.SYNC.prepare('SELECT c.id, c.uid, c.text, c.t, p.name, p.avatar, p.level FROM comments c LEFT JOIN profiles p ON p.uid = c.uid WHERE c.rid = ?1 AND c.del = 0 ORDER BY c.t DESC LIMIT 60').bind(rid).all();
-  return { comments: rows.results.map(r => fmtComment(r, me)).reverse() };
+  await chatTables(env);
+  // l'id pubblico dell'autore serve per il pulsante «Scrivi» (chat): l'uid resta sul server
+  const pids = {}; for (const r of rows.results) if (r.uid !== me && r.name && !pids[r.uid]) pids[r.uid] = await myPid(env, r.uid);
+  return { comments: rows.results.map(r => ({ ...fmtComment(r, me), pid: pids[r.uid] || '' })).reverse() };
 }
 async function commentAdd(env, req, b) {
   const u = await verifyUser(env, req); await socialTables(env);
@@ -1078,7 +1083,200 @@ async function commentReport(env, req, b) {
   if (n >= 3) await env.SYNC.prepare('UPDATE comments SET del = 3 WHERE id = ?1 AND del = 0').bind(cid).run(); // tre segnalazioni: nascosto in attesa di controllo
   return { ok: true, hidden: n >= 3 };
 }
-const SOCIAL = { '/profile': profileSet, '/comments': commentsGet, '/comments/add': commentAdd, '/comments/del': commentDel, '/comments/report': commentReport };
+// Chat tra Gnammers (16/11/2026): messaggi personali uno a uno, con l'account e dopo essersi presentati.
+// Il primo messaggio è una richiesta: finché chi la riceve non accetta, chi l'ha mandata non può scrivere altro. Si può bloccare,
+// segnalare, eliminare la chat dalla propria lista. Testo, schede ricetta e foto (piccole, in una tabella a parte).
+// Ogni Gnammer ha un id pubblico (pid) ricavato dall'uid: l'uid di Firebase non esce mai dal server.
+let chatReady = false;
+async function chatTables(env) {
+  if (chatReady) return;
+  await socialTables(env);
+  await env.SYNC.batch([
+    env.SYNC.prepare('CREATE TABLE IF NOT EXISTS people (pid TEXT PRIMARY KEY, uid TEXT NOT NULL UNIQUE)'),
+    env.SYNC.prepare('CREATE TABLE IF NOT EXISTS chats (id TEXT PRIMARY KEY, a TEXT NOT NULL, b TEXT NOT NULL, st INTEGER NOT NULL DEFAULT 0, req TEXT NOT NULL, t INTEGER NOT NULL, last TEXT NOT NULL DEFAULT \'\', lastBy TEXT NOT NULL DEFAULT \'\', lid INTEGER NOT NULL DEFAULT 0, ra INTEGER NOT NULL DEFAULT 0, rb INTEGER NOT NULL DEFAULT 0, ca INTEGER NOT NULL DEFAULT 0, cb INTEGER NOT NULL DEFAULT 0)'),
+    env.SYNC.prepare('CREATE INDEX IF NOT EXISTS chats_a ON chats (a, t)'),
+    env.SYNC.prepare('CREATE INDEX IF NOT EXISTS chats_b ON chats (b, t)'),
+    env.SYNC.prepare('CREATE TABLE IF NOT EXISTS msgs (id INTEGER PRIMARY KEY AUTOINCREMENT, chat TEXT NOT NULL, uid TEXT NOT NULL, k TEXT NOT NULL, body TEXT NOT NULL, t INTEGER NOT NULL, del INTEGER NOT NULL DEFAULT 0)'),
+    env.SYNC.prepare('CREATE INDEX IF NOT EXISTS msgs_chat ON msgs (chat, id)'),
+    env.SYNC.prepare('CREATE INDEX IF NOT EXISTS msgs_uid ON msgs (uid, t)'),
+    env.SYNC.prepare('CREATE TABLE IF NOT EXISTS pics (id TEXT PRIMARY KEY, chat TEXT NOT NULL, data TEXT NOT NULL, t INTEGER NOT NULL)'),
+    env.SYNC.prepare('CREATE TABLE IF NOT EXISTS blocks (uid TEXT NOT NULL, who TEXT NOT NULL, t INTEGER NOT NULL, PRIMARY KEY (uid, who))'),
+    env.SYNC.prepare('CREATE TABLE IF NOT EXISTS mreports (mid INTEGER NOT NULL, uid TEXT NOT NULL, why TEXT, t INTEGER NOT NULL, PRIMARY KEY (mid, uid))'),
+  ]);
+  chatReady = true;
+}
+const pidOf = async uid => (await hexSha('gnammer:' + uid)).slice(0, 16);
+async function myPid(env, uid) { const pid = await pidOf(uid); await env.SYNC.prepare('INSERT OR IGNORE INTO people (pid, uid) VALUES (?1, ?2)').bind(pid, uid).run(); return pid; }
+const chatErr = (m, s = 400) => Object.assign(new Error(m), { status: s });
+async function chatMe(env, req, write) {
+  const u = await verifyUser(env, req); await chatTables(env); await myPid(env, u.uid);
+  if (write) {
+    if (u.provider === 'password' && !u.verified) throw chatErr('Conferma prima la tua email con il link che ti abbiamo mandato', 403);
+    const p = await env.SYNC.prepare('SELECT name FROM profiles WHERE uid = ?1').bind(u.uid).first();
+    if (!p) throw chatErr('Presentati prima ai Gnammers: nome e immagine', 403);
+    u.pname = p.name;
+  }
+  return u;
+}
+async function peerOf(env, pid) {
+  const r = await env.SYNC.prepare('SELECT g.uid, p.name, p.avatar, p.level FROM people g JOIN profiles p ON p.uid = g.uid WHERE g.pid = ?1').bind(str(pid, 20)).first();
+  if (!r) throw chatErr('Questo Gnammer non c\'è più', 404);
+  return r;
+}
+const chatIdOf = async (x, y) => (await hexSha('chat:' + [x, y].sort().join('|'))).slice(0, 24);
+async function chatGet(env, me, id) {
+  const c = await env.SYNC.prepare('SELECT * FROM chats WHERE id = ?1').bind(str(id, 30)).first();
+  if (!c || (c.a !== me && c.b !== me)) throw chatErr('Chat non trovata', 404);
+  return c;
+}
+const chatSide = (c, me) => (c.a === me ? 'a' : 'b');
+const chatOther = (c, me) => (c.a === me ? c.b : c.a);
+const chatSt = (c, me) => (c.st === 1 ? 'ok' : c.req === me ? 'out' : c.st === 2 ? 'no' : 'in');
+const peerFmt = (p, pid) => ({ pid, name: p?.name || 'Gnammer', avatar: p?.avatar || '', level: p?.level || 0 });
+async function chatList(env, req) {
+  const u = await chatMe(env, req); const me = u.uid;
+  const rows = await env.SYNC.prepare(`SELECT c.*, p.name, p.avatar, p.level, g.pid,
+      (SELECT COUNT(*) FROM msgs m WHERE m.chat = c.id AND m.uid <> ?1 AND m.del = 0 AND m.id > (CASE WHEN c.a = ?1 THEN MAX(c.ra, c.ca) ELSE MAX(c.rb, c.cb) END)) AS un
+    FROM chats c LEFT JOIN profiles p ON p.uid = (CASE WHEN c.a = ?1 THEN c.b ELSE c.a END) LEFT JOIN people g ON g.uid = (CASE WHEN c.a = ?1 THEN c.b ELSE c.a END)
+    WHERE (c.a = ?1 OR c.b = ?1) AND c.lid > (CASE WHEN c.a = ?1 THEN c.ca ELSE c.cb END)
+      AND NOT EXISTS (SELECT 1 FROM blocks k WHERE k.uid = ?1 AND k.who = (CASE WHEN c.a = ?1 THEN c.b ELSE c.a END))
+    ORDER BY c.t DESC LIMIT 100`).bind(me).all();
+  const chats = rows.results.map(c => ({ id: c.id, ...peerFmt(c, c.pid), st: chatSt(c, me), last: c.last, lastMine: c.lastBy === me, t: c.t, un: c.un || 0 }))
+    .filter(c => c.st !== 'no');
+  // chi ha rifiutato non vede più la richiesta; chi l'ha mandata continua a vederla «in attesa»
+  return { chats, unread: chats.reduce((n, c) => n + (c.st === 'out' ? 0 : c.un), 0), me: await pidOf(me) };
+}
+async function chatOpen(env, req, b) {
+  const u = await chatMe(env, req); const p = await peerOf(env, b.pid);
+  if (p.uid === u.uid) throw chatErr('Questo sei tu');
+  const c = await env.SYNC.prepare('SELECT * FROM chats WHERE id = ?1').bind(await chatIdOf(u.uid, p.uid)).first();
+  return { chat: c?.id || null, st: c ? chatSt(c, u.uid) : 'new', peer: peerFmt(p, str(b.pid, 20)) };
+}
+const chatMsgFmt = (m, me) => ({ id: m.id, mine: m.uid === me, k: m.k, body: m.del ? '' : m.k === 'r' ? JSON.parse(m.body || '{}') : m.body, t: m.t, del: m.del ? 1 : 0 });
+async function chatMsgs(env, req, b) {
+  const u = await chatMe(env, req); const me = u.uid; const c = await chatGet(env, me, b.chat); const s = chatSide(c, me);
+  const from = Math.max(Math.round(+b.after) || 0, c['c' + s]);
+  const rows = await env.SYNC.prepare('SELECT * FROM msgs WHERE chat = ?1 AND id > ?2 ORDER BY id DESC LIMIT 80').bind(c.id, from).all();
+  const msgs = rows.results.reverse().map(m => chatMsgFmt(m, me));
+  if (c.lid > c['r' + s]) await env.SYNC.prepare(`UPDATE chats SET r${s} = ?2 WHERE id = ?1`).bind(c.id, c.lid).run();
+  const other = chatOther(c, me);
+  const p = await env.SYNC.prepare('SELECT g.pid, p.name, p.avatar, p.level FROM people g LEFT JOIN profiles p ON p.uid = g.uid WHERE g.uid = ?1').bind(other).first();
+  const blocked = !!(await env.SYNC.prepare('SELECT 1 FROM blocks WHERE uid = ?1 AND who = ?2').bind(me, other).first());
+  return { msgs, st: chatSt(c, me), seen: c[s === 'a' ? 'rb' : 'ra'], peer: peerFmt(p, p?.pid || ''), blocked };
+}
+// Scheda ricetta mandata in chat: solo i campi che servono per cucinarla, niente foto incorporate (solo link https)
+function chatRecipe(r) {
+  if (!r || typeof r !== 'object') throw chatErr('Ricetta mancante');
+  const arr = (a, n, l) => (Array.isArray(a) ? a : []).slice(0, n).map(x => cleanText(x, l)).filter(Boolean);
+  const url = v => (/^https:\/\/[^\s"<>]{4,400}$/.test(String(v || '')) ? String(v) : '');
+  const o = { title: cleanText(r.title, 140), image: url(r.image), url: url(r.url), source: cleanText(r.source, 60), cat: cleanText(r.cat, 40), servings: Math.min(50, Math.max(0, Math.round(+r.servings) || 0)), time: Math.min(2000, Math.max(0, Math.round(+r.time) || 0)),
+    ingredients: arr(r.ingredients, 80, 200), steps: arr(r.steps, 60, 1200), note: cleanText(r.note, 1000), bookId: str(r.bookId, 80) };
+  if (!o.title) throw chatErr('Ricetta senza titolo');
+  return o;
+}
+async function chatSend(env, req, b) {
+  const u = await chatMe(env, req, true); const me = u.uid, now = Date.now();
+  let c, other;
+  if (b.chat) { c = await chatGet(env, me, b.chat); other = chatOther(c, me); }
+  else {
+    const p = await peerOf(env, b.pid); other = p.uid;
+    if (other === me) throw chatErr('Non puoi scrivere a te stesso');
+    c = await env.SYNC.prepare('SELECT * FROM chats WHERE id = ?1').bind(await chatIdOf(me, other)).first();
+  }
+  if (await env.SYNC.prepare('SELECT 1 FROM blocks WHERE (uid = ?1 AND who = ?2) OR (uid = ?2 AND who = ?1)').bind(me, other).first()) throw chatErr('Non puoi scrivere a questa persona', 403);
+  const k = ['t', 'r', 'p'].includes(b.k) ? b.k : 't';
+  // Limiti contro lo spam: un messaggio ogni secondo, 30 al minuto, 600 al giorno; al massimo 8 richieste nuove al giorno
+  const lim = await env.SYNC.prepare('SELECT MAX(t) AS last, SUM(t > ?2) AS min, COUNT(*) AS day FROM msgs WHERE uid = ?1 AND t > ?3').bind(me, now - 60e3, now - 864e5).first();
+  if (lim?.last && now - lim.last < 1000) throw chatErr('Un attimo, stai scrivendo troppo in fretta', 429);
+  if ((lim?.min || 0) >= 30 || (lim?.day || 0) >= 600) throw chatErr('Hai mandato tanti messaggi in poco tempo: riprova tra un po\'', 429);
+  const request = !c || (c.st === 0 && c.req === me);
+  if (c && c.st === 2 && c.req === me) throw chatErr('Questa persona non accetta messaggi', 403);
+  if (c && c.st === 0 && c.req === me && c.lid) throw chatErr('Aspetta che accetti la tua richiesta: poi potrete scrivervi', 403);
+  if (!c) {
+    const n = (await env.SYNC.prepare('SELECT COUNT(*) AS n FROM chats WHERE req = ?1 AND t > ?2 AND st <> 1').bind(me, now - 864e5).first())?.n || 0;
+    if (n >= 8) throw chatErr('Per oggi hai mandato abbastanza richieste nuove: riprova domani', 429);
+  }
+  let body, last;
+  if (k === 't') {
+    body = cleanText(b.text, 1000); if (!body) throw chatErr('Scrivi qualcosa');
+    if (request && BAD_WORDS.test(body)) throw chatErr('Il messaggio contiene parole che qui non si usano');
+    if (request && /https?:\/\/|www\./i.test(body)) throw chatErr('Nel primo messaggio niente link');
+    last = body.slice(0, 90);
+  } else if (k === 'r') { const r = chatRecipe(b.recipe); body = JSON.stringify(r); if (body.length > 40000) throw chatErr('Ricetta troppo lunga'); last = '📖 ' + r.title.slice(0, 80); }
+  else {
+    if (request) throw chatErr('Le foto si mandano dopo che la richiesta è stata accettata');
+    const d = String(b.photo || ''); if (!/^data:image\/(jpeg|webp|png);base64,[A-Za-z0-9+/=]+$/.test(d) || d.length > 450000) throw chatErr('Foto non valida o troppo grande');
+    body = crypto.randomUUID().replace(/-/g, '').slice(0, 20); last = '📷 Foto';
+  }
+  const id = c?.id || (await chatIdOf(me, other));
+  const ops = [];
+  if (!c) { const [a, bb] = [me, other].sort(); ops.push(env.SYNC.prepare('INSERT INTO chats (id,a,b,st,req,t) VALUES (?1,?2,?3,0,?4,?5)').bind(id, a, bb, me, now)); c = { id, a, b: bb, st: 0, req: me }; }
+  if (k === 'p') ops.push(env.SYNC.prepare('INSERT INTO pics (id,chat,data,t) VALUES (?1,?2,?3,?4)').bind(body, id, String(b.photo), now));
+  ops.push(env.SYNC.prepare('INSERT INTO msgs (chat,uid,k,body,t) VALUES (?1,?2,?3,?4,?5)').bind(id, me, k, body, now));
+  // chi riceve una richiesta e risponde la accetta (anche se prima l'aveva rifiutata)
+  const st = c.req !== me ? 1 : c.st, s = chatSide(c, me);
+  ops.push(env.SYNC.prepare(`UPDATE chats SET t = ?2, last = ?3, lastBy = ?4, st = ?5, lid = (SELECT MAX(id) FROM msgs WHERE chat = ?1), r${s} = (SELECT MAX(id) FROM msgs WHERE chat = ?1) WHERE id = ?1`).bind(id, now, last, me, st));
+  await env.SYNC.batch(ops);
+  const m = await env.SYNC.prepare('SELECT * FROM msgs WHERE chat = ?1 AND uid = ?2 ORDER BY id DESC LIMIT 1').bind(id, me).first();
+  return { chat: id, msg: chatMsgFmt(m, me), st: chatSt({ ...c, st }, me) };
+}
+async function chatAnswer(env, req, b) {
+  const u = await chatMe(env, req); const c = await chatGet(env, u.uid, b.chat);
+  if (c.st !== 0 || c.req === u.uid) throw chatErr('Non c\'è nessuna richiesta da accettare');
+  await env.SYNC.prepare('UPDATE chats SET st = ?2 WHERE id = ?1').bind(c.id, b.ok ? 1 : 2).run();
+  return { ok: true, st: b.ok ? 'ok' : 'no' };
+}
+async function chatBlock(env, req, b) {
+  const u = await chatMe(env, req); const c = await chatGet(env, u.uid, b.chat); const other = chatOther(c, u.uid);
+  if (b.on === false) await env.SYNC.prepare('DELETE FROM blocks WHERE uid = ?1 AND who = ?2').bind(u.uid, other).run();
+  else await env.SYNC.batch([env.SYNC.prepare('INSERT OR IGNORE INTO blocks (uid,who,t) VALUES (?1,?2,?3)').bind(u.uid, other, Date.now()), ...(c.st === 0 && c.req !== u.uid ? [env.SYNC.prepare('UPDATE chats SET st = 2 WHERE id = ?1').bind(c.id)] : [])]);
+  return { ok: true, blocked: b.on !== false };
+}
+async function chatReport(env, req, b) {
+  const u = await chatMe(env, req); const mid = Math.round(+b.mid) || 0;
+  const m = await env.SYNC.prepare('SELECT chat, uid FROM msgs WHERE id = ?1').bind(mid).first();
+  if (!m) throw chatErr('Messaggio non trovato', 404);
+  await chatGet(env, u.uid, m.chat);
+  if (m.uid === u.uid) throw chatErr('È un tuo messaggio');
+  await env.SYNC.prepare('INSERT OR IGNORE INTO mreports (mid,uid,why,t) VALUES (?1,?2,?3,?4)').bind(mid, u.uid, cleanText(b.why, 200), Date.now()).run();
+  console.log('segnalazione chat', mid);
+  return { ok: true };
+}
+async function chatDel(env, req, b) {
+  const u = await chatMe(env, req); const c = await chatGet(env, u.uid, b.chat); const s = chatSide(c, u.uid);
+  if (b.mid) { // elimina un proprio messaggio per tutti
+    const r = await env.SYNC.prepare('UPDATE msgs SET del = 1, body = \'\' WHERE id = ?1 AND chat = ?2 AND uid = ?3').bind(Math.round(+b.mid) || 0, c.id, u.uid).run();
+    if (!r.meta.changes) throw chatErr('Puoi eliminare solo i tuoi messaggi', 403);
+    return { ok: true };
+  }
+  await env.SYNC.prepare(`UPDATE chats SET c${s} = lid, r${s} = lid WHERE id = ?1`).bind(c.id).run();
+  return { ok: true };
+}
+async function chatPic(env, req, b) {
+  const u = await chatMe(env, req);
+  const p = await env.SYNC.prepare('SELECT chat, data FROM pics WHERE id = ?1').bind(str(b.id, 30)).first();
+  if (!p) throw chatErr('Foto non trovata', 404);
+  await chatGet(env, u.uid, p.chat);
+  return { data: p.data };
+}
+async function chatFind(env, req, b) {
+  const u = await chatMe(env, req); const q = cleanText(b.q, 30).replace(/[%_]/g, '');
+  if (q.length < 2) return { people: [] };
+  const rows = await env.SYNC.prepare(`SELECT p.uid, p.name, p.avatar, p.level FROM profiles p WHERE p.name LIKE ?1 AND p.uid <> ?2
+      AND NOT EXISTS (SELECT 1 FROM blocks k WHERE (k.uid = ?2 AND k.who = p.uid) OR (k.uid = p.uid AND k.who = ?2)) ORDER BY p.t DESC LIMIT 15`).bind('%' + q + '%', u.uid).all();
+  const people = [];
+  for (const r of rows.results) people.push(peerFmt(r, await myPid(env, r.uid)));
+  return { people };
+}
+// Chi chiude l'account sparisce anche dalle chat: le sue chat (con i messaggi di entrambi) e le foto vengono cancellate
+async function chatForget(env, uid) {
+  await chatTables(env);
+  const ids = `(SELECT id FROM chats WHERE a = ?1 OR b = ?1)`;
+  await env.SYNC.batch([env.SYNC.prepare(`DELETE FROM msgs WHERE chat IN ${ids}`).bind(uid), env.SYNC.prepare(`DELETE FROM pics WHERE chat IN ${ids}`).bind(uid), env.SYNC.prepare('DELETE FROM chats WHERE a = ?1 OR b = ?1').bind(uid),
+    env.SYNC.prepare('DELETE FROM blocks WHERE uid = ?1 OR who = ?1').bind(uid), env.SYNC.prepare('DELETE FROM mreports WHERE uid = ?1').bind(uid), env.SYNC.prepare('DELETE FROM people WHERE uid = ?1').bind(uid)]);
+}
+const CHAT = { '/chat/list': chatList, '/chat/open': chatOpen, '/chat/msgs': chatMsgs, '/chat/send': chatSend, '/chat/answer': chatAnswer, '/chat/block': chatBlock, '/chat/report': chatReport, '/chat/del': chatDel, '/chat/pic': chatPic, '/chat/find': chatFind };
+const SOCIAL = { '/profile': profileSet, '/comments': commentsGet, '/comments/add': commentAdd, '/comments/del': commentDel, '/comments/report': commentReport, ...CHAT };
 
 export default {
   // Aggiornamento automatico dei prezzi: un lotto di province ogni giorno
@@ -1145,8 +1343,9 @@ export default {
     }
     if (req.method !== 'POST' || !['/analyze', '/photo', '/ocr', '/dictate', '/nutrition', '/preview', '/translate-recipe', '/sync', '/account', '/handoff', '/handoff/take', '/stars', '/stars/vote', '/stars/top', ...Object.keys(SOCIAL)].includes(path)) return reply(origin, { error: 'Not found' }, 404);
     const ip = req.headers.get('CF-Connecting-IP') || 'local';
-    // Le letture leggere (stelle e commenti di una scheda) non consumano il limite per IP: chi sfoglia il ricettario le fa a ogni ricetta
-    if (env.LIMITER && path !== '/stars' && path !== '/stars/top' && path !== '/comments' && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
+    // Le letture leggere (stelle e commenti di una scheda) non consumano il limite per IP: chi sfoglia il ricettario le fa a ogni ricetta.
+    // La chat nemmeno: è solo con l'account e ha i suoi limiti per persona (vedi chatSend)
+    if (env.LIMITER && path !== '/stars' && path !== '/stars/top' && path !== '/comments' && !path.startsWith('/chat/') && !(await env.LIMITER.limit({ key: ip })).success) return reply(origin, { error: 'Troppe richieste' }, 429);
     // Stelle dei Gnammers (lettura a lotti e voto)
     if (req.method === 'POST' && (path === '/stars' || path === '/stars/vote' || path === '/stars/top')) {
       if (!env.SYNC) return reply(origin, { error: 'Non disponibile' }, 503);

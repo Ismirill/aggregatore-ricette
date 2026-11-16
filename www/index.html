@@ -187,8 +187,9 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
   header .top{position:relative;justify-content:flex-end;gap:8px;min-height:2.9rem}
   header .top .brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);flex:none;pointer-events:none}
   header .top .brand .mark,header .top .brand>div{display:none}
-  header .top .brand .wm{display:block;height:42px;width:auto;max-width:calc(100vw - 230px);object-fit:contain}
-  #cupBtn{display:grid;margin-right:auto;position:relative}
+  header .top .brand .wm{display:block;height:42px;width:auto;max-width:calc(100vw - 250px);object-fit:contain}
+  #cupBtn{display:grid;position:relative}
+  header .top #chatBtn{margin-right:auto}
   #cupBtn.on{border-color:var(--acc);color:var(--acc)}
   .cupDot{position:absolute;right:2px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--acc);border:2px solid var(--card)}
   header .top #camBtn{display:none!important}
@@ -197,6 +198,48 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
   .ncam span{width:58px;height:58px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;box-shadow:0 8px 18px color-mix(in srgb,var(--acc) 45%,transparent);border:4px solid var(--card)}
   .ncam svg{width:26px;height:26px}
 }
+/* ---------- Chat tra Gnammers (v174): finestra a tutto schermo sul telefono, riquadro al centro sul computer ---------- */
+#chatBtn{position:relative}
+.chatN{position:absolute;right:-4px;top:-4px;min-width:20px;height:20px;padding:0 5px;box-sizing:border-box;border-radius:99px;background:var(--acc);color:#fff;font:800 .72rem/20px var(--sans);font-style:normal;text-align:center;border:2px solid var(--card)}
+#ntools .chatN{position:static;margin-left:auto;border:0}
+:root[data-sito] #ntools .chatN{position:absolute;margin:0;right:-3px;top:-3px;border:2px solid #fff}
+dialog#chat{padding:0;max-width:720px;height:min(88dvh,900px);overflow:hidden}
+#chatV{display:flex;flex-direction:column;height:100%;min-height:0}
+@media (max-width:620px){dialog#chat{height:100dvh;max-height:100dvh;border-radius:0;padding:0}}
+.chHead{display:flex;align-items:center;gap:10px;padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top));border-bottom:1px solid var(--bd);flex:none}
+.chHead h2{flex:1;min-width:0;margin:0;font-size:1.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chHead .icon{box-shadow:none;flex:none;font-size:1.15rem}.chHead .btn{flex:none}
+.chBody{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:8px 14px 16px}
+.chBody>input{width:100%;box-sizing:border-box;font-size:max(16px,1.05rem);margin:6px 0 10px}
+.chSec{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:14px 0 4px}
+.chRow{display:flex;align-items:center;gap:12px;width:100%;padding:11px 4px;border:0;border-bottom:1px solid var(--bd);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.chRow .cav{width:50px;height:50px}
+.chMid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.chMid b{font-size:1.05rem}
+.chLast{color:var(--mut);font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chEnd{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:none;color:var(--mut);font-size:.78rem}
+.chUn{background:var(--acc);color:#fff;border-radius:99px;min-width:22px;height:22px;line-height:22px;text-align:center;font-style:normal;font-weight:800;font-size:.78rem;padding:0 6px;box-sizing:border-box}
+.chEmpty{padding:30px 6px;text-align:center}.chEmpty p{margin:0 0 8px}
+.chPickInfo{background:color-mix(in srgb,var(--acc) 10%,var(--card));border-radius:14px;padding:10px 12px;margin:6px 0}
+.chHead .cav{width:40px;height:40px}
+.chMsgs{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:10px 12px;display:flex;flex-direction:column;gap:6px;background:color-mix(in srgb,var(--acc) 4%,var(--bg))}
+.chDay{align-self:center;font-size:.78rem;font-weight:700;color:var(--mut);background:var(--card);border-radius:99px;padding:3px 12px;margin:6px 0}
+.chMsg{display:flex;flex-direction:column;align-items:flex-start}.chMsg.me{align-items:flex-end}
+.chB{max-width:min(80%,460px);background:var(--card);border:1px solid var(--bd);border-radius:18px 18px 18px 6px;padding:8px 12px 5px;box-shadow:var(--sh);cursor:pointer}
+.chMsg.me .chB{background:color-mix(in srgb,var(--acc) 16%,var(--card));border-color:color-mix(in srgb,var(--acc) 30%,var(--bd));border-radius:18px 18px 6px 18px}
+.chB p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1.05rem;line-height:1.4}
+.chB small{display:block;text-align:right;color:var(--mut);font-size:.72rem;margin-top:2px}.chSeen{color:#2a8bd8;font-weight:800}
+.chB a{color:inherit;text-decoration:underline}
+.chRec{display:flex;flex-direction:column;gap:4px;min-width:200px}.chRec img{width:100%;max-height:180px;object-fit:cover;border-radius:12px}.chRec .btn{margin-top:4px}
+.chPic{border:0;padding:0;background:none;display:block;cursor:pointer;min-width:120px;min-height:60px}.chPic img{display:block;max-width:100%;max-height:300px;border-radius:12px}
+.chAct{display:flex;gap:6px;margin:4px 2px}.chAct .btn{min-height:2.2rem;padding:4px 12px;font-size:.88rem}
+.chBan{flex:none;padding:10px 14px;border-bottom:1px solid var(--bd);background:var(--card)}.chBan p{margin:0 0 8px}.chBan .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start}
+.chIn{flex:none;display:flex;align-items:flex-end;gap:6px;padding:8px 10px;padding-bottom:max(8px,env(safe-area-inset-bottom));border-top:1px solid var(--bd);background:var(--card)}
+.chIn textarea{flex:1;min-width:0;font-size:max(16px,1.05rem);min-height:2.7rem;max-height:8rem;resize:none;border-radius:22px;padding:10px 14px;box-sizing:border-box}
+.chIn .icon{flex:none;box-shadow:none;width:2.7rem;height:2.7rem;font-size:1.2rem}
+.chSend{flex:none;border-radius:50%;width:2.9rem;height:2.9rem;min-height:0;padding:0;font-size:1.2rem}
+.chMenu{position:absolute;right:12px;top:60px;z-index:3;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh2);display:flex;flex-direction:column;padding:6px;min-width:200px}
+.chMenu button{border:0;background:none;font:inherit;font-size:1rem;text-align:left;padding:12px 14px;border-radius:10px;color:inherit;cursor:pointer}.chMenu button:hover{background:var(--bg2)}
+.chMenu .danger{color:#c0392b}
 /* ---------- Stile Rivista: schede come in una rivista di cucina (foto quadrata arrotondata, titolo sotto), sezioni in «Le mie ricette» ---------- */
 :root[data-style=rivista] .list{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 12px}
 @media (min-width:700px){:root[data-style=rivista] .list{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}}
@@ -853,6 +896,7 @@ details summary{cursor:pointer}
 <header>
   <div class="top">
     <button class="icon" id="cupBtn" aria-label="La sfida della settimana"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><i class="cupDot" hidden></i></button>
+    <button class="icon" id="chatBtn" aria-label="Messaggi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4.5"/></svg><span class="lbl">Messaggi</span><i class="chatN" id="chatN" hidden></i></button>
     <div class="brand"><img class="mark" src="icon-192.png" alt="Gnamina" width="192" height="192"><img class="wm" src="logo.svg" alt="Gnamina" width="402" height="128"><div><h1 id="vTitle">Le mie ricette</h1></div></div>
     <button class="icon" id="camBtn" aria-label="Trova ricette da una foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg><span class="lbl">Foto di un piatto</span></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden>
     <button class="icon user" id="userBtn" aria-label="Il tuo profilo"><span id="userAv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span></button>
@@ -1017,6 +1061,7 @@ details summary{cursor:pointer}
   <div id="cookVoiceBox" hidden><p class="meta" id="cookVoiceTxt" style="margin:8px 0 6px"></p><button type="button" class="btn" id="cookImprove" style="width:100%">🗣 Migliora la voce</button></div></dialog>
 <dialog id="photo"><button class="dclose" id="phX" aria-label="Chiudi">✕</button><div id="phv"></div></dialog>
 <dialog id="ratePop"><h3 id="rateT" tabindex="-1" autofocus></h3><p class="meta" id="rateSub" style="margin:0"></p><div class="rate" id="rateStars"><button type="button" data-n="1" aria-label="1 stelle">★</button><button type="button" data-n="2" aria-label="2 stelle">★</button><button type="button" data-n="3" aria-label="3 stelle">★</button><button type="button" data-n="4" aria-label="4 stelle">★</button><button type="button" data-n="5" aria-label="5 stelle">★</button></div><p class="meta" id="rateHint" style="margin:0"></p><button class="btn" id="rateX">Chiudi</button></dialog>
+<dialog id="chat" aria-label="Messaggi"><div id="chatV"></div><input type="file" id="chatPh" accept="image/*" hidden></dialog>
 <dialog id="rec"><div class="rech"><b>🎬 Il video della ricetta</b><button type="button" class="dclose" id="recX" aria-label="Chiudi" style="float:none;margin:0">✕</button></div><div id="recBody"></div></dialog>
 
 <dialog id="acct">
@@ -1404,7 +1449,7 @@ async function commLoad(id){const d=$('#dComm');if(!d||d.dataset.id!==id)return;
   try{const r=await server('/comments',{id},await starsToken());COMM[id]=r.comments||[];commPaint(id)}
   catch(e){const l=d.querySelector('.commList');if(l)l.innerHTML=`<p class="meta">${e.status===0?'Senza connessione i commenti non si leggono':'Commenti non disponibili in questo momento'}</p>`}}
 function commPaint(id){const d=$('#dComm');if(!d||d.dataset.id!==id)return;const list=COMM[id]||[];
-  d.querySelector('.commList').innerHTML=list.length?list.map(c=>`<div class="cm" data-cid="${esc(c.id)}"><span class="cav">${commAv(c)}</span><div><b>${esc(c.name)}</b> <span class="meta">· ${agoIt(c.t)}</span><p>${esc(c.text)}</p><button type="button" class="lnk" data-act="${c.mine?'del':'rep'}">${c.mine?'Elimina':'Segnala'}</button></div></div>`).join(''):'<p class="meta">Ancora nessun commento: scrivi tu il primo.</p>';
+  d.querySelector('.commList').innerHTML=list.length?list.map(c=>`<div class="cm" data-cid="${esc(c.id)}"><span class="cav">${commAv(c)}</span><div><b>${esc(c.name)}</b> <span class="meta">· ${agoIt(c.t)}</span><p>${esc(c.text)}</p><button type="button" class="lnk" data-act="${c.mine?'del':'rep'}">${c.mine?'Elimina':'Segnala'}</button>${!c.mine&&c.pid?' <button type="button" class="lnk" data-act="dm">💬 Scrivi</button>':''}</div></div>`).join(''):'<p class="meta">Ancora nessun commento: scrivi tu il primo.</p>';
   d.querySelector('.commN').textContent=list.length?` (${list.length})`:''}
 // La casella per scrivere: con l'account e il profilo; altrimenti il passo che manca
 const commBox=()=>!ACC?`<button type="button" class="btn" data-act="login">Accedi per commentare</button>`:!profDone()?`<button type="button" class="btn" data-act="login">Presentati ai Gnammers per commentare</button>`
@@ -1416,6 +1461,7 @@ function commInit(id){const d=$('#dComm');if(!d)return;
     if(act==='send'){const ta=d.querySelector('textarea'),text=ta.value.trim();if(!text){ta.focus();return}b.disabled=true;
       try{await profPush();const r=await server('/comments/add',{id,text},await starsToken());(COMM[id]||=[]).push(r.comment);ta.value='';commPaint(id);toast('Commento pubblicato')}catch(e){toast(e.message||'Commento non inviato')}b.disabled=false;return}
     const cid=b.closest('.cm')?.dataset.cid;if(!cid)return;
+    if(act==='dm'){const c=(COMM[id]||[]).find(x=>x.id===cid);if(c)chatStart({pid:c.pid,name:c.name,avatar:c.avatar,level:c.level});return}
     if(act==='del'){if(!confirm('Eliminare il tuo commento?'))return;try{await server('/comments/del',{id:cid},await starsToken());COMM[id]=(COMM[id]||[]).filter(c=>c.id!==cid);commPaint(id);toast('Commento eliminato')}catch(e){toast(e.message||'Non riesco a eliminarlo')}}
     if(act==='rep'){if(!ACC){openAcct(false);return}if(!confirm('Segnalare questo commento come non adatto?'))return;try{await server('/comments/report',{id:cid},await starsToken());toast('Grazie, lo controlliamo')}catch(e){toast(e.message||'Segnalazione non inviata')}}};
   commLoad(id)}
@@ -1434,6 +1480,156 @@ async function server(path,body,auth){
 }
 // 429 dal server: o troppe richieste dallo stesso telefono (15 al minuto) o quota gratuita giornaliera dell'AI esaurita (si rinnova alle 2 di notte, ora italiana)
 const aiErr=e=>e?.status===429?(/giornalier|quota|limite/i.test(e.message||'')?'Il servizio AI gratuito è al limite in questo momento: riprova tra qualche minuto':'Troppe richieste, riprova tra un minuto'):e?.message||'Servizio AI non disponibile';
+
+/* ---------- Chat tra Gnammers (v174): messaggi personali uno a uno, «il WhatsApp della cucina» (server: /chat/*).
+   Si scrive con l'account e dopo essersi presentati. Il primo messaggio è una richiesta che l'altra persona accetta o rifiuta;
+   si possono mandare testo, schede ricetta e foto, bloccare, segnalare ed eliminare. Il telefono chiede le novità solo con l'app
+   aperta: ogni 4 secondi nella conversazione, ogni 10 nell'elenco, ogni minuto per il numero sul pulsante in alto. ---------- */
+const CH={list:[],unread:0,view:'list',chat:null,pid:'',peer:null,st:'',msgs:[],last:0,seen:0,blocked:false,pics:{},t:0,qt:0,pick:null,busy:false,menu:false};
+const chatOk=()=>!!ACC&&profDone();
+async function chatApi(p,b={}){return server(p,b,await idToken())}
+function chatBadge(){const n=CH.unread||0,e=$('#chatN');if(!e)return;e.hidden=!n;e.textContent=n>9?'9+':String(n);$('#chatBtn').setAttribute('aria-label',n?`Messaggi: ${n} da leggere`:'Messaggi')}
+async function chatPoll(){if(!chatOk()||document.hidden)return;
+  try{const r=await chatApi('/chat/list');CH.list=r.chats||[];CH.unread=r.unread||0;chatBadge();if($('#chat').open&&CH.view==='list')chatPaintList()}catch{}}
+function chatTick(){clearTimeout(CH.t);const open=$('#chat').open,conv=open&&CH.view==='conv',ms=!open?60000:conv?4000:10000;
+  CH.t=setTimeout(async()=>{try{if(conv)await chatFetch();else await chatPoll()}catch{}chatTick()},ms)}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&chatOk()){chatPoll();chatTick()}});
+const chAv=p=>`<span class="cav">${commAv(p||{})}</span>`;
+const chatWhen=t=>{const d=new Date(t),n=new Date();if(d.toDateString()===n.toDateString())return d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+  const y=new Date(n);y.setDate(n.getDate()-1);if(d.toDateString()===y.toDateString())return 'ieri';return d.toLocaleDateString('it-IT',{day:'numeric',month:'short'})};
+const chatDay=t=>{const w=chatWhen(t);return /:/.test(w)?'Oggi':w==='ieri'?'Ieri':new Date(t).toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})};
+const chatLinks=h=>h.replace(/https?:\/\/[^\s<]+/g,u=>`<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
+const absUrl=u=>{if(!u||/^(data|blob):/.test(u))return '';try{const x=new URL(u,'https://gnamina.it/');return x.protocol==='https:'?x.href:''}catch{return ''}};
+const chatRecOf=i=>({title:i.title||'Ricetta',image:absUrl(i.image),url:/^https:/.test(i.url||'')?i.url:'',source:i.source||'',cat:i.cat||'',servings:+i.servings||0,time:+i.time||0,ingredients:i.ingredients||[],steps:i.steps||[],note:i.note||'',bookId:pubId(i)});
+// Apre la chat (dal pulsante in alto, da «Scrivi» sotto un commento, da «Manda a un Gnammer» in una ricetta)
+function chatStart(peer){
+  if(!accOn()){toast('Gli account non sono ancora attivi');return}
+  if(!ACC){toast('Accedi per scrivere agli altri Gnammers');openAcct(false);return}
+  if(!profDone()){toast('Presentati prima ai Gnammers: nome e immagine');openAcct(false);return}
+  if(!$('#chat').open)$('#chat').showModal();
+  if(peer)chatWith(peer);else{CH.view='list';chatPaintList();chatPoll()}
+  chatTick()}
+$('#chatBtn').onclick=()=>{CH.pick=null;chatStart()};
+function chatPaintList(){CH.menu=false;
+  const req=CH.list.filter(c=>c.st==='in'),rest=CH.list.filter(c=>c.st!=='in');
+  const row=c=>`<button type="button" class="chRow" data-chat="${esc(c.id)}">${chAv(c)}<span class="chMid"><b>${esc(c.name)}</b><span class="chLast">${c.st==='out'?'Richiesta inviata · ':c.lastMine?'Tu: ':''}${esc(c.last)}</span></span><span class="chEnd"><small>${chatWhen(c.t)}</small>${c.un&&c.st!=='out'?`<i class="chUn">${c.un}</i>`:''}</span></button>`;
+  $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="close" aria-label="Chiudi">✕</button><h2>${CH.pick?'Manda la ricetta':'Messaggi'}</h2><button type="button" class="btn pri" data-ch="new">✏️ Nuovo</button></div>
+  <div class="chBody">${CH.pick?`<p class="chPickInfo">Scegli a chi mandare <b>${esc(CH.pick.title)}</b>, oppure tocca «Nuovo» e cerca un Gnammer per nome.</p>`:''}
+  ${req.length?`<h3 class="chSec">Vogliono scriverti</h3>${req.map(row).join('')}`:''}
+  ${rest.length?`${req.length?'<h3 class="chSec">Le tue chat</h3>':''}${rest.map(row).join('')}`:req.length?'':`<div class="chEmpty"><p><b>Qui scrivi agli altri Gnammers</b>, come su WhatsApp, ma di cucina.</p><p class="meta">Tocca «Nuovo» e cerca una persona per nome, oppure tocca «💬 Scrivi» accanto a un commento sotto una ricetta del Ricettario.</p></div>`}</div>`}
+function chatPaintFind(){CH.view='find';
+  $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="back" aria-label="Indietro">←</button><h2>Nuovo messaggio</h2></div><div class="chBody"><input id="chQ" type="search" placeholder="Cerca un Gnammer per nome" autocomplete="off" enterkeyhint="search"><div id="chRes"><p class="meta">Scrivi almeno due lettere del nome.</p></div></div>`;
+  const q=$('#chQ');q.oninput=()=>{clearTimeout(CH.qt);CH.qt=setTimeout(chatFind,350)};setTimeout(()=>q.focus(),50)}
+async function chatFind(){const q=$('#chQ')?.value.trim()||'',box=$('#chRes');if(!box)return;if(q.length<2){box.innerHTML='<p class="meta">Scrivi almeno due lettere del nome.</p>';return}
+  try{const r=await chatApi('/chat/find',{q});if(($('#chQ')?.value.trim()||'')!==q)return;CH.found=r.people||[];
+    box.innerHTML=CH.found.length?CH.found.map((p,k)=>`<button type="button" class="chRow" data-found="${k}">${chAv(p)}<span class="chMid"><b>${esc(p.name)}</b><span class="chLast">${esc(LEVELS[p.level]?.[0]||'Gnammer')}</span></span></button>`).join(''):'<p class="meta">Nessun Gnammer con questo nome.</p>'}
+  catch(e){box.innerHTML=`<p class="meta">${esc(e.message)}</p>`}}
+// Conversazione con un Gnammer: peer = {pid, name, avatar, level}
+async function chatWith(peer){
+  Object.assign(CH,{view:'conv',peer,pid:peer.pid,chat:null,msgs:[],last:0,seen:0,st:'new',blocked:false,menu:false});
+  const c=CH.list.find(x=>x.pid===peer.pid);if(c){CH.chat=c.id;CH.st=c.st}
+  chatPaintConv();
+  if(!CH.chat){try{const r=await chatApi('/chat/open',{pid:peer.pid});CH.chat=r.chat;CH.st=r.st;CH.peer={...peer,...r.peer}}catch(e){toast(e.message||'Chat non disponibile')}}
+  if(CH.chat)await chatFetch(true);else chatPaintConv();
+  if(CH.pick&&CH.view==='conv'){const r=CH.pick;CH.pick=null;if(await chatSend('r',{recipe:r}))toast('Ricetta mandata')}
+  chatTick()}
+async function chatFetch(first){if(!CH.chat||CH.view!=='conv')return;const id=CH.chat;
+  try{const r=await chatApi('/chat/msgs',{chat:id,after:first?0:CH.last});if(CH.chat!==id||CH.view!=='conv')return;
+    const add=(r.msgs||[]).filter(m=>!CH.msgs.some(x=>x.id===m.id));CH.msgs.push(...add);CH.msgs.sort((a,b)=>a.id-b.id);if(add.length)CH.last=Math.max(CH.last,...add.map(m=>m.id));
+    const changed=CH.st!==r.st||CH.seen!==r.seen||CH.blocked!==r.blocked;Object.assign(CH,{st:r.st,seen:r.seen,blocked:r.blocked});if(r.peer?.name)CH.peer={...CH.peer,...r.peer};
+    if(first||changed)chatPaintConv();else if(add.length)chatAppend(add);
+    const it=CH.list.find(x=>x.id===id);if(it?.un){CH.unread=Math.max(0,CH.unread-(it.st==='out'?0:it.un));it.un=0;chatBadge()}}
+  catch(e){if(first)toast(e.message||'Messaggi non disponibili')}}
+function chatMsgHtml(m,prev){const tm=new Date(m.t).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+  let inner;
+  if(m.del)inner='<p class="meta"><i>Messaggio eliminato</i></p>';
+  else if(m.k==='r'){const r=m.body||{};inner=`<div class="chRec">${r.image?`<img src="${esc(r.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}<b>📖 ${esc(r.title)}</b><span class="meta">${r.ingredients?.length||0} ingredienti${r.steps?.length?` · ${r.steps.length} passaggi`:''}</span><button type="button" class="btn" data-ch="rec">Apri la ricetta</button></div>`}
+  else if(m.k==='p')inner=`<button type="button" class="chPic" data-ch="pic" data-pic="${esc(m.body)}">${CH.pics[m.body]?`<img src="${CH.pics[m.body]}" alt="Foto">`:'<span class="meta">📷 Carico la foto…</span>'}</button>`;
+  else inner=`<p>${chatLinks(esc(m.body))}</p>`;
+  const day=!prev||new Date(prev.t).toDateString()!==new Date(m.t).toDateString()?`<div class="chDay">${chatDay(m.t)}</div>`:'';
+  return `${day}<div class="chMsg${m.mine?' me':''}" data-mid="${m.id}"><div class="chB">${inner}<small>${tm}${m.mine?` <span class="${m.id<=CH.seen?'chSeen':''}" title="${m.id<=CH.seen?'Letto':'Inviato'}">${m.id<=CH.seen?'✓✓':'✓'}</span>`:''}</small></div></div>`}
+function chatMsgsHtml(){return CH.msgs.map((m,k)=>chatMsgHtml(m,CH.msgs[k-1])).join('')}
+function chatCanWrite(){const st=CH.st;return !CH.blocked&&(st==='ok'||st==='new'||st==='in'||(st==='out'&&!CH.msgs.some(m=>m.mine)))}
+function chatPaintConv(){const p=CH.peer||{},st=CH.st,nm=esc(p.name||'Gnammer');
+  const ta=$('#chatV .chIn textarea'),draft=ta?ta.value:'';
+  const ban=CH.blocked?`<div class="chBan"><p>Hai bloccato ${nm}: non può scriverti.</p><div class="row"><button type="button" class="btn" data-ch="unblock">Sblocca</button></div></div>`
+    :st==='in'?`<div class="chBan"><p><b>${nm}</b> vuole scriverti. Se non la conosci puoi rifiutare: non potrà più scriverti.</p><div class="row"><button type="button" class="btn pri" data-ch="yes">Accetta</button><button type="button" class="btn" data-ch="no">Rifiuta</button><button type="button" class="btn danger" data-ch="block">Blocca</button></div></div>`
+    :st==='out'&&CH.msgs.some(m=>m.mine)?`<div class="chBan"><p class="meta" style="margin:0">Richiesta inviata: potrete scrivervi quando ${nm} l'avrà accettata.</p></div>`
+    :st==='no'?`<div class="chBan"><p class="meta" style="margin:0">Questa persona non accetta messaggi.</p></div>`
+    :st==='new'?`<div class="chBan"><p class="meta" style="margin:0">Il primo messaggio arriva a ${nm} come richiesta: saluta e scrivi perché la contatti. Le foto si mandano dopo che ha accettato.</p></div>`:'';
+  $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="back" aria-label="Indietro">←</button>${chAv(p)}<h2>${nm}</h2>${CH.chat?'<button type="button" class="icon" data-ch="more" aria-label="Altre azioni">⋮</button>':''}</div>
+  ${ban}<div class="chMsgs" id="chMsgs">${chatMsgsHtml()||(CH.chat?'<p class="meta" style="text-align:center">Carico i messaggi…</p>':'')}</div>
+  ${chatCanWrite()?`<div class="chIn">${st==='ok'?'<button type="button" class="icon" data-ch="photo" aria-label="Manda una foto">📷</button>':''}<button type="button" class="icon" data-ch="recipe" aria-label="Manda una ricetta">📖</button><textarea rows="1" maxlength="1000" placeholder="Scrivi un messaggio" aria-label="Messaggio"></textarea><button type="button" class="btn pri chSend" data-ch="send" aria-label="Invia">➤</button></div>`:''}`;
+  const t=$('#chatV .chIn textarea');if(t){t.value=draft;t.oninput=()=>{t.style.height='auto';t.style.height=Math.min(t.scrollHeight,128)+'px'}}
+  chatScroll();chatPics()}
+function chatAppend(list){const box=$('#chMsgs');if(!box)return;if(!CH.msgs.length)return;
+  if(box.querySelector('p.meta')&&!box.querySelector('.chMsg'))box.innerHTML='';
+  const near=box.scrollHeight-box.scrollTop-box.clientHeight<160;
+  for(const m of list){const k=CH.msgs.indexOf(m);box.insertAdjacentHTML('beforeend',chatMsgHtml(m,CH.msgs[k-1]))}
+  if(near||list.some(m=>m.mine))chatScroll();chatPics()}
+function chatScroll(){const b=$('#chMsgs');if(b)requestAnimationFrame(()=>{b.scrollTop=b.scrollHeight})}
+async function chatPics(){for(const el of document.querySelectorAll('#chMsgs .chPic[data-pic]')){const id=el.dataset.pic;if(el.querySelector('img'))continue;
+  if(!CH.pics[id]){try{CH.pics[id]=(await chatApi('/chat/pic',{id})).data}catch{el.innerHTML='<span class="meta">📷 Foto non disponibile</span>';continue}}
+  el.innerHTML=`<img src="${CH.pics[id]}" alt="Foto">`;const b=$('#chMsgs');if(b&&b.scrollHeight-b.scrollTop-b.clientHeight<400)chatScroll()}}
+async function chatSend(k,payload){if(CH.busy)return false;CH.busy=true;
+  try{await profPush();const r=await chatApi('/chat/send',{k,...payload,...(CH.chat?{chat:CH.chat}:{pid:CH.pid})});
+    const was=CH.st;CH.chat=r.chat;CH.st=r.st;if(r.msg.k==='p'&&payload.photo)CH.pics[r.msg.body]=payload.photo;
+    if(!CH.msgs.some(x=>x.id===r.msg.id))CH.msgs.push(r.msg);CH.last=Math.max(CH.last,r.msg.id);
+    if(was!==CH.st||CH.msgs.length===1)chatPaintConv();else chatAppend([r.msg]);
+    chatPoll();return true}
+  catch(e){toast(e.status===0?'Senza connessione: messaggio non inviato':e.message||'Messaggio non inviato');return false}
+  finally{CH.busy=false}}
+// Foto: ridotta sul telefono (lato lungo al massimo 1280 px) finché non sta sotto i 300 kB circa
+function chatShrink(file){return new Promise((ok,ko)=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height,m=1280,q=.78,d='';
+  for(let t=0;t<6;t++){const f=Math.min(1,m/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.round(w*f);c.height=Math.round(h*f);c.getContext('2d').drawImage(img,0,0,c.width,c.height);d=c.toDataURL('image/jpeg',q);if(d.length<420000)break;m=Math.round(m*.8);q=Math.max(.5,q-.08)}
+  URL.revokeObjectURL(img.src);d.length<450000?ok(d):ko(new Error('Foto troppo grande'))};img.onerror=()=>ko(new Error('Non riesco a leggere questa foto'));img.src=URL.createObjectURL(file)})}
+$('#chatPh').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const d=await chatShrink(f);await chatSend('p',{photo:d})}catch(err){toast(err.message)}};
+function chatPaintPick(){CH.view='pick';const mine=items.filter(libOk);
+  const draw=q=>{const l=mine.filter(i=>!q||(i.title||'').toLowerCase().includes(q.toLowerCase())).slice(0,60);
+    $('#chPickL').innerHTML=l.length?l.map(i=>`<button type="button" class="chRow" data-rid="${esc(i.id)}"><span class="cav">${i.image?`<img class="tom" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:'📖'}</span><span class="chMid"><b>${esc(i.title)}</b><span class="chLast">${esc(i.cat||'')}</span></span></button>`).join(''):`<p class="meta">${mine.length?'Nessuna ricetta con questo nome.':'Non hai ancora ricette salvate da mandare.'}</p>`};
+  $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="backconv" aria-label="Indietro">←</button><h2>Manda una ricetta</h2></div><div class="chBody"><input id="chPq" type="search" placeholder="Cerca tra le tue ricette" autocomplete="off"><div id="chPickL"></div></div>`;
+  draw('');$('#chPq').oninput=e=>draw(e.target.value.trim())}
+function chatSaveRec(i){const r={title:i.title,image:i.image||'',url:i.url||'',source:i.source||'',cat:i.cat||'',servings:i.servings||undefined,ingredients:i.ingredients||[],steps:i.steps||[],bookId:i.bookId||undefined,
+    note:[i.note,`Ricevuta in chat da ${i.from||'un Gnammer'}.`].filter(Boolean).join('\n')};
+  const rec={...Object.fromEntries(Object.entries(r).filter(([,v])=>v!==undefined&&v!=='')),id:Date.now().toString(36),created:Date.now(),t:Date.now(),rating:0};
+  items=[rec,...items];saveItems();toast('Salvata in Le mie ricette');if(view==='mine')render()}
+function chatMsgActs(el){const old=document.querySelector('#chMsgs .chAct');const mine=el.classList.contains('me');if(old){const same=old.parentElement===el;old.remove();if(same)return}
+  const m=CH.msgs.find(x=>x.id===+el.dataset.mid);if(!m||m.del)return;
+  el.insertAdjacentHTML('beforeend',`<div class="chAct">${m.k==='t'?'<button type="button" class="btn" data-ch="copy">Copia</button>':''}${mine?'<button type="button" class="btn danger" data-ch="mdel">Elimina</button>':'<button type="button" class="btn" data-ch="mrep">Segnala</button>'}</div>`)}
+$('#chat').addEventListener('cancel',e=>{if(CH.view!=='list'){e.preventDefault();chatBack()}});
+$('#chat').addEventListener('close',()=>{CH.view='list';CH.pick=null;chatTick()});
+function chatBack(){if(CH.view==='pick'){CH.view='conv';chatPaintConv();return}CH.view='list';CH.chat=null;chatPaintList();chatPoll();chatTick()}
+$('#chat').onclick=async e=>{const t=e.target;
+  if(CH.menu&&!t.closest('.chMenu')){document.querySelector('#chatV .chMenu')?.remove();CH.menu=false;if(!t.closest('[data-ch=more]'))return}
+  const row=t.closest('.chRow');
+  if(row){
+    if(row.dataset.chat){const c=CH.list.find(x=>x.id===row.dataset.chat);if(c)chatWith(c);return}
+    if(row.dataset.found){const p=CH.found?.[+row.dataset.found];if(p)chatWith(p);return}
+    if(row.dataset.rid){const i=items.find(x=>x.id===row.dataset.rid);if(!i)return;CH.view='conv';chatPaintConv();if(await chatSend('r',{recipe:chatRecOf(i)}))toast('Ricetta mandata');return}}
+  const b=t.closest('[data-ch]');
+  if(!b){const bub=t.closest('.chMsg');if(bub&&!t.closest('a'))chatMsgActs(bub);return}
+  const a=b.dataset.ch,mid=+b.closest('.chMsg')?.dataset.mid||0,m=CH.msgs.find(x=>x.id===mid);
+  if(a==='close'){$('#chat').close();return}
+  if(a==='back'){chatBack();return}
+  if(a==='backconv'){CH.view='conv';chatPaintConv();return}
+  if(a==='new'){chatPaintFind();return}
+  if(a==='send'){const ta=$('#chatV .chIn textarea'),text=ta.value.trim();if(!text){ta.focus();return}b.disabled=true;if(await chatSend('t',{text})){const t2=$('#chatV .chIn textarea');if(t2){t2.value='';t2.style.height='';t2.focus()}}b.disabled=false;return}
+  if(a==='photo'){$('#chatPh').click();return}
+  if(a==='recipe'){chatPaintPick();return}
+  if(a==='rec'&&m){openDetail({...m.body,id:'chat'+m.id,chatShare:true,from:m.mine?'':CH.peer?.name,book:false});return}
+  if(a==='pic'){const src=CH.pics[b.dataset.pic];if(src){const ph=$('#phv');ph.onclick=null;ph.innerHTML=`<img src="${src}" alt="Foto" style="width:100%;border-radius:14px">`;$('#photo').showModal()}return}
+  if(a==='copy'&&m){copyText(m.body,'Messaggio copiato');document.querySelector('#chMsgs .chAct')?.remove();return}
+  if(a==='mdel'&&m){if(!confirm('Eliminare questo messaggio per tutti?'))return;try{await chatApi('/chat/del',{chat:CH.chat,mid});m.del=1;m.body='';chatPaintConv()}catch(err){toast(err.message)}return}
+  if(a==='mrep'&&m){if(!confirm(`Segnalare questo messaggio di ${CH.peer?.name||'questo Gnammer'} come non adatto?`))return;try{await chatApi('/chat/report',{mid});toast('Grazie, lo controlliamo')}catch(err){toast(err.message)}document.querySelector('#chMsgs .chAct')?.remove();return}
+  if(a==='yes'||a==='no'){try{const r=await chatApi('/chat/answer',{chat:CH.chat,ok:a==='yes'});CH.st=r.st;if(a==='no'){toast('Richiesta rifiutata');chatBack()}else{toast('Ora potete scrivervi');chatPaintConv()}chatPoll()}catch(err){toast(err.message)}return}
+  if(a==='more'){if(CH.menu)return;CH.menu=true;$('#chatV').style.position='relative';$('#chatV').insertAdjacentHTML('beforeend',`<div class="chMenu">${CH.blocked?'<button type="button" data-ch="unblock">Sblocca</button>':'<button type="button" class="danger" data-ch="block">🚫 Blocca</button>'}<button type="button" data-ch="clear">🗑 Elimina la chat</button></div>`);return}
+  if(a==='block'){if(!confirm(`Bloccare ${CH.peer?.name||'questa persona'}? Non potrà più scriverti e non la vedrai nelle tue chat.`))return;try{await chatApi('/chat/block',{chat:CH.chat});toast('Bloccata');chatBack()}catch(err){toast(err.message)}return}
+  if(a==='unblock'){try{await chatApi('/chat/block',{chat:CH.chat,on:false});CH.blocked=false;toast('Sbloccata');chatPaintConv()}catch(err){toast(err.message)}return}
+  if(a==='clear'){if(!confirm('Eliminare questa chat dal tuo elenco? I messaggi spariscono solo per te.'))return;try{await chatApi('/chat/del',{chat:CH.chat});CH.list=CH.list.filter(x=>x.id!==CH.chat);toast('Chat eliminata');chatBack()}catch(err){toast(err.message)}return}
+};
+// Invio con il tasto Invio sul computer (Maiusc+Invio va a capo); sul telefono Invio va a capo
+$('#chat').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&e.target.matches('.chIn textarea')&&matchMedia('(pointer:fine)').matches){e.preventDefault();$('#chatV [data-ch=send]')?.click()}});
+setTimeout(()=>{if(chatOk()){chatPoll();chatTick()}},4000);
 
 // AI del telefono, gratis e senza server: Gemini Nano su Android 8+ (AndroidShare.localAi) e Apple Intelligence su iPhone
 // (webkit.messageHandlers.localAi, modello dentro il telefono; quello sui server Apple richiede un permesso, vedi AppDelegate.swift).
@@ -1629,7 +1825,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=173; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=174; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2650,10 +2846,11 @@ function openDetail(i){
   const lnk=i.url&&i.source!=='Gnamina'&&i.source!=='Aggregatore Ricette'?i.url:i.video||'';
   if(lnk)acts.push(`<button type="button" class="btn" id="dCopy" data-u="${esc(lnk)}">📋 Copia il link</button>`);
   acts.push(`<a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">▶ Cerca su YouTube</a>`);
-  if(!(i.pronto||i.colazione))acts.push(i.book?'<button class="btn pri" id="dSave">💾 Salva nelle mie</button>':'<button class="btn" id="dEdit">✏️ Modifica</button>');
+  if(!(i.pronto||i.colazione))acts.push(i.book||i.chatShare?'<button class="btn pri" id="dSave">💾 Salva nelle mie</button>':'<button class="btn" id="dEdit">✏️ Modifica</button>');
+  if(libOk(i)&&!i.chatShare&&accOn())acts.push('<button type="button" class="btn" id="dChat">💬 Manda a un Gnammer</button>');
   libSync(i);
-  if(libOk(i)&&!i.pronto&&!i.colazione)acts.push(`<button type="button" class="btn" id="dLib">${i.inBook?`🔖 Nel libro · ${esc(i.bookNo||'')}`:'🔖 Metti nel libro'}</button>`);
-  if(libOk(i))acts.push('<button type="button" class="btn" id="dPrint">🖨 Stampa la ricetta</button>');
+  if(libOk(i)&&!i.pronto&&!i.colazione&&!i.chatShare)acts.push(`<button type="button" class="btn" id="dLib">${i.inBook?`🔖 Nel libro · ${esc(i.bookNo||'')}`:'🔖 Metti nel libro'}</button>`);
+  if(libOk(i)&&!i.chatShare)acts.push('<button type="button" class="btn" id="dPrint">🖨 Stampa la ricetta</button>');
   acts.push(`<button class="btn${i.book?'':' pri'}" id="dClose">Chiudi</button>`);
   $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button><div class="dcols"><div class="dmain">
     ${i.clips?.length?`<div class="clipPl" id="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p><p class="row" style="justify-content:flex-start;gap:8px;margin:0 0 10px"><button type="button" class="btn pri" data-vc="share">📤 Pubblica</button><button type="button" class="btn" data-vc="save">💾 Salva nel rullino</button></p></div>`
@@ -2698,7 +2895,8 @@ function openDetail(i){
   if($('#dCook'))$('#dCook').onclick=()=>cookOpen(i);
   if(i.clips?.length){clipPlayer(i.clipKey,i.clips,$('#clipPl'));$('#clipPl').onclick=e=>{const b=e.target.closest('[data-vc]');if(b)(b.dataset.vc==='share'?clipsShare:clipsSave)(i.clipKey,i.clips,i.title)}}
   if($('#dEdit'))$('#dEdit').onclick=()=>{$('#det').close();openForm(i)};
-  if($('#dSave'))$('#dSave').onclick=()=>{saveFromBook(i);$('#det').close()};
+  if($('#dSave'))$('#dSave').onclick=()=>{i.chatShare?chatSaveRec(i):saveFromBook(i);$('#det').close()};
+  if($('#dChat'))$('#dChat').onclick=()=>{CH.pick=chatRecOf(i);chatStart()};
   $('#det').showModal();
 }
 $('#det').addEventListener('close',()=>$('#dv').innerHTML=''); // ferma il video
@@ -3481,8 +3679,8 @@ if(document.documentElement.dataset.sito){$('.nbrand').onclick=()=>{if(window.gn
 const deskQ=matchMedia('(min-width:900px)'),addHome=$('#add').nextSibling;
 function placeDesk(){const d=deskQ.matches,nav=$('#tabs');
   const sito=!!document.documentElement.dataset.sito; // sul sito anche il profilo va nella testata
-  if(d){nav.insertBefore($('#add'),$('#secLbl'));$('#ntools').append(...(sito?[$('#camBtn'),$('#setBtn'),$('#userBtn')]:[$('#camBtn'),$('#setBtn')]))}
-  else{document.body.insertBefore($('#add'),addHome);$('.top').append($('#camBtn'),$('#setBtn'),$('#userBtn'))}}
+  if(d){nav.insertBefore($('#add'),$('#secLbl'));$('#ntools').append(...(sito?[$('#chatBtn'),$('#camBtn'),$('#setBtn'),$('#userBtn')]:[$('#chatBtn'),$('#camBtn'),$('#setBtn')]))}
+  else{document.body.insertBefore($('#add'),addHome);$('#cupBtn').after($('#chatBtn'));$('.top').append($('#camBtn'),$('#setBtn'),$('#userBtn'))}}
 // Telefono (14/11): la Sfida è la coppa in alto a sinistra (con il pallino se c'è una sfida aperta), la fotocamera è il tasto rotondo al centro della barra
 $('#cupBtn').onclick=()=>goView('home');
 $('#navCam').onclick=()=>$('#camIn').click();
