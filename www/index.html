@@ -1198,6 +1198,11 @@ const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{retur
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
 let persistAsked=false;
 const saveItems=()=>{save('items',items);queueSync();if(!persistAsked){persistAsked=true;try{navigator.storage?.persist?.().catch(()=>{})}catch{}}}; // salva e, se c'è il codice ricettario, sincronizza
+// Titoli uniformi (v178): lettere «decorate» dei post (𝗣𝗔𝗟𝗟𝗜𝗡𝗘) tornate normali, niente emoji, niente tutto maiuscolo
+const nice=t=>{try{let s=String(t??'').normalize('NFKC').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}]/gu,' ').replace(/\s+/g,' ').trim();
+  const up=(s.match(/[A-ZÀ-Ý]/g)||[]).length,lo=(s.match(/[a-zß-ÿ]/g)||[]).length;
+  if(up>3&&up>lo*2)s=s.toLocaleLowerCase('it').replace(/^[^a-zà-ÿ]*[a-zà-ÿ]/,c=>c.toLocaleUpperCase('it'));
+  return s}catch{return String(t??'')}};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200)};
 const lines=s=>String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);
@@ -1349,7 +1354,7 @@ const tidyTitle=t=>{t=String(t||'').replace(/\s*#\S+/g,'').replace(/[\p{Extended
 // Dal titolo di un post o di un video al solo nome del piatto: via commenti, superlativi, «come fare», hashtag, emoji, nome del canale
 const FLUFF=/\b(pi[uù]\s+\w+\s+(del\s+mondo|che\s+(esist\w*|c'?[èe]|abbia\w*)|di\s+sempre|mai\s+\w+)|(del\s+mondo|che\s+esist\w*|di\s+sempre|in\s+assoluto)|fatt[aoie]\s+(per|da|come|in\s+casa)|per\s+tutti|per\s+(me|te|voi|noi)|come\s+(si\s+fa|fare|farl[aoie]|prepararl[aoie]|preparare|cucinare|non\s+l'?hai|al\s+ristorante|quell[aoie]|la\s+faccio|lo\s+faccio|nonna|quando)|(la|il|le|i)?\s*mi[aoe]\s+(versione|ricetta)|ricetta\s+(facile|veloce|perfetta|originale|cremosa|infallibile|semplice|della\s+nonna|di\s+famiglia|segreta|definitiva|completa)|(facile|veloce|facilissim\w|velocissim\w|buonissim\w|cremosissim\w|golosissim\w|perfett[aoie]|infallibile|spettacolare|pazzesc\w|incredibile|strepitos\w|favolos\w|irresistibile|deliziosissim\w)\b|in\s+\d+\s+minuti|in\s+pochi\s+minuti|senza\s+(errori|segreti|fatica|sforzo|impazzire)|trucc\w|segret\w|svel\w|provala|provatela|provateci|devi\s+provare|da\s+provare|non\s+ci\s+credere|lasciat\w|guard\w+\s+fino|iscrivi\w*|like|subscribe|tutorial|vlog|parte\s+\d+|ep\.?\s*\d+|episodio)\b/i;
 function dishName(t){
-  let s=String(t||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,' ').replace(/#\S+|@\S+/g,' ').replace(/\s+/g,' ').trim();
+  let s=String(t||'').normalize('NFKC').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,' ').replace(/#\S+|@\S+/g,' ').replace(/\s+/g,' ').trim();
   if(!s)return '';
   const orig=s;
   s=s.replace(/\s*[|•·]\s*(youtube|tiktok|instagram|facebook|cookist|giallozafferano|fatto in casa da benedetta)[^|•·]*$/i,'');
@@ -1364,7 +1369,7 @@ function dishName(t){
   best=best.replace(/^[\s\-–—:;,.!?'"«»“”]+|[\s\-–—:;,.!?'"«»“”]+$/g,'').trim();
   if(best.length<3||!/[a-zà-ü]{3}/i.test(best))best=orig.replace(/^[\s\-–—:;,.!?'"«»]+|[\s\-–—:;,.!?'"«»]+$/g,'');
   if(best.length>3&&best===best.toUpperCase())best=best.toLowerCase();
-  return best.charAt(0).toUpperCase()+best.slice(1);
+  best=nice(best);return best.charAt(0).toUpperCase()+best.slice(1);
 }
 const junkTitle=t=>{t=String(t||'').trim();return !t||t.length<40&&/^(instagram|tiktok|facebook|youtube|pinterest|reels?|log ?in|accedi|login|condividi|share|guarda (questo|il) (reel|video|post))\b/i.test(t)};
 const extractUrl=t=>(String(t||'').match(/https?:\/\/[^\s]+/)||[])[0];
@@ -1654,7 +1659,7 @@ async function chatFetch(first){if(!CH.chat||CH.view!=='conv')return;const id=CH
 function chatMsgHtml(m,prev){const tm=new Date(m.t).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
   let inner;
   if(m.del)inner='<p class="meta"><i>Messaggio eliminato</i></p>';
-  else if(m.k==='r'){const r=m.body||{};inner=`<div class="chRec">${r.image?`<img src="${esc(r.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}<b>📖 ${esc(r.title)}</b><span class="meta">${r.ingredients?.length||0} ingredienti${r.steps?.length?` · ${r.steps.length} passaggi`:''}</span><button type="button" class="btn" data-ch="rec">Apri la ricetta</button></div>`}
+  else if(m.k==='r'){const r=m.body||{};inner=`<div class="chRec">${r.image?`<img src="${esc(r.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}<b>📖 ${esc(nice(r.title))}</b><span class="meta">${r.ingredients?.length||0} ingredienti${r.steps?.length?` · ${r.steps.length} passaggi`:''}</span><button type="button" class="btn" data-ch="rec">Apri la ricetta</button></div>`}
   else if(m.k==='p')inner=`<button type="button" class="chPic" data-ch="pic" data-pic="${esc(m.body)}">${CH.pics[m.body]?`<img src="${CH.pics[m.body]}" alt="Foto">`:'<span class="meta">📷 Carico la foto…</span>'}</button>`;
   else inner=`<p>${chatLinks(esc(m.body))}</p>`;
   const day=!prev||new Date(prev.t).toDateString()!==new Date(m.t).toDateString()?`<div class="chDay">${chatDay(m.t)}</div>`:'';
@@ -1697,7 +1702,7 @@ function chatShrink(file){return new Promise((ok,ko)=>{const img=new Image();img
 $('#chatPh').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const d=await chatShrink(f);await chatSend('p',{photo:d})}catch(err){toast(err.message)}};
 function chatPaintPick(){CH.view='pick';const mine=items.filter(libOk);
   const draw=q=>{const l=mine.filter(i=>!q||(i.title||'').toLowerCase().includes(q.toLowerCase())).slice(0,60);
-    $('#chPickL').innerHTML=l.length?l.map(i=>`<button type="button" class="chRow" data-rid="${esc(i.id)}"><span class="cav">${i.image?`<img class="tom" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:'📖'}</span><span class="chMid"><b>${esc(i.title)}</b><span class="chLast">${esc(i.cat||'')}</span></span></button>`).join(''):`<p class="meta">${mine.length?'Nessuna ricetta con questo nome.':'Non hai ancora ricette salvate da mandare.'}</p>`};
+    $('#chPickL').innerHTML=l.length?l.map(i=>`<button type="button" class="chRow" data-rid="${esc(i.id)}"><span class="cav">${i.image?`<img class="tom" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:'📖'}</span><span class="chMid"><b>${esc(nice(i.title))}</b><span class="chLast">${esc(i.cat||'')}</span></span></button>`).join(''):`<p class="meta">${mine.length?'Nessuna ricetta con questo nome.':'Non hai ancora ricette salvate da mandare.'}</p>`};
   $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="backconv" aria-label="Indietro">←</button><h2>Manda una ricetta</h2></div><div class="chBody"><input id="chPq" type="search" placeholder="Cerca tra le tue ricette" autocomplete="off"><div id="chPickL"></div></div>`;
   draw('');$('#chPq').oninput=e=>draw(e.target.value.trim())}
 function chatSaveRec(i){const r={title:i.title,image:i.image||'',url:i.url||'',source:i.source||'',cat:i.cat||'',servings:i.servings||undefined,ingredients:i.ingredients||[],steps:i.steps||[],bookId:i.bookId||undefined,
@@ -1861,9 +1866,9 @@ function showPhotoResults(img,r){
   ph.innerHTML=`<img class="shot" src="${img}" alt="">
     <h2 style="margin-top:12px">${esc(r.dish)}</h2><p class="meta">${esc(r.description||'')}${r.confidence&&r.confidence!=='alta'?` · sicurezza ${esc(r.confidence)}`:''}</p>
     ${r.alternatives?.length?`<p class="meta">Potrebbe anche essere: ${r.alternatives.map(esc).join(', ')}</p>`:''}
-    ${mine.length?`<h3>Già nelle tue ricette</h3>${mine.map(i=>`<div class="res"><div class="b"><b>${esc(i.title)}</b><div class="meta">${esc([i.cat,i.source].join(' · '))} ${stars(i.rating)}</div></div><button class="btn" data-open="${i.id}">Apri</button></div>`).join('')}`:''}
+    ${mine.length?`<h3>Già nelle tue ricette</h3>${mine.map(i=>`<div class="res"><div class="b"><b>${esc(nice(i.title))}</b><div class="meta">${esc([i.cat,i.source].join(' · '))} ${stars(i.rating)}</div></div><button class="btn" data-open="${i.id}">Apri</button></div>`).join('')}`:''}
     <h3>Ricette trovate</h3>
-    ${recs.length?recs.map((x,k)=>`<div class="res">${x.image?`<img src="${esc(x.image)}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px" referrerpolicy="no-referrer">`:''}<div class="b"><b>${esc(x.title)}</b><div class="meta">${esc(x.site||sourceOf(x.url))}</div>
+    ${recs.length?recs.map((x,k)=>`<div class="res">${x.image?`<img src="${esc(x.image)}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px" referrerpolicy="no-referrer">`:''}<div class="b"><b>${esc(nice(x.title))}</b><div class="meta">${esc(x.site||sourceOf(x.url))}</div>
       <a href="${esc(x.url)}" target="_blank" rel="noopener">Apri</a></div><button class="btn pri" data-save="${k}">Salva</button></div>`).join(''):'<p class="meta">Nessuna ricetta trovata automaticamente: prova a cercare qui sotto.</p>'}
     <h3>Cerca anche su</h3><div class="checks">${links.map(([n,u])=>`<a class="btn" href="${esc(u)}" target="_blank" rel="noopener">${n}</a>`).join('')}</div>
     <div class="row"><button class="btn" id="phClose">Chiudi</button></div>`;
@@ -1936,7 +1941,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=177; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=178; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2127,7 +2132,7 @@ function renderHome(){
         <li>Chi partecipa e assaggia sale di livello: Novizio, Cuoco, Sous chef, Chef, Maestro. Il voto di chi contribuisce pesa di più.</li>
       </ol></details>
     </div>
-    ${mine?`<div class="hsec"><h3>La tua ricetta in gara</h3></div><div class="mine-gara" id="cMine"><div class="th">${mine.image?`<img src="${esc(mine.image)}" alt="">`:look(mine)[0]}</div><div><b>${esc(mine.title||'Senza titolo')}</b><span>${mine.video||mine.clips?.length?'Con il video ✓':'Manca il video della preparazione'}${ph==='join'?' · puoi modificarla fino a '+dIt(c.fine_partecipazione):''}</span></div></div>`:''}
+    ${mine?`<div class="hsec"><h3>La tua ricetta in gara</h3></div><div class="mine-gara" id="cMine"><div class="th">${mine.image?`<img src="${esc(mine.image)}" alt="">`:look(mine)[0]}</div><div><b>${esc(nice(mine.title)||'Senza titolo')}</b><span>${mine.video||mine.clips?.length?'Con il video ✓':'Manca il video della preparazione'}${ph==='join'?' · puoi modificarla fino a '+dIt(c.fine_partecipazione):''}</span></div></div>`:''}
     <div class="hsec"><h3>Il Ricettario di Gnamina</h3><span class="meta">le ricette vincitrici</span></div>
     <div class="empty" style="padding:22px 16px"><b>Le prime vincitrici arrivano con i primi contest</b>Ogni settimana se ne aggiunge una, scelta da chi l'ha cucinata.${c.prossimo?`<br>Prossimo tema: <b style="display:inline;font-family:inherit;font-size:inherit">${esc(c.prossimo)}</b>`:''}</div>
     <div class="hlinks">
@@ -2209,7 +2214,7 @@ function card(i){
   return `<div class="item" data-id="${i.id}"${pubId(i)?` data-pub="${esc(pubId(i))}"`:''}>
     <div class="thumb" style="--ph:linear-gradient(135deg,${c1}55,${c2}66)">${em}${i.imgGen?'<span class="aiTag" title="Immagine generata con l\'AI">AI</span>':''}${i.image?`<img src="${esc(i.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
       <span class="cat">${esc(i.cat||'Altro')}</span>${vid?'<span class="play" title="Con video">▶</span>':''}${canRate(i)?svOf(i):''}${libOk(libSync(i))&&!i.pronto&&!i.colazione?`<button type="button" class="ribBtn${i.inBook?' on':''}" data-rib="${esc(i.id)}" aria-pressed="${!!i.inBook}" aria-label="${i.inBook?'Nel libro di cucina: tocca per togliere':'Metti nel libro di cucina'}">${RIB_SVG}</button>`:''}</div>
-    <div class="b"><h3>${esc(i.title||i.url)}</h3>
+    <div class="b"><h3>${esc(nice(i.title)||i.url)}</h3>
       <div class="facts">${facts.map(f=>`<span>${f}</span>`).join('')}</div>${gara}</div></div>`;
 }
 const stars=n=>n?'<span class="stars">'+'★'.repeat(n)+'</span>':'';
@@ -2236,7 +2241,7 @@ function vetrina(){
   const top=(TOP?.list||[]).map(t=>findAny(t.id)).filter(b=>b&&b.image&&!b.pronto&&!b.colazione);
   const hero=[...top,...pick.filter(b=>!top.includes(b))].slice(0,3);
   const tile=(b,big)=>{const v=STARS[pubId(b)],tm=(b.ingredients?.length||b.steps?.length)?timing(b):null;
-    return `<div class="vtile${big?' big':''}" data-vid="${esc(b.id)}" role="button" tabindex="0"><img src="${esc(b.image)}" alt="" loading="${big?'eager':'lazy'}" referrerpolicy="no-referrer"><span class="vtag">${esc(b.cat||'')}</span><div class="vt"><b>${esc(b.title)}</b><span>${[b.region||b.country,tm&&fmtMin(tm.t),v?.[1]?`★ ${fmtAvg(v[0])} · ${v[1]} ${v[1]===1?'voto':'voti'}`:''].filter(Boolean).map(esc).join(' · ')}</span></div></div>`};
+    return `<div class="vtile${big?' big':''}" data-vid="${esc(b.id)}" role="button" tabindex="0"><img src="${esc(b.image)}" alt="" loading="${big?'eager':'lazy'}" referrerpolicy="no-referrer"><span class="vtag">${esc(b.cat||'')}</span><div class="vt"><b>${esc(nice(b.title))}</b><span>${[b.region||b.country,tm&&fmtMin(tm.t),v?.[1]?`★ ${fmtAvg(v[0])} · ${v[1]} ${v[1]===1?'voto':'voti'}`:''].filter(Boolean).map(esc).join(' · ')}</span></div></div>`};
   const catImg=c=>{const cp=(c==='Internazionali'?book.filter(b=>b.image&&isIntl(b)):pool.filter(b=>b.cat===c));return cp.length?cp[(day*31)%cp.length].image:''};
   const grid=top.length>=4?top.slice(0,8):pick.filter(b=>!hero.includes(b)).slice(0,8);
   const c=CONTEST,ph=contestPhase(c);
@@ -2266,15 +2271,15 @@ function magHome(list){
   const quick=list.filter(i=>(i.ingredients?.length||i.steps?.length)&&timing(i).t&&timing(i).t<=30).slice(0,10);
   const recent=list.slice(0,6);
   return `<div class="magBlk">
-    ${hero.length?`<div class="magHero" id="magHero">${hero.map(i=>`<div class="item magSlide" data-id="${esc(i.id)}"${i.clips?.length&&i.clipKey?` data-clip="${esc(i.clipKey)}"`:''}><img class="kb" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer"><div class="magTx"><span class="magEye">${lbl(i)}</span><h2>${esc(i.title)}</h2><div class="magF">${fact(i)}</div></div></div>`).join('')}</div>
+    ${hero.length?`<div class="magHero" id="magHero">${hero.map(i=>`<div class="item magSlide" data-id="${esc(i.id)}"${i.clips?.length&&i.clipKey?` data-clip="${esc(i.clipKey)}"`:''}><img class="kb" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer"><div class="magTx"><span class="magEye">${lbl(i)}</span><h2>${esc(nice(i.title))}</h2><div class="magF">${fact(i)}</div></div></div>`).join('')}</div>
       ${hero.length>1?`<div class="magDots">${hero.map((_,k)=>`<i${k?'':' class="on"'}></i>`).join('')}</div>`:''}`:''}
     ${cs.length>1?`<div class="magSh"><h3>Per tipo di piatto</h3><button type="button" class="lnk" data-mall="1">Tutte ${list.length}</button></div>
       <div class="magCats">${cs.map(c=>{const im=(cnt[c].find(i=>i.image)||{}).image;return `<button type="button" class="magCat" data-mcat="${esc(c)}">${im?`<img src="${esc(im)}" alt="" referrerpolicy="no-referrer">`:`<span class="magNo">${look(cnt[c][0])[0]}</span>`}<b>${esc(c)}</b><small>${cnt[c].length}</small></button>`}).join('')}</div>`:''}
     ${vids.length?`<div class="magSh"><h3>Video da guardare</h3><span class="meta">${vids.length}</span></div>
-      <div class="magReels">${vids.map(i=>`<div class="item magReel" data-id="${esc(i.id)}"${i.clips?.length&&i.clipKey?` data-clip="${esc(i.clipKey)}"`:''}><img class="kb" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer"><span class="magPlay"></span><span class="magSrc">${esc(src(i))}</span><b>${esc(i.title)}</b></div>`).join('')}</div>`:''}
+      <div class="magReels">${vids.map(i=>`<div class="item magReel" data-id="${esc(i.id)}"${i.clips?.length&&i.clipKey?` data-clip="${esc(i.clipKey)}"`:''}><img class="kb" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer"><span class="magPlay"></span><span class="magSrc">${esc(src(i))}</span><b>${esc(nice(i.title))}</b></div>`).join('')}</div>`:''}
     <div class="magSh"><h3>Salvate di recente</h3><button type="button" class="lnk" data-mall="1">Vedi tutte</button></div>
     <div class="magGrid">${recent.map(card).join('')}</div>
-    ${quick.length?`<div class="magSh"><h3>Pronte in 30 minuti</h3></div><div class="magRow">${quick.map(i=>`<div class="item magWide" data-id="${esc(i.id)}">${i.image?`<img src="${esc(i.image)}" alt="" referrerpolicy="no-referrer">`:`<span class="magNo">${look(i)[0]}</span>`}<div><b>${esc(i.title)}</b><small>${esc(i.cat||'')}</small><span class="magTm">⏱ ${fmtMin(timing(i).t)}</span></div></div>`).join('')}</div>`:''}
+    ${quick.length?`<div class="magSh"><h3>Pronte in 30 minuti</h3></div><div class="magRow">${quick.map(i=>`<div class="item magWide" data-id="${esc(i.id)}">${i.image?`<img src="${esc(i.image)}" alt="" referrerpolicy="no-referrer">`:`<span class="magNo">${look(i)[0]}</span>`}<div><b>${esc(nice(i.title))}</b><small>${esc(i.cat||'')}</small><span class="magTm">⏱ ${fmtMin(timing(i).t)}</span></div></div>`).join('')}</div>`:''}
   </div>`}
 function magWire(){
   $('#list').querySelectorAll('[data-mcat]').forEach(b=>b.onclick=e=>{e.stopPropagation();cur=b.dataset.mcat;render();scrollTo({top:0})});
@@ -2853,7 +2858,7 @@ function shopping(P){
       if(d.id==='raw'){for(const v of (d.veg||['insalata'])){const k=keyOf(v)||v;acc[k]=(acc[k]||0)+60*o.people}continue} // 60 g a persona per ogni verdura cruda
       const r=findRec(d.id,d.book);if(!r)continue;const f=o.people/baseS(r);
       if(r.b)for(const [k,g] of r.b)acc[k]=(acc[k]||0)+g*f;
-      else extra.push(`<b>${esc(r.title)}</b>: ${r.ingredients.map(x=>esc(scaleLine(x,o.people/(r.servings||4)))).join(', ')}`);
+      else extra.push(`<b>${esc(nice(r.title))}</b>: ${r.ingredients.map(x=>esc(scaleLine(x,o.people/(r.servings||4)))).join(', ')}`);
     }
   }
   if(breadKg){acc['pane']=(acc['pane']||0)+breadKg*1000;breadKg=0}
@@ -2974,7 +2979,7 @@ function openDetail(i){
       :e?`<iframe class="video ${e.v?'v':'h'}" src="${esc(e.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
       :i.image?`<div class="heroWrap"><img class="hero" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;hero&quot; style=&quot;display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)&quot;>${em}</div>'"></div>`
       :`<div class="heroWrap"><div class="hero" style="display:grid;place-items:center;font-size:4rem;aspect-ratio:16/7;background:linear-gradient(135deg,${c1}66,${c2}77)">${em}</div></div>`}
-    <h2 style="margin-top:12px">${esc(i.title||i.url)}</h2>
+    <h2 style="margin-top:12px">${esc(nice(i.title)||i.url)}</h2>
     ${i.pseudo?`<div class="warn" style="margin:8px 0">Piatto <b>italo-americano</b>: nato all'estero e spesso presentato come italiano, non fa parte della cucina italiana di tutti i giorni.</div>`:''}
     ${tm?`<div class="kv"><span>⏱ ${fmtMin(tm.t)}${tm.w>=30?` + ${fmtMin(tm.w)} attesa`:''}</span><span>${DIFF[tm.d]}</span>${i.cat?`<span>${esc(i.cat)}</span>`:''}</div>`:''}
     ${sub?`<div class="meta">${esc(sub)}</div>`:''}
@@ -3232,7 +3237,7 @@ $('#garaCancel').onclick=()=>$('#dlg').close();
 $('#garaWrite').onclick=()=>rGo(0);
 $('#garaVoice').onclick=()=>setMode('voice',true);$('#garaPhoto').onclick=()=>setMode('photo',true);$('#garaFile').onclick=()=>setMode('file',true);
 $('#garaPick').onclick=()=>{const l=$('#garaList'),ok=items.filter(garaOk);
-  l.innerHTML=ok.map(i=>`<button type="button" class="srcCard" data-id="${esc(i.id)}"><b>${esc(i.title||'Senza titolo')}</b><span>${esc(i.source||'Scritta da te')} · ${i.ingredients.length} ingredient${i.ingredients.length===1?'e':'i'} · ${i.steps.length} passagg${i.steps.length===1?'io':'i'}</span></button>`).join('');
+  l.innerHTML=ok.map(i=>`<button type="button" class="srcCard" data-id="${esc(i.id)}"><b>${esc(nice(i.title)||'Senza titolo')}</b><span>${esc(i.source||'Scritta da te')} · ${i.ingredients.length} ingredient${i.ingredients.length===1?'e':'i'} · ${i.steps.length} passagg${i.steps.length===1?'io':'i'}</span></button>`).join('');
   l.hidden=false;l.querySelector('button')?.scrollIntoView({block:'nearest'})};
 $('#garaList').onclick=e=>{const b=e.target.closest('[data-id]');if(!b)return;const it=items.find(i=>i.id===b.dataset.id);if(!it)return;
   openForm({...it,contest:extra.contest,tags:[...new Set([...(it.tags||[]),'In gara'])]})};
@@ -3820,6 +3825,7 @@ const FGROUPS=[['fSort','Ordina per',[['new','In evidenza'],['fast','Più veloci
   ['fRate','Voto',[['0','Qualsiasi'],['3','★ 3+'],['4','★ 4+'],['5','★ 5']]]];
 let LIST_N=0,CH2ALL=false;
 function filtPanel(){const box=$('#fPanel');if(!box||$('.filters').hidden)return;
+  const fz=$('#fZone');if(fz&&box.contains(fz))$('.filters').append(fz); // la tendina della zona non va cancellata ridisegnando i gruppi
   box.innerHTML=FGROUPS.map(([id,lbl,opts])=>{const sel=$('#'+id),o=opts||[...sel.options].map(x=>[x.value,x.value?x.textContent:'Qualsiasi']);
     return `<div class="fg"><b>${lbl}</b><div class="fgc">${o.map(([v,t])=>`<button type="button" class="fc${sel.value===v?' on':''}" data-f="${id}" data-v="${esc(v)}">${esc(t)}</button>`).join('')}</div></div>`}).join('')
     +`<div class="fg" id="fZoneG"><b>Zona</b></div>`;
@@ -4128,7 +4134,7 @@ const libDedica=(o,t)=>libFrame('dedica',`<div class="pg"><p>${esc(t)}</p></div>
 const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
 function libDivider(o,sec,n,list){
   const num=o.style==='class'?ROMAN[n-1]||n:o.style==='tratt'?'Sezione '+n:o.style==='nonna'?'parte '+n:n;
-  const rows=list.slice(0,14).map(i=>`<li><span>${esc(i.title)}</span><span>${esc(i.bookNo||'')}</span></li>`).join('');
+  const rows=list.slice(0,14).map(i=>`<li><span>${esc(nice(i.title))}</span><span>${esc(i.bookNo||'')}</span></li>`).join('');
   return libFrame('divider',`${libBand(o,sec)}<div class="pg"><p class="dv-num">${num}</p><h2 class="dv-title">${esc(sec)}</h2><ol class="dv-list">${rows}</ol>${list.length>14?`<p class="dv-more">e altre ${list.length-14}</p>`:''}</div>`,o)}
 function libIndexPage(o,entries,first){
   const secs=[];for(const e of entries){let s=secs.find(x=>x.n===e.sec);if(!s)secs.push(s={n:e.sec,l:[]});s.l.push(e)}
@@ -4138,14 +4144,14 @@ function libFoot(i){const who=[i.author&&`di ${i.author}`,i.source&&!['Gnamina',
   return `<div class="r-foot"><p>${who?esc('Ricetta '+who)+' · ':''}Gnamina, la tua app di cucina</p></div>`}
 function libRecipeHtml(i,o,p){ // p: {ing, steps, s0, first, notes}
   const cat=`${esc(i.cat||'Altro')}${i.bookNo&&o.numbered?' · '+esc(i.bookNo):''}`;
-  const head=p.first?`<p class="r-cat">${cat}</p><h3 class="r-title">${esc(i.title)}</h3><div class="r-meta">${libMeta(i)}</div>${o.photo&&i.image&&o.style!=='big'?`<div class="r-photo"><img src="${esc(i.image)}" alt=""></div>`:''}`
-    :`<p class="r-cat">${cat}</p><h3 class="r-title">${esc(i.title)} (continua)</h3>`;
+  const head=p.first?`<p class="r-cat">${cat}</p><h3 class="r-title">${esc(nice(i.title))}</h3><div class="r-meta">${libMeta(i)}</div>${o.photo&&i.image&&o.style!=='big'?`<div class="r-photo"><img src="${esc(i.image)}" alt=""></div>`:''}`
+    :`<p class="r-cat">${cat}</p><h3 class="r-title">${esc(nice(i.title))} (continua)</h3>`;
   const one=!p.first&&!p.ing.length; // pagina di continuazione con i soli passaggi: una colonna
   const ingCol=one?'':`<div><p class="r-h">${p.ing.length?'Ingredienti':''}</p><ul class="r-ing">${p.ing.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
   const stCol=`<div><p class="r-h">${p.steps.length?'Preparazione':''}</p><ol class="r-steps" style="--s0:${p.s0}">${p.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></div>`;
   const notes=p.notes&&o.notes?`<div class="r-note">${'<i></i>'.repeat(3)}</div>`:'';
   return libFrame('recipe'+(p.first?'':' cont'),`${libBand(o,i.cat||'Altro')}<div class="pg">${head}<div class="r-body"${one?' style="grid-template-columns:1fr"':''}>${ingCol}${stCol}</div>${notes}${libFoot(i)}</div>`,o)}
-const libNotesPage=(o,i)=>libFrame('notes',`<div class="pg"><h4>Appunti${i?' · '+esc(i.title):''}</h4>${'<div class="nl"></div>'.repeat(30)}</div>`,o);
+const libNotesPage=(o,i)=>libFrame('notes',`<div class="pg"><h4>Appunti${i?' · '+esc(nice(i.title)):''}</h4>${'<div class="nl"></div>'.repeat(30)}</div>`,o);
 // controlla se una pagina messa nel contenitore di lavoro sborda
 function libOver(el){const b=el.querySelector('.r-body,.ix-cols');if(!b)return false;
   if(b.classList.contains('ix-cols'))return b.scrollWidth>b.clientWidth+2||b.scrollHeight>b.clientHeight+2;
@@ -4251,7 +4257,7 @@ function libRender(){
     h=back(`Le ricette · ${book.length}`)+`<p class="meta" style="margin-top:0">Ci sono le ricette con il segnalibro <span class="libRibI">${RIB_SVG}</span>, tue o del Ricettario. Togli la spunta per toglierne una.</p>
       ${book.length?bsecs.map(s=>{const l=book.filter(i=>(i.cat||'Altro')===s);
         return `<div class="libSec"><div class="libSecH"><b>${esc(s)}</b><span class="meta">${l.length}</span></div>
-        ${l.map(i=>`<label class="libRow"><input type="checkbox" data-id="${esc(i.id)}" checked aria-label="Togli dal libro"><span class="libT">${esc(i.title)}${libMine(i)?'':'<small class="meta"> · dal Ricettario</small>'}</span><span class="libNo">${esc(i.bookNo||'')}</span>${tag(i)}</label>`).join('')}</div>`}).join('')
+        ${l.map(i=>`<label class="libRow"><input type="checkbox" data-id="${esc(i.id)}" checked aria-label="Togli dal libro"><span class="libT">${esc(nice(i.title))}${libMine(i)?'':'<small class="meta"> · dal Ricettario</small>'}</span><span class="libNo">${esc(i.bookNo||'')}</span>${tag(i)}</label>`).join('')}</div>`}).join('')
       :'<p class="meta">Il libro è vuoto. Tocca il segnalibro sulla foto di una ricetta, in «Le mie» o nel Ricettario, e la ritrovi qui.</p>'}`;
   }else if(LIBPAGE==='formato'){
     h=back('Il formato')+`<div class="libFmts">${LIB_FMTS.map(([k,n,s])=>`<label class="libOpt"><input type="radio" name="libFmt" value="${k}"${LIB.fmt===k?' checked':''}><span><b>${n}</b><small>${s}</small></span></label>`).join('')}</div>

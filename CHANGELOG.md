@@ -4,6 +4,14 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-17
+
+- **Versione 178, titoli delle ricette tutti uguali**
+  - **Il problema:** in «Le mie» i titoli presi dai post (per esempio «🥔 𝗣𝗔𝗟𝗟𝗜𝗡𝗘 𝗗𝗜 𝗣𝗔𝗧𝗔𝗧𝗘 𝗦𝗨𝗣𝗘𝗥 𝗖𝗥𝗜𝗦𝗣𝗬…») uscivano con un carattere diverso dagli altri, tutti in maiuscolo e con le emoji davanti. Le lettere «decorate» dei social sono simboli a parte e non usano il carattere dell'app.
+  - **Ora:** ogni titolo viene mostrato con le lettere normali, senza emoji e, se era tutto maiuscolo, con la sola iniziale maiuscola («Palline di patate super crispy in friggitrice ad aria»). Vale per le schede, la ricetta aperta, il libro, la chat e le ricerche, anche per le ricette già salvate; il titolo salvato non viene toccato. Le ricette importate da adesso ricevono il titolo già pulito.
+  - **Correzione nei Filtri:** riaprendo i Filtri la tendina della Zona veniva cancellata e il pulsante dava un errore; ora resta al suo posto.
+  - **Provato:** nella copia dell'app a 375×812 con titoli d'esempio (lettere decorate, tutto maiuscolo, emoji in testa e in coda) e riapertura dei Filtri. Non ancora su un telefono vero.
+
 ## 2026-11-16
 
 - **Versione 177, il Libro torna in vista e le icone in alto diventano uguali** (stile C con il Libro 1, scelti dall'utente in `docs/proposte-colori/icone-testata.html`)
