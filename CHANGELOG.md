@@ -6,6 +6,12 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-17
 
+- **Versione 179, lettura delle ricette più pulita (dopo due prove su 120 link social)**
+  - **Le prove:** un agente ha importato con l'app 120 link veri presi da Google (YouTube, TikTok, Instagram, Facebook), in due giri da 60; i resoconti sono in `docs/prove/prova-60-social-2026-11-17.md` e `docs/prove/prova-60-social-2-2026-11-17.md`.
+  - **App, ricette dal sito del cuoco:** spariscono i simboli rimasti nel testo («l&#8217;aiuto» → «l’aiuto»), i numeri delle foto di GialloZafferano dentro i passaggi («formate una fontana 1 e…», «(7-8)», «pesce spada 10 e…») e la riga «sono stati inseriti link di affiliazione» presa per un passaggio. I numeri veri («cuocete 10 minuti», «2 uova») restano: si tolgono solo quelli che formano la sequenza delle foto.
+  - **App:** se l'analisi non trova il procedimento, ora lo dice anche per TikTok («nel post non c'è il procedimento: scrivilo tu nel passo «Preparazione»») invece del solo «Analisi AI completata».
+  - **Server (da ripubblicare):** gli ingredienti non risultano più «indovinati, senza dosi» quando le dosi sono scritte (anche «4 tazze di latte», prima non riconosciuto); le parole storpiate dalla trascrizione si correggono («pezzemolo», «titolo» per tuorli, «figlio di carta forno»); i video in un'altra lingua escono in italiano anche quando Gemini li guarda («2 cups flour»); ogni ingrediente usato nei passaggi va anche nella lista; niente titoli generici («Pesce», «Dolce»); un «pronto in 15 minuti» più corto dei tempi dei passaggi non vale come tempo totale. Le analisi già in memoria si rifanno con le regole nuove.
+
 - **Versione 178, titoli delle ricette tutti uguali**
   - **Il problema:** in «Le mie» i titoli presi dai post (per esempio «🥔 𝗣𝗔𝗟𝗟𝗜𝗡𝗘 𝗗𝗜 𝗣𝗔𝗧𝗔𝗧𝗘 𝗦𝗨𝗣𝗘𝗥 𝗖𝗥𝗜𝗦𝗣𝗬…») uscivano con un carattere diverso dagli altri, tutti in maiuscolo e con le emoji davanti. Le lettere «decorate» dei social sono simboli a parte e non usano il carattere dell'app.
   - **Ora:** ogni titolo viene mostrato con le lettere normali, senza emoji e, se era tutto maiuscolo, con la sola iniziale maiuscola («Palline di patate super crispy in friggitrice ad aria»). Vale per le schede, la ricetta aperta, il libro, la chat e le ricerche, anche per le ricette già salvate; il titolo salvato non viene toccato. Le ricette importate da adesso ricevono il titolo già pulito.

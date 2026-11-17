@@ -109,7 +109,7 @@ const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.tr
   r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html)) && !LOGIN_RX.test(r.html || '') && !r.retry); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
 // b.yt: il video YouTube della stessa ricetta, trovato sulla pagina del blog del cuoco quando il blog non scrive il procedimento
 const siteYtOf = b => /^[\w-]{11}$/.test(String(b.yt || '')) ? String(b.yt) : '';
-const ANALYZE_V = 5; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
+const ANALYZE_V = 6; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
 const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([ANALYZE_V, str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30), ...(siteYtOf(b) ? [siteYtOf(b)] : [])]), 30 * DAY,
   () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length && !(r.result.inferred && !r.result.steps?.length))); // le analisi «indovinate» (ingredienti tipici, nessun passaggio) non si salvano: la prossima volta si riprova
 
@@ -163,14 +163,14 @@ Titolo/didascalia (e, se presente, la trascrizione di ciò che viene detto nel v
 """${text}"""
 
 Sei un trascrittore fedele, non un cuoco: riporta SOLO ciò che è scritto nel testo (hashtag compresi: #cannellini, #carote sono ingredienti) o chiaramente visibile nell'immagine allegata. Non aggiungere dosi, tempi, porzioni o passaggi che non ci sono. Meglio un campo vuoto di un dato inventato.
-Se c'è il «Parlato nel video», ciò che il cuoco dice vale come testo scritto: le dosi dette a voce in lettere vanno scritte in cifre («due etti di farina» → "200 g farina", «mezzo litro di latte» → "500 ml latte", «tre uova» → "3 uova", «un cucchiaio» → "1 cucchiaio"), e i passaggi raccontati a voce vanno in steps, in ordine, uno per voce. La trascrizione automatica può avere errori di ascolto: correggi solo quelli evidenti.
+Se c'è il «Parlato nel video», ciò che il cuoco dice vale come testo scritto: le dosi dette a voce in lettere vanno scritte in cifre («due etti di farina» → "200 g farina", «mezzo litro di latte» → "500 ml latte", «tre uova» → "3 uova", «un cucchiaio» → "1 cucchiaio"), e i passaggi raccontati a voce vanno in steps, in ordine, uno per voce. La trascrizione automatica ha spesso errori di ascolto: correggi quelli evidenti dal senso della ricetta («pezzemolo» → prezzemolo, «lavorate titolo e zucchero» → tuorli, «un figlio di carta forno» → foglio, «zucchero zuccherè» → zucchero), senza ripetere lo stesso ingrediente scritto in due modi, e non lasciare in ingredienti o passaggi parole senza senso.
 Guarda bene l'immagine: se mostra il piatto, elenca gli ingredienti che si riconoscono con certezza (es. fagioli bianchi, carote a dadini, patate, pasta corta, pane); se contiene testo sovrimpresso (titolo, elenco di ingredienti, dosi), trascrivilo e usalo come se fosse nel post.
 Estrai i dati in italiano. Se il post è in un'altra lingua (inglese, spagnolo…), traduci in italiano titolo, ingredienti e passaggi: i nomi di piatti noti restano com'è d'uso in Italia («Arancini», «Tacos», «Pad Thai», «Paella»), ma i nomi descrittivi si traducono sempre («Mermelada de mandarina» → "Marmellata di mandarini", «Tarte aux pommes» → "Torta di mele", «700 g de mandarina» → "700 g mandarini"), «chicken» → pollo, «bell peppers» → peperoni. I numeri delle dosi restano esattamente quelli del post e si traducono solo le unità: cup/cups → tazza/tazze, tbsp → cucchiaio, tsp → cucchiaino, lb → libbra, oz → oncia, clove → spicchio; nei passaggi le temperature in °F si scrivono in °C se il post le dà anche in °C, altrimenti si convertono (425°F → 220°C).
-- title: SOLO il nome del piatto, senza hashtag, emoji, aggettivi pubblicitari o commenti: «Carbonara vegana, la più buona del mondo» → "Carbonara vegana"; «Come fare la pasta alla norma perfetta» → "Pasta alla norma". Il nome deve restare specifico, con gli ingredienti o la variante che lo distinguono: «Pizza in 1h 45 ~ Basilico, Limone, Parmigiano & Pepe nero» → "Pizza basilico, limone e parmigiano", non solo "Pizza"; «Pane fatto in casa in due passaggi» → "Pane fatto in casa", non solo "Pane".
+- title: SOLO il nome del piatto, senza hashtag, emoji, aggettivi pubblicitari o commenti: «Carbonara vegana, la più buona del mondo» → "Carbonara vegana"; «Come fare la pasta alla norma perfetta» → "Pasta alla norma". Il nome deve restare specifico, con gli ingredienti o la variante che lo distinguono: «Pizza in 1h 45 ~ Basilico, Limone, Parmigiano & Pepe nero» → "Pizza basilico, limone e parmigiano", non solo "Pizza"; «Pane fatto in casa in due passaggi» → "Pane fatto in casa", non solo "Pane". Mai un nome generico di una parola sola («Pesce», «Dolce», «Pane», «Torta», «Pasta», «Antipasto»): aggiungi ciò che lo distingue, preso dal testo («Orata al forno con limone», «Torta allo yogurt», «Antipasto di sfoglia e zucca»). Un nome descrittivo straniero si traduce («Chicken roll» → "Involtini di pollo").
 - cat: uno tra ${cats.map(c => `"${c}"`).join(', ')}.
 - servings: per quante persone sono le dosi, SOLO se scritto nel post ("per 4 persone", "4 porzioni", "ingredienti per 2"…); altrimenti 0. "per 10 minuti" non è una porzione.
 - ingredients: un ingrediente per voce, nell'ordine del post (una riga con due misure dello stesso ingrediente, es. «2 uova 100 g» o «3 cachi (circa 600 g)», è UN solo ingrediente: "2 uova (100 g)"), formato "quantità unità ingrediente" (es. "320 g spaghetti", "2 uova", "olio extravergine q.b."). Le quantità solo se scritte nel post: se un ingrediente è nominato senza dose, scrivi solo il nome (es. "pomodori secchi"), NON "q.b." e NON una dose tipica. Se il post non elenca ingredienti, metti i soli NOMI: prima quelli nominati nel testo e negli hashtag, poi quelli che vedi nell'immagine (mettili anche in seen), senza dosi, e imposta inferred a true. Usa nomi concreti, non categorie: niente "verdure" o "legumi" se sai quali sono (carote, cannellini). Se non riconosci il piatto, lascia vuoto.
-- steps: passaggi del procedimento SOLO se descritti nel post, un passaggio per voce, con le parole del post; altrimenti vuoto.
+- steps: passaggi del procedimento SOLO se descritti nel post, un passaggio per voce, con le parole del post; altrimenti vuoto. Ogni ingrediente usato nei passaggi («aggiungi l'olio di semi», «una noce di burro») deve stare anche in ingredients, con la dose solo se scritta.
 - diets: solo tra ${DIETS.map(x => `"${x}"`).join(', ')} e solo se evidente dagli ingredienti elencati; nel dubbio nessuna.
 - country e region: zona d'origine del piatto se chiara dal nome (region solo per regioni italiane), altrimenti stringa vuota.
 - time: minuti totali dall'inizio al piatto pronto, come li vive chi cucina. Se il post dichiara chiaramente il tempo TOTALE di preparazione ("pronta in 30 minuti", "tempo: 1 ora", "tempo di preparazione 45 min") usa quello e basta. Altrimenti RICOSTRUISCILO passaggio per passaggio, in ordine: le durate scritte nel post valgono così come sono (intervalli o alternative: la più lunga); per ogni passaggio SENZA durata scritta stima il tempo di lavoro o di attesa che richiede davvero (es. lessare le patate "finché morbide" ≈ 25, pelare e tagliare verdure ≈ 10, impastare ≈ 10, lasciar intiepidire ≈ 10, formare palline o polpette ≈ 10, soffriggere ≈ 5, montare o mescolare ≈ 5) e somma tutto. La durata di un solo passaggio (es. "cuoci 20 minuti") NON è mai il totale se prima o dopo ci sono altri passaggi: il totale è sempre più alto. Metti 0 solo se il post non descrive nessun passaggio e non dà nessun tempo.
@@ -266,12 +266,16 @@ const servingsIn = text => +((String(text).match(SERV_RX) || [''])[0].match(/\d+
 
 function faithful(r, text) {
   const nums = numsIn(text), spoken = /parlato nel video:/i.test(text); // il parlato trascritto vale come testo scritto
-  const hasList = /ingredient/i.test(text) || new RegExp(`(?:\\d+|\\b(?:${NUM_WORDS}))\\s?(?:g|gr|grammi?|kg|chil[oi]|ml|cl|dl|l|litr[oi]|ett[oi]|cucchia|tazz|bicchier|pizzic)\\b`, 'i').test(text) || (spoken && nums.size > 0);
+  // dosi scritte («300 g di arachidi», «4 tazze di latte»): le unità corte vogliono il confine di parola, le radici («tazz», «cucchia») no (v179)
+  const doseRx = new RegExp(`(?:\\d+|\\b(?:${NUM_WORDS}))\\s?(?:(?:g|gr|grammi?|kg|chil[oi]|ml|cl|dl|l|litr[oi]|ett[oi])\\b|cucchia|tazz|bicchier|pizzic)`, 'i');
+  const hasList = /ingredient/i.test(text) || doseRx.test(text) || (spoken && nums.size > 0);
   // tempo e porzioni: valgono solo se scritti nel post; se il modello li salta o li inventa, si legge direttamente il testo
   const tm = timesIn(text), sv = servingsIn(text);
   r.time = Math.round(+r.time) || 0; r.time_note = str(r.time_note, 120).trim();
   const steps = Array.isArray(r.steps) ? r.steps.filter(Boolean).length : 0;
-  if (tm.total) { r.time = tm.total; r.time_how = 'indicato'; r.time_note = ''; } // il post dichiara il totale: vale quello e basta
+  // il post dichiara il totale: vale quello e basta, purché non sia meno delle durate dei passaggi (un «pronto in 15 minuti» che è solo l'impasto, con 40 minuti di forno) (v179)
+  const stepSum = steps ? timesIn(r.steps.filter(Boolean).join('\n')).sum : 0;
+  if (tm.total && tm.total >= stepSum) { r.time = tm.total; r.time_how = 'indicato'; r.time_note = ''; }
   else if (!steps && !tm.n) { r.time = 0; r.time_how = ''; r.time_note = ''; } // né passaggi né durate: niente da ricostruire
   else {
     // Il totale si ricostruisce dai passaggi: le durate scritte sono un pavimento (mai sotto la loro somma), le stime per i
@@ -286,6 +290,8 @@ function faithful(r, text) {
   }
   if (!SERV_RX.test(text) || !r.servings || !nums.has(String(r.servings))) r.servings = sv;
   if (!hasList) r.inferred = true;
+  // il post scrive le dosi (anche solo nei passaggi): gli ingredienti non sono «indovinati», anche se il modello lo dice (v179)
+  else if (r.inferred && (doseRx.test(text.replace(/parlato nel video:[\s\S]*/i, '')) || /ingredienti\s*[:\n]/i.test(text))) r.inferred = false;
   r.ingredients = (Array.isArray(r.ingredients) ? r.ingredients : []).map(String).map(x => {
     const m = x.match(/^\s*(\d+(?:[.,]\d+)?)(?:\s*[-–\/]\s*\d+(?:[.,]\d+)?)?\s*/); // "300 g …", "2-3 …", "1/2 …"
     const frac = x.match(/^\s*(?:[½¼¾⅓⅔]|\d+\/\d+)\s/);
@@ -626,10 +632,11 @@ async function socialSite(desc) {
 // Si usa solo quando il procedimento non è scritto da nessuna parte; consuma quota del piano gratuito, quindi video fino a 25 minuti
 async function ytVideoRecipe(env, id, seconds) {
   if (!env.GEMINI_KEY || !id || (seconds && seconds > 1500)) return null;
-  const prompt = `Guarda questo video di cucina e trascrivi fedelmente la ricetta così come viene detta e mostrata: sei un trascrittore, non un cuoco. Rispondi in italiano, SOLO con JSON:
+  const prompt = `Guarda questo video di cucina e trascrivi fedelmente la ricetta così come viene detta e mostrata: sei un trascrittore, non un cuoco. Rispondi in italiano, SOLO con JSON: se il video è in un'altra lingua traduci in italiano titolo (i nomi di piatti noti restano com'è d'uso in Italia), ingredienti e passaggi, lasciando i numeri delle dosi come detti e traducendo le unità (cup/cups → tazza/tazze, tbsp → cucchiaio, tsp → cucchiaino, oz e lb restano con la loro abbreviazione):
 {"is_recipe":true,"title":"nome del piatto","servings":0,"time":0,"ingredients":["quantità unità ingrediente, come detto o mostrato (es. \"400 g spaghetti\", \"3 spicchi aglio\"); solo il nome se la dose non viene detta"],"steps":["un passaggio per voce, in ordine, con le parole del cuoco, comprese temperature e tempi detti"]}
 steps: ogni passaggio è una frase completa, con la maiuscola all'inizio e il punto alla fine, che descrive un'azione compiuta: unisci nella stessa voce le frasi brevi della stessa azione («puliamo la cipolla», «la tagliamo in otto pezzi» → "Puliamo la cipolla e la tagliamo in otto pezzi."), e lascia fuori i commenti che non sono istruzioni. Di norma bastano da 5 a 15 passaggi.
 Un passaggio è un'azione di cucina (tagliare, mescolare, impastare, cuocere, far riposare, servire). NON sono passaggi, e non vanno in steps: l'elenco degli ingredienti detto a voce («un etto di mortadella», «parmigiano reggiano»: vanno solo in ingredients), i saluti, le battute, i racconti e le opinioni del cuoco («siamo nella Pork Valley», «il ripieno il giorno dopo è tutta un'altra cosa»). Un consiglio su come fare si tiene, scritto come istruzione («Il ripieno è meglio prepararlo il giorno prima.»).
+Ogni ingrediente usato nei passaggi deve stare anche in ingredients (senza dose se non viene detta), e il titolo è il nome specifico del piatto, mai una parola generica come «Pesce» o «Dolce».
 servings: per quante persone, solo se detto, altrimenti 0. time: minuti totali dall'inizio al piatto pronto solo se detto o chiaramente deducibile dai tempi detti, altrimenti 0. Non inventare dosi, tempi o passaggi non detti né mostrati. is_recipe false se il video non è una ricetta.`;
   const body = { contents: [{ parts: [{ file_data: { file_uri: `https://www.youtube.com/watch?v=${id}` } }, { text: prompt }] }],
     generationConfig: { temperature: 0.2, maxOutputTokens: 4000, responseMimeType: 'application/json', mediaResolution: 'MEDIA_RESOLUTION_LOW' } };
