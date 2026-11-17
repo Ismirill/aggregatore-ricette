@@ -6,11 +6,19 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-17
 
+- **Server ripubblicato con le regole della 179, più tre correzioni nuove (solo server, l'app non cambia)**
+  - **Riprova degli 11 casi del server:** ora vanno bene «tuorli» al posto di «titolo», «Involtini di pollo» al posto di «Chicken roll», «4 tazze di latte» riconosciute come dosi, «Dolce allo yogurt», il brodo nella lista degli ingredienti. Il flan da 780 minuti è giusto: il post fa seccare la rapa rossa in forno per 12 ore.
+  - **Più ricette nella stessa descrizione** («Recipe 1… Recipe 2… Recipe 3…», un video che confronta tre banana bread): il server tiene solo la prima prima di darla al modello, e dice a Gemini quale ricetta guardare nel video. Prima uscivano 31 ingredienti di tre ricette mescolate.
+  - **Ingredienti rimasti in inglese** («2 cups all-purpose flour»): una traduzione in più, solo quando l'elenco è in inglese.
+  - **Titolo generico di una parola** che il modello lascia lo stesso («Pesce»): si completa con la cottura e due ingredienti dei passaggi → «Pesce in padella con pomodori e olive greche».
+  - **Dosi finite tra i passaggi** («2 tazze farina», «1 cucchiaino sale» come passi): tornano tra gli ingredienti, e così Gemini guarda il video per il procedimento vero.
+  - Analisi in memoria rifatte (ANALYZE_V 9). Controllo dopo l'ultima pubblicazione su banana bread, pesce, tiramisù, spaghetti all'assassina e dolce allo yogurt.
+
 - **Versione 179, lettura delle ricette più pulita (dopo due prove su 120 link social)**
   - **Le prove:** un agente ha importato con l'app 120 link veri presi da Google (YouTube, TikTok, Instagram, Facebook), in due giri da 60; i resoconti sono in `docs/prove/prova-60-social-2026-11-17.md` e `docs/prove/prova-60-social-2-2026-11-17.md`.
   - **App, ricette dal sito del cuoco:** spariscono i simboli rimasti nel testo («l&#8217;aiuto» → «l’aiuto»), i numeri delle foto di GialloZafferano dentro i passaggi («formate una fontana 1 e…», «(7-8)», «pesce spada 10 e…») e la riga «sono stati inseriti link di affiliazione» presa per un passaggio. I numeri veri («cuocete 10 minuti», «2 uova») restano: si tolgono solo quelli che formano la sequenza delle foto.
   - **App:** se l'analisi non trova il procedimento, ora lo dice anche per TikTok («nel post non c'è il procedimento: scrivilo tu nel passo «Preparazione»») invece del solo «Analisi AI completata».
-  - **Server (da ripubblicare):** gli ingredienti non risultano più «indovinati, senza dosi» quando le dosi sono scritte (anche «4 tazze di latte», prima non riconosciuto); le parole storpiate dalla trascrizione si correggono («pezzemolo», «titolo» per tuorli, «figlio di carta forno»); i video in un'altra lingua escono in italiano anche quando Gemini li guarda («2 cups flour»); ogni ingrediente usato nei passaggi va anche nella lista; niente titoli generici («Pesce», «Dolce»); un «pronto in 15 minuti» più corto dei tempi dei passaggi non vale come tempo totale. Le analisi già in memoria si rifanno con le regole nuove.
+  - **Server (ripubblicato e provato lo stesso giorno):** gli ingredienti non risultano più «indovinati, senza dosi» quando le dosi sono scritte (anche «4 tazze di latte», prima non riconosciuto); le parole storpiate dalla trascrizione si correggono («pezzemolo», «titolo» per tuorli, «figlio di carta forno»); i video in un'altra lingua escono in italiano anche quando Gemini li guarda («2 cups flour»); ogni ingrediente usato nei passaggi va anche nella lista; niente titoli generici («Pesce», «Dolce»); un «pronto in 15 minuti» più corto dei tempi dei passaggi non vale come tempo totale. Le analisi già in memoria si rifanno con le regole nuove.
 
 - **Versione 178, titoli delle ricette tutti uguali**
   - **Il problema:** in «Le mie» i titoli presi dai post (per esempio «🥔 𝗣𝗔𝗟𝗟𝗜𝗡𝗘 𝗗𝗜 𝗣𝗔𝗧𝗔𝗧𝗘 𝗦𝗨𝗣𝗘𝗥 𝗖𝗥𝗜𝗦𝗣𝗬…») uscivano con un carattere diverso dagli altri, tutti in maiuscolo e con le emoji davanti. Le lettere «decorate» dei social sono simboli a parte e non usano il carattere dell'app.

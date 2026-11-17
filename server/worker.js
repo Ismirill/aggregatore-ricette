@@ -109,7 +109,7 @@ const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.tr
   r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html)) && !LOGIN_RX.test(r.html || '') && !r.retry); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
 // b.yt: il video YouTube della stessa ricetta, trovato sulla pagina del blog del cuoco quando il blog non scrive il procedimento
 const siteYtOf = b => /^[\w-]{11}$/.test(String(b.yt || '')) ? String(b.yt) : '';
-const ANALYZE_V = 6; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
+const ANALYZE_V = 9; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
 const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([ANALYZE_V, str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30), ...(siteYtOf(b) ? [siteYtOf(b)] : [])]), 30 * DAY,
   () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length && !(r.result.inferred && !r.result.steps?.length))); // le analisi «indovinate» (ingredienti tipici, nessun passaggio) non si salvano: la prossima volta si riprova
 
@@ -155,7 +155,8 @@ const SERV_RX = /(?:per|x|serves?|for)\s*\d+\s*(?:person|porzion|pers\b|people|s
 
 async function analyze(env, b) {
   const cats = (Array.isArray(b.cats) ? b.cats : []).slice(0, 30).map(c => str(c, 40));
-  const text = str(b.caption || b.title, 9000); // didascalia + parlato trascritto (un video di 3 minuti ≈ 3.000 caratteri)
+  const multi = firstRecipeOnly(str(b.caption || b.title, 9000));
+  const text = multi.text; // didascalia + parlato trascritto (un video di 3 minuti ≈ 3.000 caratteri)
   const prompt = `Questo è un post con una ricetta, salvato in un ricettario personale in italiano.
 Link: ${str(b.url, 500)}
 Fonte: ${str(b.source, 40)}${b.author ? ' · autore: ' + str(b.author, 80) : ''}
@@ -169,7 +170,7 @@ Estrai i dati in italiano. Se il post è in un'altra lingua (inglese, spagnolo�
 - title: SOLO il nome del piatto, senza hashtag, emoji, aggettivi pubblicitari o commenti: «Carbonara vegana, la più buona del mondo» → "Carbonara vegana"; «Come fare la pasta alla norma perfetta» → "Pasta alla norma". Il nome deve restare specifico, con gli ingredienti o la variante che lo distinguono: «Pizza in 1h 45 ~ Basilico, Limone, Parmigiano & Pepe nero» → "Pizza basilico, limone e parmigiano", non solo "Pizza"; «Pane fatto in casa in due passaggi» → "Pane fatto in casa", non solo "Pane". Mai un nome generico di una parola sola («Pesce», «Dolce», «Pane», «Torta», «Pasta», «Antipasto»): aggiungi ciò che lo distingue, preso dal testo («Orata al forno con limone», «Torta allo yogurt», «Antipasto di sfoglia e zucca»). Un nome descrittivo straniero si traduce («Chicken roll» → "Involtini di pollo").
 - cat: uno tra ${cats.map(c => `"${c}"`).join(', ')}.
 - servings: per quante persone sono le dosi, SOLO se scritto nel post ("per 4 persone", "4 porzioni", "ingredienti per 2"…); altrimenti 0. "per 10 minuti" non è una porzione.
-- ingredients: un ingrediente per voce, nell'ordine del post (una riga con due misure dello stesso ingrediente, es. «2 uova 100 g» o «3 cachi (circa 600 g)», è UN solo ingrediente: "2 uova (100 g)"), formato "quantità unità ingrediente" (es. "320 g spaghetti", "2 uova", "olio extravergine q.b."). Le quantità solo se scritte nel post: se un ingrediente è nominato senza dose, scrivi solo il nome (es. "pomodori secchi"), NON "q.b." e NON una dose tipica. Se il post non elenca ingredienti, metti i soli NOMI: prima quelli nominati nel testo e negli hashtag, poi quelli che vedi nell'immagine (mettili anche in seen), senza dosi, e imposta inferred a true. Usa nomi concreti, non categorie: niente "verdure" o "legumi" se sai quali sono (carote, cannellini). Se non riconosci il piatto, lascia vuoto.
+- ingredients: un ingrediente per voce, nell'ordine del post (se il testo contiene più ricette, es. «Recipe 1… Recipe 2…» o un confronto tra versioni, prendi SOLO la prima, con i suoi ingredienti e passaggi; una riga con due misure dello stesso ingrediente, es. «2 uova 100 g» o «3 cachi (circa 600 g)», è UN solo ingrediente: "2 uova (100 g)"), formato "quantità unità ingrediente" (es. "320 g spaghetti", "2 uova", "olio extravergine q.b."). Le quantità solo se scritte nel post: se un ingrediente è nominato senza dose, scrivi solo il nome (es. "pomodori secchi"), NON "q.b." e NON una dose tipica. Se il post non elenca ingredienti, metti i soli NOMI: prima quelli nominati nel testo e negli hashtag, poi quelli che vedi nell'immagine (mettili anche in seen), senza dosi, e imposta inferred a true. Usa nomi concreti, non categorie: niente "verdure" o "legumi" se sai quali sono (carote, cannellini). Se non riconosci il piatto, lascia vuoto.
 - steps: passaggi del procedimento SOLO se descritti nel post, un passaggio per voce, con le parole del post; altrimenti vuoto. Ogni ingrediente usato nei passaggi («aggiungi l'olio di semi», «una noce di burro») deve stare anche in ingredients, con la dose solo se scritta.
 - diets: solo tra ${DIETS.map(x => `"${x}"`).join(', ')} e solo se evidente dagli ingredienti elencati; nel dubbio nessuna.
 - country e region: zona d'origine del piatto se chiara dal nome (region solo per regioni italiane), altrimenti stringa vuota.
@@ -185,6 +186,7 @@ Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diet
   let r0;
   try { r0 = await aiJson(env, prompt, img); }
   catch (e) { if (!img) throw e; console.log('analisi senza immagine:', str(e.message, 200)); r0 = await aiJson(env, prompt, null); }
+  if (r0) doseStepsBack(r0);
   const r = r0 && faithful(r0, text);
   // YouTube: se il procedimento non è scritto né nella descrizione né sul sito del cuoco, Gemini guarda il video
   // i «capitoli» del video (00:00 Preparazione del sugo…) non sono un procedimento: si tolgono dai passaggi (sono le righe del testo che iniziano con un orario)
@@ -197,22 +199,80 @@ Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diet
   // se il link non è di YouTube ma il blog del cuoco ha il video della ricetta (b.yt), Gemini guarda quello
   const yid = r && r.is_recipe !== false && !b.haveSteps && !realSteps ? ytIdOf(b.url) || siteYtOf(b) : '';
   if (yid) try {
-    const v = await ytVideoRecipe(env, yid, ytIdOf(b.url) ? +b.seconds || 0 : 0);
+    const v = await ytVideoRecipe(env, yid, ytIdOf(b.url) ? +b.seconds || 0 : 0, multi.first);
     if (v && v.is_recipe !== false) {
       const st = (Array.isArray(v.steps) ? v.steps : []).map(x => str(x, 600).trim()).filter(Boolean).slice(0, 30);
       if (st.length) { r.steps = st; r.from_video = true; }
       const vt = str(v.title, 120).trim(); if (vt && (!r.title || r.title === r.title.toUpperCase() || r.title.length > 60)) r.title = vt; // «GNOCCHI AI FRUTTI DI MARE: la RICETTA…» → il nome del piatto
       // dal video del blog (b.yt) si prendono i passaggi: gli ingredienti scritti nel post o sul blog hanno le dosi e restano
       const ing = (Array.isArray(v.ingredients) ? v.ingredients : []).map(x => str(x, 120).trim()).filter(Boolean).slice(0, 40);
-      if (ing.length && (r.inferred || !r.ingredients.length || (ytIdOf(b.url) && ing.length > r.ingredients.length + 2))) { r.ingredients = ing; r.inferred = false; r.seen = []; r.from_video = true; }
+      // lo stesso ingrediente ripetuto più volte = il video mescola più ricette: resta l'elenco della descrizione (v180)
+      const bare = ing.map(x => x.toLowerCase().replace(/^[\d.,\/\s½¼¾⅓⅔]+/, '').replace(/^(?:(?:g|gr|kg|ml|cl|l)\b|cucchia\w*|tazz\w*)\s*(?:di\s+)?/, '').trim());
+      const mixed = bare.length - new Set(bare).size >= 2 && r.ingredients.length >= 3;
+      if (ing.length && !mixed && (r.inferred || !r.ingredients.length || (ytIdOf(b.url) && ing.length > r.ingredients.length + 2))) { r.ingredients = ing; r.inferred = false; r.seen = []; r.from_video = true; }
       if (!r.servings && +v.servings > 0 && +v.servings <= 100) r.servings = Math.round(+v.servings);
       if (!r.time && +v.time > 0 && +v.time <= 1440) { r.time = Math.round(+v.time); r.time_how = 'video'; r.time_note = ''; }
     }
   } catch (e) { console.log('video Gemini', e.message); }
   if (r && r.title) r.title = dishName(r.title);
+  if (r) await italianize(env, r);
+  if (r) r.title = specificTitle(r.title, r.ingredients, r.steps);
   // i passaggi presi dal parlato arrivano spesso in minuscolo («fare le melanzane a strisce»): iniziano con la maiuscola
   if (r && Array.isArray(r.steps)) r.steps = r.steps.map(x => String(x).trim()).filter(Boolean).map(x => x.charAt(0).toUpperCase() + x.slice(1));
   return { result: r };
+}
+
+// Descrizione con più ricette numerate («Recipe 1… Recipe 2… Recipe 3…», un video di confronto): resta solo la prima,
+// i modelli altrimenti uniscono gli elenchi. Le righe dopo l'ultima ricetta (consigli, cottura) restano (v180)
+function firstRecipeOnly(text) {
+  const head = /^\s*(?:recipe|ricetta|receta|recette)\s*(?:n\.?\s*|#\s*)?([1-9])\b[\s:.)\-–—]*(.*)$/i;
+  const lines = String(text).split('\n'), first = lines.map(l => l.match(head)).find(m => m && m[1] === '1');
+  if (!first || !lines.some(l => (l.match(head) || [])[1] === '2')) return { text, first: '' };
+  let skip = false; const out = [];
+  for (const l of lines) {
+    const m = l.match(head);
+    if (m) { skip = m[1] !== '1'; if (skip) continue; }
+    else if (skip && l.trim() && !/^\s*(?:[-*•–\d½¼¾⅓⅔]|\()/.test(l)) skip = false;
+    if (!skip) out.push(l);
+  }
+  return { text: out.join('\n'), first: str(first[2].replace(/[:.\s]+$/, ''), 100) };
+}
+// Il modello a volte mette l'elenco delle dosi tra i passaggi («2 tazze farina», «1 cucchiaino sale»): tornano tra gli ingredienti (v180)
+function doseStepsBack(r) {
+  if (!Array.isArray(r.steps)) return;
+  const dose = x => { x = String(x).trim(); return x.length < 70 && /^[\d½¼¾⅓⅔][\d\s.,\/½¼¾⅓⅔-]*\s*(?:(?:g|gr|kg|ml|cl|dl|l|oz|lb)\b|cucchia|tazz|bicchier|vasett|spicch|fett|pizzic|uov|bustin|[a-zà-ü]+)/i.test(x) && !/[.!]$/.test(x) && x.split(/\s+/).length <= 8; };
+  const moved = r.steps.filter(dose);
+  if (moved.length < 3) return;
+  const ing = Array.isArray(r.ingredients) ? r.ingredients.map(String) : [];
+  r.ingredients = [...ing, ...moved.filter(x => !ing.some(y => y.trim().toLowerCase() === String(x).trim().toLowerCase()))];
+  r.steps = r.steps.filter(x => !dose(x));
+}
+// Ingredienti rimasti in inglese (il modello a volte copia l'elenco della descrizione così com'è): una traduzione in più, solo in quel caso (v180)
+const EN_RX = /\b(?:cups?|tsp|tbsp|teaspoons?|tablespoons?|flour|sugar|butter|eggs?|salt|all-purpose|baking (?:soda|powder)|chopped|melted|minced|large|medium|cloves?|ounces?|pounds?|cream|milk|water|oil|pepper|onions?|garlic|chicken|beef)\b/gi;
+async function italianize(env, r) {
+  const ing = Array.isArray(r.ingredients) ? r.ingredients : [];
+  if (ing.length < 2 || (ing.join(' ').match(EN_RX) || []).length < Math.max(2, ing.length / 3)) return;
+  try {
+    const src = { ingredients: ing.slice(0, 40).map(String), steps: (Array.isArray(r.steps) ? r.steps : []).slice(0, 30).map(String) };
+    const out = await aiJson(env, `Traduci in italiano questi ingredienti e passaggi di una ricetta, con i termini delle cucine italiane. I numeri restano esattamente gli stessi; traduci le unità (cup/cups → tazza/tazze, tsp → cucchiaino, tbsp → cucchiaio, oz → oncia, lb → libbra) e i nomi ("all-purpose flour" → "farina 00", "brown sugar" → "zucchero di canna", "baking soda" → "bicarbonato", "sour cream" → "panna acida"). Stesso numero di voci, stesso ordine. Rispondi solo con JSON nello stesso formato:\n${JSON.stringify(src)}`);
+    if (Array.isArray(out?.ingredients) && out.ingredients.length === src.ingredients.length) r.ingredients = out.ingredients.map(x => str(x, 120).trim());
+    if (Array.isArray(out?.steps) && out.steps.length === src.steps.length && src.steps.length) r.steps = out.steps.map(x => str(x, 600).trim());
+  } catch (e) { console.log('traduzione ingredienti', e.message); }
+}
+// Titolo di una sola parola generica («Pesce», «Dolce»): si completa con la cottura e i due ingredienti principali dei passaggi (v180)
+const GENERIC_TITLE = /^(?:pesce|dolce|dolcetti|torta|pane|pasta|antipasto|carne|pollo|verdure|insalata|zuppa|biscotti|primo|secondo|contorno|ricetta|piatto)$/i;
+const STAPLE = /^(?:sale|pepe|olio|aglio|acqua|zucchero|farina|burro|uova?|latte|lievito|prezzemolo|basilico|limone)\b/i;
+function specificTitle(title, ingredients, steps) {
+  const t = String(title || '').trim();
+  if (!GENERIC_TITLE.test(t)) return t;
+  const st = (Array.isArray(steps) ? steps : []).join(' ').toLowerCase();
+  const how = /\bforno\b|infornat/.test(st) ? 'al forno' : /friggi|fritt/.test(st) ? 'fritto' : /griglia|piastra/.test(st) ? 'alla griglia' : /vapore/.test(st) ? 'al vapore' : /padella/.test(st) ? 'in padella' : '';
+  const base = t.toLowerCase();
+  const names = (Array.isArray(ingredients) ? ingredients : []).map(x => String(x).replace(/^[\d.,\/\s½¼¾]+(?:(?:g|gr|kg|ml|cl|l)\b|cucchia\w*|tazz\w*|vasett\w*|spicch\w*|fett\w*)?\s*(?:di\s+|d')?/i, '').replace(/\s*\(.*$/, '').trim().toLowerCase())
+    .filter(x => x && x.length < 25 && !STAPLE.test(x) && !x.includes(base));
+  const main = [...new Set(names)].slice(0, 2);
+  const out = [t, how, main.length ? 'con ' + main.join(' e ') : ''].filter(Boolean).join(' ');
+  return out === t ? t : out;
 }
 
 // Titoli dei post: resta solo il nome del piatto (stessa funzione nell'app)
@@ -630,13 +690,13 @@ async function socialSite(desc) {
 
 // Gemini guarda il video YouTube (link pubblico passato direttamente all'API) e trascrive ingredienti e passaggi come detti e mostrati.
 // Si usa solo quando il procedimento non è scritto da nessuna parte; consuma quota del piano gratuito, quindi video fino a 25 minuti
-async function ytVideoRecipe(env, id, seconds) {
+async function ytVideoRecipe(env, id, seconds, only = '') {
   if (!env.GEMINI_KEY || !id || (seconds && seconds > 1500)) return null;
   const prompt = `Guarda questo video di cucina e trascrivi fedelmente la ricetta così come viene detta e mostrata: sei un trascrittore, non un cuoco. Rispondi in italiano, SOLO con JSON: se il video è in un'altra lingua traduci in italiano titolo (i nomi di piatti noti restano com'è d'uso in Italia), ingredienti e passaggi, lasciando i numeri delle dosi come detti e traducendo le unità (cup/cups → tazza/tazze, tbsp → cucchiaio, tsp → cucchiaino, oz e lb restano con la loro abbreviazione):
 {"is_recipe":true,"title":"nome del piatto","servings":0,"time":0,"ingredients":["quantità unità ingrediente, come detto o mostrato (es. \"400 g spaghetti\", \"3 spicchi aglio\"); solo il nome se la dose non viene detta"],"steps":["un passaggio per voce, in ordine, con le parole del cuoco, comprese temperature e tempi detti"]}
 steps: ogni passaggio è una frase completa, con la maiuscola all'inizio e il punto alla fine, che descrive un'azione compiuta: unisci nella stessa voce le frasi brevi della stessa azione («puliamo la cipolla», «la tagliamo in otto pezzi» → "Puliamo la cipolla e la tagliamo in otto pezzi."), e lascia fuori i commenti che non sono istruzioni. Di norma bastano da 5 a 15 passaggi.
 Un passaggio è un'azione di cucina (tagliare, mescolare, impastare, cuocere, far riposare, servire). NON sono passaggi, e non vanno in steps: l'elenco degli ingredienti detto a voce («un etto di mortadella», «parmigiano reggiano»: vanno solo in ingredients), i saluti, le battute, i racconti e le opinioni del cuoco («siamo nella Pork Valley», «il ripieno il giorno dopo è tutta un'altra cosa»). Un consiglio su come fare si tiene, scritto come istruzione («Il ripieno è meglio prepararlo il giorno prima.»).
-Ogni ingrediente usato nei passaggi deve stare anche in ingredients (senza dose se non viene detta), e il titolo è il nome specifico del piatto, mai una parola generica come «Pesce» o «Dolce».
+Se il video prepara o confronta più ricette, trascrivi SOLO la prima, con i suoi ingredienti e passaggi.${only ? ` Questo video confronta più ricette: trascrivi SOLO «${only}», ignora le altre.` : ''} Ogni ingrediente usato nei passaggi deve stare anche in ingredients (senza dose se non viene detta), e il titolo è il nome specifico del piatto, mai una parola generica come «Pesce» o «Dolce».
 servings: per quante persone, solo se detto, altrimenti 0. time: minuti totali dall'inizio al piatto pronto solo se detto o chiaramente deducibile dai tempi detti, altrimenti 0. Non inventare dosi, tempi o passaggi non detti né mostrati. is_recipe false se il video non è una ricetta.`;
   const body = { contents: [{ parts: [{ file_data: { file_uri: `https://www.youtube.com/watch?v=${id}` } }, { text: prompt }] }],
     generationConfig: { temperature: 0.2, maxOutputTokens: 4000, responseMimeType: 'application/json', mediaResolution: 'MEDIA_RESOLUTION_LOW' } };
