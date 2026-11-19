@@ -857,6 +857,21 @@ details summary{cursor:pointer}
 :root[data-sito] .item:nth-child(4n+3)::before{width:30px;height:52px;top:-18px;margin-left:-15px;background-image:url(casa/puntina-crema.webp)}
 :root[data-sito] .item:nth-child(4n)::before{width:100px;height:24px;top:-11px;margin-left:-50px;background-image:url(casa/nastro-pois.webp);transform:rotate(3deg)}
 :root[data-sito] .list{gap:34px 26px;padding-top:12px}
+/* polaroid vere (v181): cartoncino piatto e nitido, con il filo del bordo e gli angoli presi da stampe Polaroid generate con MiniMax H3 sul PC
+   (casa/polaroid-1..3.webp), usato come bordo elastico: la scheda tiene la sua misura. Il rilievo viene da quello che ha una stampa vera
+   appoggiata sul tavolo: ombra netta a contatto più ombra morbida, la foto incassata e lucida */
+:root[data-sito] .list>.item,:root[data-sito] .vgrid>.item,:root[data-sito] .hscroll>.item{background:none;box-shadow:none;border-radius:0;border:14px solid transparent;border-image:url(casa/polaroid-1.webp) 26 fill/14px stretch;padding:2px 0 0;filter:drop-shadow(0 1px .6px rgba(30,24,20,.30)) drop-shadow(0 3px 3px rgba(30,24,20,.14)) drop-shadow(0 14px 18px rgba(30,24,20,.16))}
+:root[data-sito] .list>.item:nth-child(3n+2),:root[data-sito] .vgrid>.item:nth-child(3n+2),:root[data-sito] .hscroll>.item:nth-child(3n+2){border-image-source:url(casa/polaroid-2.webp)}
+:root[data-sito] .list>.item:nth-child(3n),:root[data-sito] .vgrid>.item:nth-child(3n),:root[data-sito] .hscroll>.item:nth-child(3n){border-image-source:url(casa/polaroid-3.webp)}
+:root[data-sito] .list>.item:hover,:root[data-sito] .vgrid .item:hover{box-shadow:none;filter:drop-shadow(0 2px 1px rgba(30,24,20,.22)) drop-shadow(0 8px 8px rgba(30,24,20,.14)) drop-shadow(0 26px 30px rgba(30,24,20,.2))}
+/* la foto incassata nel cartoncino, con il lucido della stampa istantanea */
+:root[data-sito] .item .thumb::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18),inset 1px 2px 3px rgba(0,0,0,.30),inset 0 -1px 0 rgba(255,255,255,.4);background:linear-gradient(125deg,rgba(255,255,255,.20),rgba(255,255,255,.04) 30%,rgba(255,255,255,0) 55%,rgba(255,255,255,.06))}
+:root[data-sito] .item::before{margin-top:-14px}
+:root[data-sito] .sPol{background:none;box-shadow:none;border:14px solid transparent;border-bottom-width:40px;border-image:url(casa/polaroid-2.webp) 26 fill/14px 14px 40px stretch;padding:0;filter:drop-shadow(0 1px .8px rgba(0,0,0,.35)) drop-shadow(0 4px 4px rgba(0,0,0,.18)) drop-shadow(0 20px 24px rgba(0,0,0,.3))}
+:root[data-sito] .sPol.p2,:root[data-sito] .sSide .sPol.s2{border-image-source:url(casa/polaroid-3.webp)}
+:root[data-sito] .sPol .foto{box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+:root[data-sito] .sPol .fis{margin-top:-14px}
+:root[data-sito] .sPol::after{content:'';position:absolute;left:0;right:0;top:0;aspect-ratio:1;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18),inset 1px 2px 3px rgba(0,0,0,.3);background:linear-gradient(125deg,rgba(255,255,255,.2),rgba(255,255,255,0) 40%)}
 :root[data-sito] .vgrid{gap:34px 26px;padding-top:10px}
 :root[data-sito] .occh{margin:0 0 6px;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#3f7a2e}
 :root[data-sito] .vsec h3,:root[data-sito] .hsec h3,:root[data-sito] .bhead h2{font-size:2.3rem}
@@ -1959,7 +1974,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=180; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=181; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){

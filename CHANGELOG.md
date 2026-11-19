@@ -6,6 +6,9 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-19
 
+- **Versione 181, Polaroid vere nel sito da computer**
+  - Le ricette e le foto grandi in alto sembrano stampe Polaroid vere: cartoncino piatto e nitido, bianco opaco, angoli appena arrotondati e filo dello spessore sul bordo, presi da stampe generate con MiniMax H3 sul PC (`www/casa/polaroid-1..3.webp`, 30 KB in tutto) e usati come bordo elastico, così il layout resta identico. Il rilievo viene da un'ombra netta a contatto più una morbida, e dalla foto incassata con un leggero lucido; le foto grandi hanno il bordo inferiore largo. Una prima versione con il cartoncino «bombato» è stata scartata. Solo sito da 900 px in su: l'app sul telefono non cambia. Confronti in `docs/proposte-polaroid/`.
+
 - **Versione 180, correzioni dopo 100 prove con collaudatore locale**
   - **La prova:** 100 link nuovi (25 YouTube, TikTok, Instagram e Facebook) importati con l'app e il server vero; il giudizio l'ha dato Qwen 3.6 con ragionamento sul PC con la scheda grafica, scelto con un esame su 8 ricette (l'unico senza falsi allarmi). Resoconto in `docs/prove/prova-100-llm-locale-2026-11-19.md`.
   - **Server, TikTok di nuovo funzionante:** dal 2026-11 la pagina di incorporamento di TikTok non ha più i dati e tutti i link davano «TikTok non risponde». Ora si legge la pagina del video come da iPhone e il video si scarica con il suo cookie (didascalia e parlato tornano).
