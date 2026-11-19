@@ -4,6 +4,15 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-19
+
+- **Versione 180, correzioni dopo 100 prove con collaudatore locale**
+  - **La prova:** 100 link nuovi (25 YouTube, TikTok, Instagram e Facebook) importati con l'app e il server vero; il giudizio l'ha dato Qwen 3.6 con ragionamento sul PC con la scheda grafica, scelto con un esame su 8 ricette (l'unico senza falsi allarmi). Resoconto in `docs/prove/prova-100-llm-locale-2026-11-19.md`.
+  - **Server, TikTok di nuovo funzionante:** dal 2026-11 la pagina di incorporamento di TikTok non ha più i dati e tutti i link davano «TikTok non risponde». Ora si legge la pagina del video come da iPhone e il video si scarica con il suo cookie (didascalia e parlato tornano).
+  - **Server, sito del cuoco:** la ricetta del sito vale solo se ogni parola del titolo del video si ritrova nel suo nome o nei suoi ingredienti (un link «ricetta stampabile» portava all'elenco del blog e veniva presa la prima ricetta, con finocchi al posto delle patate).
+  - **Server:** passaggi ripuliti da capitoli del video, titoletti, link e firme social (se non resta un procedimento, Gemini guarda il video); voci dell'elenco «Ingredienti:» saltate dal modello rimesse in lista; diete in contrasto con gli ingredienti tolte («Senza glutine» con i biscotti); un secondo tentativo quando il modello risponde male. Analisi in memoria rifatte (ANALYZE_V 10).
+  - **App:** stesso filtro sulle righe della descrizione usate come passaggi provvisori; via i saluti finali («spero che vi piacciano… A presto!»); se nel post non c'è la ricetta, l'app lo dice invece di «elencati gli ingredienti tipici» con la lista vuota.
+
 ## 2026-11-17
 
 - **Server ripubblicato con le regole della 179, più tre correzioni nuove (solo server, l'app non cambia)**

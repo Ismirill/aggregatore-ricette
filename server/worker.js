@@ -109,7 +109,7 @@ const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.tr
   r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html)) && !LOGIN_RX.test(r.html || '') && !r.retry); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
 // b.yt: il video YouTube della stessa ricetta, trovato sulla pagina del blog del cuoco quando il blog non scrive il procedimento
 const siteYtOf = b => /^[\w-]{11}$/.test(String(b.yt || '')) ? String(b.yt) : '';
-const ANALYZE_V = 9; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
+const ANALYZE_V = 10; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
 const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([ANALYZE_V, str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30), ...(siteYtOf(b) ? [siteYtOf(b)] : [])]), 30 * DAY,
   () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length && !(r.result.inferred && !r.result.steps?.length))); // le analisi «indovinate» (ingredienti tipici, nessun passaggio) non si salvano: la prossima volta si riprova
 
@@ -186,13 +186,18 @@ Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diet
   let r0;
   try { r0 = await aiJson(env, prompt, img); }
   catch (e) { if (!img) throw e; console.log('analisi senza immagine:', str(e.message, 200)); r0 = await aiJson(env, prompt, null); }
+  // risposta vuota o non leggibile (succede ogni tanto, anche con un post valido): un secondo tentativo prima di arrendersi (v180)
+  if (!r0 || typeof r0 !== 'object') { try { r0 = await aiJson(env, prompt, null); } catch (e) { console.log('analisi, secondo tentativo:', str(e.message, 200)); } }
   if (r0) doseStepsBack(r0);
+  if (r0) dietCheck(r0);
   const r = r0 && faithful(r0, text);
+  if (r && !r.inferred) listCheck(r, text);
   // YouTube: se il procedimento non è scritto né nella descrizione né sul sito del cuoco, Gemini guarda il video
   // i «capitoli» del video (00:00 Preparazione del sugo…) non sono un procedimento: si tolgono dai passaggi (sono le righe del testo che iniziano con un orario)
   const norm = x => String(x).trim().toLowerCase().replace(/[.\s]+$/, '');
   const chapters = new Set((text.match(/^\s*(?:\d{1,2}:)?\d{1,2}:\d{2}\s*[-–—)]?\s*\S.*$/gm) || []).map(l => norm(l.replace(/^\s*[\d:]+\s*[-–—)]?\s*/, ''))));
   if (r && chapters.size && Array.isArray(r.steps)) r.steps = r.steps.filter(x => !chapters.has(norm(x)));
+  if (r) junkSteps(r);
   // passaggi veri = almeno due frasi di una certa lunghezza
   // (in un video oltre i 3 minuti ne servono almeno tre: due righe di appunti, «Il ripieno va preparato il giorno prima», non bastano)
   const realSteps = (r?.steps || []).filter(x => String(x).trim().length >= 30).length >= ((+b.seconds || 0) > 180 ? 3 : 2);
@@ -246,6 +251,49 @@ function doseStepsBack(r) {
   const ing = Array.isArray(r.ingredients) ? r.ingredients.map(String) : [];
   r.ingredients = [...ing, ...moved.filter(x => !ing.some(y => y.trim().toLowerCase() === String(x).trim().toLowerCase()))];
   r.steps = r.steps.filter(x => !dose(x));
+}
+// Righe della descrizione finite tra i passaggi: capitoli del video («‣ 1:18 Cottura ⏲»), titoletti («INGREDIENTI», «PER IL SUGO»),
+// link e firme social («■ 𝗜𝗻𝘀𝘁𝗮𝗴𝗿𝗮𝗺 ► https://…»), le righe dell'elenco ingredienti ripetute. Tolte queste, se non resta un procedimento
+// vero Gemini guarda il video (v180)
+function junkSteps(r) {
+  if (!Array.isArray(r.steps)) return;
+  const ing = new Set((Array.isArray(r.ingredients) ? r.ingredients : []).map(x => String(x).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '')));
+  const junk = x => { x = String(x).trim(); const k = x.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+    return !x || /^\W*\(?(?:\d{1,2}:)?\d{1,2}:\d{2}\b/.test(x) || /https?:\/\/|www\.|bit\.ly/i.test(x) || /[\u{1D400}-\u{1D7FF}═■►▶]/u.test(x)
+      || (x.length < 40 && x === x.toUpperCase() && /\p{L}{3}/u.test(x)) || ing.has(k) || /^(?:a presto|alla prossima|buon appetito)[!. ]*$/i.test(x); };
+  r.steps = r.steps.filter(x => !junk(x));
+}
+// Diete in contrasto con gli ingredienti (una cheesecake con biscotti segnata «Senza glutine»): si tolgono (v180)
+const DIET_NO = {
+  'Senza glutine': /farin(?:a|e)(?! di (?:riso|mais|ceci|mandorl|cocco|grano saraceno))|biscott|pane\b|pangrattat|pan grattat|pasta\b|spaghett|savoiard|semola|orzo|farro|couscous|cous cous|pan di spagna|crackers?|grissin|seitan|birra/i,
+  'Senza lattosio': /latte\b(?! (?:di|vegetale)\b)|burro\b|panna\b|formagg|mascarpone|ricotta|mozzarella|parmigian|pecorino|grana\b|yogurt|stracchino|scamorza|provola|besciamella/i,
+  'Senza uova': /\buov[ao]\b|tuorl|album|maionese|savoiard/i,
+  Vegano: /carne|pollo|maiale|manzo|vitello|pesce|tonno|salmone|gamber|prosciutt|pancett|guancial|salame|uov[ao]|tuorl|latte\b(?! (?:di|vegetale)\b)|burro\b|panna\b|formagg|mascarpone|ricotta|mozzarella|parmigian|pecorino|miele|yogurt|acciugh|alici/i,
+  Vegetariano: /carne|pollo|tacchino|maiale|manzo|vitello|pesce|tonno|salmone|gamber|cozz|vongol|calamar|polp[oi]\b|prosciutt|pancett|guancial|salame|salsicc|speck|mortadell|acciugh|alici|wurstel|brodo di (?:carne|pollo|pesce)/i,
+  'Senza frutta secca': /noc[ei]|nocciol|mandorl|pistacch|anacard|pinol|arachid/i,
+};
+function dietCheck(r) {
+  if (!Array.isArray(r.diets) || !r.diets.length) return;
+  const ing = (Array.isArray(r.ingredients) ? r.ingredients : []).join(' ; ');
+  r.diets = r.diets.filter(d => !(DIET_NO[d] && DIET_NO[d].test(ing)));
+}
+// Il post ha l'elenco «Ingredienti:» scritto, una voce per riga, e il modello ne salta qualcuna («vino bianco qb»): si rimette in lista (v180)
+function listCheck(r, text) {
+  const t = String(text).replace(/parlato nel video:[\s\S]*/i, ''), m = t.match(/ingredienti[^\n:]{0,40}:?[ \t]*\n([\s\S]{10,2500}?)(?:\n\s*\n\s*(?:procedimento|preparazione|come si fa|metodo)|\n\s*(?:procedimento|preparazione)\s*:|$)/i);
+  if (!m || !Array.isArray(r.ingredients)) return;
+  const stem = w => w.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z]/g, '').replace(/[aeiou]$/, '').slice(0, 5);
+  if ((m[1].match(EN_RX) || []).length >= 2) return; // elenco in inglese: lo traduce italianize
+  const have = new Set(r.ingredients.join(' ').split(/\s+/)/* stem toglie la vocale finale: uova/uovo, pomodoro/pomodori */.map(stem).filter(x => x.length >= 3));
+  const add = [];
+  for (let line of m[1].split('\n')) {
+    line = line.replace(/^\s*[-•*·▪✔✓►‣○●◦–]+\s*/, '').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '').trim();
+    if (!line || line.length > 60 || /https?:|#|@|©|®|\bsrl\b|s\.r\.l|riservat|^per\s|:$/i.test(line)) continue;
+    const ws = line.split(/\s+/).map(stem).filter(x => x.length >= 3 && !/^(?:circa|piace|grand|picco|medio|fresc|quant|abbon|qualc)/.test(x));
+    if (!ws.length || ws.some(w => have.has(w))) continue;
+    add.push(line.replace(/\s*,?\s*\b(?:q\.?\s?b\.?|ab)\s*$/i, '').trim());
+  }
+  if (add.length && add.length <= 3) r.ingredients.push(...add);
 }
 // Ingredienti rimasti in inglese (il modello a volte copia l'elenco della descrizione così com'è): una traduzione in più, solo in quel caso (v180)
 const EN_RX = /\b(?:cups?|tsp|tbsp|teaspoons?|tablespoons?|flour|sugar|butter|eggs?|salt|all-purpose|baking (?:soda|powder)|chopped|melted|minced|large|medium|cloves?|ounces?|pounds?|cream|milk|water|oil|pepper|onions?|garlic|chicken|beef)\b/gi;
@@ -575,11 +623,33 @@ Rispondi solo con JSON: {"items":[{"name":"","grams":0,"kcal":0,"protein":0,"car
 const PREVIEW_UA = 'Gnamina/1.0 (+https://gnamina.it/)';
 // Trascrizione del parlato di un video (Whisper su Workers AI). Solo video brevi e non troppo pesanti: la quota è condivisa.
 // info.partial diventa true se del video si è potuta scaricare (e quindi trascrivere) solo la prima parte
+const IPHONE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+async function tiktokPage(url, id) {
+  for (let i = 0; i < 2; i++) {
+    try {
+      const r = await fetch(url, { headers: { 'User-Agent': IPHONE_UA, 'Accept-Language': 'it-IT,it;q=0.9' }, redirect: 'follow' });
+      if (r.ok) {
+        const html = await r.text(), m = html.match(/<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/);
+        const sc = m && JSON.parse(m[1]).__DEFAULT_SCOPE__ || {};
+        const it = (sc['webapp.reflow.video.detail'] || sc['webapp.video-detail'] || {}).itemInfo?.itemStruct;
+        if (it && (it.desc || it.video)) {
+          const v = it.video || {}, cookie = (r.headers.getSetCookie?.() || []).map(c => c.split(';')[0]).join('; ');
+          return { tk: { text: str(it.desc, 6000), author: str(it.author?.nickname || it.author?.uniqueId, 80), image: str(v.originCover || v.cover, 1000),
+            url: `https://www.tiktok.com/@${it.author?.uniqueId || 'tiktok'}/video/${id}`, video: str(v.playAddr || v.downloadAddr, 2000), seconds: +v.duration || 0 },
+            info: { ua: IPHONE_UA, cookie } };
+        }
+      }
+    } catch (e) { console.log('TikTok pagina', e.message); }
+    await new Promise(ok => setTimeout(ok, 1200));
+  }
+  return null;
+}
 async function transcribe(env, videoUrl, seconds, referer = 'https://www.tiktok.com/', info = {}) {
   try {
     if (!env?.AI || !/^https:\/\//.test(videoUrl) || !seconds || seconds > 600) return '';
     // solo i primi 24 MB: i video dei social hanno l'indice all'inizio, quindi anche un pezzo si legge (es. 92 s di un reel di 125 s da 31 MB)
-    const r = await fetch(videoUrl, { headers: { 'User-Agent': PREVIEW_UA, Referer: referer, Range: 'bytes=0-23999999' } });
+    // TikTok dal 2026-11: il video si scarica solo con il browser e il cookie della pagina (info.ua, info.cookie)
+    const r = await fetch(videoUrl, { headers: { 'User-Agent': info.ua || PREVIEW_UA, Referer: referer, Range: 'bytes=0-23999999', ...(info.cookie ? { Cookie: info.cookie } : {}) } });
     if (!r.ok) return '';
     const buf = await r.arrayBuffer();
     if (buf.byteLength > 24e6) return '';
@@ -649,6 +719,11 @@ async function creatorRecipe(desc, title, timeoutMs = 9000) {
         let rec; try { const j = JSON.parse(m[1]); rec = [j, ...(j['@graph'] || []), ...(Array.isArray(j) ? j : [])].find(x => x && (x['@type'] === 'Recipe' || (Array.isArray(x['@type']) && x['@type'].includes('Recipe')))); } catch { continue; }
         if (!rec || !rec.recipeInstructions) continue;
         const rw = words(rec.name || ''); if (tw.filter(w => rw.some(x => x.startsWith(w.slice(0, 5)))).length < Math.min(2, tw.length)) continue;
+        // ogni parola del titolo del video deve ritrovarsi nel nome o negli ingredienti della ricetta del sito: «Fusi di pollo al forno con patate»
+        // non è «Fusi di pollo al forno con finocchi e funghi» (un link «ricetta stampabile» che porta all'elenco delle ricette) (v180)
+        const ingW = (rec.recipeIngredient || []).map(String).flatMap(l => words(l.replace(/\d+(?:[.,]\d+)?/g, '')));
+        const missing = tw.filter(w => !rw.some(x => x.startsWith(w.slice(0, 5))) && !ingW.some(x => x.startsWith(w.slice(0, 5))));
+        if (missing.length > (tw.length > 5 ? 1 : 0)) { console.log('sito del cuoco: piatto diverso', u, missing.join(' ')); continue; }
         // stesso piatto se gli ingredienti del video si ritrovano sul sito (almeno la metà, e almeno due); le dosi possono differire
         if (descNames.size >= 3) {
           const siteW = (rec.recipeIngredient || []).map(String).flatMap(l => words(l.replace(/\d+(?:[.,]\d+)?/g, '')).map(x => x.slice(0, 5)));
@@ -808,10 +883,14 @@ async function preview(env, b) {
       if (v) tk = { text: str(v.itemInfos?.text, 6000), author: str(v.authorInfos?.nickName || v.authorInfos?.uniqueId, 80), image: str((v.itemInfos?.covers || [])[0], 1000), url: id ? `https://www.tiktok.com/@${v.authorInfos?.uniqueId || 'tiktok'}/video/${id}` : u.href,
         video: str((v.itemInfos?.video?.urls || [])[0], 2000), seconds: +v.itemInfos?.video?.videoMeta?.duration || 0 };
     } catch {}
+    // dal 2026-11 la pagina di incorporamento non ha più i dati (li carica dopo, con JavaScript): si legge la pagina del video come da iPhone,
+    // che ha ancora didascalia, autore, copertina e durata; il video si scarica con il suo cookie (v180)
+    let tkInfo = {};
+    if (id && !tk) { const p = await tiktokPage(u.pathname.includes('/video/') ? u.origin + u.pathname : `https://www.tiktok.com/@tiktok/video/${id}`, id); if (p) { tk = p.tk; tkInfo = p.info; } }
     if (id && !tk) throw Object.assign(new Error('TikTok non risponde, riprova tra qualche minuto'), { status: 502 });
     if (tk) {
       // il parlato del video, trascritto (nei reel la ricetta spesso è solo detta a voce), e la ricetta sul sito del cuoco se la didascalia ha il link
-      const info = {};
+      const info = { ...tkInfo };
       const [tr, site] = await Promise.all([b.transcribe === false ? '' : transcribe(env, tk.video, tk.seconds, undefined, info), socialSite(tk.text)]), transcript = tr || '';
       const esc = v => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
       return { html: `<html><head><title>${esc(tk.text.split('\n')[0].slice(0, 140))}</title><meta property="og:title" content="${esc(tk.text)}"><meta property="og:site_name" content="${esc(tk.author)}"><meta property="og:image" content="${esc(tk.image)}">${site}</head></html>`, url: tk.url, transcript, site: !!site, ...(tr === null ? { retry: true } : {}), ...(info.partial && transcript ? { partial: true } : {}) };
