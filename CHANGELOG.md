@@ -6,6 +6,14 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-21
 
+- **Versione 183, poche scritte dappertutto, scelte e filtri più leggeri, pane «un pasto»**
+  - **Menu guidato:** le scelte sono pillole vuote, più piccole e in colonne uguali (tre per riga le domande, due le caselle); quella scelta ha bordo e scritta colorati (carota sul tema scuro, pomodoro sul chiaro e sul sito), senza riempimento. «Settimana» al posto di «La settimana»; «Vegetariano» e «Pescetariano» senza la spiegazione tra parentesi.
+  - **Pane:** le risposte sono «Un pasto», «Ogni pasto», «No». Con «Un pasto» il pane va a cena, oppure a pranzo se nel menu ci sono solo i pranzi (prima, con i soli pranzi, non compariva mai).
+  - **Filtri, categorie e titolo di copertina del Libro:** stessa pillola vuota con il bordo colorato su quella attiva (prima piene, bianche o rosse).
+  - **Scritte sfoltite:** pagina vuota di «Le mie» (tre pulsanti a pillola senza riga sotto, tre passi brevi per TikTok e Instagram), Sfida (le regole si aprono con «Regole»), Chat, Impostazioni (una riga per zona prezzi, codice ricettario e backup), scheda ricetta («Cucina con me»), modulo «Nuova ricetta», sottopagine del Libro.
+  - **Difetti corretti:** nel modulo «Nuova ricetta» della 182 i tre pulsanti della foto spingevano la pagina oltre il bordo destro e tagliavano «Avanti» (tolta la misura forzata dei pulsanti); nei filtri sul telefono l'etichetta «Tipo di piatto tra le italiane» finiva sopra i pulsanti.
+  - **Controlli:** telefono con tema scuro e chiaro, stili Crema e Rivista, sito da computer; menu creato di prova; Libro con tre ricette; chat viste con dati finti (non con un account vero). Immagini in `docs/proposte-menu/`.
+
 - **Versione 182, un solo carattere, pulsanti tutti uguali, «Il mio menu» più semplice**
   - **Caratteri:** Nunito per tutti i titoli e i testi, nell'app e nel sito; Fredoka solo su barra in basso, logo e pulsanti; Caveat solo per la scrittura a mano di Polaroid e fogli di quaderno. Tolti Fraunces e Inter (due caratteri in meno da scaricare). I modelli di stampa del Libro tengono i loro.
   - **Pulsanti:** tutti a pillola con la palette della cucina: pieno rosso pomodoro per l'azione principale, crema con il bordo per le altre. Stessa forma per le scelte (prima caselle grigie), i filtri e le caselle da spuntare. Non toccati le icone in alto, la barra in basso e i pulsanti colorati dentro la scheda della ricetta.

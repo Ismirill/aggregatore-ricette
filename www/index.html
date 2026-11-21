@@ -1023,28 +1023,40 @@ details summary{cursor:pointer}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]){--kb2:var(--k-to);--kt2:var(--fg)}}
 :root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]){--kb2:var(--k-to);--kt2:var(--fg)}
 @media (min-width:900px){:root[data-sito]:root[data-sito]{--kb2:var(--k-bb);--kt2:var(--k-bb);--k-in:#fff7ef}}
-:root:not(#_) .btn:not(.cookBtn):not(.dacts *){font-family:'Fredoka',var(--sans);font-weight:600;letter-spacing:.01em;border-radius:999px;border:3px solid var(--kb2);background:var(--k-in);color:var(--kt2);box-shadow:none;min-height:2.9rem;padding:7px 18px;line-height:1.15}
+:root:not(#_) .btn:not(.cookBtn):not(.dacts *){font-family:'Fredoka',var(--sans);font-weight:600;letter-spacing:.01em;border-radius:999px;border:3px solid var(--kb2);background:var(--k-in);color:var(--kt2);box-shadow:none;line-height:1.15}
 :root:not(#_) .btn.pri:not(.cookBtn):not(.dacts *),:root:not(#_) .cbtn,:root:not(#_) .fab{font-family:'Fredoka',var(--sans);font-weight:600;border-radius:999px;border:3px solid var(--k-po);background:var(--k-po);color:#fff;box-shadow:none}
 :root:not(#_) .btn.danger:not(.dacts *){border-color:var(--k-po);color:var(--k-po)}
 :root:not(#_) .btn:not(.dacts *):hover,:root:not(#_) .cbtn:hover,:root:not(#_) .fab:hover{filter:brightness(.96)}
 :root:not(#_) .btn:not(.dacts *):active,:root:not(#_) .cbtn:active,:root:not(#_) .fab:active{transform:translateY(1px)}
-:root:not(#_) .chip{font-family:'Fredoka',var(--sans);font-weight:500;border-radius:999px;border:2px solid var(--k-to);background:var(--k-in);color:var(--kt2)}
-:root:not(#_) .chip.on{background:var(--k-po);border-color:var(--k-po);color:#fff}
-/* scelte: ogni voce è un pulsante a pillola, quella scelta è piena */
-:root:not(#_) .seg{display:flex;flex-wrap:wrap;gap:8px;background:none;padding:0;border-radius:0}
-:root:not(#_) .seg label{flex:1 1 auto}
-:root:not(#_) .seg span{font-family:'Fredoka',var(--sans);font-weight:600;border:3px solid var(--kb2);border-radius:999px;background:var(--k-in);color:var(--kt2);padding:10px 14px;white-space:nowrap;box-shadow:none}
-:root:not(#_) .seg input:checked+span{background:var(--k-po);border-color:var(--k-po);color:#fff;box-shadow:none}
+/* scelte: pillole vuote, piccole e in colonne uguali; quella scelta ha il bordo colorato (niente riempimento) */
+:root{--ksel:var(--k-po)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]){--ksel:var(--k-ca)}}
+:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]){--ksel:var(--k-ca)}
+@media (min-width:900px){:root[data-sito]:root[data-sito]{--ksel:var(--k-po)}}
+:root:not(#_) .seg,:root:not(#_) .bform .checks,:root:not(#_) #dietChecks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:none;padding:0;border-radius:0;max-width:30rem}
 :root:not(#_) .checks{gap:8px}
-:root:not(#_) .checks label{position:relative;font-family:'Fredoka',var(--sans);font-weight:600;font-size:.95rem;border:3px solid var(--kb2);border-radius:999px;background:var(--k-in);color:var(--kt2);padding:9px 14px}
-:root:not(#_) .checks label:has(input:checked){background:var(--k-po);border-color:var(--k-po);color:#fff}
+:root:not(#_) .bform .checks,:root:not(#_) #dietChecks{grid-template-columns:repeat(2,minmax(0,1fr))}
+:root:not(#_) #origL label{border-radius:16px;text-align:left;justify-content:flex-start;padding:8px 12px}
+:root:not(#_) .seg label,:root:not(#_) .checks label{display:flex;min-width:0;margin:0}
+:root:not(#_) .seg span,:root:not(#_) .checks label{font-family:'Fredoka',var(--sans);font-weight:500;font-size:.92rem;line-height:1.15;border:2px solid color-mix(in srgb,var(--k-to) 55%,transparent);border-radius:999px;background:none;color:var(--kt2);padding:6px 8px;min-height:2.5rem;box-shadow:none;white-space:normal;text-align:center;align-items:center;justify-content:center}
+:root:not(#_) .seg span{display:flex;flex:1}
+:root:not(#_) .checks label{position:relative}
+:root:not(#_) .seg input:checked+span,:root:not(#_) .checks label:has(input:checked){background:none;border-color:var(--ksel);color:var(--ksel);font-weight:600;box-shadow:0 0 0 1.5px var(--ksel)}
 :root:not(#_) .checks input{position:absolute;opacity:0;pointer-events:none}
+/* filtri ed etichette di categoria: stessa pillola vuota delle scelte, quella attiva ha il bordo colorato */
+:root:not(#_) .chip,:root:not(#_) .fc,:root:not(#_) .libPf{font-family:'Fredoka',var(--sans);font-weight:500;border-radius:999px;border:2px solid color-mix(in srgb,var(--k-to) 55%,transparent);background:none;color:var(--kt2);box-shadow:none}
+:root:not(#_) .chip.on,:root:not(#_) .fc.on,:root:not(#_) .libPf.on{background:none;border-color:var(--ksel);color:var(--ksel);font-weight:600;box-shadow:0 0 0 1.5px var(--ksel)}
+:root:not(#_) .chip.on small{color:inherit;opacity:.75}
+@media (max-width:899px){:root:not(#_).fOpen #chips2{padding-top:40px}:root:not(#_).fOpen #chips,:root:not(#_).fOpen #chips2,:root:not(#_) .fgc{padding-bottom:4px;padding-left:3px}}
 /* Il mio menu: domande corte, una cosa per volta, niente spiegazioni */
 #budget .bhead h2{font-weight:900}
 .bform .step h3{font-size:1.5rem;font-weight:900;margin:0 0 14px}
 .bform .step p>b{font-size:1.05rem;font-weight:800}
 .bform .step label{font-weight:700}
-.bform .step .seg span{font-size:1.05rem;padding:12px 16px}
+/* pulsanti d'ingresso di «Le mie» e Sfida: stessa pillola, senza riga di spiegazione (il sito da computer tiene i suoi) */
+@media (max-width:899px){:root:not(#_) .wbtn{border:3px solid var(--kb2);border-radius:999px;background:var(--k-in);color:var(--kt2);box-shadow:none;padding:12px 20px}
+:root:not(#_) .wbtn b{font-family:'Fredoka',var(--sans);font-weight:600;font-size:1.08rem;margin:0}}
+.wsteps b{display:inline;font:inherit;font-weight:800;margin:0}
 /* Nuova ricetta: cinque pulsanti chiari, senza righe di spiegazione */
 :root:not(#_) .srcCard{border:3px solid var(--kb2);border-radius:999px;background:var(--k-in);color:var(--kt2);box-shadow:none;padding:13px 20px;text-align:left}
 :root:not(#_) .srcCard b{font-family:'Fredoka',var(--sans);font-weight:600;font-size:1.1rem}
@@ -1086,13 +1098,13 @@ details summary{cursor:pointer}
   <form id="bForm" class="bform">
     <div class="wiz"><button type="button" class="icon" id="wTopBack" aria-label="Indietro" style="visibility:hidden">←</button><div class="wmid"><div class="wdots" id="wDots"></div><div class="meta" id="wStep"></div></div><button type="button" class="icon" id="wTopX" aria-label="Annulla" style="visibility:hidden">✕</button></div>
     <section class="step" data-s="0"><h3>Che menu vuoi?</h3>
-      <div class="seg"><label><input type="radio" name="mode" value="week" checked><span>La settimana</span></label><label><input type="radio" name="mode" value="meal"><span>Un pasto</span></label></div>
+      <div class="seg"><label><input type="radio" name="mode" value="week" checked><span>Settimana</span></label><label><input type="radio" name="mode" value="meal"><span>Un pasto</span></label></div>
       <p class="meta" id="wHint0" hidden></p>
       <div id="bBreakL" style="margin-top:10px"><p style="margin:0 0 6px"><b>Colazione</b></p>
         <div class="seg wrap"><label><input type="radio" name="breakfast" value="no" checked><span>No</span></label><label><input type="radio" name="breakfast" value="classica"><span>Classica</span></label><label><input type="radio" name="breakfast" value="dolce"><span>Dolce</span></label><label><input type="radio" name="breakfast" value="salata"><span>Salata</span></label><label><input type="radio" name="breakfast" value="mista"><span>Varia</span></label></div>
         </div>
       <div style="margin-top:10px"><p style="margin:0 0 6px"><b>Pane</b></p>
-        <div class="seg"><label><input type="radio" name="bread" value="dinner" checked><span>A cena</span></label><label><input type="radio" name="bread" value="all"><span>Sempre</span></label><label><input type="radio" name="bread" value="no"><span>No</span></label></div></div></section>
+        <div class="seg"><label><input type="radio" name="bread" value="dinner" checked><span>Un pasto</span></label><label><input type="radio" name="bread" value="all"><span>Ogni pasto</span></label><label><input type="radio" name="bread" value="no"><span>No</span></label></div></div></section>
     <section class="step" data-s="1" hidden><h3>Budget e persone</h3>
       <div class="two"><label><span id="bLbl">Budget della settimana (€)</span><input name="budget" type="number" min="1" step="0.5" inputmode="decimal" placeholder="es. 60"></label>
       <label>Persone<input name="people" type="number" min="1" max="20" value="2" inputmode="numeric"></label></div>
@@ -1137,7 +1149,7 @@ details summary{cursor:pointer}
   </div>
   <div id="garaStep" class="step" hidden>
     <h3>Da dove partiamo?</h3>
-    <p class="meta">In gara va una ricetta originale, creata da te, con persone, dosi precise e tempi; il video lo giri tu con l'app. Scritta, dettata, fotografata o da un tuo file: niente link, niente ricette prese da internet.</p>
+    <p class="meta">In gara va una ricetta tua, originale: niente link né ricette prese da internet.</p>
     <div class="srcGrid">
       <button type="button" class="srcCard" id="garaWrite"><b>✍️ La scrivo adesso</b><span>Nome del piatto, persone, tempi, ingredienti con le dosi e procedimento</span></button>
       <button type="button" class="srcCard" id="garaVoice"><b>🎤 La detto a voce</b><span>Racconti nome, persone, tempi, ingredienti con le dosi e procedimento: Gnamina la scrive, poi la controlli</span></button>
@@ -1159,9 +1171,9 @@ details summary{cursor:pointer}
       <label id="capL" hidden>Descrizione del post <span class="meta" style="font-weight:400">— se l'app non la legge da sola: tieni premuto il testo del post, copialo e incollalo qui</span>
         <span class="inl" style="margin:0;align-items:flex-start"><textarea name="caption" rows="3" placeholder="Ingredienti, dosi, procedimento…"></textarea><button type="button" class="btn" id="pasteCap">📋 Incolla</button></span></label>
       <div class="srcGrid hint" id="photoL" hidden><button type="button" class="srcCard" id="shootBtn"><b>📷 Scatta la foto</b><span>Inquadra bene la pagina con la ricetta, con buona luce</span></button><button type="button" class="srcCard" id="galBtn"><b>🖼 Scegli dalla galleria</b><span>Una foto che hai già fatto</span></button></div>
-      <div class="hint" id="fileL" hidden><button type="button" class="btn pri" id="fileBtn">📄 Scegli il file</button><p class="meta" style="margin:8px 0 0">Un file di testo (.txt) o un'immagine: Gnamina legge la ricetta e compila i campi, poi tu la controlli.</p></div>
-      <div class="hint" id="voiceL" hidden><button type="button" class="btn pri" id="dictBtn" style="font-size:1.1rem;padding:14px 18px;width:100%">🎤 Inizia a dettare</button><p class="meta" style="margin:8px 0 0">Di' il nome del piatto, per quante persone, quanto tempo ci vuole, gli ingredienti con le dosi e poi come si prepara, con calma, come se la raccontassi a un'amica. Hai fino a 3 minuti: quando hai finito premi «Ho finito» e Gnamina scrive tutto nei campi, che poi controlli.</p></div>
-      <p class="meta hint" id="srcAfter">Quando i dati sono stati letti, premi «Avanti» per controllarli. Se la lettura non riesce, puoi scrivere tutto tu nei passi seguenti.</p>
+      <div class="hint" id="fileL" hidden><button type="button" class="btn pri" id="fileBtn">📄 Scegli il file</button><p class="meta" style="margin:8px 0 0">Un testo (.txt) o un'immagine.</p></div>
+      <div class="hint" id="voiceL" hidden><button type="button" class="btn pri" id="dictBtn" style="font-size:1.1rem;padding:14px 18px;width:100%">🎤 Inizia a dettare</button><p class="meta" style="margin:8px 0 0">Di' nome, persone, tempo, ingredienti con le dosi e come si prepara. Hai 3 minuti, poi premi «Ho finito».</p></div>
+      <p class="meta hint" id="srcAfter">Premi «Avanti» per controllare. Se la lettura non riesce, scrivi tu.</p>
     </section>
     <section class="step" data-s="base">
       <h3>Come si chiama il piatto?</h3>
@@ -1176,12 +1188,12 @@ details summary{cursor:pointer}
     </section>
     <section class="step" data-s="ing">
       <h3>Gli ingredienti</h3>
-      <p class="meta hint" style="margin:-6px 0 0">Scrivi un ingrediente per riga, con la quantità: ad esempio «200 g di farina». Vai a capo dopo ognuno.</p>
+      <p class="meta hint" style="margin:-6px 0 0">Un ingrediente per riga, con la quantità.</p>
       <label>Ingredienti (uno per riga)<textarea name="ingredients" rows="5" placeholder="200 g di farina&#10;2 uova&#10;un pizzico di sale"></textarea></label>
     </section>
     <section class="step" data-s="steps">
       <h3>Il procedimento</h3>
-      <p class="meta hint" style="margin:-6px 0 0">Un passaggio per riga, nell'ordine in cui si fa. Nella scheda diventeranno una lista numerata.</p>
+      <p class="meta hint" style="margin:-6px 0 0">Un passaggio per riga.</p>
       <label>Procedimento (un passaggio per riga)<textarea name="steps" rows="5" placeholder="Sbatti le uova con il sale&#10;Aggiungi la farina poco alla volta&#10;Cuoci 10 minuti"></textarea></label>
     </section>
     <section class="step" data-s="more">
@@ -1249,15 +1261,15 @@ details summary{cursor:pointer}
   <section class="sec"><h3>Aspetto</h3><div class="seg" id="styleSeg" style="margin-bottom:8px"><label><input type="radio" name="style" value="trattoria"><span>Trattoria</span></label><label><input type="radio" name="style" value="crema"><span>Crema</span></label><label><input type="radio" name="style" value="rivista"><span>Rivista</span></label></div><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div><p class="meta quadNote">Il Quaderno è sempre chiaro, come il sito: Chiaro e Scuro valgono per Trattoria e Crema.</p></section>
   <section class="sec"><h3>Tipi di piatto</h3><div class="badges" id="catList"></div>
     <form id="catF" class="inl"><input name="c" placeholder="Nuovo tipo, es. Lievitati" aria-label="Nuovo tipo di piatto"><button class="btn pri">Aggiungi</button></form></section>
-  <section class="sec"><h3>Zona per i prezzi</h3><p class="meta" id="zoneInfo">Costi calcolati con i prezzi medi ufficiali (Osservatorio Prezzi del Ministero) della tua provincia.</p>
+  <section class="sec"><h3>Zona per i prezzi</h3><p class="meta" id="zoneInfo">Prezzi medi ufficiali della tua provincia.</p>
     <select id="zoneSel" aria-label="Provincia per i prezzi"><option value="">Automatica (posizione approssimativa)</option></select>
     <div class="grid2" style="margin-top:8px"><button class="btn" id="gpsBtn">📍 Usa la mia posizione</button><button class="btn" id="zoneReset">Automatica</button></div></section>
   <section class="sec"><h3>Intelligenza artificiale</h3><p class="meta" id="laiInfo">Controllo se questo telefono sa leggere le ricette da solo…</p>
     <label class="meta" style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="laiOn" checked> Usa l'AI del telefono quando c'è</label></section>
-  <section class="sec"><h3>Ricette su tutti i tuoi dispositivi</h3><div id="syncBox"></div></section>
-  <section class="sec"><h3>Backup su file</h3><p class="meta">Salva tutte le ricette in un file e tienilo dove vuoi: su iCloud Drive o Google Drive, nel telefono o sul computer. Per ripristinarle apri il file da qui.</p>
+  <section class="sec"><h3>Su tutti i dispositivi</h3><div id="syncBox"></div></section>
+  <section class="sec"><h3>Backup su file</h3><p class="meta">Salva le ricette in un file; per riaverle, aprilo da qui.</p>
     <div class="grid2"><button class="btn pri" id="expFile">💾 Salva file</button><button class="btn" id="impFile">📂 Apri file</button></div><input type="file" id="impIn" accept=".json,application/json,text/plain" hidden>
-    <p class="meta" style="margin-top:10px">Oppure copia i dati come testo e incollali sull'altro dispositivo.</p>
+    <p class="meta" style="margin-top:10px">Oppure come testo:</p>
     <div class="grid2"><button class="btn" id="exp">Copia backup</button><button class="btn" id="imp">Incolla backup</button></div></section>
   <p class="meta" style="text-align:center;margin:12px 0 0" id="verInfo"></p>
 </dialog>
@@ -1629,7 +1641,7 @@ async function starsFetch(ids,force){const want=[...new Set(ids.filter(Boolean))
   try{const r=await server('/stars',{ids:want,dev:DEV},await starsToken());for(const id of want)STARS[id]=[...(r.stars[id]||[0,0,0]),Date.now()];starsPaint()}catch{}}
 // Un solo blocco di stelle nella scheda: le cinque stelle grandi sono il tuo voto (si toccano per darlo o toglierlo); sotto, in una riga, la media dei Gnammers
 function rateBox(i){const d=$('#dStars');if(!d)return;const pid=pubId(i),r=(pid&&STARS[pid]?.[2])||(isMine(i)?i.rating:0)||0,v=pid?STARS[pid]||[0,0,0]:null,n=v?v[1]:0;
-  d.innerHTML=`<div class="rate big" id="dMy">${[1,2,3,4,5].map(k=>`<button type="button" data-n="${k}" class="${k<=r?'on':''}" aria-label="${k} stelle">★</button>`).join('')}</div><p class="meta rateTxt">${r?`Il tuo voto: ${r} stell${r===1?'a':'e'}`:'Tocca le stelle per votare'}${pid?` · ${n?`media dei Gnammers ${fmtAvg(v[0])} su 5 (${n} ${n===1?'voto':'voti'})`:'ancora nessun voto dei Gnammers'}`:''}</p>`;
+  d.innerHTML=`<div class="rate big" id="dMy">${[1,2,3,4,5].map(k=>`<button type="button" data-n="${k}" class="${k<=r?'on':''}" aria-label="${k} stelle">★</button>`).join('')}</div><p class="meta rateTxt">${r?`Il tuo voto: ${r} stell${r===1?'a':'e'}`:'Tocca le stelle per votare'}${pid?` · ${n?`media dei Gnammers ${fmtAvg(v[0])} su 5 (${n} ${n===1?'voto':'voti'})`:''}`:''}</p>`;
   $('#dMy').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const k=+b.dataset.n;rateSet(i,r===k?0:k)}}
 function starsBlock(id){if(DET&&pubId(DET)===id)rateBox(DET)}
 /* ---------- Commenti dei Gnammers sotto le ricette del ricettario (server: /comments). Pubblici, con nome e pomodoro di chi scrive.
@@ -1641,7 +1653,7 @@ async function commLoad(id){const d=$('#dComm');if(!d||d.dataset.id!==id)return;
   try{const r=await server('/comments',{id},await starsToken());COMM[id]=r.comments||[];commPaint(id)}
   catch(e){const l=d.querySelector('.commList');if(l)l.innerHTML=`<p class="meta">${e.status===0?'Senza connessione i commenti non si leggono':'Commenti non disponibili in questo momento'}</p>`}}
 function commPaint(id){const d=$('#dComm');if(!d||d.dataset.id!==id)return;const list=COMM[id]||[];
-  d.querySelector('.commList').innerHTML=list.length?list.map(c=>`<div class="cm" data-cid="${esc(c.id)}"><span class="cav">${commAv(c)}</span><div><b>${esc(c.name)}</b> <span class="meta">· ${agoIt(c.t)}</span><p>${esc(c.text)}</p><button type="button" class="lnk" data-act="${c.mine?'del':'rep'}">${c.mine?'Elimina':'Segnala'}</button>${!c.mine&&c.pid?' <button type="button" class="lnk" data-act="dm">💬 Scrivi</button>':''}</div></div>`).join(''):'<p class="meta">Ancora nessun commento: scrivi tu il primo.</p>';
+  d.querySelector('.commList').innerHTML=list.length?list.map(c=>`<div class="cm" data-cid="${esc(c.id)}"><span class="cav">${commAv(c)}</span><div><b>${esc(c.name)}</b> <span class="meta">· ${agoIt(c.t)}</span><p>${esc(c.text)}</p><button type="button" class="lnk" data-act="${c.mine?'del':'rep'}">${c.mine?'Elimina':'Segnala'}</button>${!c.mine&&c.pid?' <button type="button" class="lnk" data-act="dm">💬 Scrivi</button>':''}</div></div>`).join(''):'<p class="meta">Ancora nessun commento.</p>';
   d.querySelector('.commN').textContent=list.length?` (${list.length})`:''}
 // La casella per scrivere: con l'account e il profilo; altrimenti il passo che manca
 const commBox=()=>!ACC?`<button type="button" class="btn" data-act="login">Accedi per commentare</button>`:!profDone()?`<button type="button" class="btn" data-act="login">Presentati ai Gnammers per commentare</button>`
@@ -1706,12 +1718,12 @@ const chatRow=c=>`<button type="button" class="chRow" data-chat="${esc(c.id)}">$
 function chatPage(){const b=$('#chatsBody');if(!b)return;
   const hero=(t,p,btn)=>`<div class="chHero"><div class="em">💬</div><h2>${t}</h2><p class="meta">${p}</p>${btn}</div>`;
   if(!accOn()){b.innerHTML=hero('Le chat dei Gnammers','Presto potrai scrivere agli altri Gnammers: scambiarvi ricette, foto dei piatti e consigli.','');return}
-  if(!chatOk()){b.innerHTML=hero('Scrivi a chi cucina come te','Qui trovi tutte le tue chat con gli altri Gnammers, come su WhatsApp: vi scambiate ricette con un tocco, le foto dei piatti riusciti, i trucchi della nonna. Per cominciare entra con il tuo account e presentati con nome e immagine.',`<button type="button" class="btn pri" data-chp="login">${ACC?'Presentati ai Gnammers':'Accedi o registrati'}</button>`);return}
+  if(!chatOk()){b.innerHTML=hero('Scrivi a chi cucina come te','Scambia ricette, foto e consigli con gli altri Gnammers.',`<button type="button" class="btn pri" data-chp="login">${ACC?'Presentati ai Gnammers':'Accedi o registrati'}</button>`);return}
   const req=CH.list.filter(c=>c.st==='in'),rest=CH.list.filter(c=>c.st!=='in');
   b.innerHTML=`<div class="chTop"><h2>Le tue chat</h2><button type="button" class="btn pri" data-chp="new">✏️ Nuovo messaggio</button></div>
   ${req.length?`<h3 class="chSec">Vogliono scriverti</h3><div class="chList">${req.map(chatRow).join('')}</div>`:''}
   ${rest.length?`${req.length?'<h3 class="chSec">Conversazioni</h3>':''}<div class="chList">${rest.map(chatRow).join('')}</div>`
-    :req.length?'':hero('Ancora nessuna chat','Tocca «Nuovo messaggio» e cerca una persona per nome, oppure tocca «💬 Scrivi» accanto a un commento sotto una ricetta del Ricettario. Dalla scheda di una ricetta puoi mandarla a chi vuoi con «💬 Manda a un Gnammer».','')}`}
+    :req.length?'':hero('Ancora nessuna chat','Tocca «Nuovo messaggio» e cerca una persona per nome.','')}`}
 $('#chatsBody').onclick=e=>{const r=e.target.closest('.chRow'),b=e.target.closest('[data-chp]');
   if(r){const c=CH.list.find(x=>x.id===r.dataset.chat);if(c){CH.pick=null;chatStart(c)}return}
   if(b?.dataset.chp==='login'){openAcct(false);return}
@@ -1719,9 +1731,9 @@ $('#chatsBody').onclick=e=>{const r=e.target.closest('.chRow'),b=e.target.closes
 function chatPaintList(){CH.menu=false;CH.view='list';
   const req=CH.list.filter(c=>c.st==='in'),rest=CH.list.filter(c=>c.st!=='in'),row=chatRow;
   $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="close" aria-label="Chiudi">✕</button><h2>${CH.pick?'Manda la ricetta':'Messaggi'}</h2><button type="button" class="btn pri" data-ch="new">✏️ Nuovo</button></div>
-  <div class="chBody">${CH.pick?`<p class="chPickInfo">Scegli a chi mandare <b>${esc(CH.pick.title)}</b>, oppure tocca «Nuovo» e cerca un Gnammer per nome.</p>`:''}
+  <div class="chBody">${CH.pick?`<p class="chPickInfo">Scegli a chi mandare <b>${esc(CH.pick.title)}</b>.</p>`:''}
   ${req.length?`<h3 class="chSec">Vogliono scriverti</h3>${req.map(row).join('')}`:''}
-  ${rest.length?`${req.length?'<h3 class="chSec">Le tue chat</h3>':''}${rest.map(row).join('')}`:req.length?'':`<div class="chEmpty"><p><b>Qui scrivi agli altri Gnammers</b>, come su WhatsApp, ma di cucina.</p><p class="meta">Tocca «Nuovo» e cerca una persona per nome, oppure tocca «💬 Scrivi» accanto a un commento sotto una ricetta del Ricettario.</p></div>`}</div>`}
+  ${rest.length?`${req.length?'<h3 class="chSec">Le tue chat</h3>':''}${rest.map(row).join('')}`:req.length?'':`<div class="chEmpty"><p><b>Ancora nessuna chat</b></p><p class="meta">Tocca «Nuovo» e cerca una persona per nome.</p></div>`}</div>`}
 function chatPaintFind(){CH.view='find';
   $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="back" aria-label="Indietro">←</button><h2>Nuovo messaggio</h2></div><div class="chBody"><input id="chQ" type="search" placeholder="Cerca un Gnammer per nome" autocomplete="off" enterkeyhint="search"><div id="chRes"><p class="meta">Scrivi almeno due lettere del nome.</p></div></div>`;
   const q=$('#chQ');q.oninput=()=>{clearTimeout(CH.qt);CH.qt=setTimeout(chatFind,350)};setTimeout(()=>q.focus(),50)}
@@ -1758,10 +1770,10 @@ function chatCanWrite(){const st=CH.st;return !CH.blocked&&(st==='ok'||st==='new
 function chatPaintConv(){const p=CH.peer||{},st=CH.st,nm=esc(p.name||'Gnammer');
   const ta=$('#chatV .chIn textarea'),draft=ta?ta.value:'';
   const ban=CH.blocked?`<div class="chBan"><p>Hai bloccato ${nm}: non può scriverti.</p><div class="row"><button type="button" class="btn" data-ch="unblock">Sblocca</button></div></div>`
-    :st==='in'?`<div class="chBan"><p><b>${nm}</b> vuole scriverti. Se non la conosci puoi rifiutare: non potrà più scriverti.</p><div class="row"><button type="button" class="btn pri" data-ch="yes">Accetta</button><button type="button" class="btn" data-ch="no">Rifiuta</button><button type="button" class="btn danger" data-ch="block">Blocca</button></div></div>`
+    :st==='in'?`<div class="chBan"><p><b>${nm}</b> vuole scriverti.</p><div class="row"><button type="button" class="btn pri" data-ch="yes">Accetta</button><button type="button" class="btn" data-ch="no">Rifiuta</button><button type="button" class="btn danger" data-ch="block">Blocca</button></div></div>`
     :st==='out'&&CH.msgs.some(m=>m.mine)?`<div class="chBan"><p class="meta" style="margin:0">Richiesta inviata: potrete scrivervi quando ${nm} l'avrà accettata.</p></div>`
     :st==='no'?`<div class="chBan"><p class="meta" style="margin:0">Questa persona non accetta messaggi.</p></div>`
-    :st==='new'?`<div class="chBan"><p class="meta" style="margin:0">Il primo messaggio arriva a ${nm} come richiesta: saluta e scrivi perché la contatti. Le foto si mandano dopo che ha accettato.</p></div>`:'';
+    :st==='new'?`<div class="chBan"><p class="meta" style="margin:0">Il primo messaggio arriva a ${nm} come richiesta: saluta e spiega perché scrivi.</p></div>`:'';
   $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="back" aria-label="Indietro">←</button>${chAv(p)}<h2>${nm}</h2>${CH.chat?'<button type="button" class="icon" data-ch="more" aria-label="Altre azioni">⋮</button>':''}</div>
   ${ban}<div class="chMsgs" id="chMsgs">${chatMsgsHtml()||(CH.chat?'<p class="meta" style="text-align:center">Carico i messaggi…</p>':'')}</div>
   ${chatCanWrite()?`<div class="chIn">${st==='ok'?'<button type="button" class="icon" data-ch="photo" aria-label="Manda una foto">📷</button>':''}<button type="button" class="icon" data-ch="recipe" aria-label="Manda una ricetta">📖</button><textarea rows="1" maxlength="1000" placeholder="Scrivi un messaggio" aria-label="Messaggio"></textarea><button type="button" class="btn pri chSend" data-ch="send" aria-label="Invia">➤</button></div>`:''}`;
@@ -2030,7 +2042,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=182; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=183; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2206,14 +2218,14 @@ function renderHome(){
   const btn={soon:mine?'✏️ Rivedi la tua ricetta':'Prepara la tua ricetta',join:mine?'✏️ Rivedi la tua ricetta in gara':'Partecipa con la tua ricetta',taste:'Assaggia e vota',done:'Vedi la vincitrice'}[ph];
   const L=gnammerLevel(),nm=profName();
   $('#home').innerHTML=`
-    <div class="who" id="whoBar"><span class="av">${picHtml('')}</span><div>${nm?`<b>Ciao, ${esc(nm)}</b><span>${L.name} · il tuo voto vale ${L.weight}${L.ric?` · ${L.ric} ricett${L.ric===1?'a':'e'} in gara`:''}</span>`:`<b>Come ti chiami?</b><span>Scegli il tuo nome da Gnammer: lo vedranno gli altri accanto alle tue ricette</span>`}</div><span class="lvl">${L.name}</span></div>
+    <div class="who" id="whoBar"><span class="av">${picHtml('')}</span><div>${nm?`<b>Ciao, ${esc(nm)}</b><span>${L.name} · il tuo voto vale ${L.weight}${L.ric?` · ${L.ric} ricett${L.ric===1?'a':'e'} in gara`:''}</span>`:`<b>Come ti chiami?</b><span>Scegli il tuo nome da Gnammer</span>`}</div><span class="lvl">${L.name}</span></div>
     <div class="contest">
       <p class="eyebrow">La sfida della settimana</p>
       <h2>${esc(c.tema)}</h2>
       <p class="desc">${esc(c.descrizione||'')}</p>
       <p class="state">${state}</p>
       <button type="button" class="cbtn" id="cAct"${ph==='done'?' disabled':''}>${btn}</button>
-      ${c.regole?.length?`<ul class="rules">${c.regole.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>`:''}
+      ${c.regole?.length?`<details class="how"><summary>Regole</summary><ul class="rules">${c.regole.map(r=>`<li>${esc(r)}</li>`).join('')}</ul></details>`:''}
       <details class="how"><summary>Come funziona</summary><ol>
         <li>Ogni settimana c'è un tema. Chi vuole partecipa con una sua ricetta originale (persone, dosi precise e tempi) e un breve video della preparazione girato con l'app.</li>
         <li>La settimana dopo tutti possono cucinare le ricette degli altri e votarle con le stelle. Chi allega la foto del piatto vale di più: ha cucinato davvero.</li>
@@ -2223,11 +2235,11 @@ function renderHome(){
     </div>
     ${mine?`<div class="hsec"><h3>La tua ricetta in gara</h3></div><div class="mine-gara" id="cMine"><div class="th">${mine.image?`<img src="${esc(mine.image)}" alt="">`:look(mine)[0]}</div><div><b>${esc(nice(mine.title)||'Senza titolo')}</b><span>${mine.video||mine.clips?.length?'Con il video ✓':'Manca il video della preparazione'}${ph==='join'?' · puoi modificarla fino a '+dIt(c.fine_partecipazione):''}</span></div></div>`:''}
     <div class="hsec"><h3>Il Ricettario di Gnamina</h3><span class="meta">le ricette vincitrici</span></div>
-    <div class="empty" style="padding:22px 16px"><b>Le prime vincitrici arrivano con i primi contest</b>Ogni settimana se ne aggiunge una, scelta da chi l'ha cucinata.${c.prossimo?`<br>Prossimo tema: <b style="display:inline;font-family:inherit;font-size:inherit">${esc(c.prossimo)}</b>`:''}</div>
+    <div class="empty" style="padding:22px 16px"><b>Le prime vincitrici arrivano presto</b>${c.prossimo?`<br>Prossimo tema: <b style="display:inline;font-family:inherit;font-size:inherit">${esc(c.prossimo)}</b>`:''}</div>
     <div class="hlinks">
-      <button type="button" class="wbtn" data-goto="mine"><b>Le mie ricette</b><span>${items.length?items.length+(items.length===1?' ricetta salvata':' ricette salvate'):'Le ricette che salvi o importi'}</span></button>
-      <button type="button" class="wbtn" data-goto="book"><b>Ricettario</b><span>Oltre 1.400 ricette italiane e dal mondo</span></button>
-      <button type="button" class="wbtn" data-goto="budget"><b>Il mio menu</b><span>Settimana o pasto, nel tuo budget</span></button>
+      <button type="button" class="wbtn" data-goto="mine"><b>Le mie ricette</b><span>${items.length?items.length+(items.length===1?' ricetta salvata':' ricette salvate'):''}</span></button>
+      <button type="button" class="wbtn" data-goto="book"><b>Ricettario</b></button>
+      <button type="button" class="wbtn" data-goto="budget"><b>Il mio menu</b></button>
     </div>`;
   $('#cAct').onclick=()=>{
     if(ph==='taste'){toast('L\'assaggio e il voto arrivano con il prossimo aggiornamento');return}
@@ -2430,15 +2442,14 @@ function welcome(){
   const pick=[];for(let i=0;pool.length&&pick.length<8&&i<40;i++){const b=pool[(day*7919+i*104729)%pool.length];if(!pick.includes(b))pick.push(b)}
   return `<div class="welcome">
     <h2>Benvenuto in Gnamina</h2><p class="tagline">La tua app di cucina</p>
-    <p>Qui raccogli le tue ricette: quelle che trovi su TikTok, Instagram e YouTube, quelle di famiglia e quelle che scopri nel Ricettario. Per ogni ricetta hai dosi per quante persone vuoi, calorie e costo a persona con i prezzi della tua zona.</p>
     <div class="wact">
-      <button type="button" class="wbtn" data-w="add"><b>➕ Salva la prima ricetta</b><span>Da un link social, scritta a mano, da una foto o da un file</span></button>
-      <button type="button" class="wbtn" data-w="book"><b>📖 Sfoglia il Ricettario</b><span>Oltre 1.400 ricette italiane e dal mondo, con foto, costi e calorie</span></button>
-      <button type="button" class="wbtn" data-w="budget"><b>🍽️ Crea il mio menu</b><span>Settimana o singolo pasto, bilanciato, con la lista della spesa</span></button>
+      <button type="button" class="wbtn" data-w="add"><b>➕ Salva la prima ricetta</b></button>
+      <button type="button" class="wbtn" data-w="book"><b>📖 Sfoglia il Ricettario</b></button>
+      <button type="button" class="wbtn" data-w="budget"><b>🍽️ Crea il mio menu</b></button>
     </div>
-    <h3>Come si salva da TikTok e Instagram</h3>
-    <ol class="wsteps"><li>Apri il video della ricetta e tocca <b>Condividi</b></li><li>Scegli <b>Gnamina</b> tra le app (su iPhone: il comando rapido)</li><li>L'app legge il post e compila ingredienti, dosi e passaggi: tu controlli e salvi</li></ol>
-    ${pick.length?`<h3>Piatti di oggi dal Ricettario</h3><div class="hscroll">${pick.map(card).join('')}</div><p class="meta" style="text-align:center">Tocca un piatto per vederlo; «Salva nelle mie» lo porta qui.</p>`:'<p class="meta">Carico i piatti del giorno…</p>'}
+    <h3>Da TikTok e Instagram</h3>
+    <ol class="wsteps"><li>Apri il video e tocca <b>Condividi</b></li><li>Scegli <b>Gnamina</b></li><li>Controlla e <b>salva</b></li></ol>
+    ${pick.length?`<h3>Piatti di oggi</h3><div class="hscroll">${pick.map(card).join('')}</div>`:'<p class="meta">Carico i piatti del giorno…</p>'}
   </div>`;
 }
 // Ricerca senza risultati: la stessa parola nell'altra sezione, oppure online (YouTube, TikTok, Instagram, Google)
@@ -2479,8 +2490,7 @@ async function initZone(){
     const d=await (await fetch(AI_URL+'/prices')).json();
     const sel=$('#zoneSel');
     sel.innerHTML=`<option value="">Automatica${d.auto?` (ora: ${esc(d.auto)})`:''}</option>`+d.provinces.map(p=>`<option${p===z.province?' selected':''}>${esc(p)}</option>`).join('');
-    $('#zoneInfo').textContent=`Costi calcolati con i prezzi medi ufficiali dell'Osservatorio Prezzi del Ministero${d.period?` (${d.period})`:''}, per provincia. Zona attuale: ${zoneLabel(z)}.`+
-      (d.available.length<d.provinces.length?` Province già disponibili: ${d.available.length} su ${d.provinces.length}; per le altre si usa la media nazionale.`:'');
+    $('#zoneInfo').textContent=`Prezzi medi ufficiali${d.period?` (${d.period})`:''}. Zona: ${zoneLabel(z)}.`;
   }catch{}
 }
 $('#zoneSel').onchange=e=>{save('zone',e.target.value?{province:e.target.value}:{});initZone();loadPT(true).then(render);toast('Zona prezzi: '+(e.target.value||'automatica'))};
@@ -2593,8 +2603,7 @@ const stem=w=>w.toLowerCase().replace(/[^a-zà-ù ]/g,'').split(' ').map(x=>x.sl
 function initBudget(){
   const f=$('#bForm');
   if(!$('#bDiet').children.length){
-    const LBL={Vegetariano:'Vegetariano (niente carne né pesce)',Pescetariano:'Pescetariano (pesce sì, carne no)'};
-    $('#bDiet').innerHTML=B_DIETS.map(d=>`<label><input type="checkbox" value="${d}">${LBL[d]||d}</label>`).join('');
+    $('#bDiet').innerHTML=B_DIETS.map(d=>`<label><input type="checkbox" value="${d}">${d}</label>`).join('');
     $('#bMonth').innerHTML=MESI.slice(1).map((m,i)=>`<option value="${i+1}">${m[0].toUpperCase()+m.slice(1)}</option>`).join('');
     $('#bMonth').value=new Date().getMonth()+1;
     const TOPT=[[15,'15 minuti'],[30,'30 minuti'],[45,'45 minuti'],[60,'1 ora'],[90,'1 ora e mezza'],[0,'Nessun limite']];
@@ -2717,10 +2726,10 @@ function extras(o){
   return {fruits:fr.length?fr:['frutta fresca'],raw:raw.length?raw:['lattuga','carote'],rawN:0,fruit:{eur:.15*fruitEur,kcal:75,p:.8,c:18,f:.3},
     bread:o.diets.includes('Senza glutine')||o.bread==='no'?null:{eur:.05*(PT?.eur['pane']??3.8),kcal:135,p:4.5,c:27,f:.8}};
 }
-// Pane a tavola in questo pasto? (mai a colazione; "solo a cena" o "a ogni pasto"; nel pasto singolo solo se non è completo)
+// Pane a tavola in questo pasto? (mai a colazione; «un pasto» al giorno = la cena, o il pranzo se le cene non sono nel menu; oppure a ogni pasto; nel pasto singolo solo se non è completo)
 // Nelle colazioni «con frutta» il frutto del giorno è scritto per nome
 const dishTitle=(x,m,X)=>m.m==='breakfast'&&/frutta$/.test(x.title)?x.title.replace(/frutta$/,X.fruits[m.d%X.fruits.length]):x.title;
-const breadAt=(o,X,m)=>!!X.bread&&m.m!=='breakfast'&&(o.bread==='all'||m.m!=='lunch')&&(o.mode==='week'||m.dishes.length<3);
+const breadAt=(o,X,m)=>!!X.bread&&m.m!=='breakfast'&&(o.bread==='all'||m.m!=='lunch'||!o.dinner)&&(o.mode==='week'||m.dishes.length<3);
 // Colazioni italiane (per persona): dolci e salate, con grammi per costo e spesa e valori medi indicativi
 const BK_DEF=[
   ['classica','Caffellatte e biscotti confezionati',[['latte',200],['caffè',7],['biscotti e dolci pronti',40]],[310,10,42,10],'Caffellatte caldo con 4–5 biscotti confezionati (frollini o secchi).'],
@@ -3080,7 +3089,7 @@ function openDetail(i){
     ${i.linked?`<div class="kv"><span>Costo ${esc(i.cost||'n.d.')}</span></div><h3>Ingredienti principali</h3><ul>${i.ingredients.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="meta">Dosi e procedimento sono sulla pagina originale di GialloZafferano.</p>`
     :i.ingredients?.length?`<h3>Ingredienti</h3><div class="srv">Per <button type="button" class="btn" id="sMinus" aria-label="Meno persone">−</button><b id="sN"></b><button type="button" class="btn" id="sPlus" aria-label="Più persone">+</button> <span id="sLbl">persone</span> <span class="meta" id="sOrig"></span></div>
       <div class="nut" id="nut"></div><ul id="ingList"></ul>`:''}
-    ${i.steps?.length?`<h3>Procedimento</h3><button type="button" class="btn cookBtn" id="dCook">${kIc('cook')}Cucina con me: leggo io ingredienti e passaggi</button><ol>${i.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
+    ${i.steps?.length?`<h3>Procedimento</h3><button type="button" class="btn cookBtn" id="dCook">${kIc('cook')}Cucina con me</button><ol>${i.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
     ${i.note?`<h3>Note</h3><p class="cap">${esc(i.note)}</p>`:''}
     ${!i.ingredients?.length&&i.caption?`<h3>Descrizione</h3><p class="cap">${esc(i.caption)}</p>`:''}
     ${fonti.length?`<details class="fonti2"><summary>Fonti e note</summary>${fonti.map(f=>`<p class="lic">${f}</p>`).join('')}${i.artusi?`<details class="meta" style="margin-top:8px"><summary>Testo originale di Artusi: «${esc(i.origTitle)}» (n. ${i.num}, ${esc(i.chapter)})</summary><p class="cap" style="margin-top:6px">${esc(i.text)}</p></details>`:''}</details>`:''}
@@ -3092,7 +3101,7 @@ function openDetail(i){
     const draw=()=>{const f=n/base;
       $('#ingList').innerHTML=i.ingredients.map(x=>`<li>${esc(scaleLine(x,f))}</li>`).join('');
       $('#sN').textContent=n;$('#sLbl').textContent=n===1?'persona':'persone';
-      $('#sOrig').textContent=!i.servings?`(persone non indicate nella ricetta: stimate ${base})`:n!==base?`(ricetta originale per ${base})`:'';
+      $('#sOrig').textContent=!i.servings?`(persone stimate: ${base})`:n!==base?`(ricetta originale per ${base})`:'';
       $('#sMinus').disabled=n<=1;drawNut(i,n)};
     $('#sMinus').onclick=()=>{if(n>1){n--;draw()}};$('#sPlus').onclick=()=>{if(n<50){n++;draw()}};
     draw();
@@ -3299,7 +3308,7 @@ function rValid(){
 function endUI(){const link=addMode==='link';$('#endH').textContent=link?'Controlla e salva':'Il video della ricetta';$('#guideVid').hidden=$('#vidHint').hidden=link;$('#ytL').hidden=link||!!extra.contest}
 function endSum(){
   const f=$('#f'),n=lines(f.ingredients.value).length,st=lines(f.steps.value).length;
-  $('#endSum').innerHTML=`<b>${esc(f.title.value.trim()||'Senza titolo')}</b> · ${esc(f.cat.value)}${n?` · ${n} ingredient${n===1?'e':'i'}`:''}${st?` · ${st} passagg${st===1?'io':'i'}`:''}${f.time.value?` · ${esc(f.time.value)} min`:''}<br><span class="meta">${extra.contest?(m=>m.length?`<span class="warnTxt">${esc(garaMsg(m))}.</span> `:'')(garaMissing(f).filter(x=>!x.startsWith('la conferma')))+'Ricetta in gara: il video lo giri tu, qui sotto, con la guida in tre parti, poi conferma che la ricetta è tua.':addMode==='link'?'Ricetta presa da '+esc(sourceOf(f.url.value)||'un link')+': il video è quello originale. Se i dati non tornano, torna al primo passo e premi «Rianalizza». Altrimenti premi «Salva la ricetta».':n&&st?'È tutto pronto: gira il video con la guida, oppure premi «Salva la ricetta» e lo fai un altro giorno da «Modifica».':'Puoi salvare anche così e completare la ricetta in un altro momento con «Modifica».'}</span>`;
+  $('#endSum').innerHTML=`<b>${esc(f.title.value.trim()||'Senza titolo')}</b> · ${esc(f.cat.value)}${n?` · ${n} ingredient${n===1?'e':'i'}`:''}${st?` · ${st} passagg${st===1?'io':'i'}`:''}${f.time.value?` · ${esc(f.time.value)} min`:''}<br><span class="meta">${extra.contest?(m=>m.length?`<span class="warnTxt">${esc(garaMsg(m))}.</span> `:'')(garaMissing(f).filter(x=>!x.startsWith('la conferma')))+'Ricetta in gara: il video lo giri tu, qui sotto, con la guida in tre parti, poi conferma che la ricetta è tua.':addMode==='link'?'Ricetta presa da '+esc(sourceOf(f.url.value)||'un link')+': il video è quello originale. Se i dati non tornano, torna al primo passo e premi «Rianalizza». Altrimenti premi «Salva la ricetta».':n&&st?'È tutto pronto: gira il video con la guida, oppure premi «Salva la ricetta» e lo fai un altro giorno da «Modifica».':'Puoi salvare anche così e completare dopo.'}</span>`;
 }
 $('#rNext').onclick=()=>{if(rValid())rGo(rStep+1)};
 $('#rBack').onclick=$('#rBackTop').onclick=()=>rGo(rStep-1);
@@ -3528,7 +3537,7 @@ $('#f').caption.addEventListener('change',()=>{const u=extractUrl($('#f').url.va
 $('#analyzeBtn').onclick=()=>{const u=extractUrl($('#f').url.value);if(!u){toast('Incolla prima un link');return}$('#f').url.value=u;runAnalysis(u,!!editing)};
 /* ---------- Il video dell'utente: registrato o scelto qui, caricato sul SUO canale YouTube (nessuno spazio cloud nostro), qui resta solo il link ---------- */
 const ytId=u=>(String(u||'').match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/)||[])[1]||'';
-const VID_HINT='La guida ti porta passo per passo: prima racconti la ricetta e mostri gli ingredienti, poi la preparazione, infine il piatto pronto. La fotocamera si accende dentro Gnamina, il video esce verticale con il marchio in basso a destra, pronto per TikTok, Instagram, Facebook e YouTube Shorts, e resta sul tuo telefono finché non lo pubblichi.';
+const VID_HINT='La guida ti porta passo per passo. Il video resta sul telefono finché non lo pubblichi.';
 const GARA_HINT='Per la gara il video si gira qui, con la guida in tre parti: racconti la ricetta e mostri gli ingredienti, fai vedere la preparazione, poi il piatto pronto. Gnamina scandisce i tempi e mette il suo marchio.';
 function vidHint(h){$('#vidHint').innerHTML=h||(extra.clips?.length?clipsStatus():extra.contest?GARA_HINT:VID_HINT);$('#guideVid').textContent=extra.clips?.length?'🎬 Modifica il video con la guida':'🎬 Registra il video con la guida'}
 const vidAfter=()=>vidHint('Quando YouTube ha finito di caricare, apri il video, tocca <b>Condividi → Copia link</b>, torna qui e premi «📋 Incolla».');
@@ -4341,16 +4350,16 @@ function libRender(){
   let h='';
   if(LIBPAGE==='stile'){
     h=back('Lo stile')+`<div class="libStyles">${LIB_STYLES.map(([k,n])=>`<button type="button" class="libSty${LIB.style===k?' on':''}" data-sty="${k}">${mini(k)}<b>${n}</b></button>`).join('')}</div>
-      <p class="meta">Così viene una ricetta nello stile scelto:</p><div class="libPrev" id="libPrev"></div>`;
+      <p class="meta">Anteprima:</p><div class="libPrev" id="libPrev"></div>`;
   }else if(LIBPAGE==='ricette'){
-    h=back(`Le ricette · ${book.length}`)+`<p class="meta" style="margin-top:0">Ci sono le ricette con il segnalibro <span class="libRibI">${RIB_SVG}</span>, tue o del Ricettario. Togli la spunta per toglierne una.</p>
+    h=back(`Le ricette · ${book.length}`)+`<p class="meta" style="margin-top:0">Le ricette con il segnalibro <span class="libRibI">${RIB_SVG}</span>. Togli la spunta per toglierne una.</p>
       ${book.length?bsecs.map(s=>{const l=book.filter(i=>(i.cat||'Altro')===s);
         return `<div class="libSec"><div class="libSecH"><b>${esc(s)}</b><span class="meta">${l.length}</span></div>
         ${l.map(i=>`<label class="libRow"><input type="checkbox" data-id="${esc(i.id)}" checked aria-label="Togli dal libro"><span class="libT">${esc(nice(i.title))}${libMine(i)?'':'<small class="meta"> · dal Ricettario</small>'}</span><span class="libNo">${esc(i.bookNo||'')}</span>${tag(i)}</label>`).join('')}</div>`}).join('')
       :'<p class="meta">Il libro è vuoto. Tocca il segnalibro sulla foto di una ricetta, in «Le mie» o nel Ricettario, e la ritrovi qui.</p>'}`;
   }else if(LIBPAGE==='formato'){
     h=back('Il formato')+`<div class="libFmts">${LIB_FMTS.map(([k,n,s])=>`<label class="libOpt"><input type="radio" name="libFmt" value="${k}"${LIB.fmt===k?' checked':''}><span><b>${n}</b><small>${s}</small></span></label>`).join('')}</div>
-      <p class="meta">${LIB.fmt==='book'?'Senza fori, con i numeri di pagina: da far rilegare in copisteria o con un servizio di stampa online.':'Ogni ricetta comincia su un foglio nuovo, con i fori già segnati: una ricetta nuova si aggiunge senza toccare le altre.'}</p>
+      <p class="meta">${LIB.fmt==='book'?'Senza fori, con i numeri di pagina: da far rilegare.':'Ogni ricetta su un foglio suo: ne aggiungi una senza toccare le altre.'}</p>
       <label class="libChk"><input type="checkbox" id="libPhoto"${LIB.photo?' checked':''}> Con le foto delle ricette</label>
       <label class="libChk"><input type="checkbox" id="libNotes"${LIB.notes?' checked':''}> Righe per gli appunti</label>
       ${LIB.fmt==='book'?'':`<label class="libChk"><input type="checkbox" id="libDuplex"${LIB.duplex?' checked':''}> Stampo fronte e retro</label>`}`;
@@ -4377,7 +4386,7 @@ function libRender(){
       <div class="libPrint">
         <button type="button" class="btn pri" id="libGo" data-m="${upd?'update':'all'}"${book.length?'':' disabled'}>🖨 ${upd?`Stampa le ${todo.length} da aggiornare`:'Stampa il libro'}</button>
         ${anyPrinted?'<button type="button" class="btn" id="libAll">Stampa tutto il libro</button>':''}
-        <p class="meta">${upd?'Escono le ricette nuove o cambiate e l\'indice aggiornato, da aggiungere al quaderno.':'Si apre il menu di stampa: stampante di casa, oppure «Salva come PDF» per la copisteria.'}</p>
+        <p class="meta">${upd?'Escono le ricette nuove o cambiate e l\'indice aggiornato, da aggiungere al quaderno.':'Stampante di casa, oppure «Salva come PDF» per la copisteria.'}</p>
         ${LIB.last&&Date.now()-LIB.last.at<7*864e5?`<p class="meta">${LIB.last.prev.length} ricett${LIB.last.prev.length===1?'a risulta stampata':'e risultano stampate'} il ${libDate(LIB.last.at)}. <button type="button" class="lnk" id="libUndo">Non le ho stampate</button></p>`:''}
       </div>`;
   }
@@ -4505,7 +4514,7 @@ async function applyRows(rows,key){
 function syncUI(status){
   const box=$('#syncBox');if(!box)return;
   if(!SY?.code){
-    box.innerHTML=`<p class="meta">Crea un <b>codice ricettario</b>: le ricette vengono salvate cifrate online e compaiono su iPhone, Android e computer. Senza account né password: basta scrivere lo stesso codice sull'altro dispositivo.</p><div class="grid2"><button class="btn pri" id="syNew">Crea il codice</button><button class="btn" id="syHave">Ho già un codice</button></div>${IOS&&!inApp?'<p class="meta" style="margin-top:10px">Su iPhone aggiungi Gnamina alla schermata Home (Condividi → Aggiungi alla schermata Home): così Safari non cancella le ricette.</p>':''}`;
+    box.innerHTML=`<p class="meta">Con un <b>codice ricettario</b> ritrovi le ricette su telefono e computer. Senza account né password.</p><div class="grid2"><button class="btn pri" id="syNew">Crea il codice</button><button class="btn" id="syHave">Ho già un codice</button></div>${IOS&&!inApp?'<p class="meta" style="margin-top:10px">Su iPhone: Condividi → Aggiungi alla schermata Home, così le ricette non si perdono.</p>':''}`;
     $('#syNew').onclick=()=>linkCode(newCode(),true);
     $('#syHave').onclick=()=>{const c=normCode(prompt('Scrivi il codice ricettario che vedi sull\'altro dispositivo:'));if(c.length===16)linkCode(c);else if(c)toast('Codice non valido: sono 16 tra lettere e numeri')};
     return}
