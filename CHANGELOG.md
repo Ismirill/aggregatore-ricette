@@ -4,6 +4,16 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-21
+
+- **Versione 182, un solo carattere, pulsanti tutti uguali, «Il mio menu» più semplice**
+  - **Caratteri:** Nunito per tutti i titoli e i testi, nell'app e nel sito; Fredoka solo su barra in basso, logo e pulsanti; Caveat solo per la scrittura a mano di Polaroid e fogli di quaderno. Tolti Fraunces e Inter (due caratteri in meno da scaricare). I modelli di stampa del Libro tengono i loro.
+  - **Pulsanti:** tutti a pillola con la palette della cucina: pieno rosso pomodoro per l'azione principale, crema con il bordo per le altre. Stessa forma per le scelte (prima caselle grigie), i filtri e le caselle da spuntare. Non toccati le icone in alto, la barra in basso e i pulsanti colorati dentro la scheda della ricetta.
+  - **«Il mio menu»:** titolo corto, via i paragrafi di spiegazione, domande di una o due parole («Colazione», «Pane», «Budget e persone», «Pasti e tempo», «Cibi già pronti?», «Diete e allergie», «Cucina e periodo»), risposte come pulsanti grandi. I passi restano sei e il menu creato non cambia.
+  - **«Nuova ricetta»:** cinque pulsanti senza le righe di spiegazione sotto.
+  - **Polaroid del sito da computer, dopo le osservazioni sulla 181:** foto quadrata con angoli vivi, parte bianca più corta, titolo scritto a mano, stampe un po' storte come foto sparse su un tavolo (si raddrizzano al passaggio del mouse); lo zoom delle foto grandi resta dentro la cornice e non monta più sul bordo bianco; filo del bordo più leggero (`www/casa/polaroid-1..3.webp`). Immagini in `docs/proposte-polaroid/`.
+  - Controllati «Il mio menu» (primi passi) e «Nuova ricetta» sul telefono, ricettario e menu sul sito; le altre pagine prendono le stesse regole ma non sono state guardate una per una, e le loro scritte non sono ancora state sfoltite.
+
 ## 2026-11-19
 
 - **Versione 181, Polaroid vere nel sito da computer**

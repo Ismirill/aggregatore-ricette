@@ -18,12 +18,12 @@ if(!app&&!L.search&&!L.hash&&!mine&&matchMedia('(min-width:900px)').matches&&!se
 // colore della barra di stato coerente con il tema (scuro predefinito; «Automatico» segue il sistema)
 function themeColor(){const t=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.getElementById("themeColor").content=t==="dark"?"#15120e":"#f7f2ea"}themeColor();matchMedia("(prefers-color-scheme:dark)").addEventListener("change",themeColor);</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ---------- Tema: cucina italiana calda (terracotta, crema, oliva); chiaro e scuro automatici ---------- */
 :root{--bg:#f7f2ea;--bg2:#efe7da;--card:#fffdf9;--fg:#2a231d;--mut:#8a7e71;--acc:#c2502f;--acc2:#e9a23b;--ok:#5f7a35;--bd:#e8dfd1;--star:#e0a526;
-  --sh:0 1px 2px #2a231d10,0 6px 20px #2a231d0d;--sh2:0 10px 30px #2a231d26;--r:18px;--serif:'Fraunces',Georgia,'Times New Roman',serif;
-  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color-scheme:light}
+  --sh:0 1px 2px #2a231d10,0 6px 20px #2a231d0d;--sh2:0 10px 30px #2a231d26;--r:18px;--serif:'Nunito',ui-rounded,system-ui,sans-serif;
+  --sans:'Nunito',ui-rounded,system-ui,sans-serif;color-scheme:light}
 /* Stile Trattoria (tovaglia a quadretti): solo in modalità chiara */
 :root[data-style=trattoria]{--bg:#fbf5f1;--bg2:#fbece9;--card:#ffffff;--fg:#2b1b18;--mut:#86706a;--acc:#d6362b;--acc2:#e9a23b;--ok:#4f7a2a;--bd:#f0dcd8;
   --sh:0 1px 2px #5a1a1414,0 6px 18px #5a1a1412;--sh2:0 12px 30px #5a1a1426;
@@ -39,7 +39,7 @@ function themeColor(){const t=document.documentElement.dataset.theme||(matchMedi
   --sh:0 1px 2px #2b242012,0 10px 24px #2b24201a;--sh2:0 16px 36px #2b242030;--serif:'Nunito',ui-rounded,system-ui,sans-serif;--sans:'Nunito',ui-rounded,system-ui,sans-serif;
   --hand:'Caveat','Bradley Hand','Segoe Print',cursive;--pattern:none;color-scheme:light}
 :root[data-style=rivista]{--bg:#f7f2ea;--bg2:#efe6da;--card:#fffdf9;--fg:#2a211c;--mut:#8a7c70;--acc:#c2502f;--acc2:#e9a23b;--ok:#3f7a2e;--bd:#e8ddcf;--star:#e0a526;
-  --sh:0 1px 2px #2a211c12,0 8px 22px #3c230f1c;--sh2:0 16px 34px #3c230f30;--serif:'Fraunces',Georgia,serif;--sans:'Nunito',ui-rounded,system-ui,sans-serif;--pattern:none;color-scheme:light}
+  --sh:0 1px 2px #2a211c12,0 8px 22px #3c230f1c;--sh2:0 16px 34px #3c230f30;--serif:'Nunito',ui-rounded,system-ui,sans-serif;--sans:'Nunito',ui-rounded,system-ui,sans-serif;--pattern:none;color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{font:-apple-system-body;font-family:var(--sans);-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip} /* su iPhone il testo segue «Dimensione testo» delle Impostazioni; tutte le misure sotto sono in rem, così l'interfaccia cresce insieme */
 body{margin:0;overflow-x:clip;font-family:var(--sans);background:var(--bg);background-image:var(--pattern,none);background-attachment:fixed;color:var(--fg);padding-bottom:calc(5.6rem + env(safe-area-inset-bottom));line-height:1.45}
@@ -871,6 +871,28 @@ details summary{cursor:pointer}
 :root[data-sito] .sPol.p2,:root[data-sito] .sSide .sPol.s2{border-image-source:url(casa/polaroid-3.webp)}
 :root[data-sito] .sPol .foto{box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
 :root[data-sito] .sPol .fis{margin-top:-14px}
+/* come vere Polaroid (v182): foto quadrata, titolo scritto a pennarello sul bordo bianco, bordi un po' più larghi */
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item{border-width:16px 16px 14px;border-image-width:16px 16px 14px}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item .thumb{aspect-ratio:1;border-radius:0!important;box-shadow:none}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item .thumb img,:root[data-sito] .sPol .foto{border-radius:0!important}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item{align-self:start}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item .b{padding:7px 2px 0;gap:1px;flex:none}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item h3{font-family:var(--hand);font-weight:700;font-size:1.38rem;line-height:.98;color:#2a2622;letter-spacing:0}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item .facts{font-size:.7rem;flex-wrap:nowrap;gap:0 8px;white-space:nowrap;overflow:hidden;line-height:1.5}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item .cat{font-size:.62rem;padding:3px 8px}
+/* sparse come foto sul tavolo: inclinate un po' da una parte e un po' dall'altra, con piccoli dislivelli */
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item:nth-child(7n+1){transform:rotate(-2.4deg) translateY(6px)}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item:nth-child(7n+2){transform:rotate(1.9deg) translateY(-5px)}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item:nth-child(7n+3){transform:rotate(-1.1deg) translateY(11px)}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item:nth-child(7n+4){transform:rotate(2.7deg) translateY(2px)}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item:nth-child(7n+5){transform:rotate(-1.9deg) translateY(-7px)}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item:nth-child(7n+6){transform:rotate(1.3deg) translateY(8px)}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item:nth-child(7n){transform:rotate(-2.9deg) translateY(0)}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item{transition:transform .25s,filter .25s}
+:root[data-sito] :is(.list,.vgrid,.hscroll)>.item:hover{transform:rotate(0) translateY(-6px) scale(1.02);z-index:4}
+/* foto grandi del Ricettario: lo zoom resta dentro la foto e non copre il bordo bianco (la foto ingrandita si ritaglia di quanto cresce) */
+:root[data-sito] .vtile>img{transition:transform .6s,clip-path .6s;clip-path:inset(0)}
+:root[data-sito] .vtile:hover>img{transform:scale(1.05);clip-path:inset(2.39%)}
 :root[data-sito] .sPol::after{content:'';position:absolute;left:0;right:0;top:0;aspect-ratio:1;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18),inset 1px 2px 3px rgba(0,0,0,.3);background:linear-gradient(125deg,rgba(255,255,255,.2),rgba(255,255,255,0) 40%)}
 :root[data-sito] .vgrid{gap:34px 26px;padding-top:10px}
 :root[data-sito] .occh{margin:0 0 6px;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#3f7a2e}
@@ -993,6 +1015,40 @@ details summary{cursor:pointer}
   html:root:not([data-sito]) header .top .icon.on{color:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--hc) 40%,transparent),inset 0 -3px 0 #0002}
   html:root:not([data-sito]) .cupDot{background:#fff;border-color:var(--hc)}
 }
+
+/* ===== Coerenza grafica (v182): un solo carattere per testi e titoli (Nunito), Fredoka su barra e pulsanti, Caveat solo per la scrittura a mano.
+   Pulsanti tutti a pillola con la palette della cucina: pieno pomodoro = azione principale, vuoto crema con bordo = le altre.
+   Non toccano la barra in basso né le icone della testata, e nemmeno i pulsanti colorati della scheda ricetta (v176) ===== */
+:root{--kb2:var(--k-bb);--kt2:var(--k-bb)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]){--kb2:var(--k-to);--kt2:var(--fg)}}
+:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]){--kb2:var(--k-to);--kt2:var(--fg)}
+@media (min-width:900px){:root[data-sito]:root[data-sito]{--kb2:var(--k-bb);--kt2:var(--k-bb);--k-in:#fff7ef}}
+:root:not(#_) .btn:not(.cookBtn):not(.dacts *){font-family:'Fredoka',var(--sans);font-weight:600;letter-spacing:.01em;border-radius:999px;border:3px solid var(--kb2);background:var(--k-in);color:var(--kt2);box-shadow:none;min-height:2.9rem;padding:7px 18px;line-height:1.15}
+:root:not(#_) .btn.pri:not(.cookBtn):not(.dacts *),:root:not(#_) .cbtn,:root:not(#_) .fab{font-family:'Fredoka',var(--sans);font-weight:600;border-radius:999px;border:3px solid var(--k-po);background:var(--k-po);color:#fff;box-shadow:none}
+:root:not(#_) .btn.danger:not(.dacts *){border-color:var(--k-po);color:var(--k-po)}
+:root:not(#_) .btn:not(.dacts *):hover,:root:not(#_) .cbtn:hover,:root:not(#_) .fab:hover{filter:brightness(.96)}
+:root:not(#_) .btn:not(.dacts *):active,:root:not(#_) .cbtn:active,:root:not(#_) .fab:active{transform:translateY(1px)}
+:root:not(#_) .chip{font-family:'Fredoka',var(--sans);font-weight:500;border-radius:999px;border:2px solid var(--k-to);background:var(--k-in);color:var(--kt2)}
+:root:not(#_) .chip.on{background:var(--k-po);border-color:var(--k-po);color:#fff}
+/* scelte: ogni voce è un pulsante a pillola, quella scelta è piena */
+:root:not(#_) .seg{display:flex;flex-wrap:wrap;gap:8px;background:none;padding:0;border-radius:0}
+:root:not(#_) .seg label{flex:1 1 auto}
+:root:not(#_) .seg span{font-family:'Fredoka',var(--sans);font-weight:600;border:3px solid var(--kb2);border-radius:999px;background:var(--k-in);color:var(--kt2);padding:10px 14px;white-space:nowrap;box-shadow:none}
+:root:not(#_) .seg input:checked+span{background:var(--k-po);border-color:var(--k-po);color:#fff;box-shadow:none}
+:root:not(#_) .checks{gap:8px}
+:root:not(#_) .checks label{position:relative;font-family:'Fredoka',var(--sans);font-weight:600;font-size:.95rem;border:3px solid var(--kb2);border-radius:999px;background:var(--k-in);color:var(--kt2);padding:9px 14px}
+:root:not(#_) .checks label:has(input:checked){background:var(--k-po);border-color:var(--k-po);color:#fff}
+:root:not(#_) .checks input{position:absolute;opacity:0;pointer-events:none}
+/* Il mio menu: domande corte, una cosa per volta, niente spiegazioni */
+#budget .bhead h2{font-weight:900}
+.bform .step h3{font-size:1.5rem;font-weight:900;margin:0 0 14px}
+.bform .step p>b{font-size:1.05rem;font-weight:800}
+.bform .step label{font-weight:700}
+.bform .step .seg span{font-size:1.05rem;padding:12px 16px}
+/* Nuova ricetta: cinque pulsanti chiari, senza righe di spiegazione */
+:root:not(#_) .srcCard{border:3px solid var(--kb2);border-radius:999px;background:var(--k-in);color:var(--kt2);box-shadow:none;padding:13px 20px;text-align:left}
+:root:not(#_) .srcCard b{font-family:'Fredoka',var(--sans);font-weight:600;font-size:1.1rem}
+:root:not(#_) .srcCard span{display:none}
 </style>
 </head>
 <body>
@@ -1026,37 +1082,37 @@ details summary{cursor:pointer}
 <section id="libro" hidden><div id="libBody"></div></section>
 <section id="chats" hidden><div id="chatsBody"></div></section>
 <section id="budget" hidden>
-  <div class="bhead"><h2>Il menu giusto per il tuo budget</h2><p>Rispondi a sei domande: preparo un menu con i piatti italiani di tutti i giorni, bilanciato e con frutta e verdura di stagione. Alla fine puoi variarlo quante volte vuoi.</p></div>
+  <div class="bhead"><h2>Il mio menu</h2></div>
   <form id="bForm" class="bform">
     <div class="wiz"><button type="button" class="icon" id="wTopBack" aria-label="Indietro" style="visibility:hidden">←</button><div class="wmid"><div class="wdots" id="wDots"></div><div class="meta" id="wStep"></div></div><button type="button" class="icon" id="wTopX" aria-label="Annulla" style="visibility:hidden">✕</button></div>
     <section class="step" data-s="0"><h3>Che menu vuoi?</h3>
-      <div class="seg"><label><input type="radio" name="mode" value="week" checked><span>Tutta la settimana</span></label><label><input type="radio" name="mode" value="meal"><span>Un solo pasto</span></label></div>
-      <p class="meta" id="wHint0">Settimana: pranzi e cene da lunedì a domenica, bilanciati tra loro. Un solo pasto: un menu completo per oggi.</p>
-      <div id="bBreakL" style="margin-top:10px"><p style="margin:0 0 6px"><b>Vuoi includere la colazione?</b></p>
+      <div class="seg"><label><input type="radio" name="mode" value="week" checked><span>La settimana</span></label><label><input type="radio" name="mode" value="meal"><span>Un pasto</span></label></div>
+      <p class="meta" id="wHint0" hidden></p>
+      <div id="bBreakL" style="margin-top:10px"><p style="margin:0 0 6px"><b>Colazione</b></p>
         <div class="seg wrap"><label><input type="radio" name="breakfast" value="no" checked><span>No</span></label><label><input type="radio" name="breakfast" value="classica"><span>Classica</span></label><label><input type="radio" name="breakfast" value="dolce"><span>Dolce</span></label><label><input type="radio" name="breakfast" value="salata"><span>Salata</span></label><label><input type="radio" name="breakfast" value="mista"><span>Varia</span></label></div>
-        <p class="meta" style="margin:6px 0 0">Classica: caffellatte e biscotti, cappuccino e cornetto, fette biscottate… Dolce: anche yogurt, porridge, pane e miele. Salata: uova, toast, pane e formaggio. Varia: un giorno dolce e uno salata. Le colazioni sono anche nel Ricettario, sezione «Colazione».</p></div>
-      <div style="margin-top:10px"><p style="margin:0 0 6px"><b>Pane a tavola?</b></p>
-        <div class="seg"><label><input type="radio" name="bread" value="dinner" checked><span>Solo a cena</span></label><label><input type="radio" name="bread" value="all"><span>A ogni pasto</span></label><label><input type="radio" name="bread" value="no"><span>No</span></label></div></div></section>
-    <section class="step" data-s="1" hidden><h3>Quanto vuoi spendere e per quante persone?</h3>
-      <div class="two"><label><span id="bLbl">Budget settimanale (€)</span><input name="budget" type="number" min="1" step="0.5" inputmode="decimal" placeholder="es. 60"></label>
+        </div>
+      <div style="margin-top:10px"><p style="margin:0 0 6px"><b>Pane</b></p>
+        <div class="seg"><label><input type="radio" name="bread" value="dinner" checked><span>A cena</span></label><label><input type="radio" name="bread" value="all"><span>Sempre</span></label><label><input type="radio" name="bread" value="no"><span>No</span></label></div></div></section>
+    <section class="step" data-s="1" hidden><h3>Budget e persone</h3>
+      <div class="two"><label><span id="bLbl">Budget della settimana (€)</span><input name="budget" type="number" min="1" step="0.5" inputmode="decimal" placeholder="es. 60"></label>
       <label>Persone<input name="people" type="number" min="1" max="20" value="2" inputmode="numeric"></label></div>
-      <p class="meta">Il costo è calcolato con i prezzi medi della tua zona; frutta, pane e contorni compresi.</p></section>
-    <section class="step" data-s="2" hidden><h3>Quando cucini e quanto tempo hai?</h3>
-      <label id="bMealsL">Pasti da preparare<div class="checks"><label><input type="checkbox" name="lunch" checked>Pranzo</label><label><input type="checkbox" name="dinner" checked>Cena</label></div></label>
-      <div class="two"><label><span id="bTimeL">Tempo per cucinare a pasto (lun–ven)</span><select name="tWeek"></select></label>
-      <label id="bTimeEndL">Tempo a pasto (sab–dom)<select name="tEnd"></select></label></div>
-      <div class="checks"><label><input type="checkbox" name="easy">Solo ricette facili</label><label><input type="checkbox" name="ahead">Posso preparare il giorno prima (lievitazioni, marinature, ammollo)</label></div></section>
-    <section class="step" data-s="3" hidden><h3>Vanno bene anche cibi già pronti?</h3>
-      <div class="seg"><label><input type="radio" name="ready" value="no" checked><span>No, solo cucinato</span></label><label><input type="radio" name="ready" value="some"><span>Sì, quando il tempo è poco</span></label><label><input type="radio" name="ready" value="yes"><span>Sì, volentieri</span></label></div>
-      <p class="meta">Surgelati, freschi confezionati (lasagne, ravioli, zuppe in vaschetta), in scatola e gastronomia del supermercato: costano un po' di più e si preparano in pochi minuti. «Quando il tempo è poco» li usa solo nei pasti con meno tempo per cucinare, al massimo tre a settimana.</p></section>
-    <section class="step" data-s="4" hidden><h3>Diete, intolleranze e allergie</h3>
+      </section>
+    <section class="step" data-s="2" hidden><h3>Pasti e tempo</h3>
+      <label id="bMealsL">Pasti<div class="checks"><label><input type="checkbox" name="lunch" checked>Pranzo</label><label><input type="checkbox" name="dinner" checked>Cena</label></div></label>
+      <div class="two"><label><span id="bTimeL">Tempo, lun–ven</span><select name="tWeek"></select></label>
+      <label id="bTimeEndL">Tempo, sab–dom<select name="tEnd"></select></label></div>
+      <div class="checks"><label><input type="checkbox" name="easy">Solo facili</label><label><input type="checkbox" name="ahead">Anche il giorno prima</label></div></section>
+    <section class="step" data-s="3" hidden><h3>Cibi già pronti?</h3>
+      <div class="seg"><label><input type="radio" name="ready" value="no" checked><span>No</span></label><label><input type="radio" name="ready" value="some"><span>Se ho poco tempo</span></label><label><input type="radio" name="ready" value="yes"><span>Sì</span></label></div>
+      </section>
+    <section class="step" data-s="4" hidden><h3>Diete e allergie</h3>
       <div class="checks" id="bDiet"></div>
-      <label>Altri ingredienti da evitare (separati da virgola)<input name="avoid" placeholder="es. sedano, funghi, senape, kiwi"></label></section>
-    <section class="step" data-s="5" hidden><h3>Che cucina e in che periodo?</h3>
-      <label>Cucina<select name="cuisine"><option value="quotidiana">Italiana di tutti i giorni (consigliata)</option><option value="italiana">Italiana, anche piatti regionali rari</option><option value="mondo">Anche ricette dal mondo</option></select></label>
+      <label>Da evitare<input name="avoid" placeholder="es. sedano, funghi, senape, kiwi"></label></section>
+    <section class="step" data-s="5" hidden><h3>Cucina e periodo</h3>
+      <label>Cucina<select name="cuisine"><option value="quotidiana">Italiana di tutti i giorni</option><option value="italiana">Italiana, anche regionale</option><option value="mondo">Anche dal mondo</option></select></label>
       <div class="two"><label>Periodo<select name="month" id="bMonth"></select></label>
-      <label>Ricette da usare<select name="pool"><option value="all">Ricettario + le mie</option><option value="book">Solo ricettario</option><option value="mine">Solo le mie</option></select></label></div></section>
-    <div class="row" style="justify-content:space-between;gap:8px"><span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn" id="wBack">← Indietro</button> <button type="button" class="btn" id="wCancel" hidden>✕ Annulla</button></span><span><button type="button" class="btn pri" id="wNext">Avanti →</button><button class="btn pri" id="wGo" hidden>✨ Crea il menu</button></span></div>
+      <label>Ricette<select name="pool"><option value="all">Ricettario + le mie</option><option value="book">Solo ricettario</option><option value="mine">Solo le mie</option></select></label></div></section>
+    <div class="row" style="justify-content:space-between;gap:8px"><span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn" id="wBack">Indietro</button> <button type="button" class="btn" id="wCancel" hidden>Annulla</button></span><span><button type="button" class="btn pri" id="wNext">Avanti</button><button class="btn pri" id="wGo" hidden>Crea il menu</button></span></div>
   </form>
   <div id="bOut"></div>
 </section></main>
@@ -1974,7 +2030,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=181; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=182; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2575,8 +2631,8 @@ $('#wBack').onclick=$('#wTopBack').onclick=()=>showStep(wStep-1);
 $('#wCancel').onclick=$('#wTopX').onclick=()=>{const plan=load('budgetPlan',null);if(plan){budgetView(false);loadSeason().then(()=>showPlan(plan))}};
 // mostra il modulo (dal passo indicato) o il menu
 function budgetView(showForm,step=0){$('#bForm').hidden=!showForm;$('#bOut').hidden=showForm;if(showForm){showStep(step);const p=!!load('budgetPlan',null);$('#wCancel').hidden=!p;$('#wTopX').style.visibility=p?'visible':'hidden'}}
-function modeUI(){const w=$('#bForm').mode.value==='week';$('#bLbl').textContent=w?'Budget settimanale (€)':'Budget per il pasto (€)';$('#bMealsL').hidden=!w;
-  $('#bTimeEndL').hidden=!w;$('#bTimeL').textContent=w?'Tempo per cucinare a pasto (lun–ven)':'Tempo per cucinare';$('#bBreakL').hidden=!w}
+function modeUI(){const w=$('#bForm').mode.value==='week';$('#bLbl').textContent=w?'Budget della settimana (€)':'Budget del pasto (€)';$('#bMealsL').hidden=!w;
+  $('#bTimeEndL').hidden=!w;$('#bTimeL').textContent=w?'Tempo, lun–ven':'Tempo';$('#bBreakL').hidden=!w}
 
 // Tipo di proteina prevalente, per le regole settimanali
 function protein(r){
