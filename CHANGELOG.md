@@ -4,6 +4,15 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-22
+
+### Versione 184 — procedura del menu ridisegnata, X e frecce piene, tasto indietro
+- **Il mio menu, procedura guidata:** «Passo 1 di 6» sopra una barra a tacche al posto dei pallini; in fondo un solo pulsante grande «Avanti» (tolti «Indietro» e «Annulla», che restano come freccia e X in alto). Stessa testata nella «Nuova ricetta».
+- **X e freccia indietro:** disegnate con tratto pieno e tondo dentro un tondo morbido, uguali in tutte le finestre (scheda ricetta, impostazioni, account, chat, foto, video, «Cucina con me»).
+- **Lista della spesa:** il pulsante è pieno pomodoro a pillola come gli altri; la lista si apre in una scheda sotto.
+- **Tasto indietro del telefono:** chiude la finestra aperta, torna al passo o alla pagina prima, poi alla schermata principale; dall'app si esce solo da lì, premendo due volte. Fatto con una voce in più nella cronologia (nessuna modifica alla parte Android).
+- Esempi in `docs/proposte-menu/v184-*.jpg`. Non provato su un telefono vero.
+
 ## 2026-11-21
 
 - **Versione 183, poche scritte dappertutto, scelte e filtri più leggeri, pane «un pasto»**

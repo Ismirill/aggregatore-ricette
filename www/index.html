@@ -1057,6 +1057,22 @@ details summary{cursor:pointer}
 @media (max-width:899px){:root:not(#_) .wbtn{border:3px solid var(--kb2);border-radius:999px;background:var(--k-in);color:var(--kt2);box-shadow:none;padding:12px 20px}
 :root:not(#_) .wbtn b{font-family:'Fredoka',var(--sans);font-weight:600;font-size:1.08rem;margin:0}}
 .wsteps b{display:inline;font:inherit;font-weight:800;margin:0}
+/* v184 — X e freccia: tratto pieno e tondo dentro un tondo morbido, uguali in tutte le finestre */
+.ix{width:22px;height:22px;display:block;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+:root:not(#_) .icon:has(>.ix),:root:not(#_) .dclose{display:grid;place-items:center;width:2.6rem;height:2.6rem;padding:0;border:0;border-radius:50%;background:color-mix(in srgb,var(--k-to) 30%,var(--card));color:var(--kt2);box-shadow:none}
+:root:not(#_) .icon:has(>.ix):active,:root:not(#_) .dclose:active{transform:scale(.94)}
+/* procedura guidata: «Passo 1 di 6» sopra una barra a tacche, un solo pulsante grande in fondo */
+.wiz{gap:12px;margin-bottom:4px}.wiz .wmid{gap:7px}
+.wlbl{font-family:'Fredoka',var(--sans);font-weight:600;font-size:.95rem;color:var(--kt2)}
+:root:not(#_) .wdots{width:100%;max-width:13rem;gap:5px}
+:root:not(#_) .wdots i{flex:1;width:auto;height:7px;border-radius:99px;background:color-mix(in srgb,var(--k-to) 38%,transparent)}
+:root:not(#_) .wdots i.on,:root:not(#_) .wdots i.done{background:var(--ksel)}
+.wfoot{display:flex;margin-top:6px}:root:not(#_) .wfoot .btn{flex:1;font-size:1.12rem;padding:13px 20px}
+.bform .step{gap:14px}.bform .step>div[style]{margin-top:4px!important}
+/* lista della spesa: stesso pulsante pieno degli altri, la lista si apre in una scheda sotto */
+:root:not(#_) .shopBox summary{font-family:'Fredoka',var(--sans);font-weight:600;border-radius:999px;border:3px solid var(--k-po);background:var(--k-po);color:#fff;box-shadow:none;padding:11px 18px}
+:root:not(#_) .shopBox[open] summary{border-radius:999px}
+:root:not(#_) .shopBox #shopList{border-top:1px solid var(--bd);border-radius:16px;margin-top:8px}
 /* Nuova ricetta: cinque pulsanti chiari, senza righe di spiegazione */
 :root:not(#_) .srcCard{border:3px solid var(--kb2);border-radius:999px;background:var(--k-in);color:var(--kt2);box-shadow:none;padding:13px 20px;text-align:left}
 :root:not(#_) .srcCard b{font-family:'Fredoka',var(--sans);font-weight:600;font-size:1.1rem}
@@ -1096,7 +1112,7 @@ details summary{cursor:pointer}
 <section id="budget" hidden>
   <div class="bhead"><h2>Il mio menu</h2></div>
   <form id="bForm" class="bform">
-    <div class="wiz"><button type="button" class="icon" id="wTopBack" aria-label="Indietro" style="visibility:hidden">←</button><div class="wmid"><div class="wdots" id="wDots"></div><div class="meta" id="wStep"></div></div><button type="button" class="icon" id="wTopX" aria-label="Annulla" style="visibility:hidden">✕</button></div>
+    <div class="wiz"><button type="button" class="icon" id="wTopBack" aria-label="Indietro" style="visibility:hidden"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button><div class="wmid"><div class="wlbl" id="wStep"></div><div class="wdots" id="wDots"></div></div><button type="button" class="icon" id="wTopX" aria-label="Annulla" style="visibility:hidden"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
     <section class="step" data-s="0"><h3>Che menu vuoi?</h3>
       <div class="seg"><label><input type="radio" name="mode" value="week" checked><span>Settimana</span></label><label><input type="radio" name="mode" value="meal"><span>Un pasto</span></label></div>
       <p class="meta" id="wHint0" hidden></p>
@@ -1124,7 +1140,7 @@ details summary{cursor:pointer}
       <label>Cucina<select name="cuisine"><option value="quotidiana">Italiana di tutti i giorni</option><option value="italiana">Italiana, anche regionale</option><option value="mondo">Anche dal mondo</option></select></label>
       <div class="two"><label>Periodo<select name="month" id="bMonth"></select></label>
       <label>Ricette<select name="pool"><option value="all">Ricettario + le mie</option><option value="book">Solo ricettario</option><option value="mine">Solo le mie</option></select></label></div></section>
-    <div class="row" style="justify-content:space-between;gap:8px"><span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn" id="wBack">Indietro</button> <button type="button" class="btn" id="wCancel" hidden>Annulla</button></span><span><button type="button" class="btn pri" id="wNext">Avanti</button><button class="btn pri" id="wGo" hidden>Crea il menu</button></span></div>
+    <div class="wfoot"><button type="button" class="btn pri" id="wNext">Avanti</button><button class="btn pri" id="wGo" hidden>Crea il menu</button></div>
   </form>
   <div id="bOut"></div>
 </section></main>
@@ -1133,9 +1149,9 @@ details summary{cursor:pointer}
 <dialog id="det"><div class="dv" id="dv"></div></dialog>
 
 <dialog id="dlg">
-  <div class="dhead stk"><h2 id="dlgT">Nuova ricetta</h2><button type="button" class="icon" id="dlgX" aria-label="Chiudi">✕</button></div>
+  <div class="dhead stk"><h2 id="dlgT">Nuova ricetta</h2><button type="button" class="icon" id="dlgX" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
   <!-- Percorso guidato (solo per una ricetta nuova): un passo per schermata, con i pallini come nel menu -->
-  <div class="wiz" id="rWiz"><button type="button" class="icon" id="rBackTop" aria-label="Indietro" style="visibility:hidden">←</button><div class="wmid"><div class="wdots" id="rDots"></div><div class="meta" id="rStepLbl"></div></div><span class="icon" style="visibility:hidden"></span></div>
+  <div class="wiz" id="rWiz"><button type="button" class="icon" id="rBackTop" aria-label="Indietro" style="visibility:hidden"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button><div class="wmid"><div class="wlbl" id="rStepLbl"></div><div class="wdots" id="rDots"></div></div><span class="icon" style="visibility:hidden"></span></div>
   <div id="srcStep" class="step">
     <h3>Da dove viene la ricetta?</h3>
     <div class="srcGrid">
@@ -1224,20 +1240,20 @@ details summary{cursor:pointer}
 <datalist id="countries"></datalist><datalist id="regions"></datalist>
 
 <dialog id="menu"><h3 id="menuT"></h3><p class="lbl">Condividi su</p><div class="socRow"><button class="btn ig" data-s="instagram">Instagram</button><button class="btn tt" data-s="tiktok">TikTok</button><button class="btn yt" data-s="youtube">YouTube</button><button class="btn fb" data-s="facebook">Facebook</button></div><button class="btn" id="menuEdit">✏️ Modifica</button><button class="btn danger" id="menuDel">🗑 Elimina</button><button class="btn" id="menuCancel">Annulla</button></dialog>
-<dialog id="cook"><div class="dhead"><h2 id="cookT" style="font-size:1.25rem">Cucina con me</h2><button type="button" class="icon" id="cookX" aria-label="Chiudi">✕</button></div>
+<dialog id="cook"><div class="dhead"><h2 id="cookT" style="font-size:1.25rem">Cucina con me</h2><button type="button" class="icon" id="cookX" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
   <p class="meta" id="cookWhere" style="margin:0"></p>
   <div class="cookTxt" id="cookTxt"></div>
   <div class="cookTimer" id="cookTimer" hidden><b id="cookLeft">0:00</b><span>Ti avviso io quando è passato il tempo, poi passo al passaggio seguente</span></div>
   <div class="cookBtns"><button type="button" class="btn" data-c="repeat">🔁 Ripeti</button><button type="button" class="btn pri" data-c="next">⏭ Avanti</button><button type="button" class="btn" data-c="prev">⏮ Indietro</button><button type="button" class="btn" data-c="ing">🥕 Ingredienti</button><button type="button" class="btn" data-c="pause" id="cookPause">⏸ Pausa</button><button type="button" class="btn" data-c="mic" id="cookMic">🎤 Voce</button></div>
   <p class="meta" id="cookHint" style="margin:10px 0 0;min-height:1.2em"></p>
   <div id="cookVoiceBox" hidden><p class="meta" id="cookVoiceTxt" style="margin:8px 0 6px"></p><button type="button" class="btn" id="cookImprove" style="width:100%">🗣 Migliora la voce</button></div></dialog>
-<dialog id="photo"><button class="dclose" id="phX" aria-label="Chiudi">✕</button><div id="phv"></div></dialog>
+<dialog id="photo"><button class="dclose" id="phX" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button><div id="phv"></div></dialog>
 <dialog id="ratePop"><h3 id="rateT" tabindex="-1" autofocus></h3><p class="meta" id="rateSub" style="margin:0"></p><div class="rate" id="rateStars"><button type="button" data-n="1" aria-label="1 stelle">★</button><button type="button" data-n="2" aria-label="2 stelle">★</button><button type="button" data-n="3" aria-label="3 stelle">★</button><button type="button" data-n="4" aria-label="4 stelle">★</button><button type="button" data-n="5" aria-label="5 stelle">★</button></div><p class="meta" id="rateHint" style="margin:0"></p><button class="btn" id="rateX">Chiudi</button></dialog>
 <dialog id="chat" aria-label="Messaggi"><div id="chatV"></div><input type="file" id="chatPh" accept="image/*" hidden></dialog>
-<dialog id="rec"><div class="rech"><b>🎬 Il video della ricetta</b><button type="button" class="dclose" id="recX" aria-label="Chiudi" style="float:none;margin:0">✕</button></div><div id="recBody"></div></dialog>
+<dialog id="rec"><div class="rech"><b>🎬 Il video della ricetta</b><button type="button" class="dclose" id="recX" aria-label="Chiudi" style="float:none;margin:0"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div><div id="recBody"></div></dialog>
 
 <dialog id="acct">
-  <div class="dhead stk"><h2 id="acctT">Il tuo profilo</h2><button class="icon" id="acctX" aria-label="Chiudi">✕</button></div>
+  <div class="dhead stk"><h2 id="acctT">Il tuo profilo</h2><button class="icon" id="acctX" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
   <div id="acctIntro" hidden>
     <div class="aiHero"><span class="aiBg"></span><img class="aiGirl" src="casa/cuoca-scontornata.webp" alt="" width="420" height="350"></div>
     <div class="aiIn">
@@ -1257,7 +1273,7 @@ details summary{cursor:pointer}
   <input type="file" id="profPhoto" accept="image/*" hidden>
 </dialog>
 <dialog id="set">
-  <div class="dhead stk"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi">✕</button></div>
+  <div class="dhead stk"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
   <section class="sec"><h3>Aspetto</h3><div class="seg" id="styleSeg" style="margin-bottom:8px"><label><input type="radio" name="style" value="trattoria"><span>Trattoria</span></label><label><input type="radio" name="style" value="crema"><span>Crema</span></label><label><input type="radio" name="style" value="rivista"><span>Rivista</span></label></div><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div><p class="meta quadNote">Il Quaderno è sempre chiaro, come il sito: Chiaro e Scuro valgono per Trattoria e Crema.</p></section>
   <section class="sec"><h3>Tipi di piatto</h3><div class="badges" id="catList"></div>
     <form id="catF" class="inl"><input name="c" placeholder="Nuovo tipo, es. Lievitati" aria-label="Nuovo tipo di piatto"><button class="btn pri">Aggiungi</button></form></section>
@@ -1730,12 +1746,12 @@ $('#chatsBody').onclick=e=>{const r=e.target.closest('.chRow'),b=e.target.closes
   if(b?.dataset.chp==='new'){CH.pick=null;chatStart()}};
 function chatPaintList(){CH.menu=false;CH.view='list';
   const req=CH.list.filter(c=>c.st==='in'),rest=CH.list.filter(c=>c.st!=='in'),row=chatRow;
-  $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="close" aria-label="Chiudi">✕</button><h2>${CH.pick?'Manda la ricetta':'Messaggi'}</h2><button type="button" class="btn pri" data-ch="new">✏️ Nuovo</button></div>
+  $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="close" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button><h2>${CH.pick?'Manda la ricetta':'Messaggi'}</h2><button type="button" class="btn pri" data-ch="new">✏️ Nuovo</button></div>
   <div class="chBody">${CH.pick?`<p class="chPickInfo">Scegli a chi mandare <b>${esc(CH.pick.title)}</b>.</p>`:''}
   ${req.length?`<h3 class="chSec">Vogliono scriverti</h3>${req.map(row).join('')}`:''}
   ${rest.length?`${req.length?'<h3 class="chSec">Le tue chat</h3>':''}${rest.map(row).join('')}`:req.length?'':`<div class="chEmpty"><p><b>Ancora nessuna chat</b></p><p class="meta">Tocca «Nuovo» e cerca una persona per nome.</p></div>`}</div>`}
 function chatPaintFind(){CH.view='find';
-  $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="back" aria-label="Indietro">←</button><h2>Nuovo messaggio</h2></div><div class="chBody"><input id="chQ" type="search" placeholder="Cerca un Gnammer per nome" autocomplete="off" enterkeyhint="search"><div id="chRes"><p class="meta">Scrivi almeno due lettere del nome.</p></div></div>`;
+  $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="back" aria-label="Indietro"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button><h2>Nuovo messaggio</h2></div><div class="chBody"><input id="chQ" type="search" placeholder="Cerca un Gnammer per nome" autocomplete="off" enterkeyhint="search"><div id="chRes"><p class="meta">Scrivi almeno due lettere del nome.</p></div></div>`;
   const q=$('#chQ');q.oninput=()=>{clearTimeout(CH.qt);CH.qt=setTimeout(chatFind,350)};setTimeout(()=>q.focus(),50)}
 async function chatFind(){const q=$('#chQ')?.value.trim()||'',box=$('#chRes');if(!box)return;if(q.length<2){box.innerHTML='<p class="meta">Scrivi almeno due lettere del nome.</p>';return}
   try{const r=await chatApi('/chat/find',{q});if(($('#chQ')?.value.trim()||'')!==q)return;CH.found=r.people||[];
@@ -1774,7 +1790,7 @@ function chatPaintConv(){const p=CH.peer||{},st=CH.st,nm=esc(p.name||'Gnammer');
     :st==='out'&&CH.msgs.some(m=>m.mine)?`<div class="chBan"><p class="meta" style="margin:0">Richiesta inviata: potrete scrivervi quando ${nm} l'avrà accettata.</p></div>`
     :st==='no'?`<div class="chBan"><p class="meta" style="margin:0">Questa persona non accetta messaggi.</p></div>`
     :st==='new'?`<div class="chBan"><p class="meta" style="margin:0">Il primo messaggio arriva a ${nm} come richiesta: saluta e spiega perché scrivi.</p></div>`:'';
-  $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="back" aria-label="Indietro">←</button>${chAv(p)}<h2>${nm}</h2>${CH.chat?'<button type="button" class="icon" data-ch="more" aria-label="Altre azioni">⋮</button>':''}</div>
+  $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="back" aria-label="Indietro"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button>${chAv(p)}<h2>${nm}</h2>${CH.chat?'<button type="button" class="icon" data-ch="more" aria-label="Altre azioni">⋮</button>':''}</div>
   ${ban}<div class="chMsgs" id="chMsgs">${chatMsgsHtml()||(CH.chat?'<p class="meta" style="text-align:center">Carico i messaggi…</p>':'')}</div>
   ${chatCanWrite()?`<div class="chIn">${st==='ok'?'<button type="button" class="icon" data-ch="photo" aria-label="Manda una foto">📷</button>':''}<button type="button" class="icon" data-ch="recipe" aria-label="Manda una ricetta">📖</button><textarea rows="1" maxlength="1000" placeholder="Scrivi un messaggio" aria-label="Messaggio"></textarea><button type="button" class="btn pri chSend" data-ch="send" aria-label="Invia">➤</button></div>`:''}`;
   const t=$('#chatV .chIn textarea');if(t){t.value=draft;t.oninput=()=>{t.style.height='auto';t.style.height=Math.min(t.scrollHeight,128)+'px'}}
@@ -1804,7 +1820,7 @@ $('#chatPh').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!
 function chatPaintPick(){CH.view='pick';const mine=items.filter(libOk);
   const draw=q=>{const l=mine.filter(i=>!q||(i.title||'').toLowerCase().includes(q.toLowerCase())).slice(0,60);
     $('#chPickL').innerHTML=l.length?l.map(i=>`<button type="button" class="chRow" data-rid="${esc(i.id)}"><span class="cav">${i.image?`<img class="tom" src="${esc(i.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:'📖'}</span><span class="chMid"><b>${esc(nice(i.title))}</b><span class="chLast">${esc(i.cat||'')}</span></span></button>`).join(''):`<p class="meta">${mine.length?'Nessuna ricetta con questo nome.':'Non hai ancora ricette salvate da mandare.'}</p>`};
-  $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="backconv" aria-label="Indietro">←</button><h2>Manda una ricetta</h2></div><div class="chBody"><input id="chPq" type="search" placeholder="Cerca tra le tue ricette" autocomplete="off"><div id="chPickL"></div></div>`;
+  $('#chatV').innerHTML=`<div class="chHead"><button type="button" class="icon" data-ch="backconv" aria-label="Indietro"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button><h2>Manda una ricetta</h2></div><div class="chBody"><input id="chPq" type="search" placeholder="Cerca tra le tue ricette" autocomplete="off"><div id="chPickL"></div></div>`;
   draw('');$('#chPq').oninput=e=>draw(e.target.value.trim())}
 function chatSaveRec(i){const r={title:i.title,image:i.image||'',url:i.url||'',source:i.source||'',cat:i.cat||'',servings:i.servings||undefined,ingredients:i.ingredients||[],steps:i.steps||[],bookId:i.bookId||undefined,
     note:[i.note,`Ricevuta in chat da ${i.from||'un Gnammer'}.`].filter(Boolean).join('\n')};
@@ -2042,7 +2058,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=183; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=184; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2624,7 +2640,7 @@ function showStep(k){
   f.querySelectorAll('.step').forEach(st=>st.hidden=+st.dataset.s!==wStep);
   $('#wDots').innerHTML=Array.from({length:W_N},(_,i)=>`<i class="${i===wStep?'on':i<wStep?'done':''}"></i>`).join('');
   $('#wStep').textContent=`Passo ${wStep+1} di ${W_N}`;
-  $('#wBack').style.visibility=$('#wTopBack').style.visibility=wStep?'visible':'hidden';$('#wNext').hidden=wStep===W_N-1;$('#wGo').hidden=wStep!==W_N-1;
+  $('#wTopBack').style.visibility=wStep?'visible':'hidden';$('#wNext').hidden=wStep===W_N-1;$('#wGo').hidden=wStep!==W_N-1;
   modeUI();
 }
 function wizardValid(){
@@ -2635,11 +2651,11 @@ function wizardValid(){
   return true;
 }
 $('#wNext').onclick=()=>{if(wizardValid())showStep(wStep+1)};
-$('#wBack').onclick=$('#wTopBack').onclick=()=>showStep(wStep-1);
+$('#wTopBack').onclick=()=>showStep(wStep-1);
 // Annulla: esce dal percorso e torna al menu già creato, senza cambiare nulla
-$('#wCancel').onclick=$('#wTopX').onclick=()=>{const plan=load('budgetPlan',null);if(plan){budgetView(false);loadSeason().then(()=>showPlan(plan))}};
+$('#wTopX').onclick=()=>{const plan=load('budgetPlan',null);if(plan){budgetView(false);loadSeason().then(()=>showPlan(plan))}};
 // mostra il modulo (dal passo indicato) o il menu
-function budgetView(showForm,step=0){$('#bForm').hidden=!showForm;$('#bOut').hidden=showForm;if(showForm){showStep(step);const p=!!load('budgetPlan',null);$('#wCancel').hidden=!p;$('#wTopX').style.visibility=p?'visible':'hidden'}}
+function budgetView(showForm,step=0){$('#bForm').hidden=!showForm;$('#bOut').hidden=showForm;if(showForm){showStep(step);const p=!!load('budgetPlan',null);$('#wTopX').style.visibility=p?'visible':'hidden'}}
 function modeUI(){const w=$('#bForm').mode.value==='week';$('#bLbl').textContent=w?'Budget della settimana (€)':'Budget del pasto (€)';$('#bMealsL').hidden=!w;
   $('#bTimeEndL').hidden=!w;$('#bTimeL').textContent=w?'Tempo, lun–ven':'Tempo';$('#bBreakL').hidden=!w}
 
@@ -3071,7 +3087,7 @@ function openDetail(i){
   if(libOk(i)&&!i.pronto&&!i.colazione&&!i.chatShare)acts.push(`<button type="button" class="btn" id="dLib">${kIc('lib')}${i.inBook?`Nel libro · ${esc(i.bookNo||'')}`:'Metti nel libro'}</button>`);
   if(libOk(i)&&!i.chatShare)acts.push(`<button type="button" class="btn" id="dPrint">${kIc('print')}Stampa la ricetta</button>`);
   acts.push(`<button class="btn" id="dClose">Chiudi</button>`);
-  $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi">✕</button><div class="dcols"><div class="dmain">
+  $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button><div class="dcols"><div class="dmain">
     ${i.clips?.length?`<div class="clipPl" id="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p><p class="row" style="justify-content:flex-start;gap:8px;margin:0 0 10px"><button type="button" class="btn pri" data-vc="share">📤 Pubblica</button><button type="button" class="btn" data-vc="save">💾 Salva nel rullino</button></p></div>`
       :e&&/facebook\.com\/plugins/.test(e.src)?fbHero(i,c1,c2,em)
       :e?`<iframe class="video ${e.v?'v':'h'}" src="${esc(e.src)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
@@ -4714,6 +4730,24 @@ if(inApp)fetch(SITE+'version.json?t='+Date.now()).then(r=>r.json()).then(v=>{if(
   document.querySelector('main').prepend(b);$('#verInfo').textContent+=` · disponibile la ${v.version}`;
   $('#updGo').onclick=()=>{if(nat){AndroidShare.updateApk(v.apk,name);$('#updMsg').textContent='Download in corso… quando finisce si apre l\'installazione: tocca «Aggiorna».'}else window.open(v.apk,'_blank','noopener')};
   window.onApkState=(st,msg)=>{const m=$('#updMsg');if(!m)return;m.textContent=st==='started'?'Download in corso… quando finisce si apre l\'installazione: tocca «Aggiorna».':st==='done'?'Download finito: nel pannello di Android tocca «Aggiorna». Se non lo vedi, apri le notifiche e tocca il file scaricato.':'Download non riuscito'+(msg?' ('+msg+')':'')+': controlla la connessione e riprova.'}}}).catch(()=>{});
+/* ---------- Tasto «indietro» del telefono (v184): chiude la finestra aperta, torna al passo o alla pagina prima e poi alla schermata principale; esce solo da lì.
+   Si tiene una voce in più nella cronologia: quando il telefono la toglie, si fa un passo indietro dentro l'app e la si rimette ---------- */
+{let seq=0,armed=false;
+ try{const sm=HTMLDialogElement.prototype.showModal;HTMLDialogElement.prototype.showModal=function(){this._ord=++seq;return sm.apply(this,arguments)}}catch{}
+ const vis=e=>e&&!e.hidden&&e.style.visibility!=='hidden'&&e.getClientRects().length;
+ const backAct=()=>{
+  const d=[...document.querySelectorAll('dialog[open]')].sort((a,b)=>(b._ord||0)-(a._ord||0))[0];
+  if(d){const b=[...d.querySelectorAll('[data-ch=backconv],#rBackTop,[data-ch=back],[data-ch=close],.dclose,[aria-label=Chiudi]')].find(vis);if(b)b.click();else d.close();return true}
+  if(document.documentElement.classList.contains('fOpen')){$('#fBtn').click();return true}
+  if(view==='budget'&&!$('#bForm').hidden){if(wStep>0){showStep(wStep-1);return true}if(load('budgetPlan',null)){$('#wTopX').click();return true}}
+  if(view==='libro'&&LIBPAGE){libGoPage('');return true}
+  if(view!=='home'){goView('home');return true}
+  return false};
+ const on=()=>{try{return !document.documentElement.dataset.sito||!WIDE()}catch{return true}};
+ const arm=()=>{if(armed||!on())return;try{history.pushState({gn:1},'');armed=true}catch{}};
+ addEventListener('pointerdown',arm,true);addEventListener('keydown',arm,true);
+ addEventListener('popstate',()=>{if(!armed)return;armed=false;let ok=false;try{ok=backAct()}catch{}if(ok)arm();else toast('Premi ancora indietro per uscire')});
+ window.gnBack=backAct}
 // Sul computer, chi non ha ancora ricette parte dal Ricettario: la vetrina con le foto è la prima cosa che vede
 // Indirizzi che arrivano dalla prima pagina del sito: ?app, ?v=vista, ?cat=tipo di piatto, ?q=ricerca, ?r=ricetta del Ricettario
 {const P=new URLSearchParams(location.search),V=P.get('v'),C=P.get('cat'),Q=P.get('q'),R=P.get('r');
