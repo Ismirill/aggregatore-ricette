@@ -6,6 +6,17 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-22
 
+### Versione 186 — menu creato: riquadri bassi, caratteri coerenti, giorni colorati
+- **Riquadri dei numeri:** spostati sotto il pulsante della lista della spesa; tre pillole su una riga sola, numero e descrizione corta sulla stessa riga («69,01 € su 70 €», «4,93 € a testa/giorno», «1188 kcal a testa»), ognuna con un colore della palette; tolto l'elenco «(colazione+pranzo+cena)» che usciva dal riquadro. Se i caratteri del telefono sono molto grandi la descrizione va a capo dentro la pillola.
+- **Caratteri:** numeri, nomi dei giorni, prezzi, etichette dei pasti e dei piatti in Fredoka come pulsanti e titoli; nomi dei piatti in Nunito grassetto.
+- **Giorni colorati:** ogni giorno ha lo sfondo pisello, pesca o crema a rotazione (le stesse tinte dei riquadri della procedura), in tutti gli stili e nel tema scuro con le tinte velate; anche i tre riquadri dei numeri.
+- **Stampa menu:** pulsante «🖨 Stampa menu» in fondo al menu creato. Foglio A4 come la carta di un ristorante (cornice doppia bordeaux, titoli in Cormorant corsivo, piatti centrati): la settimana su due fogli (lun–gio, ven–dom), il pasto singolo su un foglio. Usa la stessa stampa del Libro (`libPrintHtml`): servizio di stampa di Android, pannello di Apple, menu di stampa del browser. Non provata su stampante né nelle app.
+- **Testata e pulsanti del menu creato:** il riepilogo («Settimana · 70,00 € · 2 persone») sta a destra del titolo; «Nuovo menu» è un pulsante flottante in basso a destra come «Nuova ricetta», tutti e due semitrasparenti; «Varia menu» sta di fianco alla lista della spesa; in fondo restano «Stampa menu» e «Varia menu».
+- **Un solo stile sul telefono** (app e sito dal cellulare): tolti Trattoria (tovaglia a quadretti, 16 regole) e la scelta Crema/Rivista; resta quello con le foto senza cornice e la prima pagina a scorrimento in «Le mie», che ora segue anche il tema scuro. In Impostazioni «Aspetto» ha solo Automatico, Chiaro, Scuro. `data-sito` si accende solo da 900 px in su, quindi il sito dal cellulare è uguale all'app (niente Polaroid). Sul sito da computer restano Quaderno, Crema e Rivista; chi aveva Trattoria passa a Crema. Lo stile «Trattoria» del Libro è un'altra cosa e resta.
+- **Prima stampa di una ricetta:** la prima volta «Stampa la ricetta» porta in «Il mio libro» alla pagina «Scegli lo stile» (stile, foglio A4 o A5, anteprima della ricetta, pulsante «Stampa»), tutto in una schermata: stili su una riga che scorre, i due fogli affiancati, «Stampa la ricetta» sempre visibile sopra la barra. La scelta si salva (`LIB.printSet`) e dalle volte dopo la stampa parte subito; chi ha già stampato il libro non riceve la domanda.
+- **Miniature degli stili del Libro:** tolta la striscia vuota sotto la copertina (si vedeva sotto il rettangolo rosso di «Gnamina»).
+- Esempi in `docs/proposte-menu/v186-*.jpg`.
+
 ### Versione 185 — tasto indietro dalla parte Android, procedura in basso e compatta, riquadri pastello
 - **Tasto indietro (Android):** Capacitor senza il plugin App chiude l'app a ogni «indietro», quindi la voce in più nella cronologia della 184 nell'APK non serviva. Ora `MainActivity` passa il tasto alla pagina (`window.gnBack`) e manda l'app in secondo piano solo quando la pagina risponde che non c'è niente da chiudere. Nel browser resta la voce nella cronologia.
 - **Nuova ricetta:** «indietro» torna prima al passo precedente e solo dal primo passo chiude la finestra (prima la chiudeva subito).

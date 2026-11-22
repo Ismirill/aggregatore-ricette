@@ -12,9 +12,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <script>/* Sul computer e sul tablet largo la prima pagina del sito è il «quaderno» (benvenuto.html); nelle app, sul telefono, con un indirizzo che porta parametri o per chi ha già ricette si entra subito nell'app */
 try{const L=location,app=L.protocol==='capacitor:'||(L.hostname==='localhost'&&!L.port)||!!window.Capacitor||matchMedia('(display-mode: standalone)').matches,mine=(JSON.parse(localStorage.getItem('items')||'[]')||[]).length;
-if(!app&&!(localStorage.getItem('style')==='rivista'&&innerWidth<900))document.documentElement.dataset.sito='1'; // stile «quaderno» del sito su computer e tablet (vedi CSS «Sito»)
+if(!app&&innerWidth>=900)document.documentElement.dataset.sito='1'; // stile «quaderno» del sito su computer e tablet (vedi CSS «Sito»)
 if(!app&&!L.search&&!L.hash&&!mine&&matchMedia('(min-width:900px)').matches&&!sessionStorage.getItem('gnApp'))L.replace('benvenuto.html')}catch(e){}</script>
-<script>try{const t=localStorage.getItem("theme")||"dark";if(t!=="auto")document.documentElement.dataset.theme=t;let st=localStorage.getItem("style")||"trattoria";if(st==="quaderno"){st="rivista";localStorage.setItem("style",st)}document.documentElement.dataset.style=st}catch{document.documentElement.dataset.theme="dark";document.documentElement.dataset.style="trattoria"}
+<script>try{const t=localStorage.getItem("theme")||"dark";if(t!=="auto")document.documentElement.dataset.theme=t;let st=localStorage.getItem("style")||"crema";if(st==="quaderno"){st="rivista";localStorage.setItem("style",st)}if(st==="trattoria"){st="crema";localStorage.setItem("style",st)}/* sul telefono (app e sito) c'è un solo stile, quello con la prima pagina a scorrimento; Crema o Rivista si scelgono solo sul sito da computer */document.documentElement.dataset.style=document.documentElement.dataset.sito?st:"rivista"}catch{document.documentElement.dataset.theme="dark";document.documentElement.dataset.style="rivista"}
 // colore della barra di stato coerente con il tema (scuro predefinito; «Automatico» segue il sistema)
 function themeColor(){const t=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.getElementById("themeColor").content=t==="dark"?"#15120e":"#f7f2ea"}themeColor();matchMedia("(prefers-color-scheme:dark)").addEventListener("change",themeColor);</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,10 +24,6 @@ function themeColor(){const t=document.documentElement.dataset.theme||(matchMedi
 :root{--bg:#f7f2ea;--bg2:#efe7da;--card:#fffdf9;--fg:#2a231d;--mut:#8a7e71;--acc:#c2502f;--acc2:#e9a23b;--ok:#5f7a35;--bd:#e8dfd1;--star:#e0a526;
   --sh:0 1px 2px #2a231d10,0 6px 20px #2a231d0d;--sh2:0 10px 30px #2a231d26;--r:18px;--serif:'Nunito',ui-rounded,system-ui,sans-serif;
   --sans:'Nunito',ui-rounded,system-ui,sans-serif;color-scheme:light}
-/* Stile Trattoria (tovaglia a quadretti): solo in modalità chiara */
-:root[data-style=trattoria]{--bg:#fbf5f1;--bg2:#fbece9;--card:#ffffff;--fg:#2b1b18;--mut:#86706a;--acc:#d6362b;--acc2:#e9a23b;--ok:#4f7a2a;--bd:#f0dcd8;
-  --sh:0 1px 2px #5a1a1414,0 6px 18px #5a1a1412;--sh2:0 12px 30px #5a1a1426;
-  --pattern:repeating-linear-gradient(90deg,#b3261e1a 0 22px,transparent 22px 44px),repeating-linear-gradient(0deg,#b3261e1a 0 22px,transparent 22px 44px)}
 /* Tema scuro: automatico (sistema) salvo scelta Chiaro; oppure forzato con Scuro */
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#15120e;--bg2:#1d1914;--card:#221d17;--fg:#f2ebe1;--mut:#a89c8c;--acc:#e6734d;--acc2:#f0b24f;--ok:#a3bd6f;--bd:#352e25;
   --sh:0 1px 2px #0006,0 6px 20px #0004;--sh2:0 10px 30px #0008;--pattern:none;color-scheme:dark}}
@@ -38,7 +34,7 @@ function themeColor(){const t=document.documentElement.dataset.theme||(matchMedi
 :root[data-style=quaderno]{--bg:#fbf5e9;--bg2:#f4ead6;--card:#fffdf8;--fg:#2b2420;--mut:#6f645a;--acc:#c8301f;--acc2:#e9a23b;--ok:#3f7a2e;--bd:#e6d9c2;--star:#e0a526;
   --sh:0 1px 2px #2b242012,0 10px 24px #2b24201a;--sh2:0 16px 36px #2b242030;--serif:'Nunito',ui-rounded,system-ui,sans-serif;--sans:'Nunito',ui-rounded,system-ui,sans-serif;
   --hand:'Caveat','Bradley Hand','Segoe Print',cursive;--pattern:none;color-scheme:light}
-:root[data-style=rivista]{--bg:#f7f2ea;--bg2:#efe6da;--card:#fffdf9;--fg:#2a211c;--mut:#8a7c70;--acc:#c2502f;--acc2:#e9a23b;--ok:#3f7a2e;--bd:#e8ddcf;--star:#e0a526;
+:root[data-sito][data-style=rivista]{--bg:#f7f2ea;--bg2:#efe6da;--card:#fffdf9;--fg:#2a211c;--mut:#8a7c70;--acc:#c2502f;--acc2:#e9a23b;--ok:#3f7a2e;--bd:#e8ddcf;--star:#e0a526;
   --sh:0 1px 2px #2a211c12,0 8px 22px #3c230f1c;--sh2:0 16px 34px #3c230f30;--serif:'Nunito',ui-rounded,system-ui,sans-serif;--sans:'Nunito',ui-rounded,system-ui,sans-serif;--pattern:none;color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{font:-apple-system-body;font-family:var(--sans);-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip} /* su iPhone il testo segue «Dimensione testo» delle Impostazioni; tutte le misure sotto sono in rem, così l'interfaccia cresce insieme */
@@ -226,17 +222,17 @@ label,.flab{font-size:.8rem;color:var(--mut);display:grid;gap:5px;font-weight:50
   html:root:not([data-sito]) #tabs .chatN{left:calc(50% + 10px);top:-4px}
 }
 @media (max-width:899px) and (prefers-color-scheme:dark){
-  html:root:not([data-sito]):not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) #tabs.nav .tab[data-v=mine]{--on:#ffb3a8}
-  html:root:not([data-sito]):not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) #tabs.nav .tab[data-v=book]{--on:var(--k-pi)}
-  html:root:not([data-sito]):not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) #tabs.nav .tab[data-v=chat]{--on:#ff8a3d}
-  html:root:not([data-sito]):not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) #tabs.nav .tab[data-v=budget]{--on:var(--k-to)}
-  html:root:not([data-sito]):not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) #tabs.nav .tab.on svg{color:var(--i)}}
+  html:root:not([data-sito]):not([data-theme=light]):not([data-style=quaderno]) #tabs.nav .tab[data-v=mine]{--on:#ffb3a8}
+  html:root:not([data-sito]):not([data-theme=light]):not([data-style=quaderno]) #tabs.nav .tab[data-v=book]{--on:var(--k-pi)}
+  html:root:not([data-sito]):not([data-theme=light]):not([data-style=quaderno]) #tabs.nav .tab[data-v=chat]{--on:#ff8a3d}
+  html:root:not([data-sito]):not([data-theme=light]):not([data-style=quaderno]) #tabs.nav .tab[data-v=budget]{--on:var(--k-to)}
+  html:root:not([data-sito]):not([data-theme=light]):not([data-style=quaderno]) #tabs.nav .tab.on svg{color:var(--i)}}
 @media (max-width:899px){
-  html:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab[data-v=mine]{--on:#ffb3a8}
-  html:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab[data-v=book]{--on:var(--k-pi)}
-  html:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab[data-v=chat]{--on:#ff8a3d}
-  html:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab[data-v=budget]{--on:var(--k-to)}
-  html:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab.on svg{color:var(--i)}}
+  html:root[data-theme=dark]:not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab[data-v=mine]{--on:#ffb3a8}
+  html:root[data-theme=dark]:not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab[data-v=book]{--on:var(--k-pi)}
+  html:root[data-theme=dark]:not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab[data-v=chat]{--on:#ff8a3d}
+  html:root[data-theme=dark]:not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab[data-v=budget]{--on:var(--k-to)}
+  html:root[data-theme=dark]:not([data-style=quaderno]):not([data-sito]) #tabs.nav .tab.on svg{color:var(--i)}}
 /* Pagina Chat: l'elenco delle conversazioni come su WhatsApp */
 #chats .chTop{display:flex;align-items:center;gap:10px;margin:4px 0 6px}#chats .chTop h2{flex:1;margin:0;font-size:1.5rem}
 #chats .chRow{padding:12px 4px}
@@ -287,7 +283,7 @@ dialog#chat{padding:0;max-width:720px;height:min(88dvh,900px);overflow:hidden}
 :root[data-style=rivista] .list>.item .b,:root[data-style=rivista] .magGrid>.item .b{padding:8px 2px 0}
 :root[data-style=rivista] .list>.item h3,:root[data-style=rivista] .magGrid>.item h3{font-family:var(--serif);font-size:1rem;line-height:1.2;font-weight:700}
 :root[data-style=rivista] .list>.item .facts,:root[data-style=rivista] .magGrid>.item .facts{font-size:.78rem}
-:root[data-style=rivista] .thumb .cat{background:#fffdf9e6;color:var(--fg);border-radius:99px;font-size:.62rem;padding:3px 8px}
+:root[data-style=rivista] .thumb .cat{background:#fffdf9e6;color:#2a211c;border-radius:99px;font-size:.62rem;padding:3px 8px}
 :root[data-style=rivista] .list>.item:hover{transform:translateY(-2px)}
 :root[data-style=rivista] .list>.item .thumb .sv,:root[data-style=rivista] .magGrid>.item .thumb .sv{display:none}
 .magBlk{grid-column:1/-1;min-width:0}
@@ -378,7 +374,7 @@ img.kb.kbOn{animation:kb 9s ease-in-out infinite alternate}
 #libro .libV{color:var(--mut);font-weight:600;white-space:nowrap}
 #libro .libIco{width:30px;display:grid;place-items:center;font-size:1.2rem;flex:none}#libro .libIco svg{width:18px;height:24px;fill:var(--acc)}
 #libro .libMini{width:30px;flex:none;display:block;border-radius:3px;overflow:hidden;box-shadow:0 1px 3px #0003}
-#libro .libMini .page{box-shadow:none}
+#libro .libMini .page{box-shadow:none}#libro .libMini>.libdoc{display:block}
 #libro .libPrint{display:grid;gap:8px;margin-top:16px}#libro .libPrint .btn{width:100%;min-height:3.1rem;font-size:1.02rem}#libro .libPrint p{margin:0}
 #libro .libBack{border:0;background:none;color:var(--acc);font:inherit;font-weight:700;padding:6px 0;cursor:pointer}
 #libro .libPgT{margin:4px 0 10px}
@@ -491,21 +487,6 @@ details summary{cursor:pointer}
 .warn{border:1px solid color-mix(in srgb,var(--acc) 40%,transparent);background:color-mix(in srgb,var(--acc) 7%,var(--card));border-radius:14px;padding:12px 14px;margin:8px 0;font-size:.9rem}
 [hidden]{display:none!important}
 .shop li{margin:3px 0}.amz{font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:999px;border:1px solid var(--bd);text-decoration:none;margin-left:4px;white-space:nowrap}
-:root[data-style=trattoria] header{background:color-mix(in srgb,var(--card) 92%,transparent)}
-:root[data-style=trattoria] .item{border:1px solid var(--bd);border-top:4px solid var(--acc)}
-:root[data-style=trattoria] .chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
-:root[data-style=trattoria] .chip.on small{color:#ffd9d4}
-:root[data-style=trattoria] .thumb .cat{background:var(--acc);color:#fff}
-:root[data-style=trattoria] .item h3,:root[data-style=trattoria] .brand h1{color:#5a1612}
-:root[data-style=trattoria] .day{border-top:4px solid var(--acc)}
-:root[data-style=trattoria] .bform{border:1px solid var(--bd)}
-:root[data-style=trattoria] .nbox div{background:#fbece9}
-@media (prefers-color-scheme:dark){:root[data-style=trattoria]:not([data-theme=light]) .item{border-top:1px solid color-mix(in srgb,var(--bd) 60%,transparent)}
-  :root[data-style=trattoria]:not([data-theme=light]) .item h3,:root[data-style=trattoria]:not([data-theme=light]) .brand h1{color:var(--fg)}
-  :root[data-style=trattoria]:not([data-theme=light]) .nbox div{background:var(--bg2)}}
-:root[data-style=trattoria][data-theme=dark] .item{border-top:1px solid color-mix(in srgb,var(--bd) 60%,transparent)}
-:root[data-style=trattoria][data-theme=dark] .item h3,:root[data-style=trattoria][data-theme=dark] .brand h1{color:var(--fg)}
-:root[data-style=trattoria][data-theme=dark] .nbox div{background:var(--bg2)}
 #chips2{padding-top:6px}#chips2 .chip{font-size:.82rem;padding:5px 11px}
 .toast{position:fixed;left:50%;bottom:calc(6.4rem + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:.9rem;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:9;box-shadow:var(--sh2);max-width:calc(100% - 32px)}
 .toast.on{opacity:1;transform:translateX(-50%)}
@@ -646,7 +627,7 @@ details summary{cursor:pointer}
   .toast{bottom:28px;left:calc(50% + 134px)}
 }
 
-.quadNote{display:none;margin:6px 2px 0}:root[data-style=quaderno] .quadNote{display:block}:root[data-style=quaderno] #themeSeg{opacity:.45}
+:root:not([data-sito]) #styleSeg{display:none!important}.quadNote{display:none;margin:6px 2px 0}:root[data-style=quaderno] .quadNote{display:block}:root[data-style=quaderno] #themeSeg{opacity:.45}
 /* ---------- Stile Quaderno: i componenti dell'app vestiti come il sito (le regole del sito da 900 px, più sotto, restano più forti) ---------- */
 :root[data-style=quaderno] body{background-attachment:scroll}
 :root[data-style=quaderno] h1,:root[data-style=quaderno] h2,:root[data-style=quaderno] h3,:root[data-style=quaderno] .ttl{font-family:var(--sans);font-weight:900;letter-spacing:-.01em}
@@ -968,8 +949,8 @@ details summary{cursor:pointer}
 @media (min-width:900px) and (max-width:1179px){:root[data-sito] .sTitle{font-size:50px;top:19px}:root[data-sito] .contest h2{font-size:46px;top:20px}}
 /* Pulsanti della scheda (v176): tutti vuoti, interno crema e bordo colorato a giro (pomodoro, prezzemolo, carota, barbabietola), stessa altezza */
 :root{--k-in:#fff7ef}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]){--k-in:color-mix(in srgb,#fde4ce 8%,var(--card))}}
-:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]){--k-in:color-mix(in srgb,#fde4ce 8%,var(--card))}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=quaderno]){--k-in:color-mix(in srgb,#fde4ce 8%,var(--card))}}
+:root[data-theme=dark]:not([data-style=quaderno]){--k-in:color-mix(in srgb,#fde4ce 8%,var(--card))}
 .dacts{grid-auto-rows:1fr}
 .dacts .btn,.btn.cookBtn{--c:var(--k-po);--t:var(--k-po);background:var(--k-in);border:3px solid var(--c);color:var(--t);box-shadow:none;font-family:'Fredoka',var(--sans);font-weight:600;min-height:3.1rem;line-height:1.15;white-space:normal;text-align:center}
 .dacts .btn:nth-child(4n+2),.btn.cookBtn{--c:var(--k-pi);--t:var(--k-pid)}
@@ -977,8 +958,8 @@ details summary{cursor:pointer}
 .dacts .btn:nth-child(4n+4){--c:var(--k-bb);--t:var(--k-bb)}
 .dacts .btn:hover,.btn.cookBtn:hover{border-color:var(--c);filter:brightness(.97)}
 .dacts .kic,.cookBtn .kic{width:19px;height:19px;flex:none}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) .dacts .btn,:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]) .btn.cookBtn{--t:var(--fg)}}
-:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]) .dacts .btn,:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]) .btn.cookBtn{--t:var(--fg)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=quaderno]) .dacts .btn,:root:not([data-theme=light]):not([data-style=quaderno]) .btn.cookBtn{--t:var(--fg)}}
+:root[data-theme=dark]:not([data-style=quaderno]) .dacts .btn,:root[data-theme=dark]:not([data-style=quaderno]) .btn.cookBtn{--t:var(--fg)}
 /* Benvenuto al primo avvio (v176): la cuoca scontornata spunta sopra il foglio, sulla sua cucina schiarita; niente X, si sceglie con i due pulsanti.
    Sempre chiaro, anche con il tema scuro. Sugli schermi bassi lei resta dentro il foglio. */
 #acct.intro{overflow:visible;padding:0;background:#fff8f1;color:#2e1a14;max-height:none}
@@ -1020,8 +1001,8 @@ details summary{cursor:pointer}
    Pulsanti tutti a pillola con la palette della cucina: pieno pomodoro = azione principale, vuoto crema con bordo = le altre.
    Non toccano la barra in basso né le icone della testata, e nemmeno i pulsanti colorati della scheda ricetta (v176) ===== */
 :root{--kb2:var(--k-bb);--kt2:var(--k-bb)}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]){--kb2:var(--k-to);--kt2:var(--fg)}}
-:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]){--kb2:var(--k-to);--kt2:var(--fg)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=quaderno]){--kb2:var(--k-to);--kt2:var(--fg)}}
+:root[data-theme=dark]:not([data-style=quaderno]){--kb2:var(--k-to);--kt2:var(--fg)}
 @media (min-width:900px){:root[data-sito]:root[data-sito]{--kb2:var(--k-bb);--kt2:var(--k-bb);--k-in:#fff7ef}}
 :root:not(#_) .btn:not(.cookBtn):not(.dacts *){font-family:'Fredoka',var(--sans);font-weight:600;letter-spacing:.01em;border-radius:999px;border:3px solid var(--kb2);background:var(--k-in);color:var(--kt2);box-shadow:none;line-height:1.15}
 :root:not(#_) .btn.pri:not(.cookBtn):not(.dacts *),:root:not(#_) .cbtn,:root:not(#_) .fab{font-family:'Fredoka',var(--sans);font-weight:600;border-radius:999px;border:3px solid var(--k-po);background:var(--k-po);color:#fff;box-shadow:none}
@@ -1030,8 +1011,8 @@ details summary{cursor:pointer}
 :root:not(#_) .btn:not(.dacts *):active,:root:not(#_) .cbtn:active,:root:not(#_) .fab:active{transform:translateY(1px)}
 /* scelte: pillole vuote, piccole e in colonne uguali; quella scelta ha il bordo colorato (niente riempimento) */
 :root{--ksel:var(--k-po)}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]){--ksel:var(--k-ca)}}
-:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]){--ksel:var(--k-ca)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=quaderno]){--ksel:var(--k-ca)}}
+:root[data-theme=dark]:not([data-style=quaderno]){--ksel:var(--k-ca)}
 @media (min-width:900px){:root[data-sito]:root[data-sito]{--ksel:var(--k-po)}}
 :root:not(#_) .seg,:root:not(#_) .bform .checks,:root:not(#_) #dietChecks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:none;padding:0;border-radius:0;max-width:30rem}
 :root:not(#_) .checks{gap:8px}
@@ -1079,14 +1060,50 @@ details summary{cursor:pointer}
 :root:not(#_) .wfoot{margin-top:2px}:root:not(#_) .wfoot .btn{padding:11px 20px}
 /* riquadri pastello nei passi del menu (bozza A scelta il 22/11): crema, pisello e pesca a rotazione, pillole bianche */
 :root{--bx1:var(--k-cr);--bx2:color-mix(in srgb,var(--k-pi) 38%,#fff);--bx3:color-mix(in srgb,var(--k-to) 45%,#fff);--bxp:#fff}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]){--bx1:color-mix(in srgb,var(--k-cr) 16%,var(--card));--bx2:color-mix(in srgb,var(--k-pi) 20%,var(--card));--bx3:color-mix(in srgb,var(--k-ca) 20%,var(--card));--bxp:color-mix(in srgb,#000 28%,transparent)}}
-:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]){--bx1:color-mix(in srgb,var(--k-cr) 16%,var(--card));--bx2:color-mix(in srgb,var(--k-pi) 20%,var(--card));--bx3:color-mix(in srgb,var(--k-ca) 20%,var(--card));--bxp:color-mix(in srgb,#000 28%,transparent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=quaderno]){--bx1:color-mix(in srgb,var(--k-cr) 16%,var(--card));--bx2:color-mix(in srgb,var(--k-pi) 20%,var(--card));--bx3:color-mix(in srgb,var(--k-ca) 20%,var(--card));--bxp:color-mix(in srgb,#000 28%,transparent)}}
+:root[data-theme=dark]:not([data-style=quaderno]){--bx1:color-mix(in srgb,var(--k-cr) 16%,var(--card));--bx2:color-mix(in srgb,var(--k-pi) 20%,var(--card));--bx3:color-mix(in srgb,var(--k-ca) 20%,var(--card));--bxp:color-mix(in srgb,#000 28%,transparent)}
 @media (min-width:900px){:root[data-sito]:root[data-sito]{--bx1:var(--k-cr);--bx2:color-mix(in srgb,var(--k-pi) 38%,#fff);--bx3:color-mix(in srgb,var(--k-to) 45%,#fff);--bxp:#fff}}
 :root:not(#_) .bform .step>:not(h3):not([hidden]){border-radius:18px;padding:10px 10px 11px;margin:0;background:var(--bx3)}
 :root:not(#_) .bform .step>:nth-child(4n+2):not(h3):not([hidden]){background:var(--bx1)}
 :root:not(#_) .bform .step>:nth-child(4n):not(h3):not([hidden]){background:var(--bx2)}
 :root:not(#_) .bform .seg span,:root:not(#_) .bform .checks label{background:var(--bxp);border-color:transparent}
 :root:not(#_) .bform .seg input:checked+span,:root:not(#_) .bform .checks label:has(input:checked){background:var(--bxp);border-color:var(--ksel)}
+/* v186 — menu creato: numeri in riquadri bassi, titoli e numeri in Fredoka come i pulsanti, giorni colorati con la palette (crema, pisello, pesca) in tutti i temi */
+:root:not(#_) #bOut .nbox{display:flex;gap:5px}
+:root:not(#_) #bOut .nbox div{flex:1 1 auto;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:0 3px;padding:7px 4px;border-radius:16px;box-shadow:none;min-width:0;background:var(--bx1);color:var(--kt2)}
+:root:not(#_) #bOut .nbox div:nth-child(2){background:var(--bx2)}:root:not(#_) #bOut .nbox div:nth-child(3){background:var(--bx3)}
+:root:not(#_) #bOut .nbox b{font-family:'Fredoka',var(--sans);font-weight:600;font-size:.92rem;line-height:1.2;white-space:nowrap}
+:root:not(#_) #bOut .nbox span{font-size:.68rem;line-height:1.2;color:inherit;opacity:.8;white-space:nowrap}
+:root:not(#_) #bOut .day{background:var(--bx1);border:0;box-shadow:none;border-radius:20px;color:var(--kt2)}
+:root:not(#_) #bOut .day:nth-of-type(3n+1){background:var(--bx2)}:root:not(#_) #bOut .day:nth-of-type(3n+2){background:var(--bx3)}
+:root:not(#_) #bOut .day h3{font-family:'Fredoka',var(--sans);font-weight:600;font-size:1.25rem;color:var(--kt2)}
+:root:not(#_) #bOut .day h3 span{font-family:'Fredoka',var(--sans);font-weight:600;color:var(--ksel);font-size:1rem}
+:root:not(#_) #bOut .meal{border-top-color:color-mix(in srgb,var(--kt2) 18%,transparent);font-family:var(--sans)}
+:root:not(#_) #bOut .meal b{font-family:'Fredoka',var(--sans);font-weight:600;font-size:.8rem;color:var(--kt2);opacity:.7}
+:root:not(#_) #bOut .dish{font-family:var(--sans);font-weight:700;color:var(--kt2)}
+:root:not(#_) #bOut .dish .r{font-family:'Fredoka',var(--sans);font-weight:600;color:var(--ksel)}
+:root:not(#_) #bOut .dish small,:root:not(#_) #bOut .meal>.meta{font-weight:600;color:var(--kt2);opacity:.72}
+:root:not(#_) #bOut .bdg{font-family:'Fredoka',var(--sans);font-weight:500}
+/* v186 — testata del menu con il riepilogo a destra; «Nuovo menu» flottante in basso come «Nuova ricetta», tutti e due semitrasparenti; «Varia menu» di fianco alla lista della spesa */
+#budget .bhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}#budget .bhead h2{flex:none}
+#bSum{text-align:right;font-size:.8rem;line-height:1.25;min-width:0}
+.bsumIn{display:none;margin:0 0 10px}@media (min-width:900px){:root[data-sito] .bsumIn{display:block}}
+:root:not(#_) body>.fab,:root:not(#_) #bOut .fab{background:color-mix(in srgb,var(--k-po) 74%,transparent);border-color:transparent;-webkit-backdrop-filter:blur(2px) saturate(1.2);backdrop-filter:blur(2px) saturate(1.2);text-shadow:0 1px 2px #0006}
+#bOut .fab{z-index:5}@media (min-width:900px){#bOut .fab{bottom:24px;right:24px}}
+#bOut{padding-bottom:4.2rem}
+.shopRow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:4px 0 10px}
+:root:not(#_) .shopRow .shopBox{flex:1 1 0;min-width:0;margin:0}:root:not(#_) .shopRow .shopBox[open]{flex:1 1 100%;order:2}
+:root:not(#_) .shopRow .shopBox summary{height:100%;display:flex;flex-direction:column;justify-content:center;padding:8px 14px;font-size:1rem;line-height:1.15}
+:root:not(#_) .shopRow .shopBox[open] summary{height:auto}
+:root:not(#_) .shopRow .shopBox summary span{font-size:.76rem;font-weight:500}
+:root:not(#_) .shopRow>.btn{flex:none}
+/* prima stampa di una ricetta: stili su una riga che scorre, i due fogli affiancati, «Stampa» sempre a portata sopra la barra */
+#libro .libS1{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 6px;margin:0 -2px}#libro .libS1::-webkit-scrollbar{display:none}
+#libro .libS1 .libSty{flex:0 0 31%;min-width:0;align-content:start}#libro .libSty .libMini{align-self:start}
+#libro .libF2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.libGoBar{position:sticky;bottom:calc(5.9rem + env(safe-area-inset-bottom));z-index:4;display:flex;margin:12px 0}
+:root:not(#_) .libGoBar .btn{flex:1;font-size:1.05rem;padding:12px 16px;box-shadow:0 6px 16px #0003}
+@media (min-width:900px){.libGoBar{bottom:16px}}
 @media (max-width:899px){
  :root:not(#_):not([data-style=quaderno]) .bform{padding:14px}
  #budget:has(>#bForm:not([hidden])){display:flex;flex-direction:column;min-height:calc(100svh - 172px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
@@ -1135,7 +1152,7 @@ details summary{cursor:pointer}
 <section id="libro" hidden><div id="libBody"></div></section>
 <section id="chats" hidden><div id="chatsBody"></div></section>
 <section id="budget" hidden>
-  <div class="bhead"><h2>Il mio menu</h2></div>
+  <div class="bhead"><h2>Il mio menu</h2><span class="meta" id="bSum"></span></div>
   <form id="bForm" class="bform">
     <div class="wiz"><button type="button" class="icon" id="wTopBack" aria-label="Indietro" style="visibility:hidden"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button><div class="wmid"><div class="wlbl" id="wStep"></div><div class="wdots" id="wDots"></div></div><button type="button" class="icon" id="wTopX" aria-label="Annulla" style="visibility:hidden"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
     <section class="step" data-s="0"><h3>Che menu vuoi?</h3>
@@ -1299,7 +1316,7 @@ details summary{cursor:pointer}
 </dialog>
 <dialog id="set">
   <div class="dhead stk"><h2>Impostazioni</h2><button class="icon" id="setClose" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
-  <section class="sec"><h3>Aspetto</h3><div class="seg" id="styleSeg" style="margin-bottom:8px"><label><input type="radio" name="style" value="trattoria"><span>Trattoria</span></label><label><input type="radio" name="style" value="crema"><span>Crema</span></label><label><input type="radio" name="style" value="rivista"><span>Rivista</span></label></div><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div><p class="meta quadNote">Il Quaderno è sempre chiaro, come il sito: Chiaro e Scuro valgono per Trattoria e Crema.</p></section>
+  <section class="sec"><h3>Aspetto</h3><div class="seg" id="styleSeg" style="margin-bottom:8px"><label><input type="radio" name="style" value="crema"><span>Crema</span></label><label><input type="radio" name="style" value="rivista"><span>Rivista</span></label></div><div class="seg" id="themeSeg"><label><input type="radio" name="theme" value=""><span>Automatico</span></label><label><input type="radio" name="theme" value="light"><span>Chiaro</span></label><label><input type="radio" name="theme" value="dark"><span>Scuro</span></label></div><p class="meta quadNote">Il Quaderno è sempre chiaro, come il sito: Chiaro e Scuro valgono per Crema.</p></section>
   <section class="sec"><h3>Tipi di piatto</h3><div class="badges" id="catList"></div>
     <form id="catF" class="inl"><input name="c" placeholder="Nuovo tipo, es. Lievitati" aria-label="Nuovo tipo di piatto"><button class="btn pri">Aggiungi</button></form></section>
   <section class="sec"><h3>Zona per i prezzi</h3><p class="meta" id="zoneInfo">Prezzi medi ufficiali della tua provincia.</p>
@@ -2083,7 +2100,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=185; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=186; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2680,7 +2697,7 @@ $('#wTopBack').onclick=()=>showStep(wStep-1);
 // Annulla: esce dal percorso e torna al menu già creato, senza cambiare nulla
 $('#wTopX').onclick=()=>{const plan=load('budgetPlan',null);if(plan){budgetView(false);loadSeason().then(()=>showPlan(plan))}};
 // mostra il modulo (dal passo indicato) o il menu
-function budgetView(showForm,step=0){$('#bForm').hidden=!showForm;$('#bOut').hidden=showForm;if(showForm){showStep(step);const p=!!load('budgetPlan',null);$('#wTopX').style.visibility=p?'visible':'hidden'}}
+function budgetView(showForm,step=0){$('#bForm').hidden=!showForm;$('#bOut').hidden=showForm;$('#bSum').hidden=showForm;if(showForm){showStep(step);const p=!!load('budgetPlan',null);$('#wTopX').style.visibility=p?'visible':'hidden'}}
 function modeUI(){const w=$('#bForm').mode.value==='week';$('#bLbl').textContent=w?'Budget della settimana (€)':'Budget del pasto (€)';$('#bMealsL').hidden=!w;
   $('#bTimeEndL').hidden=!w;$('#bTimeL').textContent=w?'Tempo, lun–ven':'Tempo';$('#bBreakL').hidden=!w}
 
@@ -2922,6 +2939,41 @@ $('#bForm').onsubmit=async e=>{
   const plan={o,res:{...res,plan:res.plan.map(m=>({...m,dishes:m.dishes.map(x=>({id:x.r.id,book:!!x.r.book,pronto:!!x.r.pronto,kind:x.r.kind||'',title:x.r.title,veg:x.r.veg||null,role:x.role,eur:x.eur,kcal:x.kcal,prot:x.prot,t:x.t,d:x.d}))}))},X,noCost:C.noCost,n:C.list.length,zone:PT.zone,period:PT.period};
   save('budgetPlan',plan);showPlan(plan);
 };
+/* Stampa del menu (v186): foglio A4 come la carta di un ristorante — cornice doppia, titoli in Cormorant, piatti centrati.
+   Settimana: due fogli (lun–gio, ven–dom) con quattro giorni per foglio; un pasto: un foglio solo. Usa la stessa stampa del Libro */
+function menuPrintDoc(P){
+  const {o,res,X}=P,week=o.mode==='week',ORD={breakfast:0,lunch:1,dinner:2},MEAL={breakfast:'Colazione',lunch:'Pranzo',dinner:'Cena'};
+  const lines=m=>[...m.dishes.map(x=>dishTitle(x,m,X)),...(m.m==='breakfast'?[]:[cap1(X.fruits[(m.d*2+(m.m==='dinner'?1:0))%X.fruits.length])]),...(breadAt(o,X,m)?['Pane']:[])];
+  const meal=(m,lbl)=>`${lbl?`<h4><span>${MEAL[m.m]}</span></h4>`:''}${lines(m).map(t=>`<p>${esc(cap1(t))}</p>`).join('')}`;
+  const foot=`<footer>Per ${o.people} ${o.people>1?'persone':'persona'} · spesa stimata ${euro(res.cost)} · gnamina.it</footer>`;
+  const head=(t,sub)=>`<header><small>Gnamina</small><h1>${t}</h1><i class="orn"></i>${sub?`<em>${sub}</em>`:''}</header>`;
+  let pages;
+  if(week){
+    const days=GIORNI.map((g,d)=>({g,ms:res.plan.filter(m=>m.d===d).sort((a,b)=>ORD[a.m]-ORD[b.m])}));
+    const cell=({g,ms})=>`<section><h2>${g}</h2>${ms.map(m=>meal(m,true)).join('')}</section>`;
+    pages=[days.slice(0,4),days.slice(4)].map((ds,i)=>`<div class="page"><div class="fr">${head('Il menu della settimana',i?'da venerdì a domenica':'da lunedì a giovedì')}<div class="grid">${ds.map(cell).join('')}${i?'<section class="buon"><b>Buon appetito</b><i class="orn"></i></section>':''}</div>${foot}</div></div>`).join('');
+  }else pages=`<div class="page one"><div class="fr">${head('Il menu','')}<div class="solo">${res.plan.map(m=>meal(m,false)).join('')}<b class="ba">Buon appetito</b></div>${foot}</div></div>`;
+  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Menu Gnamina</title><link rel="stylesheet" href="${LIB_FONTS}"><style>
+@page{size:A4;margin:0}html,body{margin:0;padding:0;background:#fff}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:210mm;height:297mm;padding:9mm;background:#fdf6ec;color:#3a1d14;font-family:'EB Garamond','Cormorant Garamond',Georgia,serif;break-after:page;page-break-after:always;overflow:hidden}
+.fr{height:100%;border:.6mm solid #4e070c;outline:.25mm solid #4e070c;outline-offset:-2.2mm;padding:9mm 10mm 7mm;display:flex;flex-direction:column}
+header{text-align:center;margin-bottom:5mm}header small{font-family:'Fredoka',sans-serif;font-weight:600;font-size:11pt;letter-spacing:.3em;text-transform:uppercase;color:#d22701}
+h1{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-weight:500;font-size:34pt;line-height:1.05;margin:1mm 0 2mm;color:#4e070c}
+header em{display:block;font-size:11pt;letter-spacing:.12em;text-transform:uppercase;font-style:normal;color:#8a5a3c;margin-top:2mm}
+.orn{display:block;width:44mm;height:2.6mm;margin:0 auto;background:linear-gradient(#4e070c,#4e070c) left center/18mm .25mm no-repeat,linear-gradient(#4e070c,#4e070c) right center/18mm .25mm no-repeat;position:relative}
+.orn::after{content:"";position:absolute;left:50%;top:50%;width:2mm;height:2mm;background:#d22701;transform:translate(-50%,-50%) rotate(45deg)}
+.grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:6mm 10mm;min-height:0}
+section{text-align:center;overflow:hidden;min-height:0}
+h2{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:22pt;letter-spacing:.14em;text-transform:uppercase;margin:0 0 1mm;color:#4e070c}
+h4{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-weight:500;font-size:14.5pt;margin:2.8mm 0 .8mm;color:#d22701;display:flex;align-items:center;gap:3mm}
+h4::before,h4::after{content:"";flex:1;height:.2mm;background:#e8a877}
+p{margin:0;font-size:13.5pt;line-height:1.26}
+.buon{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4mm}.buon b,.ba{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-weight:500;font-size:26pt;color:#4e070c}
+.solo{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:5mm}.solo p{font-size:22pt;line-height:1.25}.solo p+p::before{content:"";display:block;width:2mm;height:2mm;margin:0 auto 5mm;background:#d22701;transform:rotate(45deg)}.ba{margin-top:10mm}
+.one h1{font-size:46pt}
+footer{text-align:center;font-size:9.5pt;letter-spacing:.08em;color:#8a5a3c;padding-top:4mm}
+@media screen{body{background:#ddd}.page{margin:0 auto 8mm;box-shadow:0 1px 6px #0004}}
+</style></head><body>${pages}</body></html>`}
 function showPlan(P){
   const {o,res,X}=P,week=o.mode==='week',meals=res.plan.length;
   const ROLE={primo:'Primo',secondo:'Secondo',contorno:'Contorno',unico:'Piatto unico'};
@@ -2936,14 +2988,14 @@ function showPlan(P){
   const sum=`${week?'Settimana':'Un pasto'} · ${euro(o.budget)} · ${o.people} ${o.people>1?'persone':'persona'}${o.diets.length?' · '+o.diets.join(', '):''}${o.cuisine==='mondo'?' · anche dal mondo':o.cuisine==='italiana'?' · anche regionali rari':''}${o.ready==='yes'?' · anche cibi pronti':o.ready==='some'?' · cibi pronti se il tempo è poco':''}${o.breakfast&&o.breakfast!=='no'?` · colazione ${o.breakfast==='mista'?'varia':o.breakfast}`:''}${o.bread==='no'?' · senza pane':o.bread==='all'?' · pane a ogni pasto':''}`;
   const nPronti=res.plan.reduce((a,m)=>a+m.dishes.filter(x=>x.pronto).length,0);
   $('#bOut').innerHTML=`
-    <div class="row" style="justify-content:space-between;align-items:center;margin:0 0 10px"><span class="meta">${esc(sum)}</span><span><button class="btn" id="bEdit">✚ Nuovo</button> <button class="btn pri" id="bVary">🔀 Varia menu</button></span></div>
+    <p class="meta bsumIn">${esc(sum)}</p><button type="button" class="fab" id="bEdit">Nuovo menu</button>
     ${stale?`<div class="warn">I prezzi sono stati aggiornati a ${esc(PT.period)} dopo la creazione di questo menu (${esc(P.period)}). <button class="btn" id="bRefresh">Ricalcola menu</button></div>`:''}
     ${over?(res.cost<=o.budget*1.04?`<div class="warn">Il menu supera di poco il budget (${euro(res.cost-o.budget)} in più): puoi rigenerarlo o sostituire un piatto.</div>`
       :`<div class="warn">Con ${euro(o.budget)} non si riesce a coprire tutto: il menu più economico che ho trovato costa circa <b>${euro(res.cost)}</b>. Prova ad alzare il budget o a ridurre i pasti.</div>`):''}
-    <div class="nbox"><div><b>${euro(res.cost)}</b><span>costo stimato su ${euro(o.budget)}</span></div>
-      <div><b>${euro(res.cost/o.people/(week?7:1))}</b><span>a persona${week?' al giorno':''}</span></div>
-      <div><b>${Math.round(kcalDay)} kcal</b><span>a persona ${week?`al giorno (${[hasBk?'colazione':'',o.lunch?'pranzo':'',o.dinner?'cena':''].filter(Boolean).join('+')})`:'per il pasto'}</span></div></div>
-    <details class="shopBox" id="shop"><summary>🛒 Lista della spesa <span>per ${o.people} ${o.people>1?'persone':'persona'}</span></summary><div id="shopList"></div></details>
+    <div class="shopRow"><details class="shopBox" id="shop"><summary>🛒 Lista della spesa <span>per ${o.people} ${o.people>1?'persone':'persona'}</span></summary><div id="shopList"></div></details><button class="btn pri" id="bVary">🔀 Varia menu</button></div>
+    <div class="nbox"><div><b>${euro(res.cost)}</b><span>su ${euro(o.budget).replace(',00','')}</span></div>
+      <div><b>${euro(res.cost/o.people/(week?7:1))}</b><span>a testa${week?'/giorno':''}</span></div>
+      <div><b>${Math.round(kcalDay)} kcal</b><span>a testa</span></div></div>
     <div class="badges" style="margin-bottom:8px">${rule(`Proteine ${Math.round(res.macro.p*100)}%`,res.macro.p>=.12&&res.macro.p<=.22)}${rule(`Carboidrati ${Math.round(res.macro.c*100)}%`,res.macro.c>=.42&&res.macro.c<=.62)}${rule(`Grassi ${Math.round(res.macro.f*100)}%`,res.macro.f<=.36)}
       ${week&&res.cnt?`${o.diets.some(d=>/Vege|pesce/.test(d))?'':rule(`Pesce ${res.cnt.pesce}×`,res.cnt.pesce>=2)}${rule(`Legumi ${res.cnt.legumi}×`,res.cnt.legumi>=2)}${o.diets.some(d=>/Vege|Pesce/.test(d))?'':rule(`Carne rossa ${res.cnt.rossa}×`,res.cnt.rossa<=2)}`:''}</div>
     ${days.map(({g,ms})=>`<div class="day"><h3>${g}<span>${euro(ms.reduce((a,m)=>a+m.eur,0)*o.people)}</span></h3>${ms.map(m=>`<div class="meal">${week?`<b>${MEAL[m.m]}</b>`:''}
@@ -2958,9 +3010,11 @@ function showPlan(P){
     ${nPronti?`<p class="meta">I piatti segnati «pronto» (${nPronti}) sono cibi già pronti del supermercato: surgelati, freschi confezionati, in scatola o di gastronomia, con prezzi medi indicativi e valori nutrizionali medi della categoria (fa fede l'etichetta).</p>`:''}
     <p class="meta">Costi stimati con i prezzi medi${P.period?` dell'Osservatorio Prezzi MIMIT (${esc(P.period)}, ${esc(P.zone)})`:''} e prezzi indicativi; calorie e nutrienti medi, indicativi. Pasti scelti tra ${P.n} ricette compatibili${P.noCost?`; ${P.noCost} delle tue ricette sono escluse perché senza costo calcolato (aprile e tocca "Calcola calorie e costo")`:''}.</p>
 </details>
-    <div class="row"><button class="btn" id="bEdit2">✚ Nuovo menu</button><button class="btn pri" id="bAgain">🔀 Varia menu</button></div>`;
+    <div class="row" style="margin-bottom:8px"><button class="btn" id="bPrint" style="flex:1">🖨 Stampa menu</button><button class="btn pri" id="bAgain" style="flex:1">🔀 Varia menu</button></div>`;
+  $('#bSum').textContent=sum;
+  $('#bPrint').onclick=()=>{try{libPrintHtml(menuPrintDoc(P),week?'Menu della settimana':'Il menu','a4')}catch{toast('Stampa non riuscita: riprova')}};
   $('#bAgain').onclick=$('#bVary').onclick=()=>{$('#bOut').innerHTML='<p class="meta">Preparo un altro menu con le stesse scelte…</p>';varying=true;$('#bForm').requestSubmit()};
-  $('#bEdit').onclick=$('#bEdit2').onclick=()=>budgetView(true,0);
+  $('#bEdit').onclick=()=>budgetView(true,0);
   if($('#bRefresh'))$('#bRefresh').onclick=()=>$('#bForm').requestSubmit();
   $('#bOut').querySelectorAll('.dish[data-id]:not([data-id=raw])').forEach(el=>el.onclick=async()=>{await loadBook();const r=findRec(el.dataset.id,el.dataset.book);if(r)openDetail(r)});
   $('#shop').ontoggle=async()=>{if(!$('#shop').open)return;await loadBook();$('#shopList').innerHTML=shopping(P);
@@ -3151,7 +3205,10 @@ function openDetail(i){
   if($('#dv .fbHero'))fbHeroFix($('#dv .fbHero'),i);
   if($('#dCopy'))$('#dCopy').onclick=e=>copyText(e.currentTarget.dataset.u,'Link copiato negli appunti');
   if($('#dLib'))$('#dLib').onclick=e=>{const it=libToggle(i.id);if(!it)return;e.currentTarget.innerHTML=kIc('lib')+(it.inBook?`Nel libro · ${it.bookNo}`:'Metti nel libro');toast(it.inBook?`Nel libro di cucina come ${it.bookNo}`:'Tolta dal libro di cucina');render()};
-  if($('#dPrint'))$('#dPrint').onclick=()=>libPrint([items.find(x=>x.id===i.id)||i],'one',{name:i.title,numbered:!!i.inBook});
+  if($('#dPrint'))$('#dPrint').onclick=()=>{const r=items.find(x=>x.id===i.id)||i;
+    // la prima volta si scelgono stile e formato nella sezione del Libro; poi restano salvati e la stampa parte subito
+    if(!LIB.printSet){LIB_PEND=r;$('#det').close();if(view!=='libro')goView('libro');libGoPage('prima');libFonts(LIB.style).then(()=>libPreview());return}
+    libPrint([r],'one',{name:i.title,numbered:!!i.inBook})};
   if($('#dCook'))$('#dCook').onclick=()=>cookOpen(i);
   if(i.clips?.length){clipPlayer(i.clipKey,i.clips,$('#clipPl'));$('#clipPl').onclick=e=>{const b=e.target.closest('[data-vc]');if(b)(b.dataset.vc==='share'?clipsShare:clipsSave)(i.clipKey,i.clips,i.title)}}
   if($('#dEdit'))$('#dEdit').onclick=()=>{$('#det').close();openForm(i)};
@@ -4360,7 +4417,7 @@ function libPrintHtml(html,name,size){
   document.body.appendChild(fr);fr.srcdoc=html}
 async function libPrint(recs,mode,opt={}){
   recs=recs.filter(libOk);if(!recs.length&&mode!=='all'&&mode!=='update'){toast('Niente da stampare');return}
-  toast('Preparo le pagine…');
+  toast('Preparo le pagine…');if(mode!=='one'&&!LIB.printSet){LIB.printSet=true;libSave()}
   let html;try{html=await libBuild(recs,mode,opt)}catch(e){console.log('libro',e);toast('Non sono riuscita a preparare le pagine');return}
   libPrintHtml(html,opt.name||libBookName(),LIB.fmt==='a5'?'a5':'a4');
   // le ricette del libro risultano stampate (si può annullare dalla pagina del libro)
@@ -4372,11 +4429,11 @@ async function libPrint(recs,mode,opt={}){
 const libDate=t=>new Date(t).toLocaleDateString('it-IT',{day:'numeric',month:'numeric'});
 function libOpen(){if(view!=='libro')goView('libro');else{libInit();libCss();libRender();libFonts(LIB.style).then(()=>libPreview())}}
 function libPreview(){const box=$('#libPrev');if(!box)return;const list=libItems(),o={style:LIB.style,fmt:LIB.fmt,photo:LIB.photo,notes:LIB.notes,numbered:true};
-  const r=list[0]||items.find(libOk);
-  box.innerHTML=`<div class="libdoc"><div class="s-${o.style}">${libCover(o,list)}${r?libRecipeHtml(r,o,{ing:(r.ingredients||[]).map(String),steps:(r.steps||[]).map(String),s0:0,first:true,notes:true}):''}</div></div>`}
+  const one=LIBPAGE==='prima'&&LIB_PEND,r=one||list[0]||items.find(libOk);
+  box.innerHTML=`<div class="libdoc"><div class="s-${o.style}">${one?'':libCover(o,list)}${r?libRecipeHtml(r,o,{ing:(r.ingredients||[]).map(String),steps:(r.steps||[]).map(String),s0:0,first:true,notes:true}):''}</div></div>`}
 // Sezione Libro (proposta 9 scelta il 14/11/2026): un riquadro con quante ricette ci sono e quante sono da stampare, tre righe
 // da toccare (lo stile, le ricette, il formato e la copertina) che aprono la loro pagina, e i tasti di stampa in fondo
-let LIBPAGE='';
+let LIBPAGE='',LIB_PEND=null; // LIB_PEND: la ricetta che aspetta la prima scelta di stile e formato
 function libGoPage(p){LIBPAGE=p;libRender();window.scrollTo(0,0)}
 function libCovPrev(){const b=$('#libCovPrev');if(!b)return;const o={style:LIB.style,fmt:'book',photo:true,notes:true,numbered:true};b.innerHTML=`<div class="libdoc"><div class="s-${o.style}" style="display:contents">${libCover(o,libItems())}</div></div>`}
 function libRender(){
@@ -4391,6 +4448,11 @@ function libRender(){
   let h='';
   if(LIBPAGE==='stile'){
     h=back('Lo stile')+`<div class="libStyles">${LIB_STYLES.map(([k,n])=>`<button type="button" class="libSty${LIB.style===k?' on':''}" data-sty="${k}">${mini(k)}<b>${n}</b></button>`).join('')}</div>
+      <p class="meta">Anteprima:</p><div class="libPrev" id="libPrev"></div>`;
+  }else if(LIBPAGE==='prima'&&LIB_PEND){
+    h=back('Scegli lo stile')+`<div class="libStyles libS1">${LIB_STYLES.map(([k,n])=>`<button type="button" class="libSty${LIB.style===k?' on':''}" data-sty="${k}">${mini(k)}<b>${n}</b></button>`).join('')}</div>
+      <div class="libFmts libF2">${[['a4','Foglio A4','normale'],['a5','Foglio A5','la metà']].map(([k,n,s])=>`<label class="libOpt"><input type="radio" name="libFmt" value="${k}"${(LIB.fmt==='a5'?'a5':'a4')===k?' checked':''}><span><b>${n}</b><small>${s}</small></span></label>`).join('')}</div>
+      <div class="libGoBar"><button type="button" class="btn pri" id="libFirstGo">🖨 Stampa la ricetta</button></div>
       <p class="meta">Anteprima:</p><div class="libPrev" id="libPrev"></div>`;
   }else if(LIBPAGE==='ricette'){
     h=back(`Le ricette · ${book.length}`)+`<p class="meta" style="margin-top:0">Le ricette con il segnalibro <span class="libRibI">${RIB_SVG}</span>. Togli la spunta per toglierne una.</p>
@@ -4435,7 +4497,8 @@ function libRender(){
   el.querySelectorAll('[data-pg]').forEach(b=>b.onclick=()=>libGoPage(b.dataset.pg));
   el.querySelectorAll('[data-sty]').forEach(b=>b.onclick=async()=>{LIB.style=b.dataset.sty;libSave();el.querySelectorAll('[data-sty]').forEach(x=>x.classList.toggle('on',x===b));await libFonts(LIB.style);libPreview()});
   el.querySelectorAll('.libRow input').forEach(c=>c.onchange=()=>{libToggle(c.dataset.id,c.checked);toast('Tolta dal libro: rimettila col segnalibro sulla ricetta');libRender()});
-  el.querySelectorAll('[name=libFmt]').forEach(r=>r.onchange=()=>{LIB.fmt=r.value;libSave();libRender()});
+  el.querySelectorAll('[name=libFmt]').forEach(r=>r.onchange=()=>{LIB.fmt=r.value;libSave();libRender();if(LIBPAGE==='prima')libPreview()});
+  if($('#libFirstGo'))$('#libFirstGo').onclick=()=>{const r=LIB_PEND;if(!r)return;LIB.printSet=true;libSave();LIB_PEND=null;libPrint([r],'one',{name:r.title,numbered:!!r.inBook});libGoPage('')};
   if($('#libDed'))$('#libDed').onchange=e=>{LIB.dedica=e.target.value.trim();libSave()};
   if($('#libOwner'))$('#libOwner').oninput=e=>{LIB.owner=e.target.value.trim();libSave();libCovPrev()};
   if($('#libMyName'))$('#libMyName').onclick=()=>{LIB.owner=null;libSave();libRender()};
@@ -4461,10 +4524,10 @@ $('#list').onclick=e=>{if(lpFired){lpFired=false;return} // il tocco che chiude 
   const w=e.target.closest('.wbtn');if(w){if(w.dataset.w==='add')openForm();else $(`#tabs .tab[data-v=${w.dataset.w}]`).click();return}const it=e.target.closest('.item');if(it)openDetail([...src(),...BK,...(book||[])].find(i=>i.id===it.dataset.id))};
 const showCats=()=>{$('#catList').innerHTML=cats.map(c=>`<span class="bdg z">${esc(c)}</span>`).join('')};
 // Tema: Automatico segue il sistema, Chiaro e Scuro restano fissi
-const setTheme=t=>{try{localStorage.setItem('theme',t||'auto')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme;themeColor()}; // predefinito: Trattoria scura; Automatico solo se scelto
+const setTheme=t=>{try{localStorage.setItem('theme',t||'auto')}catch{}t?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme;themeColor()}; // predefinito: Crema scura; Automatico solo se scelto
 $('#themeSeg').onchange=e=>setTheme(e.target.value);
 $('#styleSeg').onchange=e=>{try{localStorage.setItem('style',e.target.value)}catch{}document.documentElement.dataset.style=e.target.value;window.righeRun?.()};
-$('#setBtn').onclick=()=>{laiInfo();const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'trattoria'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();accUI();syncUI();if(aiOn())initZone();$('#set').showModal()};
+$('#setBtn').onclick=()=>{laiInfo();const cur=document.documentElement.dataset.theme||'';$('#styleSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===(document.documentElement.dataset.style||'crema'));$('#themeSeg').querySelectorAll('input').forEach(x=>x.checked=x.value===cur);showCats();accUI();syncUI();if(aiOn())initZone();$('#set').showModal()};
 $('#camBtn').onclick=()=>$('#camIn').click();
 $('#camIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)photoSearch(f)};
 $('#setClose').onclick=()=>$('#set').close();
