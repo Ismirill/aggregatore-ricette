@@ -34,7 +34,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Gnamina usa la fotocamera per fotografare una ricetta scritta e leggerne il testo, e per registrare il video di una tua ricetta.</string>
+	<string>Gnamina usa la fotocamera per fotografare una ricetta scritta e leggerne il testo, per leggere il codice a barre e la data di scadenza dei prodotti della spesa, e per registrare il video di una tua ricetta.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Gnamina usa la tua posizione per mostrarti i piatti e i prodotti tipici della tua zona.</string>
 	<key>NSMicrophoneUsageDescription</key>

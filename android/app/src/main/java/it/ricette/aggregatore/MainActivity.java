@@ -28,7 +28,9 @@ public class MainActivity extends BridgeActivity {
     private String pendingShare;
     // Contenuto del file di backup in attesa che l'utente scelga dove salvarlo
     private String pendingFile;
-    private static final int SAVE_FILE = 7331, REC_VIDEO = 7332, PICK_VIDEO = 7333, GOOGLE_SIGNIN = 7334, MIC_PERM = 7335;
+    private static final int SAVE_FILE = 7331, REC_VIDEO = 7332, PICK_VIDEO = 7333, GOOGLE_SIGNIN = 7334, MIC_PERM = 7335, NOTE_PERM = 7336;
+    // Tocco su un avviso di scadenza: la pagina apre la dispensa (letto con AndroidShare.takeOpen())
+    private String pendingOpen;
     // «Cucina con me»: riconoscimento vocale nativo (il WebView non ha il Web Speech API); i risultati vanno alla pagina con window.onSpeech(testo)
     private SpeechRecognizer recognizer;
     private boolean listenOn;
@@ -186,12 +188,14 @@ public class MainActivity extends BridgeActivity {
         });
         cleanApks(); // l'APK dell'aggiornamento appena installato non serve più
         handleShare(getIntent());
+        if (getIntent() != null && getIntent().getStringExtra("gnOpen") != null) pendingOpen = getIntent().getStringExtra("gnOpen");
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         handleShare(intent);
+        if (intent != null && intent.getStringExtra("gnOpen") != null) { js("window.gnOpenDisp&&gnOpenDisp()"); return; }
         getBridge().getWebView().post(() -> getBridge().getWebView().evaluateJavascript("window.onShared&&window.onShared()", null));
     }
 
@@ -349,6 +353,7 @@ public class MainActivity extends BridgeActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) { if (listenOn) startListen(); }
             else { listenOn = false; js("window.toast&&toast('Microfono non permesso: usa i pulsanti')"); }
         }
+        if (requestCode == NOTE_PERM) js("window.gnNotesPerm&&gnNotesPerm(" + (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) + ")");
     }
 
     @Override
@@ -684,6 +689,84 @@ public class MainActivity extends BridgeActivity {
                 }
                 js("window.onLocalAi&&onLocalAi(" + JSONObject.quote(id) + "," + ok + "," + JSONObject.quote(res) + ")");
             }).start();
+        }
+            // ---- Spesa e dispensa ----
+        // Risposta alla pagina: window.gnNat(id, ok, testo)
+        private void nat(String id, boolean ok, String t) {
+            js("window.gnNat&&gnNat(" + JSONObject.quote(id) + "," + ok + "," + JSONObject.quote(t == null ? "" : t) + ")");
+        }
+
+        // Codice a barre con il lettore di Google (Play Services): schermata della fotocamera già pronta, non serve il permesso
+        @JavascriptInterface
+        public void scanCode(String id) {
+            runOnUiThread(() -> {
+                try {
+                    com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions o = new com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions.Builder()
+                        .setBarcodeFormats(com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_13, com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_8,
+                            com.google.mlkit.vision.barcode.common.Barcode.FORMAT_UPC_A, com.google.mlkit.vision.barcode.common.Barcode.FORMAT_UPC_E,
+                            com.google.mlkit.vision.barcode.common.Barcode.FORMAT_QR_CODE, com.google.mlkit.vision.barcode.common.Barcode.FORMAT_DATA_MATRIX)
+                        .build();
+                    com.google.mlkit.vision.codescanner.GmsBarcodeScanning.getClient(MainActivity.this, o).startScan()
+                        .addOnSuccessListener(b -> nat(id, true, b.getRawValue()))
+                        .addOnCanceledListener(() -> nat(id, false, "cancel"))
+                        .addOnFailureListener(e -> nat(id, false, String.valueOf(e.getMessage())));
+                } catch (Throwable e) { nat(id, false, String.valueOf(e.getMessage())); }
+            });
+        }
+
+        // Testo di una foto (la data di scadenza) con il riconoscimento del testo di Google, dentro il telefono
+        @JavascriptInterface
+        public void readText(String id, String b64) {
+            runOnUiThread(() -> {
+                try {
+                    byte[] by = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
+                    android.graphics.Bitmap bm = android.graphics.BitmapFactory.decodeByteArray(by, 0, by.length);
+                    if (bm == null) { nat(id, false, "img"); return; }
+                    com.google.mlkit.vision.text.TextRecognition.getClient(com.google.mlkit.vision.text.latin.TextRecognizerOptions.DEFAULT_OPTIONS)
+                        .process(com.google.mlkit.vision.common.InputImage.fromBitmap(bm, 0))
+                        .addOnSuccessListener(t -> nat(id, true, t.getText()))
+                        .addOnFailureListener(e -> nat(id, false, String.valueOf(e.getMessage())));
+                } catch (Throwable e) { nat(id, false, String.valueOf(e.getMessage())); }
+            });
+        }
+
+        // Avvisi di scadenza: la pagina manda l'elenco completo [{at, title, body}], si cancellano i vecchi e si programmano i nuovi
+        @JavascriptInterface
+        public void notesSet(String json) {
+            try {
+                androidx.work.WorkManager wm = androidx.work.WorkManager.getInstance(getApplicationContext());
+                wm.cancelAllWorkByTag("scadenze");
+                org.json.JSONArray a = new org.json.JSONArray(json);
+                long now = System.currentTimeMillis();
+                for (int i = 0; i < a.length(); i++) {
+                    JSONObject o = a.getJSONObject(i);
+                    long delay = o.optLong("at") - now;
+                    if (delay < 0) continue;
+                    androidx.work.Data d = new androidx.work.Data.Builder().putString("title", o.optString("title")).putString("body", o.optString("body")).build();
+                    wm.enqueue(new androidx.work.OneTimeWorkRequest.Builder(NoteWorker.class)
+                        .setInitialDelay(delay, java.util.concurrent.TimeUnit.MILLISECONDS).addTag("scadenze").setInputData(d).build());
+                }
+            } catch (Throwable ignored) {}
+        }
+
+        // "granted" | "ask": da Android 13 serve il permesso per le notifiche
+        @JavascriptInterface
+        public String notesPerm() {
+            if (android.os.Build.VERSION.SDK_INT < 33) return "granted";
+            return checkSelfPermission("android.permission.POST_NOTIFICATIONS") == PackageManager.PERMISSION_GRANTED ? "granted" : "ask";
+        }
+
+        @JavascriptInterface
+        public void notesAsk() {
+            if (android.os.Build.VERSION.SDK_INT < 33) { js("window.gnNotesPerm&&gnNotesPerm(true)"); return; }
+            runOnUiThread(() -> requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, NOTE_PERM));
+        }
+
+        @JavascriptInterface
+        public String takeOpen() {
+            String o = pendingOpen;
+            pendingOpen = null;
+            return o == null ? "" : o;
         }
     }
 }

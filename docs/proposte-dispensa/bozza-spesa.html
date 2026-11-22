@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bozza spesa</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:Fredoka;src:url(fonts/fredoka.woff2) format('woff2');font-weight:400 700}
+:root{--bg:#f7f2ea;--card:#fffdf9;--fg:#2a231d;--mut:#8a7e71;--bd:#e8dfd1;--k-bb:#4e070c;--k-po:#d22701;--k-ca:#ff670e;--k-cr:#fde4ce;--k-pi:#aad15f;--k-pid:#4d6b17;--k-to:#e8a877;
+--bx1:var(--k-cr);--bx2:color-mix(in srgb,var(--k-pi) 38%,#fff);--bx3:color-mix(in srgb,var(--k-to) 45%,#fff);--bxp:#fff;--red:#c2361c}
+:root[data-theme=dark]{--bg:#15120e;--card:#221d17;--fg:#f2ebe1;--mut:#a89c8c;--bd:#352e25;--bx1:color-mix(in srgb,var(--k-cr) 16%,var(--card));--bx2:color-mix(in srgb,var(--k-pi) 20%,var(--card));--bx3:color-mix(in srgb,var(--k-ca) 20%,var(--card));--bxp:color-mix(in srgb,#000 28%,transparent);--red:#ff7a55;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.35 Nunito,system-ui,sans-serif;min-height:100svh;padding-bottom:96px}
+.scr{display:none}.scr.on{display:block}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;border-bottom:1px solid var(--bd)}
+header .g{display:flex;gap:10px}.ic{width:44px;height:44px;border-radius:50%;background:var(--card);box-shadow:0 1px 4px #0001;display:grid;place-items:center;font-size:19px}
+header img{height:30px}
+main{padding:16px 18px}
+h1{font:900 30px/1.1 Nunito;margin:4px 0 0}
+.trow{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.meta{color:var(--mut);font-size:15px}
+.seg{display:flex;background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:4px;margin:14px 0}
+.seg b{flex:1;text-align:center;padding:9px;border-radius:999px;font:600 16px Fredoka;color:var(--mut)}
+.seg b.on{background:var(--k-bb);color:#fff}
+:root[data-theme=dark] .seg b.on{background:var(--k-po)}
+.box{border-radius:20px;padding:14px;margin:0 0 14px}
+.box h2{font:600 19px Fredoka;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+.box h2 small{font:700 14px Nunito;color:var(--mut)}
+.it{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid color-mix(in srgb,var(--fg) 9%,transparent)}
+.it:first-of-type{border-top:0}
+.em{width:42px;height:42px;border-radius:12px;background:var(--bxp);display:grid;place-items:center;font-size:23px;flex:none}
+.nm{flex:1;min-width:0}.nm b{display:block;font-weight:800;font-size:16.5px}.nm span{font-size:13.5px;color:var(--mut)}
+.pill{font:600 14px Fredoka;padding:5px 10px;border-radius:999px;white-space:nowrap;background:var(--bxp)}
+.pill.r{background:var(--red);color:#fff}.pill.o{background:var(--k-ca);color:#fff}
+.fin{font:600 14px Fredoka;border:2px solid var(--k-bb);color:var(--k-bb);background:transparent;border-radius:999px;padding:5px 11px}
+:root[data-theme=dark] .fin{border-color:var(--fg);color:var(--fg)}
+.rc{display:flex;gap:10px;overflow:hidden;margin:0 -2px}
+.rcard{flex:0 0 46%;background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 1px 4px #0001}
+.rcard img{width:100%;height:96px;object-fit:cover;display:block}
+.rcard div{padding:8px 10px}.rcard b{font-weight:800;font-size:15px;display:block;line-height:1.2}.rcard span{font-size:12.5px;color:var(--k-pid);font-weight:700}
+:root[data-theme=dark] .rcard span{color:var(--k-pi)}
+.lbl{font:600 13px Fredoka;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:16px 2px 8px}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:104px;background:color-mix(in srgb,var(--k-po) 74%,transparent);backdrop-filter:blur(8px);color:#fff;font:600 18px Fredoka;border-radius:999px;padding:13px 26px;box-shadow:0 4px 14px #0003;white-space:nowrap}
+nav{position:fixed;left:0;right:0;bottom:0;height:84px;background:var(--card);border-top:1px solid var(--bd);display:flex;justify-content:space-around;align-items:flex-start;padding-top:12px;font:700 11.5px Nunito;color:var(--mut)}
+nav div{white-space:nowrap}
+nav div{text-align:center;width:16%}nav div i{display:block;font-style:normal;font-size:21px;filter:grayscale(1);opacity:.75}
+nav .on{color:var(--k-po)}nav .on i{filter:none;opacity:1}
+nav .cam{margin-top:-30px}nav .cam i{width:62px;height:62px;border-radius:50%;background:var(--k-po);display:grid;place-items:center;margin:0 auto 2px;font-size:26px;filter:none;opacity:1;border:4px solid var(--bg)}
+/* fotocamera */
+.cambg{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,#4a4036,#14100c 75%)}
+.camtop{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:16px 18px;color:#fff}
+.x{width:46px;height:46px;border-radius:50%;background:#fff3;display:grid;place-items:center;font-size:22px;font-weight:900}
+.cnt{background:#fff;color:var(--k-bb);font:600 15px Fredoka;border-radius:999px;padding:8px 14px}
+.frame{position:relative;z-index:2;margin:30px auto 0;width:78%;height:170px;border-radius:22px;border:4px solid #fff;display:grid;place-items:center;overflow:hidden}
+.bars{width:70%;height:90px;background:repeating-linear-gradient(90deg,#111 0 3px,#fff 3px 5px,#111 5px 6px,#fff 6px 9px,#111 9px 13px,#fff 13px 15px);border:10px solid #fff;border-radius:6px}
+.scanl{position:absolute;left:8%;right:8%;top:50%;height:3px;background:var(--k-ca);box-shadow:0 0 12px var(--k-ca)}
+.hint{position:relative;z-index:2;text-align:center;color:#fff;font:600 17px Fredoka;margin-top:14px}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:3;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 18px 22px;box-shadow:0 -6px 24px #0004}
+.grab{width:44px;height:5px;border-radius:9px;background:var(--bd);margin:0 auto 10px}
+.prod{display:flex;gap:12px;align-items:center;background:var(--bx2);border-radius:18px;padding:10px 12px}
+.prod .em{width:54px;height:54px;font-size:30px}
+.prod b{font-weight:900;font-size:18px;display:block}.prod span{font-size:13.5px;color:var(--k-pid);font-weight:700}
+.q{font:600 17px Fredoka;margin:14px 2px 8px}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.chips b{background:var(--bx1);border-radius:14px;text-align:center;padding:11px 4px;font:600 15.5px Fredoka}
+.chips b.on{background:var(--k-bb);color:#fff}
+.chips b.ph{background:var(--bx3)}
+.seg2{display:flex;gap:8px}.seg2 b{flex:1;text-align:center;background:var(--card);border:2px solid var(--bd);border-radius:14px;padding:9px;font:600 15.5px Fredoka}
+.seg2 b.on{border-color:var(--k-pid);background:var(--bx2)}
+.btn{display:block;text-align:center;font:600 18px Fredoka;border-radius:999px;padding:14px;margin-top:14px}
+.btn.pri{background:var(--k-po);color:#fff}.btn.sec{border:2px solid var(--k-bb);color:var(--k-bb);background:transparent;padding:11px}
+:root[data-theme=dark] .btn.sec{border-color:var(--fg);color:var(--fg)}
+.alt{text-align:center;margin-top:12px;font-weight:800;color:var(--k-po);font-size:15px}
+/* data */
+.datebox{position:relative;z-index:2;margin:40px auto 0;width:82%;height:150px;border-radius:14px;background:linear-gradient(#e9e2d6,#d7cdbd);display:grid;place-items:center;transform:rotate(-3deg)}
+.datebox p{margin:0;font:700 15px 'Courier New',monospace;color:#333;letter-spacing:.08em;text-align:center}
+.datebox em{font-style:normal;display:inline-block;font:700 30px 'Courier New',monospace;letter-spacing:.1em;outline:3px solid var(--k-pi);outline-offset:6px;border-radius:4px;margin-top:6px}
+.read{background:var(--bx2);border-radius:18px;padding:14px;text-align:center}
+.read small{display:block;font-weight:700;color:var(--mut)}.read b{font:600 28px Fredoka;color:var(--k-pid)}
+:root[data-theme=dark] .read b{color:var(--k-pi)}
+.two{display:flex;gap:10px}.two .btn{flex:1}
+/* verdure */
+.search{background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:11px 16px;color:var(--mut);font-weight:700;margin:4px 0 12px}
+.vg{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.v{border-radius:16px;padding:10px 4px 8px;text-align:center;position:relative}
+.v i{display:block;font-style:normal;font-size:32px;line-height:1.1}.v b{display:block;font:600 15px Fredoka}.v span{font-size:12px;color:var(--mut);font-weight:700}
+.v.on{outline:3px solid var(--k-po)}
+.v .n{position:absolute;top:-6px;right:-4px;background:var(--k-po);color:#fff;width:26px;height:26px;border-radius:50%;font:600 14px/26px Fredoka}
+.vg .v:nth-child(3n+1){background:var(--bx1)}.vg .v:nth-child(3n+2){background:var(--bx2)}.vg .v:nth-child(3n){background:var(--bx3)}
+.note{font-size:13.5px;color:var(--mut);text-align:center;margin-top:10px;font-weight:700}
+/* avviso */
+.lock{position:fixed;inset:0;background:linear-gradient(160deg,#6b3a2a,#2b1712 70%);color:#fff;text-align:center;padding-top:60px}
+.lock .h{font:300 76px/1 system-ui}.lock .d{font:600 18px system-ui;opacity:.85;margin-top:4px}
+.notif{margin:34px 14px 0;background:#fffffff0;color:#222;border-radius:22px;padding:13px 14px;text-align:left;display:flex;gap:12px;box-shadow:0 6px 20px #0004}
+.notif img{width:40px;height:40px;border-radius:10px}.notif b{font-size:15px}.notif p{margin:2px 0 0;font-size:15px}
+.notif small{float:right;color:#888;font-size:13px}
+.qsheet .big{font:600 21px Fredoka;text-align:center;margin:6px 0 2px}
+.qsheet .sub{text-align:center;color:var(--mut);font-weight:700;font-size:14.5px}
+.cap{position:fixed;top:0;left:0;right:0;z-index:9;background:var(--k-bb);color:#fff;font:600 13px Fredoka;text-align:center;padding:5px;letter-spacing:.04em}
+
+.addb{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--k-po);color:#fff;font:600 18px Fredoka;border-radius:999px;padding:14px;margin:0 0 14px}
+.sh{position:fixed;left:0;right:0;bottom:0;top:46px;background:var(--card);border-radius:26px 26px 0 0;padding:16px 18px 0;box-shadow:0 -6px 24px #0004;overflow:hidden;display:flex;flex-direction:column}
+.dim{position:fixed;inset:0;background:#120e0a99}
+.sh h2{font:900 23px Nunito;margin:0;display:flex;justify-content:space-between;align-items:center}
+.xx{width:44px;height:44px;border-radius:50%;background:color-mix(in srgb,var(--k-to) 30%,var(--card));display:grid;place-items:center}
+.ways{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 12px}
+.way{border-radius:18px;padding:12px 8px;text-align:center;font:600 16px Fredoka;line-height:1.2}
+.way i{display:block;font-style:normal;font-size:28px;margin-bottom:4px}
+.srch{display:flex;align-items:center;gap:8px;border:2px solid var(--k-po);border-radius:16px;padding:12px 14px;font-weight:700;font-size:17px;background:var(--bg)}
+.srch span{color:var(--mut);font-weight:600}
+.sug{border:1px solid var(--bd);border-radius:16px;margin-top:6px;overflow:hidden;background:var(--card);box-shadow:0 6px 16px #0002}
+.sug div{display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid var(--bd);font-weight:800}
+.sug div:first-child{border-top:0}.sug small{margin-left:auto;color:var(--mut);font-weight:700}
+.sug b.plus{width:30px;height:30px;border-radius:50%;background:var(--k-po);color:#fff;display:grid;place-items:center;font:600 20px Fredoka}
+.often{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 4px}
+.often b{background:var(--bx1);border-radius:999px;padding:7px 12px;font:600 15px Fredoka}
+.bag{flex:1;overflow:hidden}
+.bag h3{font:600 17px Fredoka;margin:14px 2px 6px;display:flex;justify-content:space-between}
+.bi{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--bd)}
+.bi .nm b{font-size:16.5px}.bi .nm span{display:inline-flex;gap:6px;align-items:center}
+.chip2{background:var(--bx2);border-radius:999px;padding:2px 9px;font:600 13.5px Fredoka;color:var(--fg)}
+.chip3{background:var(--bx1);border-radius:999px;padding:2px 9px;font:600 13.5px Fredoka;color:var(--fg)}
+.step{display:flex;align-items:center;border:2px solid var(--bd);border-radius:999px;overflow:hidden;flex:none}
+.step b{width:36px;height:36px;display:grid;place-items:center;font:600 20px Fredoka}
+.step b.n{width:26px;font-size:17px}.step b.m{color:var(--k-po)}
+.go{padding:12px 0 18px;background:var(--card)}
+.go .btn{margin:0}
+.ck{display:flex;align-items:center;gap:12px;padding:12px 2px;border-top:1px solid var(--bd);font-weight:800;font-size:17px}
+.ck i{width:30px;height:30px;border-radius:9px;border:2.5px solid var(--k-pid);display:grid;place-items:center;font-style:normal;color:#fff;flex:none}
+.ck i.on{background:var(--k-pid)}.ck small{margin-left:auto;color:var(--mut);font-weight:700;font-size:14px}
+.ck.dn{color:var(--mut)}
+.edit .q{margin-top:12px}
+.cap2{font-weight:700;color:var(--mut);font-size:14.5px;margin:4px 2px 0}
+</style></head><body>
+
+<section class="scr" id="pagina">
+<header><div class="g"><div class="ic">🏆</div><div class="ic">📖</div></div><img src="logo.svg" alt="Gnamina"><div class="g"><div class="ic">⚙️</div><div class="ic">👤</div></div></header>
+<main>
+<div class="trow"><h1>La mia dispensa</h1><span class="meta">8 prodotti</span></div>
+<div class="seg"><b>🍽 Menu</b><b class="on">🧺 Dispensa</b></div>
+<div class="addb">🛒 Aggiungi la spesa</div>
+<div class="box" style="background:var(--bx3)"><h2>Da usare presto <small>3</small></h2>
+<div class="it"><div class="em">🥛</div><div class="nm"><b>Yogurt bianco ×2</b><span><span class="pill r" style="padding:2px 9px;font-size:13px">oggi</span> Frigo</span></div><button class="fin">Finito</button></div>
+<div class="it"><div class="em">🧀</div><div class="nm"><b>Mozzarella</b><span><span class="pill o" style="padding:2px 9px;font-size:13px">domani</span> Frigo</span></div><button class="fin">Finito</button></div>
+<div class="it"><div class="em">🥒</div><div class="nm"><b>Zucchine ×4</b><span><span class="pill" style="padding:2px 9px;font-size:13px">≈ 2 giorni</span> Frigo</span></div><button class="fin">Finito</button></div>
+</div>
+<div class="lbl">Ricette per non sprecare</div>
+<div class="rc">
+<div class="rcard"><img src="img/wb-frittata-di-zucchine.jpg" alt=""><div><b>Frittata di zucchine</b><span>usa zucchine e uova</span></div></div>
+<div class="rcard"><img src="img/wb-torta-allo-yogurt.jpg" alt=""><div><b>Torta allo yogurt</b><span>usa lo yogurt</span></div></div>
+</div>
+</main>
+<nav><div><i>🥣</i>Le mie</div><div><i>🍲</i>Ricettario</div><div class="cam"><i>📷</i>Foto</div><div><i>💬</i>Chat</div><div><i>📕</i>Libro</div><div class="on"><i>🍽</i>Il mio menu</div></nav>
+</section>
+
+<section class="scr" id="spesa">
+<div class="dim"></div>
+<div class="sh">
+<h2>La tua spesa <span class="xx">✕</span></h2>
+<div class="ways"><div class="way" style="background:var(--bx3)"><i>📷</i>Codice a barre</div><div class="way" style="background:var(--bx2)"><i>📋</i>Dalla lista della spesa</div></div>
+<div class="srch">✏️ zu<span>|</span></div>
+<div class="sug"><div>🥒 Zucchine <small>≈ 5 giorni</small><b class="plus">+</b></div><div>🎃 Zucca <small>≈ 1 mese</small><b class="plus">+</b></div><div>✏️ «zu» <small>scrivi un altro prodotto</small></div></div>
+<div class="bag"><h3>Nella borsa <small style="font:700 14px Nunito;color:var(--mut)">3 prodotti</small></h3>
+<div class="bi"><div class="em">🍝</div><div class="nm"><b>Pesto alla genovese</b><span><span class="chip3">scade 22/11/27</span><span class="chip2">Dispensa</span></span></div><div class="step"><b class="m">🗑</b><b class="n">1</b><b>+</b></div></div>
+<div class="bi"><div class="em">🧀</div><div class="nm"><b>Mozzarella</b><span><span class="chip3">scade 12/12</span><span class="chip2">Frigo</span></span></div><div class="step"><b class="m">🗑</b><b class="n">1</b><b>+</b></div></div>
+<div class="bi"><div class="em">🍅</div><div class="nm"><b>Pomodori</b><span><span class="chip3">≈ 6 giorni</span><span class="chip2">Frigo</span></span></div><div class="step"><b class="m">−</b><b class="n">3</b><b>+</b></div></div>
+</div>
+<div class="go"><div class="btn pri">Metti in dispensa · 3 prodotti</div></div>
+</div>
+</section>
+
+<section class="scr" id="vuota">
+<div class="dim"></div>
+<div class="sh">
+<h2>La tua spesa <span class="xx">✕</span></h2>
+<div class="ways"><div class="way" style="background:var(--bx3)"><i>📷</i>Codice a barre</div><div class="way" style="background:var(--bx2)"><i>📋</i>Dalla lista della spesa</div></div>
+<div class="srch">✏️ <span>Scrivi cosa hai comprato</span></div>
+<div class="cap2" style="margin-top:12px">Compri spesso</div>
+<div class="often"><b>🥛 Latte</b><b>🥚 Uova</b><b>🍅 Pomodori</b><b>🥬 Insalata</b><b>🍌 Banane</b><b>🍞 Pane</b><b>🧀 Mozzarella</b><b>🍎 Mele</b></div>
+<div class="bag"><h3>Nella borsa <small style="font:700 14px Nunito;color:var(--mut)">vuota</small></h3>
+<p class="cap2" style="text-align:center;margin-top:20px">Scansiona un codice, scrivi un prodotto<br>o tocca uno di quelli che compri spesso.</p></div>
+<div class="go"><div class="btn pri" style="opacity:.45">Metti in dispensa</div></div>
+</div>
+</section>
+
+<section class="scr" id="lista">
+<div class="dim"></div>
+<div class="sh">
+<h2>Dalla lista della spesa <span class="xx">✕</span></h2>
+<p class="cap2">Spunta quello che hai comprato: durata e posto li metto io, puoi cambiarli dopo.</p>
+<div class="bag" style="margin-top:8px">
+<div class="ck"><i class="on">✓</i>🍝 Bucatini<small>500 g</small></div>
+<div class="ck"><i class="on">✓</i>🥓 Guanciale<small>150 g</small></div>
+<div class="ck"><i class="on">✓</i>🥬 Finocchi<small>2</small></div>
+<div class="ck"><i></i>🥕 Carote<small>4</small></div>
+<div class="ck"><i class="on">✓</i>🥚 Uova<small>6</small></div>
+<div class="ck"><i></i>🍎 Mele<small>1 kg</small></div>
+<div class="ck dn"><i></i>🧂 Sale, olio, pepe<small>li hai già?</small></div>
+</div>
+<div class="go"><div class="btn pri">Aggiungi 4 alla borsa</div></div>
+</div>
+</section>
+
+<section class="scr" id="modifica">
+<div class="dim"></div>
+<div class="sh" style="top:auto;padding-bottom:0">
+<h2>🧀 Mozzarella <span class="xx">✕</span></h2>
+<div class="q">Quando scade?</div>
+<div class="chips"><b>3 giorni</b><b>1 settimana</b><b>2 settimane</b><b>1 mese</b><b class="ph">📷 Leggi data</b><b class="on">📅 12 dic</b></div>
+<div class="q">Dove la metti?</div>
+<div class="seg2"><b class="on">❄️ Frigo</b><b>🗄 Dispensa</b><b>🧊 Freezer</b></div>
+<div class="go" style="margin-top:14px"><div class="btn pri">Fatto</div></div>
+</div>
+</section>
+
+<script>
+function show(){const h=(location.hash||'#pagina').slice(1).split('-');document.documentElement.dataset.theme=h[1]==='scuro'?'dark':'light';document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===h[0]))}
+show();addEventListener('hashchange',show)
+</script>
+</body></html>

@@ -6,6 +6,14 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-22
 
+### Versione 188 — la spesa: borsa, codice a barre, data dalla foto, avvisi di scadenza
+- **Aggiungi la spesa:** pulsante largo nella pagina della dispensa (non più flottante sopra il tasto Foto).
+- **La tua spesa:** una borsa unica. Si aggiunge con «📷 Codice a barre», con «📋 Dalla lista della spesa» del menu (lista già spuntata, «Togli tutte le spunte», le cose di solito in casa senza spunta) o scrivendo il nome (suggerimenti con durata media da un catalogo di circa 75 prodotti, oppure il nome così com'è). Al posto della griglia di icone, otto prodotti «Compri spesso» imparati da quello che si inserisce. Ogni riga ha − / + (il − diventa cestino) e toccandola si cambiano nome, scadenza e posto. La borsa resta salvata finché non si tocca «Metti in dispensa».
+- **Codice a barre:** su Android con il lettore di Google (Play Services, senza permesso della fotocamera), su iPhone da foto con Vision di Apple, nel sito da foto con BarcodeDetector o la libreria zxing-wasm 3.1.6 (MIT) messa in `www/vendor/zxing`. Il prodotto si cerca su Open Food Facts (si manda solo il numero del codice): nome, marca, formato, foto e, dalla categoria, posto e durata tipica. I prodotti non trovati si ricordano col nome dato la prima volta. Dai codici GS1 (QR, DataMatrix, link id.gs1.org) si legge anche la scadenza.
+- **Leggi data (nelle app):** foto della scadenza letta dentro il telefono (riconoscimento del testo di Google su Android, Vision su iPhone); l'app riconosce «12/12/26», «12 DIC 2026», «TMC 03/2027» e simili, preferisce la data vicina a «entro/scad/TMC/exp» e chiede conferma.
+- **Avvisi di scadenza (nelle app):** alle 9 del giorno prima e del giorno stesso («Oggi scade: …. Domani scadono: …»), riprogrammati a ogni modifica; Android con WorkManager e permesso delle notifiche da Android 13, iPhone con le notifiche locali. Il permesso si chiede dopo il primo prodotto messo in dispensa; toccando l'avviso si apre la dispensa.
+- **Tasto Foto:** apre la scelta «📷 Trova ricette da una foto» / «🛒 Scansiona la spesa».
+
 ### Versione 187 — la mia dispensa
 - **Dove si trova:** in «Il mio menu» un interruttore «🍽 Menu / 🧺 Dispensa» (la barra in basso non cambia); l'app ricorda l'ultima scelta.
 - **Da usare presto:** i prodotti che scadono entro tre giorni, con la scadenza colorata sotto il nome (rossa oggi o scaduto, arancio domani; «≈» per le durate stimate) e il tasto «Finito» che li toglie.

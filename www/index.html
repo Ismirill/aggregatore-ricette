@@ -1122,7 +1122,7 @@ details summary{cursor:pointer}
 
 /* La mia dispensa */
 .dseg{display:flex;gap:4px;background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:4px;margin:0 0 14px}
-.dseg button{flex:1;word-spacing:.25em;border:0;background:transparent;border-radius:999px;padding:9px 6px;font:600 1rem 'Fredoka',var(--sans);color:var(--mut);cursor:pointer}
+.dseg button{flex:1;display:flex;align-items:center;justify-content:center;gap:.35em;border:0;background:transparent;border-radius:999px;padding:9px 6px;font:600 1rem 'Fredoka',var(--sans);color:var(--mut);cursor:pointer}
 .dseg button.on{background:var(--k-bb);color:#fff}
 .dbox{border-radius:20px;padding:12px 14px;margin:0 0 14px;background:var(--bx3)}
 .dbox h3{display:flex;justify-content:space-between;align-items:center;margin:0 0 4px;font:600 1.15rem 'Fredoka',var(--sans)}
@@ -1165,6 +1165,43 @@ details summary{cursor:pointer}
 .dwhere button.on{border-color:var(--k-pid);background:var(--bx2)}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .dseg button.on,:root:not([data-theme=light]) .dchips button.on{background:var(--k-po)}:root:not([data-theme=light]):not(#_) .dfin{border-color:var(--fg);color:var(--fg)}:root:not([data-theme=light]) .drc span{color:var(--k-pi)}:root:not([data-theme=light]) .dwhere button.on{border-color:var(--k-pi)}}
 :root[data-theme=dark] .dseg button.on,:root[data-theme=dark] .dchips button.on{background:var(--k-po)}:root[data-theme=dark]:not(#_) .dfin{border-color:var(--fg);color:var(--fg)}:root[data-theme=dark] .drc span{color:var(--k-pi)}:root[data-theme=dark] .dwhere button.on{border-color:var(--k-pi)}
+
+.dscanb{width:100%;margin:10px 0 0}
+.dprod{display:flex;gap:12px;align-items:center;background:var(--bx2);border-radius:18px;padding:10px 12px;margin:0 0 10px}
+.dprod img{width:54px;height:54px;object-fit:contain;border-radius:12px;background:#fff;flex:none}.dprod .dem{width:54px;height:54px;font-size:30px}
+.dprod b{display:block;font-weight:900;font-size:1.05rem;line-height:1.2}.dprod span{font-size:.85rem;color:var(--k-pid);font-weight:700}
+.dchips button.ph{background:var(--bx3)}
+.dread{margin:10px 0 0;background:var(--bx2);border-radius:14px;padding:9px 12px;font-weight:700;font-size:.92rem}
+.cpick{display:grid;gap:10px;margin-top:8px}.cpick .btn{width:100%;padding:16px;font-size:1.1rem}
+:root[data-theme=dark] .dprod span{color:var(--k-pi)}@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .dprod span{color:var(--k-pi)}}
+
+.daddb{width:100%;margin:0 0 14px;padding:14px;font-size:1.1rem}
+#dAdd{min-height:min(88dvh,780px)}#dAdd[open]{display:flex;flex-direction:column}#dAddBody{flex:1;display:flex;flex-direction:column}#dAddBody>.dgo{margin-top:auto}
+.spways{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.spways.one{grid-template-columns:1fr}
+.spways button{border:0;border-radius:18px;padding:12px 8px;text-align:center;font:600 1rem/1.2 'Fredoka',var(--sans);color:var(--fg);cursor:pointer}
+.spways i{display:block;font-style:normal;font-size:28px;margin-bottom:4px}
+.spsrch{display:flex;align-items:center;gap:8px;border:2px solid var(--k-po);border-radius:16px;padding:4px 12px;background:var(--bg)}
+:root:not(#_) .spsrch input{border:0;background:transparent;box-shadow:none;padding:9px 0;font-size:1.05rem;font-weight:700;width:100%;outline:none;margin:0}
+.spsug{border:1px solid var(--bd);border-radius:16px;margin-top:6px;overflow:hidden;background:var(--card);box-shadow:0 6px 16px #0002}
+.spsug button{display:flex;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--bd);background:transparent;padding:10px 12px;color:var(--fg);font:700 1rem var(--sans);text-align:left;cursor:pointer}
+.spsug button:first-child{border-top:0}.spsug small{margin-left:auto;color:var(--mut);font-weight:700;white-space:nowrap}
+.spsug i{width:32px;height:32px;border-radius:50%;background:var(--k-po);color:#fff;display:grid;place-items:center;font:600 1.3rem 'Fredoka',var(--sans);font-style:normal;flex:none}
+.spoft{display:flex;flex-wrap:wrap;gap:7px}
+.spoft button{border:0;background:var(--bx1);border-radius:999px;padding:8px 12px;font:600 .95rem 'Fredoka',var(--sans);color:var(--fg);cursor:pointer}
+.spbag h3{display:flex;justify-content:space-between;align-items:baseline;font:600 1.05rem 'Fredoka',var(--sans);margin:16px 2px 4px}.spbag h3 small{font:700 .85rem var(--sans);color:var(--mut)}
+.spi{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--bd)}
+.spnm{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:0;text-align:left;color:var(--fg);cursor:pointer}
+.spnm img{width:42px;height:42px;object-fit:contain;border-radius:12px;background:#fff;flex:none}
+.spnm>span:last-child{min-width:0}.spnm b{display:block;font-weight:800;font-size:1rem;line-height:1.2}
+.spnm i{display:inline-block;font:600 .8rem 'Fredoka',var(--sans);font-style:normal;border-radius:999px;padding:2px 8px;margin:3px 4px 0 0}
+.spnm .c1{background:var(--bx1)}.spnm .c2{background:var(--bx2)}
+.spst{display:flex;align-items:center;border:2px solid var(--bd);border-radius:999px;flex:none}
+.spst button{width:38px;height:38px;border:0;background:transparent;font:600 1.25rem 'Fredoka',var(--sans);color:var(--fg);cursor:pointer}
+.spst button:first-child{color:var(--k-po)}.spst b{min-width:22px;text-align:center;font:600 1.05rem 'Fredoka',var(--sans)}
+.spck{display:flex;align-items:center;gap:12px;width:100%;border:0;border-top:1px solid var(--bd);background:transparent;padding:11px 2px;color:var(--fg);font:800 1.05rem var(--sans);text-align:left;cursor:pointer}
+.spck i{width:30px;height:30px;border-radius:9px;border:2.5px solid var(--k-pid);display:grid;place-items:center;font-style:normal;color:#fff;flex:none}
+.spall{align-self:flex-end;border:0;background:transparent;color:var(--k-po);font:800 .95rem var(--sans);padding:4px 2px 8px;cursor:pointer}
+.spck i.on{background:var(--k-pid)}.spck small{margin-left:auto;color:var(--mut);font-weight:700;font-size:.85rem;text-align:right}.spck.dn{color:var(--mut)}
 </style>
 </head>
 <body>
@@ -1199,7 +1236,7 @@ details summary{cursor:pointer}
 <section id="chats" hidden><div id="chatsBody"></div></section>
 <section id="budget" hidden>
   <div class="bhead"><h2>Il mio menu</h2><span class="meta" id="bSum"></span></div>
-  <div class="dseg" id="bSeg"><button type="button" data-p="menu">🍽 Menu</button><button type="button" data-p="disp">🧺 Dispensa</button></div>
+  <div class="dseg" id="bSeg"><button type="button" data-p="menu"><span>🍽</span>Menu</button><button type="button" data-p="disp"><span>🧺</span>Dispensa</button></div>
   <form id="bForm" class="bform">
     <div class="wiz"><button type="button" class="icon" id="wTopBack" aria-label="Indietro" style="visibility:hidden"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button><div class="wmid"><div class="wlbl" id="wStep"></div><div class="wdots" id="wDots"></div></div><button type="button" class="icon" id="wTopX" aria-label="Annulla" style="visibility:hidden"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
     <section class="step" data-s="0"><h3>Che menu vuoi?</h3>
@@ -1236,7 +1273,8 @@ details summary{cursor:pointer}
 </section></main>
 <button class="fab" id="add">Nuova ricetta</button>
 
-<dialog id="dAdd"><div class="dhead"><h2>Aggiungi alla dispensa</h2><button type="button" class="icon" id="dAddX" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div><div class="dseg" id="dAddSeg"><button type="button" data-t="veg">🥕 Frutta e verdura</button><button type="button" data-t="oth">✏️ Altro prodotto</button></div><div id="dAddBody"></div></dialog>
+<dialog id="dAdd"><div class="dhead"><h2 id="dAddT">La tua spesa</h2><button type="button" class="icon" id="dAddX" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div><div id="dAddBody"></div></dialog>
+<dialog id="camPick"><div class="dhead"><h2>Fotocamera</h2><button type="button" class="icon" id="cpX" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div><div class="cpick"><button type="button" class="btn pri" id="cpRec">📷 Trova ricette da una foto</button><button type="button" class="btn pri" id="cpShop">🛒 Scansiona la spesa</button></div></dialog>
 <dialog id="det"><div class="dv" id="dv"></div></dialog>
 
 <dialog id="dlg">
@@ -1414,7 +1452,7 @@ const dPlus=n=>{const d=dToday();d.setDate(d.getDate()+n);return dIso(d)};
 const dLeft=x=>Math.round((new Date(x+'T00:00:00')-dToday())/864e5);
 // La dispensa letta con prudenza: voci rotte o incomplete si scartano invece di fermare l'app
 function dItems(){const a=load('pantry',[]);return Array.isArray(a)?a.filter(p=>p&&typeof p.n==='string'&&/^\d{4}-\d\d-\d\d$/.test(p.x||'')):[]}
-const dSave=a=>save('pantry',a);
+const dSave=a=>{save('pantry',a);dNotesSync()};
 function dPill(p){const d=dLeft(p.x),t=d<-1?'scaduto':d===-1?'scaduto ieri':d===0?'oggi':d===1?'domani':d<14?d+' giorni':d<30?Math.round(d/7)+' settimane':(m=>m+(m>1?' mesi':' mese'))(Math.round(d/30));
   return `<span class="dpill ${d<=0?'r':d===1?'o':''}">${p.s&&d>1?'≈ ':''}${t}</span>`}
 function dAgo(a){const d=-dLeft(a);return d<=0?'preso oggi':d===1?'preso ieri':d<7?'preso '+['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'][new Date(a+'T00:00:00').getDay()]:'preso '+d+' giorni fa'}
@@ -1433,11 +1471,11 @@ function dispRender(){const el=$('#dOut');if(!el)return;const P=dItems().sort((a
   $('#bSum').hidden=false;$('#bSum').textContent=P.length?P.length+(P.length>1?' prodotti':' prodotto'):'';
   const rec=dRecipes(near);DREC=rec.map(o=>o.r);
   const nm=a=>{const n=a.map(p=>p.n.toLowerCase());return n.length>1?n.slice(0,-1).join(', ')+' e '+n.at(-1):n[0]};
-  el.innerHTML=(!P.length?`<div class="dempty"><div>🧺</div><b>La dispensa è vuota</b>Dopo la spesa tocca «Ho fatto la spesa»: ti avviso quando qualcosa sta per scadere e ti propongo ricette per non sprecarlo.</div>`:'')
+  el.innerHTML=`<button type="button" class="btn pri daddb" id="dShop">🛒 Aggiungi la spesa</button>`+(!P.length?`<div class="dempty"><div>🧺</div><b>La dispensa è vuota</b>Dopo la spesa tocca «Aggiungi la spesa»: ti avviso quando qualcosa sta per scadere e ti propongo ricette per non sprecarlo.</div>`:'')
    +(soon.length?`<div class="dbox"><h3>Da usare presto <small>${soon.length}</small></h3>${soon.map(dRow).join('')}</div>`:'')
    +(rec.length?`<div class="dlbl">Ricette per non sprecare</div><div class="drcs">${rec.map((o,k)=>`<button type="button" class="drc" data-rk="${k}">${o.r.image?`<img src="${esc(o.r.image)}" alt="" loading="lazy">`:`<i>${o.m[0].e||'🍽'}</i>`}<b>${esc(o.r.title)}</b><span>usa ${esc(nm(o.m))}</span></button>`).join('')}</div>`:'')
    +(P.length?`<div class="dlbl">Dove si trova</div>`+['f','d','z'].map(w=>{const L=P.filter(p=>(p.w||'f')===w&&dLeft(p.x)>3);return L.length?`<div class="dbox ${w}"><h3>${D_WICON[w]} ${D_WHERE[w]} <small>${L.length}</small></h3>${L.map(dRow).join('')}</div>`:''}).join(''):'')
-   +`<button type="button" class="fab" id="dShop">🛒 Ho fatto la spesa</button>`;
+   ;
 }
 let DREC=[];
 $('#dOut').onclick=e=>{const f=e.target.closest('[data-fin]');
@@ -1457,41 +1495,194 @@ function dBanUI(){const el=$('#dBan');if(!el)return;const S=view==='mine'?dItems
   const t=S.length>1?`<b>${S.length} prodotti</b> da usare entro domani`:`<b>${esc(p.n)}</b>: ${d<0?'è scaduto':d===0?'scade oggi':'scade domani'}`;
   el.innerHTML=`<button type="button"><span>${S.length>1?'🧺':p.e||'🛒'}</span><span>${t}</span><u>Vedi ricette ›</u></button>`}
 $('#dBan').onclick=()=>{BPANE='disp';save('bPane','disp');goView('budget')};
-// Aggiunta dopo la spesa: frutta e verdura con un tocco, o un altro prodotto con la sua scadenza
-let DADD={t:'veg',sel:{},q:'',o:{n:'',e:'',r:'',days:7,w:'f',date:'',pick:false},added:0};
-function dAddOpen(){DADD={t:'veg',sel:{},q:'',o:{n:'',e:'',r:'',days:7,w:'f',date:'',pick:false},added:0};dAddRender();$('#dAdd').showModal()}
-function dAddRender(){$('#dAddSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===DADD.t));const B=$('#dAddBody');
-  if(DADD.t==='veg'){const q=DADD.q.toLowerCase(),L=D_VEG.filter(v=>!q||v[1].toLowerCase().includes(q)),n=Object.values(DADD.sel).reduce((a,b)=>a+b,0);
-    const dur=d=>d<14?d+' giorni':d<30?Math.round(d/7)+' settimane':(m=>m+(m>1?' mesi':' mese'))(Math.round(d/30));
-    B.innerHTML=`<input class="dsearch" id="dQ" type="search" placeholder="Cerca (es. finocchi)" value="${esc(DADD.q)}"><div class="dvg">${L.map(v=>{const c=DADD.sel[v[1]]||0;return `<button type="button" class="dv${c?' on':''}" data-v="${esc(v[1])}">${c?`<span class="dn" data-minus="${esc(v[1])}">${c}</span>`:''}<i>${v[0]}</i><b>${v[1]}</b><span>${dur(v[2])}</span></button>`}).join('')||'<p class="meta">Non c\'è: scrivilo in «Altro prodotto».</p>'}</div>
-      <p class="dnote">Durate medie da quando le compri. Tocca di nuovo per aggiungerne un'altra, tocca il numero per toglierla.</p>
-      <div class="dgo"><button type="button" class="btn pri" id="dVegGo"${n?'':' disabled'}>${n?`Aggiungi ${n} ${n>1?'prodotti':'prodotto'}`:'Scegli cosa hai comprato'}</button></div>`;
-    const qi=$('#dQ');qi.oninput=()=>{DADD.q=qi.value;const pos=qi.selectionStart;dAddRender();const nq=$('#dQ');nq.focus();try{nq.setSelectionRange(pos,pos)}catch{}};return}
-  const o=DADD.o,CH=[[3,'3 giorni'],[7,'1 settimana'],[14,'2 settimane'],[30,'1 mese'],[90,'3 mesi']];
-  B.innerHTML=`<div class="dquick">${D_QUICK.map(v=>`<button type="button" data-qk="${esc(v[1])}">${v[0]} ${v[1]}</button>`).join('')}</div>
-    <label>Cosa hai comprato<input id="dName" maxlength="40" placeholder="es. Ricotta" value="${esc(o.n)}"></label>
-    <div class="dq">Quando scade?</div><div class="dchips">${CH.map(([d,l])=>`<button type="button" data-days="${d}" class="${!o.pick&&o.days===d?'on':''}">${l}</button>`).join('')}<button type="button" data-days="pick" class="${o.pick?'on':''}">📅 Scelgo io</button></div>
-    ${o.pick?`<input type="date" id="dDate" min="${dPlus(-30)}" value="${o.date||dPlus(7)}" style="margin-top:8px;width:100%">`:''}
-    <div class="dq">Dove lo metti?</div><div class="dwhere">${['f','d','z'].map(w=>`<button type="button" data-w="${w}" class="${o.w===w?'on':''}">${D_WICON[w]} ${D_WHERE[w]}</button>`).join('')}</div>
-    <div class="dgo"><button type="button" class="btn pri" id="dOthGo">Aggiungi e continua</button></div>`;
-  $('#dName').oninput=e=>{o.n=e.target.value;o.e='';o.r=''};$('#dDate')&&($('#dDate').onchange=e=>o.date=e.target.value)}
+// «La tua spesa»: una borsa unica dove finisce tutto (codice a barre, nome scritto, lista della spesa del menu); poi «Metti in dispensa»
+const D_MORE=[['🍝','Pasta',540,'d','pasta|spaghett|penne|fusill|rigaton|bucatin|linguin|tagliatell'],['🍚','Riso',540,'d','\\briso\\b'],['🌾','Farina',270,'d','farina'],['🫘','Legumi secchi',540,'d','fagiol|ceci|lenticch'],
+ ['🐟','Tonno in scatola',720,'d','tonno'],['🫒','Olio',540,'d','\\bolio\\b'],['🍬','Zucchero',720,'d','zucchero'],['☕','Caffè',365,'d','caff'],['🍪','Biscotti',180,'d','biscott'],['🌿','Pesto',365,'d','pesto'],
+ ['🧀','Ricotta',7,'f','ricott'],['🥛','Panna',14,'f','panna'],['🧀','Parmigiano',60,'f','parmigian|grana'],['🧀','Pecorino',60,'f','pecorin'],['🥓','Guanciale',21,'f','guancial|pancett'],['🌭','Salsiccia',3,'f','salsicc'],
+ ['🥩','Carne macinata',2,'f','macinat'],['🐟','Salmone',2,'f','salmon'],['🍦','Gelato',180,'z','gelato'],['🫛','Piselli surgelati',180,'z','piselli'],['🍷','Vino',720,'d','\\bvino\\b'],['🍫','Cioccolato',270,'d','cioccolat'],['🥜','Frutta secca',180,'d','\\bnoci\\b|mandorl|nocciol|pinoli']];
+const D_ALL=()=>[...D_QUICK,...D_VEG,...D_MORE].map(v=>({e:v[0],n:v[1],d:v[2],w:v[3],r:v[4]}));
+const dNorm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+const dRxOk=(r,q)=>{try{return !!r&&new RegExp(r,'i').test(q)}catch{return false}};
+// voce del catalogo più vicina a un nome (scritto o della lista del menu)
+function dFind(name){const q=dNorm(name);if(!q)return null;const A=D_ALL();return A.find(v=>dNorm(v.n)===q)||A.find(v=>dRxOk(v.r,q))||null}
+function dSuggest(q){q=dNorm(q);if(!q)return [];const A=D_ALL(),seen=new Set();
+  return A.filter(v=>dNorm(v.n).split(' ').some(w=>w.startsWith(q))).concat(A.filter(v=>dNorm(v.n).includes(q)||(q.length>=3&&dRxOk(v.r,q))))
+    .filter(v=>!seen.has(v.n)&&seen.add(v.n)).slice(0,4)}
+const D_OFTEN0=['Latte','Uova','Pomodori','Insalata','Banane','Pane','Mozzarella','Mele'];
+function dOften(){const F=load('spesaFreq',{}),A=D_ALL(),top=Object.entries(F&&typeof F==='object'?F:{}).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+  return [...new Set([...top,...D_OFTEN0])].slice(0,8).map(n=>A.find(v=>v.n===n)||{e:'🛒',n,d:7,w:'f',r:''})}
+const dDur=d=>d<14?d+' giorni':d<30?Math.round(d/7)+' settimane':d<360?(m=>m+(m>1?' mesi':' mese'))(Math.round(d/30)):(y=>y+(y>1?' anni':' anno'))(Math.round(d/365));
+let SP={bag:[],q:'',view:'main',edit:-1,lst:[]};
+const spSave=()=>save('spesaBag',SP.bag);
+// la borsa resta salvata: se si chiude la finestra a metà non si perde niente
+function dAddOpen(){const b=load('spesaBag',[]);SP={bag:Array.isArray(b)?b.filter(x=>x&&typeof x.n==='string'&&/^\d{4}-\d\d-\d\d$/.test(x.x||'')&&x.q>0):[],q:'',view:'main',edit:-1,lst:[]};dAddRender();$('#dAdd').showModal()}
+function spAdd(v,extra){const same=!extra?.code&&SP.bag.find(x=>x.n===v.n&&!x.code);if(same){same.q++;spSave();return same}
+  const it={k:Date.now().toString(36)+Math.random().toString(36).slice(2,5),n:v.n,e:v.e||'🛒',r:v.r||'',w:v.w||'f',x:dPlus(v.d||7),s:1,q:1,...(extra||{})};SP.bag.push(it);spSave();return it}
+function spRow(it,i){const y=it.x.slice(0,4)!==String(new Date().getFullYear())?'/'+it.x.slice(2,4):'';const dl=it.s?'≈ '+dDur(Math.max(dLeft(it.x),0)):'scade '+it.x.slice(8)+'/'+it.x.slice(5,7)+y;
+  return `<div class="spi"><button type="button" class="spnm" data-ed="${i}">${it.img?`<img src="${esc(it.img)}" alt="">`:`<span class="dem">${it.e}</span>`}<span><b>${esc(it.n||'Prodotto senza nome')}</b><span><i class="c1">${dl}</i><i class="c2">${D_WHERE[it.w]||'Frigo'}</i></span></span></button>
+   <div class="spst"><button type="button" data-dec="${i}" aria-label="${it.q>1?'Uno in meno':'Togli dalla borsa'}">${it.q>1?'−':'🗑'}</button><b>${it.q}</b><button type="button" data-inc="${i}" aria-label="Uno in più">+</button></div></div>`}
+function dAddRender(){const B=$('#dAddBody'),T=$('#dAddT');
+  if(SP.view==='edit'){const it=SP.bag[SP.edit];if(!it){SP.view='main';return dAddRender()}T.textContent='Il prodotto';
+    const st={wait:'Cerco il prodotto…',off:'✓ Riconosciuto dal codice',mine:'✓ L\'hai già comprato',new:'Non lo conosco: scrivi il nome, la prossima volta lo riconosco','off-line':'Senza internet: scrivi il nome'}[it.found]||'';
+    const CH=[[3,'3 giorni'],[7,'1 settimana'],[14,'2 settimane'],[30,'1 mese'],[90,'3 mesi']].filter(c=>!OCR_OK()||c[0]<90),dd=dLeft(it.x);
+    B.innerHTML=`${it.code?`<div class="dprod">${it.img?`<img src="${esc(it.img)}" alt="">`:`<span class="dem">${it.e}</span>`}<div><b>${it.found==='wait'?'Un momento…':esc(it.n||'Prodotto nuovo')}</b><span>${st}${it.brand?' · '+esc(it.brand):''}</span></div></div>`:''}
+     <label>Nome<input id="spName" maxlength="40" value="${esc(it.n)}" placeholder="es. Ricotta"></label>
+     <div class="dq">Quando scade?</div><div class="dchips">${CH.map(([d,l])=>`<button type="button" data-days="${d}" class="${it.s&&dd===d?'on':''}">${l}</button>`).join('')}${OCR_OK()?`<button type="button" data-days="ocr" class="ph">📷 Leggi data</button>`:''}<button type="button" data-days="pick" class="${!it.s?'on':''}">📅 ${!it.s?(+it.x.slice(8))+' '+MESI_L[+it.x.slice(5,7)-1].slice(0,3):'Scelgo io'}</button></div>
+     ${it.read&&it.read===it.x?`<div class="dread">Ho letto <b>${dLong(it.x)}</b>. Se non è giusta, cambiala qui sotto.</div>`:''}
+     ${!it.s?`<input type="date" id="spDate" min="${dPlus(-30)}" value="${it.x}" style="margin-top:8px;width:100%">`:''}
+     <div class="dq">Dove lo metti?</div><div class="dwhere">${['f','d','z'].map(w=>`<button type="button" data-w="${w}" class="${it.w===w?'on':''}">${D_WICON[w]} ${D_WHERE[w]}</button>`).join('')}</div>
+     <div class="dgo"><button type="button" class="btn pri" id="spDone">Fatto</button></div>`;
+    $('#spName').oninput=e=>{it.n=e.target.value;spSave()};
+    const di=$('#spDate');if(di)di.onchange=e=>{if(/^\d{4}-\d\d-\d\d$/.test(e.target.value)){it.x=e.target.value;spSave();dAddRender()}};return}
+  if(SP.view==='list'){T.textContent='Dalla lista della spesa';const n=SP.lst.filter(x=>x.on).length;
+    B.innerHTML=`<p class="meta" style="margin:2px 0 8px">Spunta quello che hai comprato: durata e posto li metto io, puoi cambiarli dopo.</p><button type="button" class="spall" id="spAll">${n?'Togli tutte le spunte':'Spunta tutto'}</button>${SP.lst.map((x,i)=>`<button type="button" class="spck${x.pantry?' dn':''}" data-ck="${i}"><i class="${x.on?'on':''}">${x.on?'✓':''}</i><span>${x.e} ${esc(x.n)}</span><small>${esc(x.pantry?'di solito in casa':x.q||'')}</small></button>`).join('')}
+     <div class="dgo"><button type="button" class="btn pri" id="spLstGo"${n?'':' disabled'}>${n?`Aggiungi ${n} alla borsa`:'Spunta quello che hai comprato'}</button></div>`;return}
+  T.textContent='La tua spesa';const S=dSuggest(SP.q),n=SP.bag.reduce((a,x)=>a+x.q,0),hasPlan=!!load('budgetPlan',null),q=SP.q.trim();
+  B.innerHTML=`<div class="spways${hasPlan?'':' one'}"><button type="button" id="spScan" style="background:var(--bx3)"><i>📷</i>Codice a barre</button>${hasPlan?`<button type="button" id="spList" style="background:var(--bx2)"><i>📋</i>Dalla lista della spesa</button>`:''}</div>
+   <div class="spsrch"><span>✏️</span><input id="spQ" type="search" autocomplete="off" enterkeyhint="done" placeholder="Scrivi cosa hai comprato" value="${esc(SP.q)}"></div>
+   ${q?`<div class="spsug">${S.map(v=>`<button type="button" data-sg="${esc(v.n)}"><span>${v.e} <b>${esc(v.n)}</b></span><small>≈ ${dDur(v.d)}</small><i>+</i></button>`).join('')}${S.some(v=>dNorm(v.n)===dNorm(q))?'':`<button type="button" data-sg=""><span>✏️ <b>«${esc(q)}»</b></span><small>aggiungi così</small><i>+</i></button>`}</div>`
+     :`<div class="meta" style="margin:12px 2px 6px">Compri spesso</div><div class="spoft">${dOften().map(v=>`<button type="button" data-of="${esc(v.n)}">${v.e} ${esc(v.n)}</button>`).join('')}</div>`}
+   <div class="spbag"><h3>Nella borsa <small>${n?n+(n>1?' prodotti':' prodotto'):'vuota'}</small></h3>${SP.bag.length?SP.bag.map(spRow).join(''):`<p class="meta" style="text-align:center;margin:18px 0">Scansiona un codice, scrivi un prodotto<br>o tocca uno di quelli che compri spesso.</p>`}</div>
+   <div class="dgo"><button type="button" class="btn pri" id="spGo"${n?'':' disabled'}>Metti in dispensa${n?' · '+n+(n>1?' prodotti':' prodotto'):''}</button></div>`;
+  const qi=$('#spQ');qi.oninput=()=>{SP.q=qi.value;const pos=qi.selectionStart;dAddRender();const nq=$('#spQ');nq.focus();try{nq.setSelectionRange(pos,pos)}catch{}};
+  qi.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const S2=dSuggest(SP.q);spPick(S2.length&&dNorm(S2[0].n).startsWith(dNorm(SP.q))?S2[0].n:'')}}}
+function spPick(name){const q=SP.q.trim(),cap=x=>x[0].toUpperCase()+x.slice(1);
+  const v=name?D_ALL().find(x=>x.n===name):q?{...(dFind(q)||{e:'🛒',d:7,w:'f',r:''}),n:cap(q)}:null;
+  if(!v)return;spAdd(v);SP.q='';dAddRender();toast(v.n+' nella borsa')}
+async function spListOpen(){const P=load('budgetPlan',null);if(!P)return;try{await loadBook();shopping(P)}catch(e){console.warn(e)}
+  const G=window.SHOP_GOODS||{buy:[],pantry:[]},cap=x=>x[0].toUpperCase()+x.slice(1);
+  SP.lst=[...G.buy.map(x=>({...x,pantry:false})),...G.pantry.map(x=>({...x,pantry:true}))].filter(x=>x.k).map(x=>{const v=dFind(x.k);return {n:cap(x.k),q:x.q,e:v?.e||'🛒',v,pantry:x.pantry,on:!x.pantry}});
+  if(!SP.lst.length){toast('La lista della spesa è vuota');return}SP.view='list';dAddRender();$('#dAdd').scrollTop=0}
+function spCommit(){const t=dIso(dToday()),F=load('spesaFreq',{}),M=load('myCodes',{});let n=0;
+  for(const it of SP.bag){const N=String(it.n||'').trim();if(!N)continue;const NN=N[0].toUpperCase()+N.slice(1);
+    dPush({n:NN,e:it.e,r:it.r,w:it.w,x:it.x,s:it.s,q:it.q,a:t});n+=it.q;F[NN]=(F[NN]||0)+1;if(it.code)M[it.code]={n:NN,e:it.e,r:it.r,w:it.w}}
+  const K=Object.keys(M);while(K.length>400)delete M[K.shift()];save('myCodes',M);save('spesaFreq',F);
+  SP.bag=[];spSave();$('#dAdd').close();toast(n>1?n+' prodotti messi in dispensa':n?'Messo in dispensa':'Scrivi il nome dei prodotti');if(n)dNotesAsk()}
 function dPush(it){const a=dItems();const same=a.find(p=>p.s&&it.s&&p.n===it.n&&p.a===it.a&&p.w===it.w);
   if(same){same.q=(same.q||1)+(it.q||1);same.x=it.x}else a.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),...it});dSave(a)}
-$('#dAddSeg').onclick=e=>{const b=e.target.closest('[data-t]');if(b){DADD.t=b.dataset.t;dAddRender()}};
 $('#dAddX').onclick=()=>$('#dAdd').close();
-$('#dAdd').addEventListener('close',()=>{if(DADD.added&&BPANE==='disp')dispRender()});
-$('#dAddBody').onclick=e=>{const o=DADD.o;
-  const m=e.target.closest('[data-minus]');if(m){const k=m.dataset.minus;DADD.sel[k]=(DADD.sel[k]||1)-1;if(DADD.sel[k]<=0)delete DADD.sel[k];dAddRender();return}
-  const v=e.target.closest('[data-v]');if(v){const k=v.dataset.v;DADD.sel[k]=(DADD.sel[k]||0)+1;dAddRender();return}
-  if(e.target.closest('#dVegGo')){const t=dIso(dToday());let n=0;for(const [k,c] of Object.entries(DADD.sel)){const V=D_VEG.find(x=>x[1]===k);if(!V)continue;dPush({n:V[1],e:V[0],r:V[4],w:V[3],x:dPlus(V[2]),s:1,q:c,a:t});n+=c}
-    DADD.added+=n;$('#dAdd').close();toast(n>1?n+' prodotti aggiunti alla dispensa':'Aggiunto alla dispensa');return}
-  const qk=e.target.closest('[data-qk]');if(qk){const V=D_QUICK.find(x=>x[1]===qk.dataset.qk);if(V){Object.assign(o,{n:V[1],e:V[0],r:V[4],w:V[3],days:V[2]>90?90:V[2],pick:![3,7,14,30,90].includes(V[2])&&V[2]<=90});if(o.pick)o.date=dPlus(V[2])}dAddRender();return}
-  const d=e.target.closest('[data-days]');if(d){if(d.dataset.days==='pick'){o.pick=true;o.date=o.date||dPlus(o.days)}else{o.pick=false;o.days=+d.dataset.days}dAddRender();return}
-  const w=e.target.closest('[data-w]');if(w){o.w=w.dataset.w;dAddRender();return}
-  if(e.target.closest('#dOthGo')){const n=(o.n||'').trim();if(!n){toast('Scrivi cosa hai comprato');$('#dName').focus();return}
-    const x=o.pick&&/^\d{4}-\d\d-\d\d$/.test(o.date)?o.date:dPlus(o.days);
-    dPush({n:n[0].toUpperCase()+n.slice(1),e:o.e||'🛒',r:o.r||'',w:o.w,x,s:o.pick?0:1,q:1,a:dIso(dToday())});DADD.added++;
-    toast(n+' aggiunto · '+DADD.added+' in tutto');Object.assign(o,{n:'',e:'',r:'',pick:false,date:''});dAddRender()}};
+$('#dAdd').addEventListener('close',()=>{if(BPANE==='disp'&&!$('#budget').hidden)dispRender()});
+$('#dAddBody').onclick=e=>{const t=e.target,it=SP.view==='edit'?SP.bag[SP.edit]:null;
+  if(t.closest('#spScan')){dScan();return}
+  if(t.closest('#spList')){spListOpen();return}
+  const sg=t.closest('[data-sg]');if(sg){spPick(sg.dataset.sg);return}
+  const of=t.closest('[data-of]');if(of){const v=D_ALL().find(x=>x.n===of.dataset.of)||{e:'🛒',n:of.dataset.of,d:7,w:'f',r:''};spAdd(v);dAddRender();return}
+  const inc=t.closest('[data-inc]');if(inc){const x=SP.bag[+inc.dataset.inc];if(x){x.q++;spSave();dAddRender()}return}
+  const dec=t.closest('[data-dec]');if(dec){const i=+dec.dataset.dec,x=SP.bag[i];if(x){if(x.q>1)x.q--;else SP.bag.splice(i,1);spSave();dAddRender()}return}
+  const ed=t.closest('[data-ed]');if(ed){SP.edit=+ed.dataset.ed;SP.view='edit';dAddRender();$('#dAdd').scrollTop=0;return}
+  const ck=t.closest('[data-ck]');if(ck){const x=SP.lst[+ck.dataset.ck];if(x){x.on=!x.on;dAddRender()}return}
+  if(t.closest('#spAll')){const on=!SP.lst.some(x=>x.on);SP.lst.forEach(x=>x.on=on&&!x.pantry);dAddRender();return}
+  if(t.closest('#spLstGo')){const L=SP.lst.filter(x=>x.on);if(!L.length)return;L.forEach(x=>spAdd(x.v?{...x.v,n:x.n}:{e:'🛒',n:x.n,d:x.pantry?180:7,w:x.pantry?'d':'f',r:''}));SP.view='main';dAddRender();toast(L.length>1?L.length+' prodotti nella borsa':'Nella borsa');return}
+  const d=t.closest('[data-days]');if(d&&it){if(d.dataset.days==='ocr'){dReadDate(it);return}if(d.dataset.days==='pick')it.s=0;else{it.s=1;it.x=dPlus(+d.dataset.days)}it.read='';spSave();dAddRender();return}
+  const w=t.closest('[data-w]');if(w&&it){it.w=w.dataset.w;spSave();dAddRender();return}
+  if(t.closest('#spDone')){if(it&&!String(it.n||'').trim()){toast('Scrivi il nome del prodotto');$('#spName').focus();return}SP.view='main';dAddRender();return}
+  if(t.closest('#spGo'))spCommit()};
+/* ---------- Spesa: codice a barre, data dalla foto, avvisi di scadenza ---------- */
+// Strumenti del telefono: Android (AndroidShare) e iPhone (webkit.messageHandlers) rispondono con window.gnNat(id, ok, testo)
+const IOS_H=n=>window.webkit?.messageHandlers?.[n];
+const NAT={};let NAT_N=0;
+window.gnNat=(id,ok,t)=>{const f=NAT[id];if(f){delete NAT[id];f({ok,t})}};
+function natCall(fn){return new Promise(res=>{const id='n'+(++NAT_N);NAT[id]=res;try{fn(id)}catch(e){delete NAT[id];res({ok:false,t:String(e)})}})}
+const OCR_OK=()=>!!(window.AndroidShare?.readText||IOS_H('vision'));
+// Foto dalla fotocamera (o dalla galleria): l'input resta nella pagina finché non si sceglie
+function pickPhoto(){return new Promise(res=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.capture='environment';i.hidden=true;
+  i.onchange=()=>{res(i.files[0]||null);i.remove()};i.addEventListener('cancel',()=>{res(null);i.remove()});document.body.append(i);i.click()})}
+// Foto raddrizzata e ridotta: tela per il browser e JPEG in base64 per il telefono
+async function imgCanvas(file,max){let bm=null;try{bm=await createImageBitmap(file)}catch{}
+  if(!bm)bm=await new Promise((ok,ko)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=ko;im.src=URL.createObjectURL(file)});
+  const k=Math.min(1,max/Math.max(bm.width,bm.height)),c=document.createElement('canvas');c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);
+  c.getContext('2d').drawImage(bm,0,0,c.width,c.height);return c}
+let ZXP=null;
+function loadZx(){return ZXP||(ZXP=new Promise((ok,ko)=>{const sc=document.createElement('script');sc.src='vendor/zxing/index.js';
+  sc.onload=()=>{try{ZXingWASM.prepareZXingModule({overrides:{locateFile:(f,pre)=>f.endsWith('.wasm')?new URL('vendor/zxing/'+f,location.href).href:pre+f}});ok()}catch(e){ko(e)}};
+  sc.onerror=()=>{ZXP=null;ko(new Error('zxing'))};document.head.append(sc)}))}
+// Codice a barre: null = annullato, '' = non trovato
+async function scanCode(){
+  if(window.AndroidShare?.scanCode){const r=await natCall(id=>AndroidShare.scanCode(id));return r.ok?r.t:r.t==='cancel'?null:''}
+  const f=await pickPhoto();if(!f)return null;
+  let c;try{c=await imgCanvas(f,1800)}catch{return ''}
+  if(IOS_H('vision')){const r=await natCall(id=>IOS_H('vision').postMessage({id,op:'barcode',img:c.toDataURL('image/jpeg',.9).split(',')[1]}));return r.ok?r.t:''}
+  try{if('BarcodeDetector' in window){const r=await new BarcodeDetector().detect(c);if(r[0]?.rawValue)return r[0].rawValue}}catch{}
+  try{await loadZx();const r=await ZXingWASM.readBarcodes(c.getContext('2d').getImageData(0,0,c.width,c.height),{tryHarder:true,maxNumberOfSymbols:1});if(r[0]?.text)return r[0].text}catch(e){console.warn(e)}
+  return ''}
+// Codice letto: prodotto (GTIN) ed eventuale scadenza scritta nel codice (GS1: QR, DataMatrix o link id.gs1.org con l'«AI 17»)
+function gs1(raw){raw=String(raw||'').trim();let g='',x='';
+  const u=raw.match(/\/01\/(\d{8,14})/);
+  if(u){g=u[1];const m=raw.match(/[\/?&]17[\/=](\d{6})/);if(m)x=m[1]}
+  else{const t=raw.replace(/^\][A-Za-z]\d/,'');const q=t.replace(/\((\d{2,4})\)/g,'\x1d$1').replace(/^\x1d/,'');
+    if(/^01\d{14}/.test(q)){g=q.slice(2,16);const m=q.slice(16).match(/(?:^|\x1d|^1[135]\d{6})17(\d{6})/);if(m)x=m[1]}
+    else if(/^\d{8,14}$/.test(t))g=t}
+  if(g.length===14&&g[0]==='0')g=g.slice(1);
+  let exp='';if(x){const y=2000+ +x.slice(0,2),mo=+x.slice(2,4);let d=+x.slice(4,6);if(!d)d=new Date(y,mo,0).getDate();const D=new Date(y,mo-1,d);if(mo>=1&&mo<=12&&D.getMonth()===mo-1)exp=dIso(D)}
+  return {code:/^\d{8,14}$/.test(g)?g:'',exp}}
+// Open Food Facts: archivio libero e gratuito dei prodotti; si manda solo il numero del codice
+async function offLookup(code){const C=load('offCache',{});if(C[code])return C[code];
+  try{const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),9000);
+    const r=await fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,product_name_it,generic_name_it,brands,quantity,categories_tags,image_front_small_url`,{signal:ctl.signal});clearTimeout(tm);
+    const j=await r.json();const p=j.product;if(!p||j.status===0)return null;
+    const o={n:String(p.product_name_it||p.product_name||p.generic_name_it||'').trim(),b:String(p.brands||'').split(',')[0].trim(),qt:String(p.quantity||''),cat:Array.isArray(p.categories_tags)?p.categories_tags.slice(0,30):[],img:String(p.image_front_small_url||'')};
+    if(!o.n&&!o.cat.length)return null;
+    C[code]=o;const K=Object.keys(C);if(K.length>300)delete C[K[0]];save('offCache',C);return o}catch{return undefined}}
+// Dalla categoria del prodotto: icona, dove si tiene, durata tipica, parole per le ricette, nome generico
+const D_CAT=[[/frozen|surgelat/,'🧊','z',180,'',''],[/canned-tuna|tonno/,'🐟','d',720,'tonno','Tonno'],[/en:eggs\b/,'🥚','f',21,'\\buov[ao]','Uova'],[/yogurt/,'🥛','f',21,'yogurt','Yogurt'],
+ [/mozzarella/,'🧀','f',7,'mozzarell','Mozzarella'],[/ricotta/,'🧀','f',7,'ricott','Ricotta'],[/cheese/,'🧀','f',30,'formagg|parmigian|grana|pecorin','Formaggio'],[/uht|long-life/,'🥛','d',90,'\\blatte\\b','Latte'],
+ [/milk/,'🥛','f',7,'\\blatte\\b','Latte'],[/butter/,'🧈','f',60,'burro','Burro'],[/cream/,'🥛','f',14,'panna','Panna'],[/ham|salami|prepared-meat|cured|sausage/,'🥓','f',10,'prosciutt|salam|speck|pancett|mortadell|salsicc','Salumi'],
+ [/poultr|chicken|turkey/,'🍗','f',3,'pollo|tacchin','Pollo'],[/meat|beef|pork|veal/,'🥩','f',3,'carne|manzo|maial|vitell|macinat','Carne'],[/fish|seafood|salmon/,'🐟','f',2,'pesce|salmon|merluzz|gamber','Pesce'],
+ [/pesto/,'🌿','d',365,'pesto','Pesto'],[/sauce|condiment|sugh/,'🥫','d',365,'sugo|ragù|ragu','Sugo'],[/pasta|spaghetti|noodle/,'🍝','d',540,'pasta|spaghett|penne|fusill|rigaton','Pasta'],[/rice\b|rices/,'🍚','d',540,'\\briso\\b','Riso'],[/bread|bakery/,'🍞','d',4,'\\bpane\\b','Pane'],
+ [/tomato/,'🥫','d',540,'passata|pelati|pomodor','Passata'],[/legume|bean|chickpea|lentil|pulses/,'🫘','d',720,'fagiol|ceci|lenticch','Legumi'],[/biscuit|cookie/,'🍪','d',180,'biscott','Biscotti'],
+ [/flour/,'🌾','d',270,'farina','Farina'],[/olive-oil|oils/,'🫒','d',540,'olio','Olio'],[/juice/,'🧃','d',240,'succo','Succo'],[/beverage|water|drink/,'🥤','d',365,'',''],[/salad|vegetable/,'🥬','f',5,'',''],[/fruit/,'🍎','f',7,'','']];
+function dCat(info){const t=(info.cat||[]).join(' ')+' '+String(info.n||'').toLowerCase();const c=D_CAT.find(x=>x[0].test(t));return c?{e:c[1],w:c[2],d:c[3],r:c[4],g:c[5]}:{e:'🛒',w:'f',d:14,r:'',g:''}}
+// Nome corto: senza marca ripetuta e senza parentesi
+const dShort=n=>String(n||'').replace(/\(.*?\)/g,'').replace(/\s+/g,' ').trim().slice(0,40);
+const MESI_L=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const dLong=x=>{const D=new Date(x+'T00:00:00');return D.getDate()+' '+MESI_L[D.getMonth()]+' '+D.getFullYear()};
+async function dScan(){const raw=await scanCode();if(raw===null)return;
+  if(!raw){toast('Non trovo il codice: riprova con più luce, oppure scrivi il prodotto');return}
+  const g=gs1(raw);if(!g.code){toast('Questo codice non è quello di un prodotto');return}
+  const it=spAdd({e:'🛒',n:'',d:7,w:'f',r:''},{code:g.code,found:'wait',...(g.exp?{x:g.exp,s:0,read:g.exp}:{})});
+  SP.edit=SP.bag.indexOf(it);SP.view='edit';dAddRender();
+  const mine=load('myCodes',{})[g.code],info=mine?null:await offLookup(g.code);
+  if(mine)Object.assign(it,{n:mine.n,e:mine.e,r:mine.r||'',w:mine.w||'f',found:'mine'});
+  else if(info){const c=dCat(info);Object.assign(it,{n:dShort(info.n)||c.g,e:c.e,r:c.r,w:c.w,img:info.img,brand:[info.b,info.qt].filter(Boolean).join(' · '),found:'off'});if(!g.exp)it.x=dPlus(c.d)}
+  else it.found=info===undefined?'off-line':'new';
+  spSave();if(!$('#dAdd').open)return;
+  if(SP.view==='edit'&&SP.bag[SP.edit]===it){dAddRender();if(!it.n)setTimeout(()=>$('#spName')?.focus(),60)}else if(SP.view==='main')dAddRender()}
+// Data di scadenza dal testo letto nella foto: «12/12/26», «12.12.2026», «12 DIC 2026», «03/2027» (fine mese); vince quella vicina a «entro», «scad», «TMC», «exp»
+const MESI3={gen:1,jan:1,feb:2,mar:3,apr:4,mag:5,may:5,giu:6,jun:6,lug:7,jul:7,ago:8,aug:8,set:9,sep:9,ott:10,oct:10,nov:11,dic:12,dec:12};
+function parseExp(t){const s=' '+String(t||'').toLowerCase().split(/\s+/).map(w=>/\d.*\d/.test(w)&&/^[\do\/.\-il|]+$/.test(w)?w.replace(/o/g,'0').replace(/[il|]/g,'1'):w).join(' ')+' ';
+  const now=dToday(),lo=new Date(now),hi=new Date(now);lo.setDate(lo.getDate()-60);hi.setFullYear(hi.getFullYear()+6);const C=[];
+  const add=(y,mo,d,i,part)=>{y=+y;if(y<100)y+=2000;mo=+mo;if(mo<1||mo>12)return;const dd=part?new Date(y,mo,0).getDate():+d;const D=new Date(y,mo-1,dd);
+    if(dd<1||D.getMonth()!==mo-1||D<lo||D>hi)return;C.push({D,i,part})};let m;
+  const R1=/(?:^|[^\d])(\d{1,2})\s?[\/.\-]\s?(\d{1,2})\s?[\/.\-]\s?(\d{4}|\d{2})(?!\d)/g;while(m=R1.exec(s))add(m[3],m[2],m[1],m.index);
+  const R2=/(?:^|[^\d])(\d{1,2})\s?([a-z]{3})[a-z]*\.?\s?(\d{4}|\d{2})(?!\d)/g;while(m=R2.exec(s))if(MESI3[m[2]])add(m[3],MESI3[m[2]],m[1],m.index);
+  const R3=/(?:^|[^\d\/.\-])(\d{1,2})\s?[\/.\-]\s?(20\d{2})(?!\d)/g;while(m=R3.exec(s))add(m[2],m[1],0,m.index,1);
+  const R4=/(?:^|[^a-z\d])([a-z]{3})[a-z]*\.?\s?(20\d{2})(?!\d)/g;while(m=R4.exec(s))if(MESI3[m[1]])add(m[2],MESI3[m[1]],0,m.index,1);
+  if(!C.length)return null;const K=[...s.matchAll(/entro|scad|exp|tmc|best|consum|bbe|use by|da consumar/g)].map(k=>k.index);
+  C.forEach(c=>{c.sc=(c.D>=now?2:0)-(c.part?1:0)+(K.some(k=>c.i>=k&&c.i-k<50)?3:0)});
+  C.sort((a,b)=>b.sc-a.sc||b.D-a.D);return dIso(C[0].D)}
+async function dReadDate(it){const f=await pickPhoto();if(!f)return;let c;try{c=await imgCanvas(f,2000)}catch{toast('Non riesco ad aprire la foto');return}
+  const b64=c.toDataURL('image/jpeg',.9).split(',')[1];toast('Leggo la data…');
+  const r=await natCall(id=>window.AndroidShare?.readText?AndroidShare.readText(id,b64):IOS_H('vision').postMessage({id,op:'text',img:b64}));
+  if(!r.ok){toast('Non riesco a leggere ora: riprova tra poco, o scegli la data');return}
+  const d=parseExp(r.t);if(!d){toast('Non trovo la data: avvicinati e riprova, o sceglila tu');return}
+  Object.assign(it,{s:0,x:d,read:d});spSave();if(SP.view==='edit'&&SP.bag[SP.edit]===it)dAddRender()}
+// Avvisi di scadenza nelle app: alle 9 del giorno prima e del giorno stesso; si riprogrammano a ogni modifica della dispensa
+function dNotesSync(){try{const and=window.AndroidShare?.notesSet,ios=IOS_H('notes');if(!and&&!ios)return;
+  const days={};dItems().forEach(p=>{const d=dLeft(p.x);if(d<0||d>45)return;for(const k of [d-1,d])if(k>=0)(days[k]=days[k]||{oggi:[],domani:[]})[k===d?'oggi':'domani'].push(p.n)});
+  const lst=a=>a.length>1?a.slice(0,-1).join(', ')+' e '+a.at(-1):a[0],L=[],now=Date.now();
+  Object.keys(days).map(Number).sort((a,b)=>a-b).slice(0,40).forEach(k=>{const o=days[k],t=dToday();t.setDate(t.getDate()+k);t.setHours(9,0,0,0);if(t.getTime()<now+60000)return;
+    const parts=[];if(o.oggi.length)parts.push((o.oggi.length>1?'Oggi scadono: ':'Oggi scade: ')+lst(o.oggi));if(o.domani.length)parts.push((o.domani.length>1?'Domani scadono: ':'Domani scade: ')+lst(o.domani));
+    L.push({at:t.getTime(),title:'Da usare presto',body:parts.join('. ')+'. Apri Gnamina per qualche ricetta.'})});
+  if(and)AndroidShare.notesSet(JSON.stringify(L));else ios.postMessage({op:'set',list:L})}catch(e){console.warn(e)}}
+// Il permesso per gli avvisi si chiede una volta, dopo il primo prodotto aggiunto
+function dNotesAsk(){try{if(load('notesAsked',0))return;if(window.AndroidShare?.notesAsk){save('notesAsked',1);if(AndroidShare.notesPerm()!=='granted')AndroidShare.notesAsk();else dNotesSync()}
+  else if(IOS_H('notes')){save('notesAsked',1);IOS_H('notes').postMessage({op:'ask'})}}catch(e){console.warn(e)}}
+window.gnNotesPerm=ok=>{if(ok){dNotesSync();toast('Ti avviso io quando qualcosa sta per scadere')}};
+window.gnOpenDisp=()=>{BPANE='disp';save('bPane','disp');goView('budget')};
+$('#cpX').onclick=()=>$('#camPick').close();
+$('#cpRec').onclick=()=>{$('#camPick').close();$('#camIn').click()};
+$('#cpShop').onclick=()=>{$('#camPick').close();gnOpenDisp();dAddOpen();dScan()};
+setTimeout(()=>{try{if(window.AndroidShare?.takeOpen?.()==='disp')gnOpenDisp()}catch{}dNotesSync()},2500);
 const lines=s=>String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);
 
 const DEFAULT_CATS=['Antipasti','Primi','Secondi','Contorni','Piatti unici','Lievitati','Dolci','Altro'];
@@ -2246,7 +2437,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=187; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=188; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -3206,7 +3397,7 @@ function shopping(P){
   if(acc['tuorli']||acc['albumi']){acc['uova']=(acc['uova']||0)+(acc['tuorli']||0)/18*60+(acc['albumi']||0)/33*60;delete acc['tuorli'];delete acc['albumi']}
   const goods=Object.entries(acc).filter(([k])=>!['sale','acqua','pepe e spezie'].includes(k)).map(([k,g])=>({k,g,...packOf(k,g)}));
   for(const [f,g] of Object.entries(fruitG))goods.push({k:f,g,...packOf(keyOf(f)||'frutta',g)});
-  const buy=goods.filter(x=>!x.pantry).sort((a,b)=>b.g-a.g),pantry=goods.filter(x=>x.pantry).sort((a,b)=>b.g-a.g);
+  const buy=goods.filter(x=>!x.pantry).sort((a,b)=>b.g-a.g),pantry=goods.filter(x=>x.pantry).sort((a,b)=>b.g-a.g);window.SHOP_GOODS={buy,pantry};
   // accorpata per reparto del supermercato, nell'ordine in cui si fa il giro
   const groups=REPARTI.map(([name,rx])=>[name,buy.filter(x=>reparto(x.k)===name)]).filter(([,xs])=>xs.length);
   const line=x=>`${x.k}: ${x.q}${x.eur!=null?` · ≈${euro(x.eur)}`:''}`;
@@ -4147,7 +4338,7 @@ function placeDesk(){const d=deskQ.matches,nav=$('#tabs');
   else{document.body.insertBefore($('#add'),addHome);$('.top').append($('#camBtn'),$('#setBtn'),$('#userBtn'))}}
 // Telefono (14/11): la Sfida è la coppa in alto a sinistra (con il pallino se c'è una sfida aperta), la fotocamera è il tasto rotondo al centro della barra
 $('#cupBtn').onclick=()=>goView('home');$('#libBtn').onclick=()=>goView('libro');
-$('#navCam').onclick=()=>$('#camIn').click();
+$('#navCam').onclick=()=>$('#camPick').showModal();
 function cupDot(){try{$('.cupDot').hidden=!(typeof CONTEST!=='undefined'&&CONTEST&&['join','taste'].includes(contestPhase(CONTEST)))}catch{}}
 deskQ.addEventListener('change',placeDesk);placeDesk();$('#navVer').textContent=APP_VERSION;
 function navCounts(){const m=$('#tabs [data-v=mine] .cnt'),b=$('#tabs [data-v=book] .cnt');if(m)m.textContent=items.length||'';if(b)b.textContent=book?book.length+BK.length:''}

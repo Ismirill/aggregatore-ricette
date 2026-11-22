@@ -1,6 +1,8 @@
 import UIKit
 import Capacitor
 import WebKit
+import Vision
+import UserNotifications
 #if canImport(FoundationModels)
 import FoundationModels
 #endif
@@ -106,11 +108,86 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 // a permesso ottenuto e quando GitHub compila con Xcode 27 (oggi usa Xcode 26.6, che non ha quella classe).
 // La pagina chiama webkit.messageHandlers.localAi.postMessage({id, op: "status" | "run", prompt, max})
 // e riceve la risposta con window.onLocalAi(id, ok, testo), come su Android (MainActivity.localAi).
-class GnaminaViewController: CAPBridgeViewController, WKScriptMessageHandler {
+class GnaminaViewController: CAPBridgeViewController, WKScriptMessageHandler, UNUserNotificationCenterDelegate {
     override func capacitorDidLoad() {
         super.capacitorDidLoad()
         webView?.configuration.userContentController.add(self, name: "localAi")
         webView?.configuration.userContentController.add(self, name: "printHtml")
+        webView?.configuration.userContentController.add(self, name: "vision")
+        webView?.configuration.userContentController.add(self, name: "notes")
+        UNUserNotificationCenter.current().delegate = self
+    }
+
+    // ---- Spesa e dispensa ----
+    // Risposta alla pagina: window.gnNat(id, ok, testo)
+    private func nat(_ id: String, _ ok: Bool, _ text: String) {
+        guard let data = try? JSONSerialization.data(withJSONObject: [id, text]), let args = String(data: data, encoding: .utf8) else { return }
+        webView?.evaluateJavaScript("(function(a){window.gnNat&&gnNat(a[0],\(ok),a[1])})(\(args))", completionHandler: nil)
+    }
+
+    // Codice a barre o testo (la data di scadenza) di una foto, con Vision di Apple dentro il telefono
+    private func vision(_ id: String, _ op: String, _ b64: String) {
+        guard let data = Data(base64Encoded: b64), let img = UIImage(data: data), let cg = img.cgImage else { nat(id, false, "img"); return }
+        DispatchQueue.global(qos: .userInitiated).async {
+            let h = VNImageRequestHandler(cgImage: cg, orientation: .up, options: [:])
+            if op == "barcode" {
+                let r = VNDetectBarcodesRequest()
+                r.symbologies = [.ean13, .ean8, .upce, .qr, .dataMatrix, .code128]
+                try? h.perform([r])
+                let v = (r.results ?? []).compactMap { $0.payloadStringValue }.first
+                DispatchQueue.main.async { self.nat(id, v != nil, v ?? "") }
+            } else {
+                let r = VNRecognizeTextRequest()
+                r.recognitionLevel = .accurate
+                r.usesLanguageCorrection = false
+                r.recognitionLanguages = ["it-IT", "en-US"]
+                do { try h.perform([r]) } catch { DispatchQueue.main.async { self.nat(id, false, String(describing: error)) }; return }
+                let t = (r.results ?? []).compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+                DispatchQueue.main.async { self.nat(id, true, t) }
+            }
+        }
+    }
+
+    // Avvisi di scadenza: {op: "perm" | "ask" | "set", id, list: [{at (ms), title, body}]}
+    private func notes(_ d: [String: Any]) {
+        let c = UNUserNotificationCenter.current(), id = d["id"] as? String ?? ""
+        switch d["op"] as? String ?? "" {
+        case "perm":
+            c.getNotificationSettings { s in
+                let v = s.authorizationStatus == .notDetermined ? "ask" : (s.authorizationStatus == .denied ? "denied" : "granted")
+                DispatchQueue.main.async { self.nat(id, true, v) }
+            }
+        case "ask":
+            c.requestAuthorization(options: [.alert, .sound, .badge]) { ok, _ in
+                DispatchQueue.main.async { self.webView?.evaluateJavaScript("window.gnNotesPerm&&gnNotesPerm(\(ok))", completionHandler: nil) }
+            }
+        case "set":
+            c.getPendingNotificationRequests { reqs in
+                c.removePendingNotificationRequests(withIdentifiers: reqs.map { $0.identifier }.filter { $0.hasPrefix("scad-") })
+                for (i, o) in (d["list"] as? [[String: Any]] ?? []).enumerated() {
+                    guard let at = o["at"] as? Double, at > Date().timeIntervalSince1970 * 1000 else { continue }
+                    let ct = UNMutableNotificationContent()
+                    ct.title = o["title"] as? String ?? "Gnamina"
+                    ct.body = o["body"] as? String ?? ""
+                    ct.sound = .default
+                    let comp = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: Date(timeIntervalSince1970: at / 1000))
+                    c.add(UNNotificationRequest(identifier: "scad-\(i)", content: ct, trigger: UNCalendarNotificationTrigger(dateMatching: comp, repeats: false)))
+                }
+            }
+        default: break
+        }
+    }
+
+    // Avviso mostrato anche con l'app aperta; toccandolo si apre la dispensa
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound])
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        if response.notification.request.identifier.hasPrefix("scad-") {
+            webView?.evaluateJavaScript("window.gnOpenDisp&&gnOpenDisp()", completionHandler: nil)
+        }
+        completionHandler()
     }
 
     // Stampa del libro di cucina: l'HTML arriva già impaginato (pagine A4 o A5), un WKWebView nascosto lo carica e il
@@ -144,6 +221,15 @@ class GnaminaViewController: CAPBridgeViewController, WKScriptMessageHandler {
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        if message.name == "vision" {
+            guard let d = message.body as? [String: Any], let id = d["id"] as? String else { return }
+            vision(id, d["op"] as? String ?? "text", d["img"] as? String ?? "")
+            return
+        }
+        if message.name == "notes" {
+            if let d = message.body as? [String: Any] { notes(d) }
+            return
+        }
         if message.name == "printHtml" {
             guard let d = message.body as? [String: Any], let html = d["html"] as? String else { return }
             printHTML(html, name: d["name"] as? String ?? "Ricettario Gnamina", size: d["size"] as? String ?? "a4")
