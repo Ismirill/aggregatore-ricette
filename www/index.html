@@ -1119,6 +1119,52 @@ details summary{cursor:pointer}
 :root:not(#_) .srcCard{border:3px solid var(--kb2);border-radius:999px;background:var(--k-in);color:var(--kt2);box-shadow:none;padding:13px 20px;text-align:left}
 :root:not(#_) .srcCard b{font-family:'Fredoka',var(--sans);font-weight:600;font-size:1.1rem}
 :root:not(#_) .srcCard span{display:none}
+
+/* La mia dispensa */
+.dseg{display:flex;gap:4px;background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:4px;margin:0 0 14px}
+.dseg button{flex:1;word-spacing:.25em;border:0;background:transparent;border-radius:999px;padding:9px 6px;font:600 1rem 'Fredoka',var(--sans);color:var(--mut);cursor:pointer}
+.dseg button.on{background:var(--k-bb);color:#fff}
+.dbox{border-radius:20px;padding:12px 14px;margin:0 0 14px;background:var(--bx3)}
+.dbox h3{display:flex;justify-content:space-between;align-items:center;margin:0 0 4px;font:600 1.15rem 'Fredoka',var(--sans)}
+.dbox h3 small{font:700 .9rem var(--sans);color:var(--mut)}
+.dbox.f{background:var(--bx2)}.dbox.d{background:var(--bx1)}.dbox.z{background:color-mix(in srgb,#9cc7e8 35%,var(--card))}
+.drow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid color-mix(in srgb,var(--fg) 9%,transparent)}
+.dbox h3+.drow{border-top:0}
+.dem{width:42px;height:42px;border-radius:12px;background:var(--bxp);display:grid;place-items:center;font-size:23px;flex:none}
+.dnm{flex:1;min-width:0}.dnm b{display:block;font-weight:800;font-size:1.03rem;line-height:1.2}.dnm b small{font-weight:700;color:var(--mut)}.dnm span{font-size:.85rem;color:var(--mut)}
+.dpill{display:inline-block;margin:3px 4px 0 0;font:600 .85rem 'Fredoka',var(--sans);padding:2px 9px;border-radius:999px;white-space:nowrap;background:var(--bxp)}
+.dpill.r{background:#c2361c;color:#fff}.dpill.o{background:var(--k-ca);color:#fff}
+:root:not(#_) .dfin{font:600 .88rem 'Fredoka',var(--sans);border:2px solid var(--k-bb);color:var(--k-bb);background:transparent;border-radius:999px;padding:5px 11px;cursor:pointer;flex:none}
+.dlbl{font:600 .8rem 'Fredoka',var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:16px 2px 8px}
+.drcs{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px 6px;padding:2px 16px 8px;scrollbar-width:none}
+.drc{flex:0 0 46%;max-width:220px;scroll-snap-align:start;background:var(--card);border:0;border-radius:16px;overflow:hidden;box-shadow:0 1px 4px #0002;padding:0;text-align:left;color:var(--fg);cursor:pointer}
+.drc img,.drc i{width:100%;height:96px;object-fit:cover;display:grid;place-items:center;font-size:40px;font-style:normal;background:var(--bx1)}
+.drc b{display:block;padding:8px 10px 0;font-weight:800;font-size:.95rem;line-height:1.2}.drc span{display:block;padding:2px 10px 9px;font-size:.8rem;font-weight:700;color:var(--k-pid)}
+.dempty{text-align:center;padding:26px 10px;color:var(--mut)}.dempty div{font-size:46px}.dempty b{display:block;color:var(--fg);font:600 1.2rem 'Fredoka',var(--sans);margin:6px 0}
+#dOut{padding-bottom:5rem}
+#dBan{margin:0 0 12px}#dBan button{display:flex;align-items:center;gap:10px;width:100%;border:0;border-radius:18px;background:var(--bx3);color:var(--fg);padding:11px 14px;font:700 .98rem var(--sans);text-align:left;cursor:pointer}
+#dBan button>span:first-child{font-size:26px}#dBan u{color:var(--k-po);font-weight:800;text-decoration:none;white-space:nowrap;margin-left:auto}
+#dAdd .dseg{margin:10px 0 12px}
+.dsearch{width:100%;margin:0 0 10px}
+.dvg{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.dv{position:relative;border:0;border-radius:16px;padding:10px 4px 8px;text-align:center;color:var(--fg);cursor:pointer;background:var(--bx1)}
+.dvg .dv:nth-child(3n+2){background:var(--bx2)}.dvg .dv:nth-child(3n){background:var(--bx3)}
+.dv i{display:block;font-style:normal;font-size:30px;line-height:1.15}.dv b{display:block;font:600 .95rem 'Fredoka',var(--sans)}.dv span{font-size:.75rem;color:var(--mut);font-weight:700}
+.dv.on{outline:3px solid var(--k-po)}
+.dv .dn{position:absolute;top:-7px;right:-5px;background:var(--k-po);color:#fff;min-width:28px;height:28px;border-radius:999px;font:600 .9rem/28px 'Fredoka',var(--sans);padding:0 6px}
+.dnote{font-size:.85rem;color:var(--mut);text-align:center;margin:10px 0 0;font-weight:700}
+.dgo{position:sticky;bottom:0;padding-top:12px;background:linear-gradient(transparent,var(--card) 30%)}
+.dgo .btn{width:100%}
+.dq{font:600 1.05rem 'Fredoka',var(--sans);margin:14px 2px 8px}
+.dchips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dchips button{border:0;background:var(--bx1);border-radius:14px;padding:11px 4px;font:600 .95rem 'Fredoka',var(--sans);color:var(--fg);cursor:pointer}
+.dchips button.on{background:var(--k-bb);color:#fff}
+.dquick{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.dquick button{border:1px solid var(--bd);background:var(--card);border-radius:999px;padding:6px 11px;font:700 .9rem var(--sans);color:var(--fg);cursor:pointer}
+.dwhere{display:flex;gap:8px}.dwhere button{flex:1;border:2px solid var(--bd);background:var(--card);border-radius:14px;padding:9px 4px;font:600 .95rem 'Fredoka',var(--sans);color:var(--fg);cursor:pointer}
+.dwhere button.on{border-color:var(--k-pid);background:var(--bx2)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .dseg button.on,:root:not([data-theme=light]) .dchips button.on{background:var(--k-po)}:root:not([data-theme=light]):not(#_) .dfin{border-color:var(--fg);color:var(--fg)}:root:not([data-theme=light]) .drc span{color:var(--k-pi)}:root:not([data-theme=light]) .dwhere button.on{border-color:var(--k-pi)}}
+:root[data-theme=dark] .dseg button.on,:root[data-theme=dark] .dchips button.on{background:var(--k-po)}:root[data-theme=dark]:not(#_) .dfin{border-color:var(--fg);color:var(--fg)}:root[data-theme=dark] .drc span{color:var(--k-pi)}:root[data-theme=dark] .dwhere button.on{border-color:var(--k-pi)}
 </style>
 </head>
 <body>
@@ -1147,12 +1193,13 @@ details summary{cursor:pointer}
   </div>
 </header>
 <nav class="nav" id="tabs"><div class="nbrand"><img src="icon-192.png" alt="" width="192" height="192"><div><b>Gnamina</b><small>La tua app di cucina</small></div></div><div class="nsec" id="secLbl">Sezioni</div><button class="tab" data-v="mine"><svg viewBox="0 0.65 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 10.5h15V16a4 4 0 0 1-4 4h-7a4 4 0 0 1-4-4z"/><path d="M2.5 10.5h19"/><path d="M9.5 7.5c0-1 .6-1.6 1.2-2.2M13.3 7.5c0-1 .6-1.6 1.2-2.2"/><path d="M12 17.4s-2.1-1.3-2.1-2.5c0-1 1.4-1.5 2.1-.6.7-.9 2.1-.4 2.1.6 0 1.2-2.1 2.5-2.1 2.5z"/></svg>Le mie<span class="cnt"></span></button><button class="tab on" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Sfida</button><button class="tab" data-v="book"><svg viewBox="0 -0.67 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14.5a4 4 0 0 1-.7-7.9 5 5 0 0 1 9.4-1.1 4 4 0 0 1 1.3 9z"/><path d="M7 14.5V19a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-4.5M7 17h10"/></svg>Ricettario<span class="cnt"></span></button><button type="button" class="ncam" id="navCam" aria-label="Foto di un piatto: Gnamina trova la ricetta"><span><svg viewBox="0 0.25 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8.5 7l1.6-2.5h3.8L15.5 7"/><circle cx="12" cy="13.5" r="3.6"/><path d="M17.6 10.2h.01" stroke-width="2.6"/></svg></span>Foto</button><button class="tab" data-v="chat" aria-label="Chat"><svg viewBox="0 -0.75 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3.5h5a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5V14l-3-2.5H14a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z"/><path d="M9.5 8.5H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h.5V19l3-2.5H10a2 2 0 0 0 2-2v-1"/></svg>Chat<i class="chatN" id="chatN" hidden></i></button><button class="tab" data-v="libro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5C9.6 4.8 6.6 4.3 3 5v13.5c3.6-.7 6.6-.2 9 1.5 2.4-1.7 5.4-2.2 9-1.5V5c-3.6-.7-6.6-.2-9 1.5z"/><path d="M12 6.5V20"/><path d="M6 9.2c1.3-.1 2.5.1 3.6.6M6 12.4c1.3-.1 2.5.1 3.6.6M14.4 9.8c1.1-.5 2.3-.7 3.6-.6"/><path d="M16.2 11.6v4.2M15.2 11.6v1.4a1 1 0 0 0 2 0v-1.4"/></svg>Libro</button><button class="tab" data-v="budget"><svg viewBox="0 2.25 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 17.5a7.5 7.5 0 0 1 15 0"/><path d="M2.5 17.5h19M4 20.5h16"/><path d="M12 10V8.4M10.6 8h2.8"/></svg>Il mio menu</button><div class="nsec">Strumenti</div><div id="ntools"></div><div class="nfoot">Versione <span id="navVer"></span> · <a href="benvenuto.html" style="color:inherit">Cos'è Gnamina</a></div></nav>
-<main><div class="list" id="list"></div>
+<main><div id="dBan" hidden></div><div class="list" id="list"></div>
 <section id="home" hidden></section>
 <section id="libro" hidden><div id="libBody"></div></section>
 <section id="chats" hidden><div id="chatsBody"></div></section>
 <section id="budget" hidden>
   <div class="bhead"><h2>Il mio menu</h2><span class="meta" id="bSum"></span></div>
+  <div class="dseg" id="bSeg"><button type="button" data-p="menu">🍽 Menu</button><button type="button" data-p="disp">🧺 Dispensa</button></div>
   <form id="bForm" class="bform">
     <div class="wiz"><button type="button" class="icon" id="wTopBack" aria-label="Indietro" style="visibility:hidden"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button><div class="wmid"><div class="wlbl" id="wStep"></div><div class="wdots" id="wDots"></div></div><button type="button" class="icon" id="wTopX" aria-label="Annulla" style="visibility:hidden"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
     <section class="step" data-s="0"><h3>Che menu vuoi?</h3>
@@ -1185,9 +1232,11 @@ details summary{cursor:pointer}
     <div class="wfoot"><button type="button" class="btn pri" id="wNext">Avanti</button><button class="btn pri" id="wGo" hidden>Crea il menu</button></div>
   </form>
   <div id="bOut"></div>
+  <div id="dOut" hidden></div>
 </section></main>
 <button class="fab" id="add">Nuova ricetta</button>
 
+<dialog id="dAdd"><div class="dhead"><h2>Aggiungi alla dispensa</h2><button type="button" class="icon" id="dAddX" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div><div class="dseg" id="dAddSeg"><button type="button" data-t="veg">🥕 Frutta e verdura</button><button type="button" data-t="oth">✏️ Altro prodotto</button></div><div id="dAddBody"></div></dialog>
 <dialog id="det"><div class="dv" id="dv"></div></dialog>
 
 <dialog id="dlg">
@@ -1346,6 +1395,103 @@ const nice=t=>{try{let s=String(t??'').normalize('NFKC').replace(/[\u{1F000}-\u{
   return s}catch{return String(t??'')}};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200)};
+/* ---------- La mia dispensa: i prodotti comprati con la scadenza, salvati sul telefono ---------- */
+// Frutta e verdura senza data stampata: durata media da quando si compra, dove si tiene (f frigo, d dispensa), parole per le ricette
+const D_VEG=[['🥬','Insalata',4,'f','insalat|lattug|rucol|valerian|scarol|indivi'],['🥒','Zucchine',5,'f','zucchin'],['🍅','Pomodori',6,'f','pomodor'],['🥕','Carote',21,'f','carot'],['🥔','Patate',30,'d','patat'],['🧅','Cipolle',30,'d','cipoll'],
+ ['🧄','Aglio',60,'d','\\baglio'],['🫑','Peperoni',7,'f','peperon'],['🍆','Melanzane',5,'f','melanzan'],['🥦','Broccoli',4,'f','broccol|cime di rapa'],['🥬','Spinaci',3,'f','spinac'],['🌿','Finocchi',7,'f','finocch'],
+ ['🥬','Cavolo',7,'f','\\bcavol[oi]\\b|verza'],['🥦','Cavolfiore',6,'f','cavolfior'],['🌿','Sedano',10,'f','sedan'],['🍄','Funghi',3,'f','fungh|champignon|porcin'],['🫛','Fagiolini',4,'f','fagiolin'],['🌱','Carciofi',5,'f','carciof'],
+ ['🌱','Asparagi',3,'f','asparag'],['🎃','Zucca',30,'d','\\bzucca'],['🥒','Cetrioli',6,'f','cetriol'],['🌿','Porri',10,'f','\\bporr[oi]'],['🌿','Prezzemolo e basilico',5,'f','prezzemol|basilic'],
+ ['🍎','Mele',21,'f','\\bmel[ae]\\b'],['🍐','Pere',7,'f','\\bper[ae]\\b'],['🍌','Banane',5,'d','banan'],['🍊','Arance',14,'d','aranc'],['🍊','Mandarini',10,'d','mandarin|clementin'],['🍋','Limoni',21,'f','limon'],
+ ['🍓','Fragole',3,'f','fragol'],['🍇','Uva',5,'f','\\buva\\b'],['🥝','Kiwi',14,'f','kiwi'],['🍑','Pesche',4,'f','pesch'],['🍑','Albicocche',4,'f','albicocc'],['🍒','Ciliegie',4,'f','cilieg'],
+ ['🫐','Frutti di bosco',3,'f','mirtill|lampon|frutti di bosco'],['🍈','Melone',5,'f','melon|anguri'],['🥑','Avocado',4,'d','avocad'],['🍍','Ananas',5,'d','ananas']];
+// Prodotti con la data stampata, per scriverli con un tocco: durata tipica proposta, dove si tengono
+const D_QUICK=[['🥛','Latte',7,'f','\\blatte\\b'],['🥚','Uova',21,'f','\\buov[ao]'],['🥛','Yogurt',14,'f','yogurt'],['🧀','Mozzarella',5,'f','mozzarell'],['🧈','Burro',30,'f','burro'],['🧀','Formaggio',21,'f','formagg|parmigian|grana|pecorin'],
+ ['🥓','Prosciutto',5,'f','prosciutt'],['🥩','Carne',3,'f','carne|manzo|vitell|maial|macinat'],['🍗','Pollo',2,'f','pollo|tacchin'],['🐟','Pesce',2,'f','pesce|merluzz|salmon|orata|branzin'],['🍞','Pane',3,'d','\\bpane\\b'],['🥫','Passata',365,'d','passata|pelati']];
+const D_WHERE={f:'Frigo',d:'Dispensa',z:'Freezer'},D_WICON={f:'❄️',d:'🗄',z:'🧊'};
+const dToday=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const dIso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const dPlus=n=>{const d=dToday();d.setDate(d.getDate()+n);return dIso(d)};
+const dLeft=x=>Math.round((new Date(x+'T00:00:00')-dToday())/864e5);
+// La dispensa letta con prudenza: voci rotte o incomplete si scartano invece di fermare l'app
+function dItems(){const a=load('pantry',[]);return Array.isArray(a)?a.filter(p=>p&&typeof p.n==='string'&&/^\d{4}-\d\d-\d\d$/.test(p.x||'')):[]}
+const dSave=a=>save('pantry',a);
+function dPill(p){const d=dLeft(p.x),t=d<-1?'scaduto':d===-1?'scaduto ieri':d===0?'oggi':d===1?'domani':d<14?d+' giorni':d<30?Math.round(d/7)+' settimane':(m=>m+(m>1?' mesi':' mese'))(Math.round(d/30));
+  return `<span class="dpill ${d<=0?'r':d===1?'o':''}">${p.s&&d>1?'≈ ':''}${t}</span>`}
+function dAgo(a){const d=-dLeft(a);return d<=0?'preso oggi':d===1?'preso ieri':d<7?'preso '+['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'][new Date(a+'T00:00:00').getDay()]:'preso '+d+' giorni fa'}
+function dRow(p){const sub=(D_WHERE[p.w]||'Frigo')+(p.s?' · '+dAgo(p.a||dIso(dToday())):'');
+  return `<div class="drow"><span class="dem">${p.e||'🛒'}</span><span class="dnm"><b>${esc(p.n)}${p.q>1?` <small>×${p.q}</small>`:''}</b><span>${dPill(p)} ${sub}</span></span><button type="button" class="dfin" data-fin="${esc(p.id)}">Finito</button></div>`}
+// parole da cercare negli ingredienti: quelle del catalogo, altrimenti la radice delle parole del nome
+function dRx(p){if(p.r)try{return new RegExp(p.r,'i')}catch{}
+  const w=p.n.toLowerCase().replace(/[^a-zà-ù ]/g,' ').split(/\s+/).filter(x=>x.length>3).map(x=>x.replace(/[aeiou]$/,''));return w.length?new RegExp(w.join('|'),'i'):null}
+// Ricette che usano i prodotti che scadono prima: più prodotti in scadenza usa, più sale
+function dRecipes(soon){const pool=[...(book||[]),...items.filter(i=>i.ingredients?.length)];if(!soon.length||!pool.length)return [];
+  const S=soon.map(p=>({p,rx:dRx(p),w:Math.max(1,6-dLeft(p.x))})).filter(o=>o.rx);
+  return pool.map(r=>{const t=(r.ingredients||[]).join(' ').toLowerCase();if(!t)return null;const m=S.filter(o=>o.rx.test(t));
+    return m.length?{r,m:m.map(o=>o.p),sc:m.reduce((a,o)=>a+o.w,0)+(r.image?1:0)}:null}).filter(Boolean).sort((a,b)=>b.sc-a.sc).slice(0,10)}
+function dispRender(){const el=$('#dOut');if(!el)return;const P=dItems().sort((a,b)=>a.x.localeCompare(b.x));
+  const soon=P.filter(p=>dLeft(p.x)<=3),near=P.filter(p=>dLeft(p.x)<=5);
+  $('#bSum').hidden=false;$('#bSum').textContent=P.length?P.length+(P.length>1?' prodotti':' prodotto'):'';
+  const rec=dRecipes(near);DREC=rec.map(o=>o.r);
+  const nm=a=>{const n=a.map(p=>p.n.toLowerCase());return n.length>1?n.slice(0,-1).join(', ')+' e '+n.at(-1):n[0]};
+  el.innerHTML=(!P.length?`<div class="dempty"><div>🧺</div><b>La dispensa è vuota</b>Dopo la spesa tocca «Ho fatto la spesa»: ti avviso quando qualcosa sta per scadere e ti propongo ricette per non sprecarlo.</div>`:'')
+   +(soon.length?`<div class="dbox"><h3>Da usare presto <small>${soon.length}</small></h3>${soon.map(dRow).join('')}</div>`:'')
+   +(rec.length?`<div class="dlbl">Ricette per non sprecare</div><div class="drcs">${rec.map((o,k)=>`<button type="button" class="drc" data-rk="${k}">${o.r.image?`<img src="${esc(o.r.image)}" alt="" loading="lazy">`:`<i>${o.m[0].e||'🍽'}</i>`}<b>${esc(o.r.title)}</b><span>usa ${esc(nm(o.m))}</span></button>`).join('')}</div>`:'')
+   +(P.length?`<div class="dlbl">Dove si trova</div>`+['f','d','z'].map(w=>{const L=P.filter(p=>(p.w||'f')===w&&dLeft(p.x)>3);return L.length?`<div class="dbox ${w}"><h3>${D_WICON[w]} ${D_WHERE[w]} <small>${L.length}</small></h3>${L.map(dRow).join('')}</div>`:''}).join(''):'')
+   +`<button type="button" class="fab" id="dShop">🛒 Ho fatto la spesa</button>`;
+}
+let DREC=[];
+$('#dOut').onclick=e=>{const f=e.target.closest('[data-fin]');
+  if(f){const a=dItems(),i=a.findIndex(p=>p.id===f.dataset.fin);if(i>=0){const [p]=a.splice(i,1);dSave(a);dispRender();toast(p.n+': tolto dalla dispensa')}return}
+  const r=e.target.closest('[data-rk]');if(r){const x=DREC[+r.dataset.rk];if(x)openDetail(x);return}
+  if(e.target.closest('#dShop'))dAddOpen()};
+// Interruttore Menu / Dispensa in «Il mio menu»: la scelta resta per la volta dopo
+let BPANE=load('bPane','menu')==='disp'?'disp':'menu';
+function paneUI(restore){const d=BPANE==='disp';$('#bSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.p===BPANE));
+  $('#budget .bhead h2').textContent=d?'La mia dispensa':'Il mio menu';$('#dOut').hidden=!d;
+  if(d){$('#bForm').hidden=true;$('#bOut').hidden=true;dispRender();loadBook().then(()=>{if(BPANE==='disp'&&!$('#budget').hidden)dispRender()})}
+  else if(restore){const plan=load('budgetPlan',null);if(plan){budgetView(false);loadSeason().then(()=>showPlan(plan))}else budgetView(true,0)}}
+$('#bSeg').onclick=e=>{const b=e.target.closest('[data-p]');if(!b||b.dataset.p===BPANE)return;BPANE=b.dataset.p;save('bPane',BPANE);paneUI(true);window.scrollTo(0,0)};
+// Avviso in cima a «Le mie» quando qualcosa scade entro domani
+function dBanUI(){const el=$('#dBan');if(!el)return;const S=view==='mine'?dItems().filter(p=>dLeft(p.x)<=1).sort((a,b)=>a.x.localeCompare(b.x)):[];
+  el.hidden=!S.length;if(!S.length)return;const p=S[0],d=dLeft(p.x);
+  const t=S.length>1?`<b>${S.length} prodotti</b> da usare entro domani`:`<b>${esc(p.n)}</b>: ${d<0?'è scaduto':d===0?'scade oggi':'scade domani'}`;
+  el.innerHTML=`<button type="button"><span>${S.length>1?'🧺':p.e||'🛒'}</span><span>${t}</span><u>Vedi ricette ›</u></button>`}
+$('#dBan').onclick=()=>{BPANE='disp';save('bPane','disp');goView('budget')};
+// Aggiunta dopo la spesa: frutta e verdura con un tocco, o un altro prodotto con la sua scadenza
+let DADD={t:'veg',sel:{},q:'',o:{n:'',e:'',r:'',days:7,w:'f',date:'',pick:false},added:0};
+function dAddOpen(){DADD={t:'veg',sel:{},q:'',o:{n:'',e:'',r:'',days:7,w:'f',date:'',pick:false},added:0};dAddRender();$('#dAdd').showModal()}
+function dAddRender(){$('#dAddSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===DADD.t));const B=$('#dAddBody');
+  if(DADD.t==='veg'){const q=DADD.q.toLowerCase(),L=D_VEG.filter(v=>!q||v[1].toLowerCase().includes(q)),n=Object.values(DADD.sel).reduce((a,b)=>a+b,0);
+    const dur=d=>d<14?d+' giorni':d<30?Math.round(d/7)+' settimane':(m=>m+(m>1?' mesi':' mese'))(Math.round(d/30));
+    B.innerHTML=`<input class="dsearch" id="dQ" type="search" placeholder="Cerca (es. finocchi)" value="${esc(DADD.q)}"><div class="dvg">${L.map(v=>{const c=DADD.sel[v[1]]||0;return `<button type="button" class="dv${c?' on':''}" data-v="${esc(v[1])}">${c?`<span class="dn" data-minus="${esc(v[1])}">${c}</span>`:''}<i>${v[0]}</i><b>${v[1]}</b><span>${dur(v[2])}</span></button>`}).join('')||'<p class="meta">Non c\'è: scrivilo in «Altro prodotto».</p>'}</div>
+      <p class="dnote">Durate medie da quando le compri. Tocca di nuovo per aggiungerne un'altra, tocca il numero per toglierla.</p>
+      <div class="dgo"><button type="button" class="btn pri" id="dVegGo"${n?'':' disabled'}>${n?`Aggiungi ${n} ${n>1?'prodotti':'prodotto'}`:'Scegli cosa hai comprato'}</button></div>`;
+    const qi=$('#dQ');qi.oninput=()=>{DADD.q=qi.value;const pos=qi.selectionStart;dAddRender();const nq=$('#dQ');nq.focus();try{nq.setSelectionRange(pos,pos)}catch{}};return}
+  const o=DADD.o,CH=[[3,'3 giorni'],[7,'1 settimana'],[14,'2 settimane'],[30,'1 mese'],[90,'3 mesi']];
+  B.innerHTML=`<div class="dquick">${D_QUICK.map(v=>`<button type="button" data-qk="${esc(v[1])}">${v[0]} ${v[1]}</button>`).join('')}</div>
+    <label>Cosa hai comprato<input id="dName" maxlength="40" placeholder="es. Ricotta" value="${esc(o.n)}"></label>
+    <div class="dq">Quando scade?</div><div class="dchips">${CH.map(([d,l])=>`<button type="button" data-days="${d}" class="${!o.pick&&o.days===d?'on':''}">${l}</button>`).join('')}<button type="button" data-days="pick" class="${o.pick?'on':''}">📅 Scelgo io</button></div>
+    ${o.pick?`<input type="date" id="dDate" min="${dPlus(-30)}" value="${o.date||dPlus(7)}" style="margin-top:8px;width:100%">`:''}
+    <div class="dq">Dove lo metti?</div><div class="dwhere">${['f','d','z'].map(w=>`<button type="button" data-w="${w}" class="${o.w===w?'on':''}">${D_WICON[w]} ${D_WHERE[w]}</button>`).join('')}</div>
+    <div class="dgo"><button type="button" class="btn pri" id="dOthGo">Aggiungi e continua</button></div>`;
+  $('#dName').oninput=e=>{o.n=e.target.value;o.e='';o.r=''};$('#dDate')&&($('#dDate').onchange=e=>o.date=e.target.value)}
+function dPush(it){const a=dItems();const same=a.find(p=>p.s&&it.s&&p.n===it.n&&p.a===it.a&&p.w===it.w);
+  if(same){same.q=(same.q||1)+(it.q||1);same.x=it.x}else a.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),...it});dSave(a)}
+$('#dAddSeg').onclick=e=>{const b=e.target.closest('[data-t]');if(b){DADD.t=b.dataset.t;dAddRender()}};
+$('#dAddX').onclick=()=>$('#dAdd').close();
+$('#dAdd').addEventListener('close',()=>{if(DADD.added&&BPANE==='disp')dispRender()});
+$('#dAddBody').onclick=e=>{const o=DADD.o;
+  const m=e.target.closest('[data-minus]');if(m){const k=m.dataset.minus;DADD.sel[k]=(DADD.sel[k]||1)-1;if(DADD.sel[k]<=0)delete DADD.sel[k];dAddRender();return}
+  const v=e.target.closest('[data-v]');if(v){const k=v.dataset.v;DADD.sel[k]=(DADD.sel[k]||0)+1;dAddRender();return}
+  if(e.target.closest('#dVegGo')){const t=dIso(dToday());let n=0;for(const [k,c] of Object.entries(DADD.sel)){const V=D_VEG.find(x=>x[1]===k);if(!V)continue;dPush({n:V[1],e:V[0],r:V[4],w:V[3],x:dPlus(V[2]),s:1,q:c,a:t});n+=c}
+    DADD.added+=n;$('#dAdd').close();toast(n>1?n+' prodotti aggiunti alla dispensa':'Aggiunto alla dispensa');return}
+  const qk=e.target.closest('[data-qk]');if(qk){const V=D_QUICK.find(x=>x[1]===qk.dataset.qk);if(V){Object.assign(o,{n:V[1],e:V[0],r:V[4],w:V[3],days:V[2]>90?90:V[2],pick:![3,7,14,30,90].includes(V[2])&&V[2]<=90});if(o.pick)o.date=dPlus(V[2])}dAddRender();return}
+  const d=e.target.closest('[data-days]');if(d){if(d.dataset.days==='pick'){o.pick=true;o.date=o.date||dPlus(o.days)}else{o.pick=false;o.days=+d.dataset.days}dAddRender();return}
+  const w=e.target.closest('[data-w]');if(w){o.w=w.dataset.w;dAddRender();return}
+  if(e.target.closest('#dOthGo')){const n=(o.n||'').trim();if(!n){toast('Scrivi cosa hai comprato');$('#dName').focus();return}
+    const x=o.pick&&/^\d{4}-\d\d-\d\d$/.test(o.date)?o.date:dPlus(o.days);
+    dPush({n:n[0].toUpperCase()+n.slice(1),e:o.e||'🛒',r:o.r||'',w:o.w,x,s:o.pick?0:1,q:1,a:dIso(dToday())});DADD.added++;
+    toast(n+' aggiunto · '+DADD.added+' in tutto');Object.assign(o,{n:'',e:'',r:'',pick:false,date:''});dAddRender()}};
 const lines=s=>String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);
 
 const DEFAULT_CATS=['Antipasti','Primi','Secondi','Contorni','Piatti unici','Lievitati','Dolci','Altro'];
@@ -2100,7 +2246,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=186; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=187; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2201,12 +2347,12 @@ function goView(v){
   view=v;cur=view==='book'?'Italiane':'Tutte';cur2=''; // il Ricettario parte dalle ricette italiane
   $('#tabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.v===v));$('#cupBtn')?.classList.toggle('on',v==='home');$('#libBtn')?.classList.toggle('on',v==='libro');cupDot();
   // sul telefono il Libro si apre dall'icona in alto accanto alla coppa
-  const bud=view==='budget',home=view==='home',lib=view==='libro',cht=view==='chat',alt=bud||home||lib||cht;['#sbar','#chips','#list'].forEach(x=>$(x).hidden=alt);$('#add').hidden=alt;if(alt){$('#chips2').hidden=true;$('.filters').hidden=true;filtUI()}$('#budget').hidden=!bud;$('#home').hidden=!home;$('#libro').hidden=!lib;$('#chats').hidden=!cht;filtUI();
+  const bud=view==='budget',home=view==='home',lib=view==='libro',cht=view==='chat',alt=bud||home||lib||cht;['#sbar','#chips','#list'].forEach(x=>$(x).hidden=alt);$('#add').hidden=alt;if(alt){$('#chips2').hidden=true;$('.filters').hidden=true;filtUI()}$('#budget').hidden=!bud;$('#home').hidden=!home;if(alt)$('#dBan').hidden=true;$('#libro').hidden=!lib;$('#chats').hidden=!cht;filtUI();
   $('#vTitle').textContent={home:'La sfida',mine:'Le mie ricette',book:'Ricettario',budget:'Il mio menu',libro:'Il mio libro',chat:'Chat'}[view];window.scrollTo(0,0);
   if(cht){chatPage();chatPoll();chatTick();return}
   if(home){renderHome();loadBook();return}
   if(lib){LIBPAGE='';libInit();libCss();libRender();libFonts(LIB.style).then(()=>libPreview());return}
-  if(bud){loadBook();loadPT();initBudget();return}
+  if(bud){loadBook();loadPT();initBudget();try{paneUI(false)}catch(e){console.warn(e)}return}
   $('#q').placeholder=view==='book'?'Cerca tra le ricette del ricettario…':'Cerca titolo, ingrediente, etichetta…';
   if(view==='book')loadBook();fillSelects();render()}
 $('#tabs').onclick=e=>{const t=e.target.closest('.tab');if(t)goView(t.dataset.v)};
@@ -2474,7 +2620,7 @@ function render(){
     $('#chips2').innerHTML=`<button class="chip${!cur2?' on':''}" data-p="">Tutte<small>${data.length}</small></button>`+cats.filter(c=>tc[c]).map(c=>`<button class="chip${c===cur2?' on':''}" data-p="${esc(c)}">${esc(c)}<small>${tc[c]}</small></button>`).join('')}
   $('#chips2').hidden=!showIntl&&!showBk&&!showIta;
   $('#chips2').dataset.lbl=showIntl?'Paese':showIta?'Tipo di piatto tra le italiane':'Tipo';
-  filtUI();
+  filtUI();try{dBanUI()}catch(e){console.warn(e)}
   const list=data.filter(i=>(cur==='Tutte'||i.cat===cur||(showIntl&&(!cur2||i.country===cur2))||(cur==='Italiane'&&(!showIta||!cur2||i.cat===cur2)))&&(!showBk||!cur2||i.kind===cur2)&&(!fd||i.diets?.includes(fd))&&(!fz||i.country===fz||`${i.country||'Italia'} · ${i.region}`===fz)&&(i.rating||0)>=fr&&(!ft||timing(i).t<=ft)&&(!fdf||(fdf===3?timing(i).d===3:timing(i).d<=fdf))&&(!fc||((perPerson(i)?.eur??99)<=fc))
       &&(!q||[i.title,i.note,i.source,i.author,i.country,i.region,...(i.tags||[]),...(i.ingredients||[]),...(i.diets||[])].join(' ').toLowerCase().includes(q)))
     .sort(sorter(fs,!!q));
@@ -3011,7 +3157,7 @@ function showPlan(P){
     <p class="meta">Costi stimati con i prezzi medi${P.period?` dell'Osservatorio Prezzi MIMIT (${esc(P.period)}, ${esc(P.zone)})`:''} e prezzi indicativi; calorie e nutrienti medi, indicativi. Pasti scelti tra ${P.n} ricette compatibili${P.noCost?`; ${P.noCost} delle tue ricette sono escluse perché senza costo calcolato (aprile e tocca "Calcola calorie e costo")`:''}.</p>
 </details>
     <div class="row" style="margin-bottom:8px"><button class="btn" id="bPrint" style="flex:1">🖨 Stampa menu</button><button class="btn pri" id="bAgain" style="flex:1">🔀 Varia menu</button></div>`;
-  $('#bSum').textContent=sum;
+  if(BPANE!=='disp')$('#bSum').textContent=sum;
   $('#bPrint').onclick=()=>{try{libPrintHtml(menuPrintDoc(P),week?'Menu della settimana':'Il menu','a4')}catch{toast('Stampa non riuscita: riprova')}};
   $('#bAgain').onclick=$('#bVary').onclick=()=>{$('#bOut').innerHTML='<p class="meta">Preparo un altro menu con le stesse scelte…</p>';varying=true;$('#bForm').requestSubmit()};
   $('#bEdit').onclick=()=>budgetView(true,0);
@@ -4837,6 +4983,7 @@ if(inApp)fetch(SITE+'version.json?t='+Date.now()).then(r=>r.json()).then(v=>{if(
  addEventListener('pointerdown',arm,true);addEventListener('keydown',arm,true);
  addEventListener('popstate',()=>{if(!armed)return;armed=false;let ok=false;try{ok=backAct()}catch{}if(ok)arm();else toast('Premi ancora indietro per uscire')});
  window.gnBack=backAct}
+
 // Sul computer, chi non ha ancora ricette parte dal Ricettario: la vetrina con le foto è la prima cosa che vede
 // Indirizzi che arrivano dalla prima pagina del sito: ?app, ?v=vista, ?cat=tipo di piatto, ?q=ricerca, ?r=ricetta del Ricettario
 {const P=new URLSearchParams(location.search),V=P.get('v'),C=P.get('cat'),Q=P.get('q'),R=P.get('r');

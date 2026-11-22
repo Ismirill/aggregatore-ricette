@@ -6,6 +6,15 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-22
 
+### Versione 187 — la mia dispensa
+- **Dove si trova:** in «Il mio menu» un interruttore «🍽 Menu / 🧺 Dispensa» (la barra in basso non cambia); l'app ricorda l'ultima scelta.
+- **Da usare presto:** i prodotti che scadono entro tre giorni, con la scadenza colorata sotto il nome (rossa oggi o scaduto, arancio domani; «≈» per le durate stimate) e il tasto «Finito» che li toglie.
+- **Ricette per non sprecare:** ricette del ricettario e proprie che usano i prodotti in scadenza entro cinque giorni, prima quelle che ne usano di più e più urgenti; si aprono con un tocco.
+- **Dove si trova:** gli altri prodotti divisi in Frigo, Dispensa e Freezer, in ordine di scadenza.
+- **Ho fatto la spesa:** «Frutta e verdura» con 39 voci, icona e durata media da quando si comprano (un tocco aggiunge un pezzo, il numerino lo toglie, ricerca per nome); «Altro prodotto» con scorciatoie (latte, uova, mozzarella, pollo…), nome, scadenza con tasti grandi o data scelta, e posto.
+- **Avviso in «Le mie»:** compare solo quando qualcosa scade entro domani, con «Vedi ricette ›» che apre la dispensa.
+- I dati restano sul telefono (chiave `pantry`); le voci rotte si scartano senza fermare l'app. Codice a barre, data dalla foto e notifiche arriveranno nelle prossime versioni.
+
 ### Versione 186 — menu creato: riquadri bassi, caratteri coerenti, giorni colorati
 - **Riquadri dei numeri:** spostati sotto il pulsante della lista della spesa; tre pillole su una riga sola, numero e descrizione corta sulla stessa riga («69,01 € su 70 €», «4,93 € a testa/giorno», «1188 kcal a testa»), ognuna con un colore della palette; tolto l'elenco «(colazione+pranzo+cena)» che usciva dal riquadro. Se i caratteri del telefono sono molto grandi la descrizione va a capo dentro la pillola.
 - **Caratteri:** numeri, nomi dei giorni, prezzi, etichette dei pasti e dei piatti in Fredoka come pulsanti e titoli; nomi dei piatti in Nunito grassetto.
