@@ -1,0 +1,38 @@
+/* Bozze dei riquadri colorati nelle procedure: NON sono nell'app, servono solo per gli esempi */
+:root:not(#_)[data-wv] .bform .step>:not(h3):not([hidden]){border-radius:18px;padding:10px 10px 11px;margin:0}
+:root:not(#_)[data-wv] .bform .step>.two{display:grid}
+/* A — pastello: crema, pisello, pesca a rotazione; pillole bianche */
+:root:not(#_)[data-wv=a] .bform .step>:nth-child(4n+2){background:var(--k-cr)}
+:root:not(#_)[data-wv=a] .bform .step>:nth-child(4n){background:color-mix(in srgb,var(--k-pi) 38%,#fff)}
+:root:not(#_)[data-wv=a] .bform .step>:nth-child(2n+1):not(h3){background:color-mix(in srgb,var(--k-to) 45%,#fff)}
+:root:not(#_)[data-wv=a] .bform .seg span,:root:not(#_)[data-wv=a] .bform .checks label{background:#fff!important;border-color:transparent!important;color:var(--k-bb)!important}
+:root:not(#_)[data-wv=a] .bform .seg input:checked+span,:root:not(#_)[data-wv=a] .bform .checks label:has(input:checked){border-color:var(--k-po)!important;color:var(--k-po)!important;box-shadow:0 0 0 1.5px var(--k-po)!important}
+:root:not(#_)[data-wv=a] .bform .step :is(p,label,span,b){color:var(--k-bb)}
+:root:not(#_)[data-wv=a][data-theme=dark] .bform .step>:nth-child(4n+2){background:color-mix(in srgb,var(--k-cr) 16%,var(--card))}
+:root:not(#_)[data-wv=a][data-theme=dark] .bform .step>:nth-child(4n){background:color-mix(in srgb,var(--k-pi) 20%,var(--card))}
+:root:not(#_)[data-wv=a][data-theme=dark] .bform .step>:nth-child(2n+1):not(h3){background:color-mix(in srgb,var(--k-ca) 20%,var(--card))}
+:root:not(#_)[data-wv=a][data-theme=dark] .bform .seg span,:root:not(#_)[data-wv=a][data-theme=dark] .bform .checks label{background:color-mix(in srgb,#000 28%,transparent)!important;color:var(--fg)!important}
+:root:not(#_)[data-wv=a][data-theme=dark] .bform .seg input:checked+span,:root:not(#_)[data-wv=a][data-theme=dark] .bform .checks label:has(input:checked){border-color:var(--k-ca)!important;color:var(--k-ca)!important;box-shadow:0 0 0 1.5px var(--k-ca)!important}
+:root:not(#_)[data-wv=a][data-theme=dark] .bform .step :is(p,label,b){color:var(--fg)}
+/* B — fascia bordeaux in testa, riquadri tutti crema */
+:root:not(#_)[data-wv=b] .bform{padding:0 14px 14px;overflow:hidden}
+:root:not(#_)[data-wv=b] .bform .wiz{background:var(--k-bb);margin:0 -14px;padding:10px 14px}
+:root:not(#_)[data-wv=b] .bform .wlbl{color:var(--k-cr)}
+:root:not(#_)[data-wv=b] .bform .wdots i{background:color-mix(in srgb,var(--k-cr) 30%,transparent)!important}
+:root:not(#_)[data-wv=b] .bform .wdots i.on,:root:not(#_)[data-wv=b] .bform .wdots i.done{background:var(--k-ca)!important}
+:root:not(#_)[data-wv=b] .bform .wiz .icon{background:color-mix(in srgb,var(--k-cr) 22%,transparent)!important;color:var(--k-cr)!important}
+:root:not(#_)[data-wv=b] .bform .step>:not(h3):not([hidden]){background:var(--k-cr)}
+:root:not(#_)[data-wv=b] .bform .seg span,:root:not(#_)[data-wv=b] .bform .checks label{background:#fff!important;border-color:transparent!important;color:var(--k-bb)!important}
+:root:not(#_)[data-wv=b] .bform .seg input:checked+span,:root:not(#_)[data-wv=b] .bform .checks label:has(input:checked){border-color:var(--k-po)!important;color:var(--k-po)!important;box-shadow:0 0 0 1.5px var(--k-po)!important}
+:root:not(#_)[data-wv=b] .bform .step :is(p,label,b){color:var(--k-bb)}
+:root:not(#_)[data-wv=b][data-theme=dark] .bform .step>:not(h3):not([hidden]){background:color-mix(in srgb,var(--k-to) 20%,var(--card))}
+:root:not(#_)[data-wv=b][data-theme=dark] .bform .seg span,:root:not(#_)[data-wv=b][data-theme=dark] .bform .checks label{background:color-mix(in srgb,#000 28%,transparent)!important;color:var(--fg)!important}
+:root:not(#_)[data-wv=b][data-theme=dark] .bform .seg input:checked+span,:root:not(#_)[data-wv=b][data-theme=dark] .bform .checks label:has(input:checked){border-color:var(--k-ca)!important;color:var(--k-ca)!important;box-shadow:0 0 0 1.5px var(--k-ca)!important}
+:root:not(#_)[data-wv=b][data-theme=dark] .bform .step :is(p,label,b){color:var(--fg)}
+/* C — deciso: riquadri pieni bordeaux, verde pisello scuro e carota; pillole crema, quella scelta è piena */
+:root:not(#_)[data-wv=c] .bform .step>:nth-child(4n+2){background:var(--k-bb);--bx:var(--k-bb)}
+:root:not(#_)[data-wv=c] .bform .step>:nth-child(4n){background:var(--k-pid);--bx:var(--k-pid)}
+:root:not(#_)[data-wv=c] .bform .step>:nth-child(2n+1):not(h3){background:#c4470a;--bx:#c4470a}
+:root:not(#_)[data-wv=c] .bform .step :is(p,label,b){color:var(--k-cr)}
+:root:not(#_)[data-wv=c] .bform .seg span,:root:not(#_)[data-wv=c] .bform .checks label{background:none!important;border-color:color-mix(in srgb,var(--k-cr) 60%,transparent)!important;color:var(--k-cr)!important}
+:root:not(#_)[data-wv=c] .bform .seg input:checked+span,:root:not(#_)[data-wv=c] .bform .checks label:has(input:checked){background:var(--k-cr)!important;border-color:var(--k-cr)!important;color:var(--bx)!important;box-shadow:none!important}

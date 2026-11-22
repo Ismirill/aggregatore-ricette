@@ -6,6 +6,13 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-22
 
+### Versione 185 — tasto indietro dalla parte Android, procedura in basso e compatta, riquadri pastello
+- **Tasto indietro (Android):** Capacitor senza il plugin App chiude l'app a ogni «indietro», quindi la voce in più nella cronologia della 184 nell'APK non serviva. Ora `MainActivity` passa il tasto alla pagina (`window.gnBack`) e manda l'app in secondo piano solo quando la pagina risponde che non c'è niente da chiudere. Nel browser resta la voce nella cronologia.
+- **Nuova ricetta:** «indietro» torna prima al passo precedente e solo dal primo passo chiude la finestra (prima la chiudeva subito).
+- **Il mio menu, procedura:** sul telefono la scheda delle domande poggia sopra la barra in basso, a portata di pollice; spazi e altezze ridotti.
+- **Riquadri pastello:** ogni gruppo di scelte ha un riquadro crema, pisello o pesca a rotazione, con pillole bianche (bozza A di `docs/proposte-riquadri/`; scartate B «fascia bordeaux» e C «deciso»). Nel tema scuro le stesse tinte velate.
+- La parte Android non è provata su un telefono vero.
+
 ### Versione 184 — procedura del menu ridisegnata, X e frecce piene, tasto indietro
 - **Il mio menu, procedura guidata:** «Passo 1 di 6» sopra una barra a tacche al posto dei pallini; in fondo un solo pulsante grande «Avanti» (tolti «Indietro» e «Annulla», che restano come freccia e X in alto). Stessa testata nella «Nuova ricetta».
 - **X e freccia indietro:** disegnate con tratto pieno e tondo dentro un tondo morbido, uguali in tutte le finestre (scheda ricetta, impostazioni, account, chat, foto, video, «Cucina con me»).

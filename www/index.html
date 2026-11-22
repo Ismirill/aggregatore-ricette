@@ -1068,7 +1068,32 @@ details summary{cursor:pointer}
 :root:not(#_) .wdots i{flex:1;width:auto;height:7px;border-radius:99px;background:color-mix(in srgb,var(--k-to) 38%,transparent)}
 :root:not(#_) .wdots i.on,:root:not(#_) .wdots i.done{background:var(--ksel)}
 .wfoot{display:flex;margin-top:6px}:root:not(#_) .wfoot .btn{flex:1;font-size:1.12rem;padding:13px 20px}
-.bform .step{gap:14px}.bform .step>div[style]{margin-top:4px!important}
+.bform .step>div[style]{margin-top:0!important}
+/* v185 — procedure compatte e in basso: sul telefono la scheda delle domande poggia sopra la barra, a portata di pollice */
+:root:not(#_) .bform{gap:10px}
+:root:not(#_) .bform .step{gap:10px}:root:not(#_) .bform .step h3{font-size:1.35rem;margin:0}
+:root:not(#_) .bform .step p{margin:0 0 5px!important}
+:root:not(#_) .bform .seg,:root:not(#_) .bform .checks{gap:6px;max-width:none}
+:root:not(#_) .bform .seg span,:root:not(#_) .bform .checks label{min-height:2.35rem;padding:5px 8px}
+:root:not(#_) .bform .wiz .icon{width:2.3rem;height:2.3rem}.bform .wiz{margin:0}
+:root:not(#_) .wfoot{margin-top:2px}:root:not(#_) .wfoot .btn{padding:11px 20px}
+/* riquadri pastello nei passi del menu (bozza A scelta il 22/11): crema, pisello e pesca a rotazione, pillole bianche */
+:root{--bx1:var(--k-cr);--bx2:color-mix(in srgb,var(--k-pi) 38%,#fff);--bx3:color-mix(in srgb,var(--k-to) 45%,#fff);--bxp:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-style=rivista]):not([data-style=quaderno]){--bx1:color-mix(in srgb,var(--k-cr) 16%,var(--card));--bx2:color-mix(in srgb,var(--k-pi) 20%,var(--card));--bx3:color-mix(in srgb,var(--k-ca) 20%,var(--card));--bxp:color-mix(in srgb,#000 28%,transparent)}}
+:root[data-theme=dark]:not([data-style=rivista]):not([data-style=quaderno]){--bx1:color-mix(in srgb,var(--k-cr) 16%,var(--card));--bx2:color-mix(in srgb,var(--k-pi) 20%,var(--card));--bx3:color-mix(in srgb,var(--k-ca) 20%,var(--card));--bxp:color-mix(in srgb,#000 28%,transparent)}
+@media (min-width:900px){:root[data-sito]:root[data-sito]{--bx1:var(--k-cr);--bx2:color-mix(in srgb,var(--k-pi) 38%,#fff);--bx3:color-mix(in srgb,var(--k-to) 45%,#fff);--bxp:#fff}}
+:root:not(#_) .bform .step>:not(h3):not([hidden]){border-radius:18px;padding:10px 10px 11px;margin:0;background:var(--bx3)}
+:root:not(#_) .bform .step>:nth-child(4n+2):not(h3):not([hidden]){background:var(--bx1)}
+:root:not(#_) .bform .step>:nth-child(4n):not(h3):not([hidden]){background:var(--bx2)}
+:root:not(#_) .bform .seg span,:root:not(#_) .bform .checks label{background:var(--bxp);border-color:transparent}
+:root:not(#_) .bform .seg input:checked+span,:root:not(#_) .bform .checks label:has(input:checked){background:var(--bxp);border-color:var(--ksel)}
+@media (max-width:899px){
+ :root:not(#_):not([data-style=quaderno]) .bform{padding:14px}
+ #budget:has(>#bForm:not([hidden])){display:flex;flex-direction:column;min-height:calc(100svh - 172px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+ #budget:has(>#bForm:not([hidden]))>#bForm{margin-top:auto;margin-bottom:0}
+ #budget:has(>#bForm:not([hidden]))>.bhead{margin-bottom:8px}
+ :root:not(#_) #dlg .step{gap:10px}:root:not(#_) #dlg .srcGrid{gap:8px}:root:not(#_) #dlg .srcCard{padding:10px 18px}
+}
 /* lista della spesa: stesso pulsante pieno degli altri, la lista si apre in una scheda sotto */
 :root:not(#_) .shopBox summary{font-family:'Fredoka',var(--sans);font-weight:600;border-radius:999px;border:3px solid var(--k-po);background:var(--k-po);color:#fff;box-shadow:none;padding:11px 18px}
 :root:not(#_) .shopBox[open] summary{border-radius:999px}
@@ -2058,7 +2083,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=184; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=185; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -4737,13 +4762,14 @@ if(inApp)fetch(SITE+'version.json?t='+Date.now()).then(r=>r.json()).then(v=>{if(
  const vis=e=>e&&!e.hidden&&e.style.visibility!=='hidden'&&e.getClientRects().length;
  const backAct=()=>{
   const d=[...document.querySelectorAll('dialog[open]')].sort((a,b)=>(b._ord||0)-(a._ord||0))[0];
-  if(d){const b=[...d.querySelectorAll('[data-ch=backconv],#rBackTop,[data-ch=back],[data-ch=close],.dclose,[aria-label=Chiudi]')].find(vis);if(b)b.click();else d.close();return true}
+  if(d){let b;for(const q of ['[data-ch=backconv]','#rBackTop','[data-ch=back]','[data-ch=close]','.dclose','[aria-label=Chiudi]']){b=[...d.querySelectorAll(q)].find(vis);if(b)break}if(b)b.click();else d.close();return true}
   if(document.documentElement.classList.contains('fOpen')){$('#fBtn').click();return true}
   if(view==='budget'&&!$('#bForm').hidden){if(wStep>0){showStep(wStep-1);return true}if(load('budgetPlan',null)){$('#wTopX').click();return true}}
   if(view==='libro'&&LIBPAGE){libGoPage('');return true}
   if(view!=='home'){goView('home');return true}
   return false};
- const on=()=>{try{return !document.documentElement.dataset.sito||!WIDE()}catch{return true}};
+ // nell'app Android il tasto arriva da MainActivity (gnBack): lì la voce in più nella cronologia non serve
+ const on=()=>{try{return !window.AndroidShare&&(!document.documentElement.dataset.sito||!WIDE())}catch{return true}};
  const arm=()=>{if(armed||!on())return;try{history.pushState({gn:1},'');armed=true}catch{}};
  addEventListener('pointerdown',arm,true);addEventListener('keydown',arm,true);
  addEventListener('popstate',()=>{if(!armed)return;armed=false;let ok=false;try{ok=backAct()}catch{}if(ok)arm();else toast('Premi ancora indietro per uscire')});

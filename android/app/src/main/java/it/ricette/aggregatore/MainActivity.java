@@ -16,6 +16,7 @@ import android.speech.tts.Voice;
 import java.util.Locale;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import androidx.activity.OnBackPressedCallback;
 import com.getcapacitor.BridgeActivity;
 import org.json.JSONObject;
 
@@ -170,6 +171,18 @@ public class MainActivity extends BridgeActivity {
                 public void onDone(String id) { js("window.onSpoken&&onSpoken(" + JSONObject.quote(id) + ")"); }
                 public void onError(String id) { js("window.onSpoken&&onSpoken(" + JSONObject.quote(id) + ")"); }
             });
+        });
+        // Tasto «indietro»: prima lo riceve la pagina (window.gnBack chiude la finestra aperta, torna al passo o alla vista prima);
+        // solo dalla schermata principale, quando la pagina risponde false, l'app va in secondo piano
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                try {
+                    getBridge().getWebView().evaluateJavascript(
+                        "(function(){try{return window.gnBack?!!window.gnBack():false}catch(e){return false}})()",
+                        v -> { if (!"true".equals(v)) moveTaskToBack(true); });
+                } catch (Exception e) { moveTaskToBack(true); }
+            }
         });
         cleanApks(); // l'APK dell'aggiornamento appena installato non serve più
         handleShare(getIntent());
