@@ -277,8 +277,8 @@ const DIET_NO = {
   'Senza glutine': /farin(?:a|e)(?! di (?:riso|mais|ceci|mandorl|cocco|grano saraceno))|biscott|pane\b|pangrattat|pan grattat|pasta\b|spaghett|savoiard|semola|orzo|farro|couscous|cous cous|pan di spagna|crackers?|grissin|seitan|birra/i,
   'Senza lattosio': /latte\b(?! (?:di|vegetale)\b)|burro\b|panna\b|formagg|mascarpone|ricotta|mozzarella|parmigian|pecorino|grana\b|yogurt|stracchino|scamorza|provola|besciamella/i,
   'Senza uova': /\buov[ao]\b|tuorl|album|maionese|savoiard/i,
-  Vegano: /carne|pollo|maiale|manzo|vitello|pesce|tonno|salmone|gamber|prosciutt|pancett|guancial|salame|uov[ao]|tuorl|latte\b(?! (?:di|vegetale)\b)|burro\b|panna\b|formagg|mascarpone|ricotta|mozzarella|parmigian|pecorino|miele|yogurt|acciugh|alici/i,
-  Vegetariano: /carne|pollo|tacchino|maiale|manzo|vitello|pesce|tonno|salmone|gamber|cozz|vongol|calamar|polp[oi]\b|prosciutt|pancett|guancial|salame|salsicc|speck|mortadell|acciugh|alici|wurstel|brodo di (?:carne|pollo|pesce)/i,
+  Vegano: /carne|pollo|strutto|\blard[oe]\b|ciccioli|sugna|bacon|brodo di (?:carne|pollo|pesce|manzo|gallina|cappone|vitello)|\bdashi\b|maiale|manzo|vitello|pesce|tonno|salmone|gamber|prosciutt|pancett|guancial|salame|uov[ao]|tuorl|latte\b(?! (?:di|vegetale)\b)|burro\b|panna\b|formagg|mascarpone|ricotta|mozzarella|parmigian|pecorino|miele|yogurt|acciugh|alici/i,
+  Vegetariano: /carne|pollo|tacchino|maiale|manzo|vitello|pesce|tonno|salmone|gamber|cozz|vongol|calamar|polp[oi]\b|prosciutt|pancett|guancial|salame|salsicc|speck|mortadell|acciugh|alici|wurstel|strutto|\blard[oe]\b|ciccioli|sugna|bacon|brodo di (?:carne|pollo|pesce|manzo|gallina|cappone|vitello)|dado di carne|sugo di carne|\bdashi\b/i,
   'Senza frutta secca': /noc[ei]|nocciol|mandorl|pistacch|anacard|pinol|arachid/i,
 };
 function dietCheck(r) {

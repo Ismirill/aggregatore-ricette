@@ -6,6 +6,13 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-23
 
+- **Versione 191: ricette vegetariane corrette, il mio menu come uno schedario, sito sistemato**
+  - **Vegetariane e vegane:** circa 80 ricette (soprattutto Artusi e Mondo) erano segnate vegetariane o vegane pur avendo brodo di carne, strutto, lardo o pancetta. Ora l'app toglie l'etichetta a ogni ricetta con strutto, lardo, ciccioli, sugna, pancetta, guanciale, bacon, brodo di carne/pollo/pesce, dashi, sugo di carne, e anche con «brodo» o «dado» non dichiarati vegetali (unico brodo ammesso: vegetale, o il liquido di cottura di verdure e legumi). Vale per Ricettario, ricette personali, nuove ricette e menu; stesso controllo nel server. Brodo vegetale dichiarato in Carote al burro, Supplì e Zuppa di lenticchie rosse. Prova su 1.507 ricette: nessuna vegetariana con brodo di carne o strutto.
+  - **Il mio menu:** testata corta («2 persone · 70 €»); menu settimanale a linguette da schedario in sette colori (rosso, verde chiaro, arancio, verde scuro, senape, bordeaux, cuoio), un giorno alla volta, si apre sul giorno di oggi; piatti con solo nome e tempo; spesa, calorie, equilibrio, costo e calorie di ogni giorno e scelte fatte in «Dettagli» in fondo; tolto il costo a persona; «Pane» senza doppione.
+  - **Scadenze:** numeretto rosso sull'icona «Il mio menu» (come le chat non lette) al posto della striscia in cima a «Le mie».
+  - **Le mie vuota:** solo la foto grande dei piatti di oggi che scorre da sola, senza scritte di benvenuto né istruzioni.
+  - **Sito su computer:** «Nuova ricetta» fuori dalla testata (resta uguale in ogni sezione), «Aggiungi una ricetta» in cima a «Le mie»; «Il mio menu» in una colonna al centro senza la colonna di foto; versione scura del sito quando nelle Impostazioni si sceglie «Scuro» (o «Automatico» con il computer scuro).
+
 - **Versione 190, primo giro di semplificazione dell'interfaccia**
   - «Aggiungi una ricetta» in riga in cima a «Le mie» al posto del pulsante galleggiante sul telefono; «Nuovo menu» in fondo accanto a «Stampa menu», un solo «Varia menu»; tolti i pulsanti doppioni dalla pagina di benvenuto e dalla sfida («La vincitrice arriva presto», «Le ricette vincitrici»); scheda della ricetta riordinata («Cucina con me» e «Salva nelle mie» in alto, ingredienti e passaggi a sinistra e più grandi, calorie e costo al tocco, stelle e commenti in fondo, altri pulsanti in «Altro…», tolto «Chiudi»); scritte da leggere almeno a 15 punti. Copia di salvezza della 189: tag `versione-189` e release «versione-189» con Gnamina-189.apk.
 
