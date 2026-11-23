@@ -107,10 +107,12 @@ const LOGIN_RX = /log in or sign up|<title>log in \| tiktok|accedi o iscriviti|m
 // i link di condivisione di Facebook letti prima del 15/11 sono in cache senza il parlato: chiave nuova (:s2) solo per loro
 const previewCached = (env, b) => cached(env, 'preview', cacheUrl(b.url) + (b.transcribe === false ? ':senza-parlato' : ':p4') + (/facebook\.com\/share\//.test(String(b.url)) ? ':s2' : ''), 3 * DAY, () => preview(env, b),
   r => !!(r.transcript || /ld\+json/.test(r.html) || /property="(?:og:)?description" content="[^"]{60,}"/.test(r.html)) && !LOGIN_RX.test(r.html || '') && !r.retry); // niente pagina di accesso o vuota in cache: conta la descrizione, non il titolo
+// Analisi in memoria: con un testo corto («Video», il solo titolo) la chiave comprende anche il link, altrimenti post diversi
+// con lo stesso testo ricevevano la stessa ricetta (quattro video Facebook diventati tutti «Biscuit log», v189)
 // b.yt: il video YouTube della stessa ricetta, trovato sulla pagina del blog del cuoco quando il blog non scrive il procedimento
 const siteYtOf = b => /^[\w-]{11}$/.test(String(b.yt || '')) ? String(b.yt) : '';
-const ANALYZE_V = 10; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
-const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([ANALYZE_V, str(b.caption || b.title, 9000), ytIdOf(b.url), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30), ...(siteYtOf(b) ? [siteYtOf(b)] : [])]), 30 * DAY,
+const ANALYZE_V = 11; // versione del prompt di /analyze: aumentarla rifà solo le analisi (non le letture dei post) con le regole nuove
+const analyzeCached = (env, b) => cached(env, 'analyze', JSON.stringify([ANALYZE_V, str(b.caption || b.title, 9000), ytIdOf(b.url) || (str(b.caption || b.title, 9000).trim().length < 200 ? cacheUrl(b.url) : ''), !!b.haveSteps, str(b.image, 2000), str(b.source, 40), (Array.isArray(b.cats) ? b.cats : []).slice(0, 30), ...(siteYtOf(b) ? [siteYtOf(b)] : [])]), 30 * DAY,
   () => analyze(env, b), r => !!(r.result && r.result.ingredients?.length && !(r.result.inferred && !r.result.steps?.length))); // le analisi «indovinate» (ingredienti tipici, nessun passaggio) non si salvano: la prossima volta si riprova
 
 // Scarica la copertina del post (lato server non ci sono blocchi CORS)
@@ -167,7 +169,7 @@ Sei un trascrittore fedele, non un cuoco: riporta SOLO ciò che è scritto nel t
 Se c'è il «Parlato nel video», ciò che il cuoco dice vale come testo scritto: le dosi dette a voce in lettere vanno scritte in cifre («due etti di farina» → "200 g farina", «mezzo litro di latte» → "500 ml latte", «tre uova» → "3 uova", «un cucchiaio» → "1 cucchiaio"), e i passaggi raccontati a voce vanno in steps, in ordine, uno per voce. La trascrizione automatica ha spesso errori di ascolto: correggi quelli evidenti dal senso della ricetta («pezzemolo» → prezzemolo, «lavorate titolo e zucchero» → tuorli, «un figlio di carta forno» → foglio, «zucchero zuccherè» → zucchero), senza ripetere lo stesso ingrediente scritto in due modi, e non lasciare in ingredienti o passaggi parole senza senso.
 Guarda bene l'immagine: se mostra il piatto, elenca gli ingredienti che si riconoscono con certezza (es. fagioli bianchi, carote a dadini, patate, pasta corta, pane); se contiene testo sovrimpresso (titolo, elenco di ingredienti, dosi), trascrivilo e usalo come se fosse nel post.
 Estrai i dati in italiano. Se il post è in un'altra lingua (inglese, spagnolo…), traduci in italiano titolo, ingredienti e passaggi: i nomi di piatti noti restano com'è d'uso in Italia («Arancini», «Tacos», «Pad Thai», «Paella»), ma i nomi descrittivi si traducono sempre («Mermelada de mandarina» → "Marmellata di mandarini", «Tarte aux pommes» → "Torta di mele", «700 g de mandarina» → "700 g mandarini"), «chicken» → pollo, «bell peppers» → peperoni. I numeri delle dosi restano esattamente quelli del post e si traducono solo le unità: cup/cups → tazza/tazze, tbsp → cucchiaio, tsp → cucchiaino, lb → libbra, oz → oncia, clove → spicchio; nei passaggi le temperature in °F si scrivono in °C se il post le dà anche in °C, altrimenti si convertono (425°F → 220°C).
-- title: SOLO il nome del piatto, senza hashtag, emoji, aggettivi pubblicitari o commenti: «Carbonara vegana, la più buona del mondo» → "Carbonara vegana"; «Come fare la pasta alla norma perfetta» → "Pasta alla norma". Il nome deve restare specifico, con gli ingredienti o la variante che lo distinguono: «Pizza in 1h 45 ~ Basilico, Limone, Parmigiano & Pepe nero» → "Pizza basilico, limone e parmigiano", non solo "Pizza"; «Pane fatto in casa in due passaggi» → "Pane fatto in casa", non solo "Pane". Mai un nome generico di una parola sola («Pesce», «Dolce», «Pane», «Torta», «Pasta», «Antipasto»): aggiungi ciò che lo distingue, preso dal testo («Orata al forno con limone», «Torta allo yogurt», «Antipasto di sfoglia e zucca»). Un nome descrittivo straniero si traduce («Chicken roll» → "Involtini di pollo").
+- title: SOLO il nome del piatto, senza hashtag, emoji, aggettivi pubblicitari o commenti: «Carbonara vegana, la più buona del mondo» → "Carbonara vegana"; «Come fare la pasta alla norma perfetta» → "Pasta alla norma". Il nome deve restare specifico, con gli ingredienti o la variante che lo distinguono: «Pizza in 1h 45 ~ Basilico, Limone, Parmigiano & Pepe nero» → "Pizza basilico, limone e parmigiano", non solo "Pizza"; «Pane fatto in casa in due passaggi» → "Pane fatto in casa", non solo "Pane". Mai un nome generico di una parola sola («Pesce», «Dolce», «Pane», «Torta», «Pasta», «Pizza», «Antipasto»): aggiungi ciò che lo distingue, preso dal testo («Orata al forno con limone», «Torta allo yogurt», «Antipasto di sfoglia e zucca»). «Dolce» non è il nome di un piatto: scrivi che preparazione è (frittelle, pancake, biscotti, torta, budino, crema, tiramisù…), es. «Dolce con la mela» → "Frittelle di mele" se nel testo si friggono. Un nome descrittivo straniero si traduce («Chicken roll» → "Involtini di pollo").
 - cat: uno tra ${cats.map(c => `"${c}"`).join(', ')}.
 - servings: per quante persone sono le dosi, SOLO se scritto nel post ("per 4 persone", "4 porzioni", "ingredienti per 2"…); altrimenti 0. "per 10 minuti" non è una porzione.
 - ingredients: un ingrediente per voce, nell'ordine del post (se il testo contiene più ricette, es. «Recipe 1… Recipe 2…» o un confronto tra versioni, prendi SOLO la prima, con i suoi ingredienti e passaggi; una riga con due misure dello stesso ingrediente, es. «2 uova 100 g» o «3 cachi (circa 600 g)», è UN solo ingrediente: "2 uova (100 g)"), formato "quantità unità ingrediente" (es. "320 g spaghetti", "2 uova", "olio extravergine q.b."). Le quantità solo se scritte nel post: se un ingrediente è nominato senza dose, scrivi solo il nome (es. "pomodori secchi"), NON "q.b." e NON una dose tipica. Se il post non elenca ingredienti, metti i soli NOMI: prima quelli nominati nel testo e negli hashtag, poi quelli che vedi nell'immagine (mettili anche in seen), senza dosi, e imposta inferred a true. Usa nomi concreti, non categorie: niente "verdure" o "legumi" se sai quali sono (carote, cannellini). Se non riconosci il piatto, lascia vuoto.
@@ -208,7 +210,7 @@ Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diet
     if (v && v.is_recipe !== false) {
       const st = (Array.isArray(v.steps) ? v.steps : []).map(x => str(x, 600).trim()).filter(Boolean).slice(0, 30);
       if (st.length) { r.steps = st; r.from_video = true; }
-      const vt = str(v.title, 120).trim(); if (vt && (!r.title || r.title === r.title.toUpperCase() || r.title.length > 60)) r.title = vt; // «GNOCCHI AI FRUTTI DI MARE: la RICETTA…» → il nome del piatto
+      const vt = str(v.title, 120).trim(); if (vt && (!r.title || r.title === r.title.toUpperCase() || r.title.length > 60 || (vagueTitle(r.title) && !vagueTitle(vt)))) r.title = vt; // anche «Pizza» o «Dolce con la mela» quando il video dice «Spiedini di penne» o «Frittelle di mele» (v189) // «GNOCCHI AI FRUTTI DI MARE: la RICETTA…» → il nome del piatto
       // dal video del blog (b.yt) si prendono i passaggi: gli ingredienti scritti nel post o sul blog hanno le dosi e restano
       const ing = (Array.isArray(v.ingredients) ? v.ingredients : []).map(x => str(x, 120).trim()).filter(Boolean).slice(0, 40);
       // lo stesso ingrediente ripetuto più volte = il video mescola più ricette: resta l'elenco della descrizione (v180)
@@ -219,11 +221,18 @@ Rispondi solo con JSON: {"is_recipe":true,"title":"","servings":0,"cat":"","diet
       if (!r.time && +v.time > 0 && +v.time <= 1440) { r.time = Math.round(+v.time); r.time_how = 'video'; r.time_note = ''; }
     }
   } catch (e) { console.log('video Gemini', e.message); }
+  // passaggi presi dal video: il tempo «indicato» nel testo era spesso quello del titolo acchiappa-clic («Dolce in 5 minuti»)
+  // e non può stare sotto le durate dette nei passaggi (3-4 ore di frigo, 50 minuti di bagnomaria) (v189)
+  if (r && r.from_video && Array.isArray(r.steps) && r.steps.length) {
+    const said = timesIn(r.steps.join('\n')).sum;
+    if (said > (+r.time || 0)) { r.time = said; r.time_how = 'sommato'; r.time_note = ''; }
+  }
   if (r && r.title) r.title = dishName(r.title);
   if (r) await italianize(env, r);
   if (r) r.title = specificTitle(r.title, r.ingredients, r.steps);
   // i passaggi presi dal parlato arrivano spesso in minuscolo («fare le melanzane a strisce»): iniziano con la maiuscola
   if (r && Array.isArray(r.steps)) r.steps = r.steps.map(x => String(x).trim()).filter(Boolean).map(x => x.charAt(0).toUpperCase() + x.slice(1));
+  if (r) tidyIngredients(r);
   return { result: r };
 }
 
@@ -297,18 +306,59 @@ function listCheck(r, text) {
 }
 // Ingredienti rimasti in inglese (il modello a volte copia l'elenco della descrizione così com'è): una traduzione in più, solo in quel caso (v180)
 const EN_RX = /\b(?:cups?|tsp|tbsp|teaspoons?|tablespoons?|flour|sugar|butter|eggs?|salt|all-purpose|baking (?:soda|powder)|chopped|melted|minced|large|medium|cloves?|ounces?|pounds?|cream|milk|water|oil|pepper|onions?|garlic|chicken|beef)\b/gi;
+// anche in francese (i reel più visti lo sono spesso) e nel titolo («Tartes tarins salées», «Gaufres de pommes de terre») (v189)
+const FR_RX = /\b(?:pâtes?|pommes?(?: de terre)?|beurre|sucre|farine|œufs?|oeufs?|lardons|fromage|crème|poulet|oignons?|échalotes?|ail|lait|cuillères?|salées?|sucrées?|gaufres?|tablette|perdus?|tartes?|gâteau|aux?|et|avec|de la|du)\b|[âêîôûçœ]/gi;
+const TITLE_EN = /\b(?:baked|pasta salad|bread|cheese|cookies?|recipe|easy|best|chicken|fries|bowl|cake|rolls?|salad|with|and|the|homemade|slice|bake|tacos?)\b/i;
 async function italianize(env, r) {
   const ing = Array.isArray(r.ingredients) ? r.ingredients : [];
-  if (ing.length < 2 || (ing.join(' ').match(EN_RX) || []).length < Math.max(2, ing.length / 3)) return;
+  const count = rx => (ing.join(' ').match(rx) || []).length;
+  const ingForeign = ing.length >= 2 && (count(EN_RX) >= Math.max(2, ing.length / 3) || count(FR_RX) >= Math.max(2, ing.length / 3));
+  const title = String(r.title || ''), titleForeign = !!title && ((title.match(FR_RX) || []).length >= 1 || TITLE_EN.test(title)) && !/\b(?:con|alla?|allo|di|del|della|e)\b/i.test(title);
+  if (!ingForeign && !titleForeign) return;
   try {
-    const src = { ingredients: ing.slice(0, 40).map(String), steps: (Array.isArray(r.steps) ? r.steps : []).slice(0, 30).map(String) };
-    const out = await aiJson(env, `Traduci in italiano questi ingredienti e passaggi di una ricetta, con i termini delle cucine italiane. I numeri restano esattamente gli stessi; traduci le unità (cup/cups → tazza/tazze, tsp → cucchiaino, tbsp → cucchiaio, oz → oncia, lb → libbra) e i nomi ("all-purpose flour" → "farina 00", "brown sugar" → "zucchero di canna", "baking soda" → "bicarbonato", "sour cream" → "panna acida"). Stesso numero di voci, stesso ordine. Rispondi solo con JSON nello stesso formato:\n${JSON.stringify(src)}`);
-    if (Array.isArray(out?.ingredients) && out.ingredients.length === src.ingredients.length) r.ingredients = out.ingredients.map(x => str(x, 120).trim());
+    const src = { title, ingredients: ing.slice(0, 40).map(String), steps: ingForeign ? (Array.isArray(r.steps) ? r.steps : []).slice(0, 30).map(String) : [] };
+    const out = await aiJson(env, `Traduci in italiano il titolo, gli ingredienti e i passaggi di una ricetta (dall'inglese, dal francese o da altre lingue): nel titolo i nomi di piatti noti restano com'è d'uso in Italia («Tacos», «Pad Thai», «Tarte tatin», «Cheesecake»), quelli descrittivi si traducono («Gaufres de pommes de terre» → "Waffle di patate", «Baked feta pasta» → "Pasta al forno con feta"); ingredienti e passaggi con i termini delle cucine italiane («pâte brisée» → "pasta brisée", «lardons» → "pancetta a dadini"). I numeri restano esattamente gli stessi; traduci le unità (cup/cups → tazza/tazze, tsp → cucchiaino, tbsp → cucchiaio, oz → oncia, lb → libbra) e i nomi ("all-purpose flour" → "farina 00", "brown sugar" → "zucchero di canna", "baking soda" → "bicarbonato", "sour cream" → "panna acida"). Stesso numero di voci, stesso ordine. Rispondi solo con JSON nello stesso formato:\n${JSON.stringify(src)}`);
+    if (titleForeign && out?.title && String(out.title).trim().length > 2) r.title = str(out.title, 120).trim();
+    if (ingForeign && Array.isArray(out?.ingredients) && out.ingredients.length === src.ingredients.length) r.ingredients = out.ingredients.map(x => str(x, 120).trim());
     if (Array.isArray(out?.steps) && out.steps.length === src.steps.length && src.steps.length) r.steps = out.steps.map(x => str(x, 600).trim());
   } catch (e) { console.log('traduzione ingredienti', e.message); }
 }
+// Ultima pulizia degli ingredienti (v189):
+// - via i saluti e gli sponsor copiati dalla descrizione («Buon appetito grazie per la visione», «Sponsor: Mulino Caputo»);
+// - libbre, once e pollici in grammi e centimetri, che in Italia nessuno pesa;
+// - gli ingredienti nominati nei passaggi e assenti dalla lista (cannella, zucchero a velo, panna) si aggiungono senza dose.
+const JUNK_ING = /buon appetito|grazie (?:per|a tutti|mille)|sponsor|iscriv|seguimi|seguici|visione|attenzione!|al prossimo video|link in bio|codice sconto|\bcanale\b|^forma\s+\d|^stampo\s+\d/i;
+const STEP_ING = ['zucchero a velo', 'zucchero di canna', 'cannella', 'vaniglia|vanillina', 'panna', 'miele', 'lamponi|lampone', 'fragole|fragola', 'mirtilli', 'cacao', 'cioccolato', 'nutella', 'mascarpone', 'ricotta', 'mozzarella', 'parmigiano', 'pecorino', 'burro', 'latte', 'yogurt', 'semola', 'pangrattato', 'passata', 'basilico', 'prezzemolo', 'rosmarino', 'origano', 'aglio', 'cipolla|cipolle', 'scalogno', 'carote|carota', 'sedano', 'patate|patata', 'zucchine|zucchina', 'melanzane|melanzana', 'peperoni|peperone', 'funghi', 'limone|limoni', 'noci', 'nocciole', 'mandorle', 'pistacchi', 'pinoli', 'capperi', 'acciughe|alici', 'guanciale', 'pancetta', 'prosciutto', 'salsiccia|salsicce', 'vino bianco', 'vino rosso', 'brodo', 'olio di semi', 'aceto', 'peperoncino', 'zenzero', 'noce moscata', 'cocco', 'uvetta|uva sultanina|uva passa', 'savoiardi', 'gelatina|colla di pesce', 'amido di mais|maizena', 'fecola', 'maionese'];
+const ingStem = w => w.toLowerCase().replace(/['’]/g, ' ').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z ]/g, '').split(' ').filter(Boolean).map(x => x.replace(/[aeiou]$/, '').slice(0, 6)).join(' ');
+function tidyIngredients(r) {
+  if (!Array.isArray(r.ingredients)) return;
+  const n = x => parseFloat(String(x).replace(',', '.'));
+  r.ingredients = r.ingredients.map(String).filter(x => !JUNK_ING.test(x)).map(x => (/\d\s*(?:g|kg|ml|l)\b/i.test(x) ? x.replace(/\s*(?:\(|\bo\s|\/)\s*\d+(?:[.,]\d+)?\s*(?:oz|once|oncia|lbs?|libbr\w*|°\s?F)\b\.?\)?/gi, '') : x)
+    .replace(/(\d+(?:[.,]\d+)?)\s*(?:libbr[ae]|lbs?|pounds?)\b\.?(?:\s+(?:di|d'))?/i, (_, q) => `${Math.round(n(q) * 454 / 10) * 10} g`)
+    .replace(/(\d+(?:[.,]\d+)?)\s*(?:once|oncia|oz|ounces?)\b\.?(?:\s+(?:di|d'))?/i, (_, q) => `${n(q) >= 1 ? Math.round(n(q) * 28.35 / 5) * 5 : Math.max(1, Math.round(n(q) * 28.35))} g`)
+    .replace(/(\d+(?:[.,]\d+)?)\s*(?:pollic[ei]|inch(?:es)?)\b/i, (_, q) => `${Math.round(n(q) * 2.54)} cm`));
+  if (Array.isArray(r.steps)) r.steps = r.steps.map(x => String(x).replace(/(\d+(?:[.,]\d+)?)\s*(?:pollic[ei]|inch(?:es)?)\b/gi, (_, q) => `${Math.round(n(q) * 2.54)} cm`));
+  if (r.inferred || !Array.isArray(r.steps) || !r.steps.length || r.ingredients.length < 2) return;
+  const have = ' ' + r.ingredients.map(ingStem).join(' | ') + ' ';
+  const st = ' ' + r.steps.join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]+/g, ' ') + ' ';
+  const add = [], title = ' ' + String(r.title || '').toLowerCase() + ' ';
+  for (const forms of STEP_ING) {
+    const alts = forms.split('|'), name = alts[0], plain = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const words = plain.split(' ');
+    // forme esatte, senza radici: «agli», «grande», «panno» o «mentre» non sono aglio, grana, panna o menta
+    // «una cipolla, aglio o scalogno»: le alternative non sono ingredienti certi
+    if (!new RegExp(`(?<!\\bo )\\b(?:${alts.map(a => a.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ /g, '\\s+')).join('|')})\\b(?! o\\b)`).test(st)) continue;
+    if (alts.some(a => have.includes(ingStem(a)) || title.includes(a)) || add.some(a => a.includes(name) || name.includes(a))) continue;
+    // «zucchero a velo» non è coperto da «zucchero»; «vino bianco» sì da «vino»
+    if (words.length > 1 && !/velo|canna|mais/.test(name) && have.includes(ingStem(words[0]))) continue;
+    add.push(name);
+  }
+  if (add.length && add.length <= 4) r.ingredients.push(...add);
+}
 // Titolo di una sola parola generica («Pesce», «Dolce»): si completa con la cottura e i due ingredienti principali dei passaggi (v180)
-const GENERIC_TITLE = /^(?:pesce|dolce|dolcetti|torta|pane|pasta|antipasto|carne|pollo|verdure|insalata|zuppa|biscotti|primo|secondo|contorno|ricetta|piatto)$/i;
+const GENERIC_TITLE = /^(?:pesce|dolce|dolci|dolcetti|torta|pane|pasta|pizza|focaccia|antipasto|carne|pollo|verdure|insalata|zuppa|biscotti|primo|secondo|contorno|ricetta|piatto)$/i;
+// titolo vago anche se di più parole: «Dolce con la mela», «Dolce senza forno», «Ricetta veloce» (v189)
+const vagueTitle = t => { t = String(t || '').trim(); return !t || GENERIC_TITLE.test(t) || /^(?:dolce|dolcetto|dolci|ricetta|piatto|secondo|primo|cena|pranzo)\b(?:\s+(?:con|alla?|allo|al|ai|alle|di|senza|in|veloce|facile|fredd[oa]|del(?:la)?)\b.{0,25})?$/i.test(t); };
 const STAPLE = /^(?:sale|pepe|olio|aglio|acqua|zucchero|farina|burro|uova?|latte|lievito|prezzemolo|basilico|limone)\b/i;
 function specificTitle(title, ingredients, steps) {
   const t = String(title || '').trim();
@@ -372,11 +422,21 @@ function timesIn(text) {
 }
 const servingsIn = text => +((String(text).match(SERV_RX) || [''])[0].match(/\d+/) || [0])[0] || 0;
 
+// Elenco degli ingredienti scritto anche in altre lingue («Ingrédients», «you'll need», «tu auras besoin de», «Zutaten») o come
+// elenco puntato (almeno tre righe brevi con •, -, ✔ o un'emoji davanti): prima valevano solo le parole italiane, e un post
+// francese o inglese con l'elenco risultava «senza ingredienti», con le dosi tolte (v189)
+const LIST_RX = /ingr[eé]d[iy]?ent|zutaten|you(?:'|’)?ll need|what you need|besoin de|il (?:vous|te) faut|necesitas|vas a necesitar|^\s*(?:pour|for|para|per)\s+\d+\b[^\n]{0,25}:\s*$/im;
+function bulletList(text) {
+  const t = String(text).replace(/parlato nel video:[\s\S]*/i, '');
+  if (t.split('\n').filter(l => /^\s*(?:[-•*·▪✔✓►‣○●◦–]|[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}])\s*\S/u.test(l) && l.trim().length <= 60 && !/https?:|#|@/.test(l)).length >= 3) return true;
+  // elenco in una riga sola: «Poulet - Cardamome - Cannelle - Coriandre - …»
+  return t.split('\n').some(l => l.split(/\s[-–•·|]\s/).filter(x => /^\s*[\p{L}][\p{L}' ]{1,25}\s*$/u.test(x)).length >= 5);
+}
 function faithful(r, text) {
   const nums = numsIn(text), spoken = /parlato nel video:/i.test(text); // il parlato trascritto vale come testo scritto
   // dosi scritte («300 g di arachidi», «4 tazze di latte»): le unità corte vogliono il confine di parola, le radici («tazz», «cucchia») no (v179)
-  const doseRx = new RegExp(`(?:\\d+|\\b(?:${NUM_WORDS}))\\s?(?:(?:g|gr|grammi?|kg|chil[oi]|ml|cl|dl|l|litr[oi]|ett[oi])\\b|cucchia|tazz|bicchier|pizzic)`, 'i');
-  const hasList = /ingredient/i.test(text) || doseRx.test(text) || (spoken && nums.size > 0);
+  const doseRx = new RegExp(`(?:\\d+|[½¼¾⅓⅔]|\\b(?:${NUM_WORDS}))\\s?(?:(?:g|gr|grammi?|grams?|gramos?|kg|chil[oi]|ml|cl|dl|l|litr[oi]|ett[oi]|cups?|tbsp|tsp|tbs|oz|ounces?|lbs?|pounds?|tazas?|tasses?|verres?|c\\.\\s?(?:à|a)\\s?(?:s|c|soupe|café))\\b|cucchia|tazz|bicchier|pizzic|teaspoon|tablespoon|cuill|cuchar|pinc[ée]e)`, 'i');
+  const hasList = LIST_RX.test(text) || doseRx.test(text) || bulletList(text) || (spoken && nums.size > 0);
   // tempo e porzioni: valgono solo se scritti nel post; se il modello li salta o li inventa, si legge direttamente il testo
   const tm = timesIn(text), sv = servingsIn(text);
   r.time = Math.round(+r.time) || 0; r.time_note = str(r.time_note, 120).trim();
@@ -399,7 +459,7 @@ function faithful(r, text) {
   if (!SERV_RX.test(text) || !r.servings || !nums.has(String(r.servings))) r.servings = sv;
   if (!hasList) r.inferred = true;
   // il post scrive le dosi (anche solo nei passaggi): gli ingredienti non sono «indovinati», anche se il modello lo dice (v179)
-  else if (r.inferred && (doseRx.test(text.replace(/parlato nel video:[\s\S]*/i, '')) || /ingredienti\s*[:\n]/i.test(text))) r.inferred = false;
+  else if (r.inferred && (doseRx.test(text.replace(/parlato nel video:[\s\S]*/i, '')) || /ingredienti\s*[:\n]/i.test(text) || LIST_RX.test(text) || bulletList(text))) r.inferred = false;
   r.ingredients = (Array.isArray(r.ingredients) ? r.ingredients : []).map(String).map(x => {
     const m = x.match(/^\s*(\d+(?:[.,]\d+)?)(?:\s*[-–\/]\s*\d+(?:[.,]\d+)?)?\s*/); // "300 g …", "2-3 …", "1/2 …"
     const frac = x.match(/^\s*(?:[½¼¾⅓⅔]|\d+\/\d+)\s/);
@@ -624,6 +684,12 @@ const PREVIEW_UA = 'Gnamina/1.0 (+https://gnamina.it/)';
 // Trascrizione del parlato di un video (Whisper su Workers AI). Solo video brevi e non troppo pesanti: la quota è condivisa.
 // info.partial diventa true se del video si è potuta scaricare (e quindi trascrivere) solo la prima parte
 const IPHONE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+function fbSlug(u) {
+  try {
+    const seg = decodeURIComponent(u.pathname).split('/').filter(Boolean).find(x => /[a-zà-ü]-[a-zà-ü]/i.test(x) && !/^\d+$/.test(x) && x.length > 8);
+    return seg ? seg.replace(/-+/g, ' ').replace(/\s+/g, ' ').trim().replace(/^./, c => c.toUpperCase()) : '';
+  } catch { return ''; }
+}
 async function tiktokPage(url, id) {
   for (let i = 0; i < 2; i++) {
     try {
@@ -771,7 +837,7 @@ async function ytVideoRecipe(env, id, seconds, only = '') {
 {"is_recipe":true,"title":"nome del piatto","servings":0,"time":0,"ingredients":["quantità unità ingrediente, come detto o mostrato (es. \"400 g spaghetti\", \"3 spicchi aglio\"); solo il nome se la dose non viene detta"],"steps":["un passaggio per voce, in ordine, con le parole del cuoco, comprese temperature e tempi detti"]}
 steps: ogni passaggio è una frase completa, con la maiuscola all'inizio e il punto alla fine, che descrive un'azione compiuta: unisci nella stessa voce le frasi brevi della stessa azione («puliamo la cipolla», «la tagliamo in otto pezzi» → "Puliamo la cipolla e la tagliamo in otto pezzi."), e lascia fuori i commenti che non sono istruzioni. Di norma bastano da 5 a 15 passaggi.
 Un passaggio è un'azione di cucina (tagliare, mescolare, impastare, cuocere, far riposare, servire). NON sono passaggi, e non vanno in steps: l'elenco degli ingredienti detto a voce («un etto di mortadella», «parmigiano reggiano»: vanno solo in ingredients), i saluti, le battute, i racconti e le opinioni del cuoco («siamo nella Pork Valley», «il ripieno il giorno dopo è tutta un'altra cosa»). Un consiglio su come fare si tiene, scritto come istruzione («Il ripieno è meglio prepararlo il giorno prima.»).
-Se il video prepara o confronta più ricette, trascrivi SOLO la prima, con i suoi ingredienti e passaggi.${only ? ` Questo video confronta più ricette: trascrivi SOLO «${only}», ignora le altre.` : ''} Ogni ingrediente usato nei passaggi deve stare anche in ingredients (senza dose se non viene detta), e il titolo è il nome specifico del piatto, mai una parola generica come «Pesce» o «Dolce».
+Se il video prepara o confronta più ricette, trascrivi SOLO la prima, con i suoi ingredienti e passaggi.${only ? ` Questo video confronta più ricette: trascrivi SOLO «${only}», ignora le altre.` : ''} Ogni ingrediente usato nei passaggi deve stare anche in ingredients (senza dose se non viene detta), e il titolo è il nome specifico del piatto, mai una parola generica come «Pesce», «Pizza» o «Dolce», né «Dolce con…»: di' che preparazione è (frittelle, pancake, spiedini di pasta, torta di savoiardi…).
 servings: per quante persone, solo se detto, altrimenti 0. time: minuti totali dall'inizio al piatto pronto solo se detto o chiaramente deducibile dai tempi detti, altrimenti 0. Non inventare dosi, tempi o passaggi non detti né mostrati. is_recipe false se il video non è una ricetta.`;
   const body = { contents: [{ parts: [{ file_data: { file_uri: `https://www.youtube.com/watch?v=${id}` } }, { text: prompt }] }],
     generationConfig: { temperature: 0.2, maxOutputTokens: 4000, responseMimeType: 'application/json', mediaResolution: 'MEDIA_RESOLUTION_LOW' } };
@@ -866,6 +932,9 @@ async function preview(env, b) {
       .replace(/<a [^>]*href="https:\/\/l\.facebook\.com\/l\.php\?u=([^&"]+)[^"]*"[^>]*>[\s\S]*?<\/a>/gi, (_, x) => { try { return ' ' + decodeURIComponent(x.replace(/&amp;/g, '&')) + ' '; } catch { return ' '; } })
       .replace(/<\/p>\s*<p>|<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')).replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').trim();
     const v = e && (e.html.match(/"sd_src(?:_no_ratelimit)?\\*":\\*"(https:[^"]+?)\\*"/) || e.html.match(/"hd_src(?:_no_ratelimit)?\\*":\\*"(https:[^"]+?)\\*"/));
+    // il riquadro a volte non ha il testo del post (la pagina dà solo «Video»): resta il titolo scritto nel link,
+    // facebook.com/Cookist/videos/creme-caramel-il-segreto-per-renderlo-perfetto/304… (v189)
+    if (!embedCaption) embedCaption = fbSlug(u);
     if (v) { igVideo = v[1].replace(/\\+u0025/g, '%').replace(/\\+u0026/g, '&').replace(/\\/g, ''); igSeconds = 120; igRef = 'https://www.facebook.com/'; } // la durata non c'è: il limite vero è il peso del file (24 MB)
   }
   // TikTok: la pagina del video chiede l'accesso e oEmbed non dà più il testo; la pagina di incorporamento ha didascalia, autore e copertina

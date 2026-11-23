@@ -1869,7 +1869,7 @@ function dropPhotoRefs(st){
 }
 // righe che non sono passaggi: avvisi dei blog
 // righe della descrizione che non sono passaggi: capitoli del video, titoletti in maiuscolo, link e firme social, righe dell'elenco ingredienti (v180)
-const junkLine=(x,ing)=>{x=String(x).trim();const k=s=>String(s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');return !x||/^\W*\(?(?:\d{1,2}:)?\d{1,2}:\d{2}\b/.test(x)||/https?:\/\/|www\.|bit\.ly/i.test(x)||/[\u{1D400}-\u{1D7FF}═■►▶©]/u.test(x)||(x.length<40&&x===x.toUpperCase()&&/\p{L}{3}/u.test(x))||(ing||[]).some(i=>k(i)===k(x))};
+const junkLine=(x,ing)=>{x=String(x).trim();const k=s=>String(s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');return !x||/^\W*\(?(?:\d{1,2}:)?\d{1,2}:\d{2}\b/.test(x)||/https?:\/\/|www\.|bit\.ly/i.test(x)||/[\u{1D400}-\u{1D7FF}═■►▶©]/u.test(x)||/[\u0400-\u04FF\u0590-\u06FF\u0900-\u0DFF\u3040-\u30FF\u4E00-\u9FFF\uAC00-\uD7AF]/.test(x)||/\b(?:subscribe|suscr[ií]b\w*|abonne\w*|iscriviti|iscrivetevi|canale|channel|canal)\b/i.test(x)||/^(?:spanish|english|arabic|french|italian|español|english version|français|italiano|deutsch)\s*:?$/i.test(x)||/^(?:receta|recipe|recette)\s+(?:para|for|pour)\b/i.test(x)||(x.length<40&&x===x.toUpperCase()&&/\p{L}{3}/u.test(x))||(ing||[]).some(i=>k(i)===k(x))};
 const notStep=x=>/link di affiliazione|link affiliat|contiene link sponsorizzat|articolo sponsorizzato|spero che vi piaccia|inviatemi le vostre foto|fatemi sapere nei commenti|^\s*a presto[!. ]*$/i.test(x);
 
 // Trova un oggetto schema.org Recipe nei blocchi JSON-LD della pagina
@@ -1942,7 +1942,7 @@ let readErr=''; // l'ultimo motivo dato dal server per un post che non riesce a 
 async function analyze(url,pasted){
   readErr='';
   const ctl=new AbortController();setTimeout(()=>ctl.abort(),10000);
-  const src=sourceOf(url);let out={};
+  const src=sourceOf(url);let out={},emptyPost=false;
   try{
     if(src==='TikTok'){
       const j=await getJson('https://www.tiktok.com/oembed?url='+encodeURIComponent(url),ctl);
@@ -1965,6 +1965,8 @@ async function analyze(url,pasted){
       if(!html&&aiOn())try{const p=await server('/preview',{url});html=p.html;fin=p.url;transcript=String(p.transcript||'');partial=!!p.partial;site=!!p.site}catch(e){if(e?.status===502&&e.message)readErr=e.message}
       if(!html&&!social)try{const res=await fetch(url,{signal:ctl.signal});html=await res.text();fin=res.url}catch{}
       out=parseHtml(html||'<html></html>');
+      // post letto ma senza didascalia né parlato (un TikTok con il solo video): lo si dice, invece di «non riesco a leggere» (v189)
+      if(social&&html&&!transcript&&!useful(out)&&!(out.caption||out.title||'').trim())emptyPost=true;
       if(!useful(out)&&!out.title)out={};
       if(!html&&pre.caption&&!out.caption)out={...pre};
       if(transcript&&partial)out.partial=true; // del video lungo il server ha potuto trascrivere solo la prima parte
@@ -1975,7 +1977,7 @@ async function analyze(url,pasted){
   }catch{}
   // testo incollato o arrivato dal Comando Rapido: ha la precedenza se è più completo di quello letto
   if(pasted&&pasted.length>(out.caption||'').length)out={...out,caption:pasted,title:out.title&&out.title.length>8?out.title:pasted};
-  if(!out.caption&&!out.title&&!out.ingredients?.length&&!out.transcript)return null;
+  if(!out.caption&&!out.title&&!out.ingredients?.length&&!out.transcript){if(emptyPost&&!readErr)readErr='Nel post non c\'è né testo né parlato: guarda il video e scrivi tu la ricetta';return null}
   if(!out.ingredients?.length&&out.caption){
     const pc=parseCaption(out.caption);
     out.ingredients=pc.ingredients;if(!out.steps?.length)out.steps=pc.steps;out.time=out.time||pc.time;out.servings=out.servings||pc.servings;
@@ -2437,7 +2439,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=188; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=189; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){

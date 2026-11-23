@@ -4,6 +4,17 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-23
+
+- **Versione 189, lettura delle ricette corretta dopo la prova sulle 100 ricette più viste dei social**
+  - **La prova:** i video di ricette più visti di YouTube, TikTok, Instagram e Facebook (25 per piattaforma) importati con l'app e il server vero; giudizio di quattro aiutanti Sonnet (il PC con Qwen era spento), casi gravi ricontrollati a mano. Voto medio 3,6, 53 ricette buone e 18 scarse. Resoconto in `docs/prove/prova-100-piu-viste-2026-11-23.md`.
+  - **Server, stessa ricetta su post diversi:** con un testo corto (un video Facebook dà solo «Video») la memoria delle analisi distingueva i post solo dal testo, e quattro video diversi uscivano tutti «Biscuit log». Ora con un testo sotto i 200 caratteri conta anche il link; e se Facebook non dà il testo si usa il titolo scritto nel link («creme-caramel-il-segreto-per-renderlo-perfetto»).
+  - **Server, elenchi in altre lingue:** l'elenco degli ingredienti si riconosce anche con «cup», «tsp», «oz», «Ingrédients», «tu auras besoin de», «Pour 3 :», gli elenchi puntati e quelli in una riga («Poulet - Cardamome - …»). Prima i post francesi e inglesi risultavano «senza ingredienti» e perdevano le dosi.
+  - **Server, titoli e ingredienti tradotti:** si traducono anche gli ingredienti in francese e i titoli stranieri («Gaufres de pommes de terre» → «Waffle di patate»); libbre, once e pollici diventano grammi e centimetri, e le alternative in once accanto ai grammi si tolgono.
+  - **Server, pulizie:** via dagli ingredienti saluti e sponsor («Buon appetito grazie per la visione», «Sponsor: Mulino Caputo»); gli ingredienti nominati nei passaggi e assenti dalla lista (cannella, zucchero a velo, panna, lamponi) si aggiungono senza dose.
+  - **Server, tempo e titolo dal video:** quando i passaggi vengono dal video il tempo non resta quello del titolo acchiappa-clic («Dolce in 5 minuti» con 3-4 ore di frigo); un titolo vago («Pizza», «Dolce con la mela») lascia il posto a quello specifico detto nel video. Analisi in memoria rifatte (ANALYZE_V 11).
+  - **App:** un TikTok senza didascalia né parlato ora dice «Nel post non c'è né testo né parlato» invece di «Non riesco a leggere la pagina»; tra i passaggi provvisori presi dalla descrizione si tolgono le traduzioni in altri alfabeti e gli inviti a iscriversi al canale.
+
 ## 2026-11-22
 
 ### Versione 188 — la spesa: borsa, codice a barre, data dalla foto, avvisi di scadenza
