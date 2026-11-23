@@ -1090,7 +1090,31 @@ details summary{cursor:pointer}
 .bsumIn{display:none;margin:0 0 10px}@media (min-width:900px){:root[data-sito] .bsumIn{display:block}}
 :root:not(#_) body>.fab,:root:not(#_) #bOut .fab{background:color-mix(in srgb,var(--k-po) 74%,transparent);border-color:transparent;-webkit-backdrop-filter:blur(2px) saturate(1.2);backdrop-filter:blur(2px) saturate(1.2);text-shadow:0 1px 2px #0006}
 #bOut .fab{z-index:5}@media (min-width:900px){#bOut .fab{bottom:24px;right:24px}}
-#bOut{padding-bottom:4.2rem}
+#bOut{padding-bottom:1rem}
+/* v190 — niente pulsanti che galleggiano sopra le schede: «Aggiungi una ricetta» in riga in cima a «Le mie» (sul telefono) */
+.addRow{display:none}
+@media (max-width:899px){:root:not(#_) body>#add{display:none}:root:not(#_) .addRow{display:flex;justify-content:center;width:100%;grid-column:1/-1;font-size:1.1rem;min-height:3.2rem;margin:2px 0 12px}}
+/* v190 — scheda della ricetta: due pulsanti grandi in alto, ingredienti e passaggi a sinistra e più grandi, «Altro…» in fondo */
+:root:not(#_) #dv .dtop{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 4px}:root:not(#_) #dv .dtop.one{grid-template-columns:1fr}
+:root:not(#_) #dv .dtop .btn{min-height:3.1rem;font-size:1.05rem;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;width:100%;min-width:0;margin:0;padding:8px 8px;white-space:normal;line-height:1.15;text-align:left}:root:not(#_) #dv .dtop .btn svg,:root:not(#_) #dv .dtop .btn img{width:1.5em;height:1.5em;flex:none;margin:0}
+:root:not(#_) #dv .dside :is(h3,.srv,#ingList,#ingList li,ol,ol li,p.cap){text-align:left}
+:root:not(#_) #dv #ingList{padding-left:1.3em}:root:not(#_) #dv #ingList li,:root:not(#_) #dv .dside ol li{font-size:1.06rem;line-height:1.5;margin:3px 0}
+:root:not(#_) #dv .dside ol{padding-left:1.6em}:root:not(#_) #dv .dside ol li::marker{font-weight:700;color:var(--k-po);font-size:1.1rem}
+:root:not(#_) #dv .srv{justify-content:flex-start}
+:root:not(#_) #dv .nutBox,:root:not(#_) #dv .dmore{margin:12px 0 4px;border:2px solid var(--bd,#eadfd4);border-radius:14px;padding:10px 14px;background:var(--card,#fff)}
+:root:not(#_) #dv .nutBox>summary,:root:not(#_) #dv .dmore>summary{font:600 1.05rem 'Fredoka',var(--sans);color:var(--k-bb);cursor:pointer;list-style:none;text-align:left}
+:root:not(#_) #dv .nutBox>summary::before,:root:not(#_) #dv .dmore>summary::before{content:'▸ ';color:var(--k-po)}
+:root:not(#_) #dv .nutBox[open]>summary::before,:root:not(#_) #dv .dmore[open]>summary::before{content:'▾ '}
+:root:not(#_) #dv .dmore .dacts{margin-top:10px}
+/* v190 — caratteri minimi: le scritte da leggere almeno 15 px, le etichette sulle foto e i titoletti maiuscoli almeno 12,5 px */
+:root:not(#_) .facts span,:root:not(#_) .facts b,:root:not(#_) #dv .kv span,:root:not(#_) #dv .dmain .meta,:root:not(#_) #dv .bdg,:root:not(#_) #dv .nut span,:root:not(#_) #dv .nut li,:root:not(#_) #dv .rateTxt,:root:not(#_) #dv .commList .meta,:root:not(#_) #dv .nutBox .meta,:root:not(#_) #dv .nutBox summary.meta{font-size:15px}
+:root:not(#_) #dv .srv,:root:not(#_) #dv #sLbl{font-size:16px}
+:root:not(#_) #bSum,:root:not(#_) .shopBox summary span,:root:not(#_) #bOut .bdg,:root:not(#_) #bOut .dish small,:root:not(#_) #bOut .meal>.meta,:root:not(#_) #bOut .meal b,:root:not(#_) #bOut .nbox span{font-size:15px}
+:root:not(#_) #bOut .dish .r{font-size:13px}
+:root:not(#_) #dOut .dpill,:root:not(#_) #dOut .dnm span,:root:not(#_) #dOut .dlbl,:root:not(#_) #dOut .drc span,:root:not(#_) #dOut .dfin{font-size:15px}
+:root:not(#_) #home .who span,:root:not(#_) #home .rules li,:root:not(#_) #home .how li{font-size:15px}:root:not(#_) #home .lvl,:root:not(#_) #home .eyebrow,:root:not(#_) #home .pill{font-size:13.5px}
+:root:not(#_) .thumb .cat,:root:not(#_) .thumb .aiTag{font-size:12.5px}
+.welcome .wlead{font-size:1.05rem;line-height:1.45;margin:4px 0 14px;color:var(--ink,inherit)}
 .shopRow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:4px 0 10px}
 :root:not(#_) .shopRow .shopBox{flex:1 1 0;min-width:0;margin:0}:root:not(#_) .shopRow .shopBox[open]{flex:1 1 100%;order:2}
 :root:not(#_) .shopRow .shopBox summary{height:100%;display:flex;flex-direction:column;justify-content:center;padding:8px 14px;font-size:1rem;line-height:1.15}
@@ -2439,7 +2463,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=189; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=190; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -2612,7 +2636,7 @@ function contestPhase(c){const t=new Date().toISOString().slice(0,10);return t<c
 function renderHome(){
   const c=CONTEST,ph=contestPhase(c),mine=items.find(i=>i.contest===c.id);
   const state={soon:`<span class="pill soon">Prossimamente</span> Si parte ${dIt(c.inizio)}`,join:`<span class="pill">Si partecipa</span> fino a ${dIt(c.fine_partecipazione)}`,taste:`<span class="pill taste">Si assaggia e si vota</span> fino a ${dIt(c.fine_assaggio)}`,done:`<span class="pill soon">Concluso</span> la vincitrice arriva nel Ricettario di Gnamina`}[ph];
-  const btn={soon:mine?'✏️ Rivedi la tua ricetta':'Prepara la tua ricetta',join:mine?'✏️ Rivedi la tua ricetta in gara':'Partecipa con la tua ricetta',taste:'Assaggia e vota',done:'Vedi la vincitrice'}[ph];
+  const btn={soon:mine?'✏️ Rivedi la tua ricetta':'Prepara la tua ricetta',join:mine?'✏️ Rivedi la tua ricetta in gara':'Partecipa con la tua ricetta',taste:'Assaggia e vota',done:'La vincitrice arriva presto'}[ph];
   const L=gnammerLevel(),nm=profName();
   $('#home').innerHTML=`
     <div class="who" id="whoBar"><span class="av">${picHtml('')}</span><div>${nm?`<b>Ciao, ${esc(nm)}</b><span>${L.name} · il tuo voto vale ${L.weight}${L.ric?` · ${L.ric} ricett${L.ric===1?'a':'e'} in gara`:''}</span>`:`<b>Come ti chiami?</b><span>Scegli il tuo nome da Gnammer</span>`}</div><span class="lvl">${L.name}</span></div>
@@ -2631,13 +2655,8 @@ function renderHome(){
       </ol></details>
     </div>
     ${mine?`<div class="hsec"><h3>La tua ricetta in gara</h3></div><div class="mine-gara" id="cMine"><div class="th">${mine.image?`<img src="${esc(mine.image)}" alt="">`:look(mine)[0]}</div><div><b>${esc(nice(mine.title)||'Senza titolo')}</b><span>${mine.video||mine.clips?.length?'Con il video ✓':'Manca il video della preparazione'}${ph==='join'?' · puoi modificarla fino a '+dIt(c.fine_partecipazione):''}</span></div></div>`:''}
-    <div class="hsec"><h3>Il Ricettario di Gnamina</h3><span class="meta">le ricette vincitrici</span></div>
-    <div class="empty" style="padding:22px 16px"><b>Le prime vincitrici arrivano presto</b>${c.prossimo?`<br>Prossimo tema: <b style="display:inline;font-family:inherit;font-size:inherit">${esc(c.prossimo)}</b>`:''}</div>
-    <div class="hlinks">
-      <button type="button" class="wbtn" data-goto="mine"><b>Le mie ricette</b><span>${items.length?items.length+(items.length===1?' ricetta salvata':' ricette salvate'):''}</span></button>
-      <button type="button" class="wbtn" data-goto="book"><b>Ricettario</b></button>
-      <button type="button" class="wbtn" data-goto="budget"><b>Il mio menu</b></button>
-    </div>`;
+    <div class="hsec"><h3>Le ricette vincitrici</h3></div>
+    <div class="empty" style="padding:22px 16px"><b>Le prime vincitrici arrivano presto</b>${c.prossimo?`<br>Prossimo tema: <b style="display:inline;font-family:inherit;font-size:inherit">${esc(c.prossimo)}</b>`:''}</div>`;
   $('#cAct').onclick=()=>{
     if(ph==='taste'){toast('L\'assaggio e il voto arrivano con il prossimo aggiornamento');return}
     if(mine){openForm(mine);return}
@@ -2824,10 +2843,11 @@ function render(){
     :view==='book'&&book?.length?`<p class="lic">${book.length-nGz-nPu-nWo-nAr-nLi-nGn} ricette da <a href="https://it.wikibooks.org/wiki/Libro_di_cucina" target="_blank" rel="noopener">Wikibooks, Libro di cucina</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>)${nGz?` e ${nGz} ricette collegate a GialloZafferano (dati: <a href="https://doi.org/10.5281/zenodo.7265211" target="_blank" rel="noopener">Italian Gastronomic Recipes Dataset</a>, CC BY 4.0)`:''}${nPu?`, ${nPu} ricette tipiche della <a href="https://dati.puglia.it/ckan/dataset/prodotti-tipici-e-ricette" target="_blank" rel="noopener">Regione Puglia</a> (CC BY 4.0)`:''}${nWo?`, ${nWo} ricette dal mondo di <a href="https://theunitools.com/en/data" target="_blank" rel="noopener">UniTools — theunitools.com</a> (CC BY-SA 4.0, tradotte in italiano)`:''}${nAr?`, ${nAr} ricette dall'<a href="https://it.wikisource.org/wiki/La_scienza_in_cucina_e_l%27arte_di_mangiar_bene_(1895)" target="_blank" rel="noopener">Artusi (1895)</a>, pubblico dominio`:''}${nLi?`, ${nLi} da Wikipedia e dal Cookbook di Wikibooks (CC BY-SA 4.0)`:''}${nGn?`, ${nGn} piatti di tutti i giorni scritti per Gnamina`:''}</p>${fontiFoto()}${fontiDati()}`:'';
   const vet=showIta&&!cur2&&!fd&&!fz&&!fr&&!ft&&!fdf&&!fc&&WIDE()?vetrina():'';if(vet&&!TOP)topFetch();
   const mag=MAG()&&view==='mine'&&cur==='Tutte'&&!MAGALL&&!q&&!fd&&!fz&&!fr&&!ft&&!fdf&&!fc&&list.length>=4;
-  $('#list').innerHTML=vet+(mag?magHome(list):list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
+  $('#list').innerHTML=(view==='mine'?'<button type="button" class="btn pri addRow" id="addRow">＋ Aggiungi una ricetta</button>':'')+vet+(mag?magHome(list):list.length?list.slice(0,view==='book'?150:9999).map(card).join('')
     +(list.length>150&&view==='book'?`<p class="meta" style="text-align:center">Mostrate 150 di ${list.length}: usa la ricerca o i filtri per trovare le altre.</p>`:'')
     :`<div class="empty">${q?noResults(q):view==='book'?(book?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':'Carico il ricettario…'):items.length?'<b>Nessun risultato</b>Prova a cambiare ricerca o filtri.':welcome()}</div>`)+(lic?`<details class="lic fonti"><summary>Fonti e licenze</summary>${lic}</details>`:'');
   if(mag)magWire();else if(MAG())magKb();
+  const ar=$('#addRow');if(ar)ar.onclick=()=>openForm();
   $('#list').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>$(`#tabs .tab[data-v=${b.dataset.goto}]`).click());
   $('#list').querySelectorAll('.vtile[data-vid]').forEach(t=>{t.onclick=()=>{const b=findAny(t.dataset.vid);if(b)openDetail(b)};t.onkeydown=e=>{if(e.key==='Enter')t.click()}});
   $('#list').querySelectorAll('.vcat[data-vcat]').forEach(b=>b.onclick=()=>{const c=b.dataset.vcat;if(c==='Internazionali'){cur='Internazionali';cur2=''}else{cur='Italiane';cur2=c}render();scrollTo({top:0,behavior:'smooth'})});
@@ -2839,11 +2859,7 @@ function welcome(){
   const pick=[];for(let i=0;pool.length&&pick.length<8&&i<40;i++){const b=pool[(day*7919+i*104729)%pool.length];if(!pick.includes(b))pick.push(b)}
   return `<div class="welcome">
     <h2>Benvenuto in Gnamina</h2><p class="tagline">La tua app di cucina</p>
-    <div class="wact">
-      <button type="button" class="wbtn" data-w="add"><b>➕ Salva la prima ricetta</b></button>
-      <button type="button" class="wbtn" data-w="book"><b>📖 Sfoglia il Ricettario</b></button>
-      <button type="button" class="wbtn" data-w="budget"><b>🍽️ Crea il mio menu</b></button>
-    </div>
+    <p class="wlead">Qui trovi le tue ricette: salvale da un video, fotografa il quaderno di casa o scrivile tu.</p>
     <h3>Da TikTok e Instagram</h3>
     <ol class="wsteps"><li>Apri il video e tocca <b>Condividi</b></li><li>Scegli <b>Gnamina</b></li><li>Controlla e <b>salva</b></li></ol>
     ${pick.length?`<h3>Piatti di oggi</h3><div class="hscroll">${pick.map(card).join('')}</div>`:'<p class="meta">Carico i piatti del giorno…</p>'}
@@ -3327,7 +3343,7 @@ function showPlan(P){
   const sum=`${week?'Settimana':'Un pasto'} · ${euro(o.budget)} · ${o.people} ${o.people>1?'persone':'persona'}${o.diets.length?' · '+o.diets.join(', '):''}${o.cuisine==='mondo'?' · anche dal mondo':o.cuisine==='italiana'?' · anche regionali rari':''}${o.ready==='yes'?' · anche cibi pronti':o.ready==='some'?' · cibi pronti se il tempo è poco':''}${o.breakfast&&o.breakfast!=='no'?` · colazione ${o.breakfast==='mista'?'varia':o.breakfast}`:''}${o.bread==='no'?' · senza pane':o.bread==='all'?' · pane a ogni pasto':''}`;
   const nPronti=res.plan.reduce((a,m)=>a+m.dishes.filter(x=>x.pronto).length,0);
   $('#bOut').innerHTML=`
-    <p class="meta bsumIn">${esc(sum)}</p><button type="button" class="fab" id="bEdit">Nuovo menu</button>
+    <p class="meta bsumIn">${esc(sum)}</p>
     ${stale?`<div class="warn">I prezzi sono stati aggiornati a ${esc(PT.period)} dopo la creazione di questo menu (${esc(P.period)}). <button class="btn" id="bRefresh">Ricalcola menu</button></div>`:''}
     ${over?(res.cost<=o.budget*1.04?`<div class="warn">Il menu supera di poco il budget (${euro(res.cost-o.budget)} in più): puoi rigenerarlo o sostituire un piatto.</div>`
       :`<div class="warn">Con ${euro(o.budget)} non si riesce a coprire tutto: il menu più economico che ho trovato costa circa <b>${euro(res.cost)}</b>. Prova ad alzare il budget o a ridurre i pasti.</div>`):''}
@@ -3349,10 +3365,10 @@ function showPlan(P){
     ${nPronti?`<p class="meta">I piatti segnati «pronto» (${nPronti}) sono cibi già pronti del supermercato: surgelati, freschi confezionati, in scatola o di gastronomia, con prezzi medi indicativi e valori nutrizionali medi della categoria (fa fede l'etichetta).</p>`:''}
     <p class="meta">Costi stimati con i prezzi medi${P.period?` dell'Osservatorio Prezzi MIMIT (${esc(P.period)}, ${esc(P.zone)})`:''} e prezzi indicativi; calorie e nutrienti medi, indicativi. Pasti scelti tra ${P.n} ricette compatibili${P.noCost?`; ${P.noCost} delle tue ricette sono escluse perché senza costo calcolato (aprile e tocca "Calcola calorie e costo")`:''}.</p>
 </details>
-    <div class="row" style="margin-bottom:8px"><button class="btn" id="bPrint" style="flex:1">🖨 Stampa menu</button><button class="btn pri" id="bAgain" style="flex:1">🔀 Varia menu</button></div>`;
+    <div class="row" style="margin-bottom:8px"><button class="btn" id="bPrint" style="flex:1">🖨 Stampa menu</button><button class="btn" id="bEdit" style="flex:1">✏️ Nuovo menu</button></div>`;
   if(BPANE!=='disp')$('#bSum').textContent=sum;
   $('#bPrint').onclick=()=>{try{libPrintHtml(menuPrintDoc(P),week?'Menu della settimana':'Il menu','a4')}catch{toast('Stampa non riuscita: riprova')}};
-  $('#bAgain').onclick=$('#bVary').onclick=()=>{$('#bOut').innerHTML='<p class="meta">Preparo un altro menu con le stesse scelte…</p>';varying=true;$('#bForm').requestSubmit()};
+  $('#bVary').onclick=()=>{$('#bOut').innerHTML='<p class="meta">Preparo un altro menu con le stesse scelte…</p>';varying=true;$('#bForm').requestSubmit()};
   $('#bEdit').onclick=()=>budgetView(true,0);
   if($('#bRefresh'))$('#bRefresh').onclick=()=>$('#bForm').requestSubmit();
   $('#bOut').querySelectorAll('.dish[data-id]:not([data-id=raw])').forEach(el=>el.onclick=async()=>{await loadBook();const r=findRec(el.dataset.id,el.dataset.book);if(r)openDetail(r)});
@@ -3499,12 +3515,14 @@ function openDetail(i){
   const lnk=i.url&&i.source!=='Gnamina'&&i.source!=='Aggregatore Ricette'?i.url:i.video||'';
   if(lnk)acts.push(`<button type="button" class="btn" id="dCopy" data-u="${esc(lnk)}">${kIc('copy')}Copia il link</button>`);
   acts.push(`<a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent('ricetta '+(i.title||''))}" target="_blank" rel="noopener">${kIc('play')}Cerca su YouTube</a>`);
-  if(!(i.pronto||i.colazione))acts.push(i.book||i.chatShare?`<button class="btn" id="dSave">${kIc('mie')}Salva nelle mie</button>`:`<button class="btn" id="dEdit">${kIc('edit')}Modifica</button>`);
+  // v190: in alto due pulsanti grandi (Cucina con me, Salva o Modifica); il resto in «Altro…» in fondo
+  const top=[];
+  if(i.steps?.length)top.push(`<button type="button" class="btn pri" id="dCook">${kIc('cook')}Cucina con me</button>`);
+  if(!(i.pronto||i.colazione))top.push(i.book||i.chatShare?`<button class="btn" id="dSave">${kIc('mie')}Salva nelle mie</button>`:`<button class="btn" id="dEdit">${kIc('edit')}Modifica</button>`);
   if(libOk(i)&&!i.chatShare&&accOn())acts.push(`<button type="button" class="btn" id="dChat">${kIc('chat')}Manda a un Gnammer</button>`);
   libSync(i);
   if(libOk(i)&&!i.pronto&&!i.colazione&&!i.chatShare)acts.push(`<button type="button" class="btn" id="dLib">${kIc('lib')}${i.inBook?`Nel libro · ${esc(i.bookNo||'')}`:'Metti nel libro'}</button>`);
   if(libOk(i)&&!i.chatShare)acts.push(`<button type="button" class="btn" id="dPrint">${kIc('print')}Stampa la ricetta</button>`);
-  acts.push(`<button class="btn" id="dClose">Chiudi</button>`);
   $('#dv').innerHTML=`<button class="dclose" id="dX" aria-label="Chiudi"><svg class="ix" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button><div class="dcols"><div class="dmain">
     ${i.clips?.length?`<div class="clipPl" id="clipPl"><video controls playsinline></video><p class="meta clipLbl">Carico il video…</p><p class="row" style="justify-content:flex-start;gap:8px;margin:0 0 10px"><button type="button" class="btn pri" data-vc="share">📤 Pubblica</button><button type="button" class="btn" data-vc="save">💾 Salva nel rullino</button></p></div>`
       :e&&/facebook\.com\/plugins/.test(e.src)?fbHero(i,c1,c2,em)
@@ -3515,19 +3533,20 @@ function openDetail(i){
     ${i.pseudo?`<div class="warn" style="margin:8px 0">Piatto <b>italo-americano</b>: nato all'estero e spesso presentato come italiano, non fa parte della cucina italiana di tutti i giorni.</div>`:''}
     ${tm?`<div class="kv"><span>⏱ ${fmtMin(tm.t)}${tm.w>=30?` + ${fmtMin(tm.w)} attesa`:''}</span><span>${DIFF[tm.d]}</span>${i.cat?`<span>${esc(i.cat)}</span>`:''}</div>`:''}
     ${sub?`<div class="meta">${esc(sub)}</div>`:''}
-    <div class="badges">${(i.diets||[]).map(d=>`<span class="bdg">${esc(d)}</span>`).join('')}${(i.tags||[]).map(t=>`<span class="bdg z">#${esc(t)}</span>`).join('')}</div>
+    ${i.tags?.length?`<div class="badges">${i.tags.map(t=>`<span class="bdg z">#${esc(t)}</span>`).join('')}</div>`:''}
+    ${top.length?`<div class="dtop${top.length===1?' one':''}">${top.join('')}</div>`:''}
     ${i.summary?`<p class="cap" style="color:var(--fg);margin:6px 0 0">${esc(i.summary)}</p>`:''}
-    ${canRate(i)?`<div id="dStars" data-id="${esc(pubId(i))}"></div>`:''}
-    ${pubId(i)?`<div class="comm" id="dComm" data-id="${esc(pubId(i))}"></div>`:''}
     </div><div class="dside">
     ${i.linked?`<div class="kv"><span>Costo ${esc(i.cost||'n.d.')}</span></div><h3>Ingredienti principali</h3><ul>${i.ingredients.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="meta">Dosi e procedimento sono sulla pagina originale di GialloZafferano.</p>`
     :i.ingredients?.length?`<h3>Ingredienti</h3><div class="srv">Per <button type="button" class="btn" id="sMinus" aria-label="Meno persone">−</button><b id="sN"></b><button type="button" class="btn" id="sPlus" aria-label="Più persone">+</button> <span id="sLbl">persone</span> <span class="meta" id="sOrig"></span></div>
-      <div class="nut" id="nut"></div><ul id="ingList"></ul>`:''}
-    ${i.steps?.length?`<h3>Procedimento</h3><button type="button" class="btn cookBtn" id="dCook">${kIc('cook')}Cucina con me</button><ol>${i.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
+      <ul id="ingList"></ul><details class="nutBox"><summary>Calorie e costo</summary><div class="nut" id="nut"></div></details>`:''}
+    ${i.steps?.length?`<h3>Procedimento</h3><ol>${i.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
     ${i.note?`<h3>Note</h3><p class="cap">${esc(i.note)}</p>`:''}
     ${!i.ingredients?.length&&i.caption?`<h3>Descrizione</h3><p class="cap">${esc(i.caption)}</p>`:''}
     ${fonti.length?`<details class="fonti2"><summary>Fonti e note</summary>${fonti.map(f=>`<p class="lic">${f}</p>`).join('')}${i.artusi?`<details class="meta" style="margin-top:8px"><summary>Testo originale di Artusi: «${esc(i.origTitle)}» (n. ${i.num}, ${esc(i.chapter)})</summary><p class="cap" style="margin-top:6px">${esc(i.text)}</p></details>`:''}</details>`:''}
-    <div class="dacts${acts.length%2?' odd':''}">${acts.join('')}</div></div></div>`;
+    ${canRate(i)?`<div id="dStars" data-id="${esc(pubId(i))}"></div>`:''}
+    ${pubId(i)?`<div class="comm" id="dComm" data-id="${esc(pubId(i))}"></div>`:''}
+    ${acts.length?`<details class="dmore"><summary>Altro…</summary><div class="dacts${acts.length%2?' odd':''}">${acts.join('')}</div></details>`:''}</div></div>`;
   DET=i;rateBox(i);
   {const pid=pubId(i);if(pid){starsFetch([pid],true);commInit(pid)}}
   if(i.ingredients?.length&&!i.linked){
@@ -3535,12 +3554,12 @@ function openDetail(i){
     const draw=()=>{const f=n/base;
       $('#ingList').innerHTML=i.ingredients.map(x=>`<li>${esc(scaleLine(x,f))}</li>`).join('');
       $('#sN').textContent=n;$('#sLbl').textContent=n===1?'persona':'persone';
-      $('#sOrig').textContent=!i.servings?`(persone stimate: ${base})`:n!==base?`(ricetta originale per ${base})`:'';
+      $('#sOrig').textContent=i.servings&&n!==base?`(ricetta originale per ${base})`:'';
       $('#sMinus').disabled=n<=1;drawNut(i,n)};
     $('#sMinus').onclick=()=>{if(n>1){n--;draw()}};$('#sPlus').onclick=()=>{if(n<50){n++;draw()}};
     draw();
   }
-  $('#dClose').onclick=$('#dX').onclick=()=>$('#det').close();
+  $('#dX').onclick=()=>$('#det').close();
   if($('#dv .fbHero'))fbHeroFix($('#dv .fbHero'),i);
   if($('#dCopy'))$('#dCopy').onclick=e=>copyText(e.currentTarget.dataset.u,'Link copiato negli appunti');
   if($('#dLib'))$('#dLib').onclick=e=>{const it=libToggle(i.id);if(!it)return;e.currentTarget.innerHTML=kIc('lib')+(it.inBook?`Nel libro · ${it.bookNo}`:'Metti nel libro');toast(it.inBook?`Nel libro di cucina come ${it.bookNo}`:'Tolta dal libro di cucina');render()};

@@ -6,6 +6,9 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
 
 ## 2026-11-23
 
+- **Versione 190, primo giro di semplificazione dell'interfaccia**
+  - «Aggiungi una ricetta» in riga in cima a «Le mie» al posto del pulsante galleggiante sul telefono; «Nuovo menu» in fondo accanto a «Stampa menu», un solo «Varia menu»; tolti i pulsanti doppioni dalla pagina di benvenuto e dalla sfida («La vincitrice arriva presto», «Le ricette vincitrici»); scheda della ricetta riordinata («Cucina con me» e «Salva nelle mie» in alto, ingredienti e passaggi a sinistra e più grandi, calorie e costo al tocco, stelle e commenti in fondo, altri pulsanti in «Altro…», tolto «Chiudi»); scritte da leggere almeno a 15 punti. Copia di salvezza della 189: tag `versione-189` e release «versione-189» con Gnamina-189.apk.
+
 - **Versione 189, lettura delle ricette corretta dopo la prova sulle 100 ricette più viste dei social**
   - **La prova:** i video di ricette più visti di YouTube, TikTok, Instagram e Facebook (25 per piattaforma) importati con l'app e il server vero; giudizio di quattro aiutanti Sonnet (il PC con Qwen era spento), casi gravi ricontrollati a mano. Voto medio 3,6, 53 ricette buone e 18 scarse. Resoconto in `docs/prove/prova-100-piu-viste-2026-11-23.md`.
   - **Server, stessa ricetta su post diversi:** con un testo corto (un video Facebook dà solo «Video») la memoria delle analisi distingueva i post solo dal testo, e quattro video diversi uscivano tutti «Biscuit log». Ora con un testo sotto i 200 caratteri conta anche il link; e se Facebook non dà il testo si usa il titolo scritto nel link («creme-caramel-il-segreto-per-renderlo-perfetto»).
