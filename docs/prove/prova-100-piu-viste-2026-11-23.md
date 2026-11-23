@@ -66,3 +66,15 @@ Tutti i difetti 1-8 sono stati corretti (dettagli in CHANGELOG.md). Provate offl
 - **Tempi:** i tempi dal video salgono a 25, 50 e 240 minuti dove erano 5.
 
 Il messaggio dell'app per il TikTok senza testo è stato provato nel browser. Le parti che usano il modello (traduzione dei titoli, titolo dal video, chiave della memoria) si possono provare solo dopo aver ripubblicato il server.
+
+## Riprova dopo la pubblicazione (23/11, server e versione 189)
+
+Rifatti 11 link con l'app e il server nuovo, incollando il solo link come fa un utente:
+- **Facebook:** i quattro video che uscivano tutti «Biscuit log» ora hanno ciascuno la sua ricetta: «Biscotti a tronco di legno senza cottura», «Crème caramel», «Con 3 ingredienti per bambini» (titolo ancora vago: il link dice solo «only 3 ingredients») e «Cookies ripieni».
+- **Instagram:** le dosi tornano («1 tazza cottage cheese, 2 uova, 1/2 cucchiaino…») e sparisce l'avviso «il post non elenca gli ingredienti».
+  - Un titolo francese è tradotto: «Tartes tarins salées» → «Tarte tatin salata».
+- **YouTube:** i titoli vaghi sono sostituiti da nomi specifici, e i saluti spariscono dagli ingredienti:
+  - «Dolce senza forno» → «Tiramisù con savoiardi e cioccolato»
+  - «Pizza» → «Spiedini di pasta pizza»
+- **Tempi:** passano da 5 a 240 minuti (frigo) e da 5 a 50 (bagnomaria).
+- **TikTok:** «Baked feta pasta» → «Pasta feta al forno».

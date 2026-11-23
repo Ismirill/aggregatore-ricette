@@ -13,6 +13,7 @@ Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) 
   - **Server, titoli e ingredienti tradotti:** si traducono anche gli ingredienti in francese e i titoli stranieri («Gaufres de pommes de terre» → «Waffle di patate»); libbre, once e pollici diventano grammi e centimetri, e le alternative in once accanto ai grammi si tolgono.
   - **Server, pulizie:** via dagli ingredienti saluti e sponsor («Buon appetito grazie per la visione», «Sponsor: Mulino Caputo»); gli ingredienti nominati nei passaggi e assenti dalla lista (cannella, zucchero a velo, panna, lamponi) si aggiungono senza dose.
   - **Server, tempo e titolo dal video:** quando i passaggi vengono dal video il tempo non resta quello del titolo acchiappa-clic («Dolce in 5 minuti» con 3-4 ore di frigo); un titolo vago («Pizza», «Dolce con la mela») lascia il posto a quello specifico detto nel video. Analisi in memoria rifatte (ANALYZE_V 11).
+  - **Pubblicata e riprovata:** server ripubblicato e 11 link rifatti: i quattro Facebook hanno ognuno la sua ricetta, le dosi dei post inglesi tornano, «Dolce senza forno» diventa «Tiramisù con savoiardi e cioccolato» con 240 minuti invece di 5.
   - **App:** un TikTok senza didascalia né parlato ora dice «Nel post non c'è né testo né parlato» invece di «Non riesco a leggere la pagina»; tra i passaggi provvisori presi dalla descrizione si tolgono le traduzioni in altri alfabeti e gli inviti a iscriversi al canale.
 
 ## 2026-11-22
