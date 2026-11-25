@@ -4,6 +4,14 @@ Ogni passo del lavoro, dal più recente. Sito, app Android (APK) e app iOS escon
 
 Gli aggiornamenti notturni automatici del ricettario (traduzioni, Artusi, foto) non sono elencati qui: si vedono nella cronologia dei commit come «Aggiornamento automatico ricettario e versione».
 
+## 2026-11-25
+
+- **Versione 192: il menu usa prima i cibi che scadono**
+  - All'ultimo passo del menu c'è la domanda «Vuoi usare prima i cibi che scadono?» (Sì/No). Compare solo se in dispensa c'è qualcosa che scade entro 14 giorni, con l'elenco dei prodotti dal più vicino alla scadenza.
+  - Con «Sì» i pasti si scelgono a partire da oggi: i prodotti che scadono prima finiscono nei primi giorni, mai in un giorno in cui sono già scaduti. Funziona anche per il pasto singolo.
+  - Sotto ogni piatto «🧺 usa …»; in alto i prodotti che non sono entrati nel menu. La riparazione del budget non toglie i piatti della dispensa.
+  - Corretto il riconoscimento dei prodotti negli ingredienti: ora cerca l'inizio della parola («pollo» non trova più «cipollotto»), anche nelle «Ricette per non sprecare».
+
 ## 2026-11-23
 
 - **Versione 191: ricette vegetariane corrette, il mio menu come uno schedario, sito sistemato**

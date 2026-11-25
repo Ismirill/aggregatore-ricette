@@ -460,6 +460,7 @@ details summary{cursor:pointer}
 .warnTxt{color:var(--acc);font-weight:600}
 .srcGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11rem),1fr));gap:10px}.srcCard{font:inherit;text-align:left;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:12px;cursor:pointer;color:var(--fg)}.srcCard b{display:block;font-size:1rem;margin-bottom:4px}.srcCard span{font-size:.78rem;color:var(--mut);line-height:1.35;display:block}.srcCard:active{transform:scale(.98)}
 .shopBox{margin:4px 0 12px}.shopBox summary{list-style:none;cursor:pointer;background:var(--acc);color:#fff;font-weight:700;font-size:1.05rem;padding:14px 16px;border-radius:14px;text-align:center;box-shadow:var(--sh)}.shopBox summary::-webkit-details-marker{display:none}.shopBox summary span{font-weight:500;opacity:.85}.shopBox[open] summary{border-radius:14px 14px 0 0}.shopBox #shopList{background:var(--card);border:1px solid var(--bd);border-top:none;border-radius:0 0 14px 14px;padding:10px 14px 14px}
+.bpan{margin-top:14px}.bpan>p{margin:0 0 6px}#bOut .dish .dpan{display:block;font-style:normal;font-weight:600;font-size:.85rem;color:var(--acc);margin-top:2px}
 #bOut .dish{font-size:1rem}#bOut .dish small{font-size:.82rem}#bOut .dish .r{font-size:.72rem}#bOut .meal>.meta{font-size:.85rem}#bOut .nbox span{font-size:.78rem}#bOut .bdg{font-size:.76rem}#bOut .fonti p{text-align:left;margin:8px 0 0;font-size:.82rem}.aiTag{position:absolute;right:8px;top:8px;z-index:2;font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}.fonti{grid-column:1/-1;margin:18px 0 4px;text-align:left}@media (max-width:899px){.list>.fonti{max-width:calc(100% - 180px)}} /* a sinistra: a destra c'è il pulsante «Nuova ricetta» */.fonti summary{cursor:pointer;color:var(--mut);font-weight:600}.fonti p{margin:8px 0 0}
 .kv{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
 .kv span{font-size:.8rem;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--bg2)}
@@ -1328,7 +1329,9 @@ details summary{cursor:pointer}
     <section class="step" data-s="5" hidden><h3>Cucina e periodo</h3>
       <label>Cucina<select name="cuisine"><option value="quotidiana">Italiana di tutti i giorni</option><option value="italiana">Italiana, anche regionale</option><option value="mondo">Anche dal mondo</option></select></label>
       <div class="two"><label>Periodo<select name="month" id="bMonth"></select></label>
-      <label>Ricette<select name="pool"><option value="all">Ricettario + le mie</option><option value="book">Solo ricettario</option><option value="mine">Solo le mie</option></select></label></div></section>
+      <label>Ricette<select name="pool"><option value="all">Ricettario + le mie</option><option value="book">Solo ricettario</option><option value="mine">Solo le mie</option></select></label></div>
+      <div id="bPanL" class="bpan" hidden><p><b>Vuoi usare prima i cibi che scadono?</b></p><p class="meta" id="bPanN"></p>
+        <div class="seg"><label><input type="radio" name="pantry" value="yes" checked><span>Sì</span></label><label><input type="radio" name="pantry" value="no"><span>No</span></label></div></div></section>
     <div class="wfoot"><button type="button" class="btn pri" id="wNext">Avanti</button><button class="btn pri" id="wGo" hidden>Crea il menu</button></div>
   </form>
   <div id="bOut"></div>
@@ -1522,8 +1525,8 @@ function dAgo(a){const d=-dLeft(a);return d<=0?'preso oggi':d===1?'preso ieri':d
 function dRow(p){const sub=(D_WHERE[p.w]||'Frigo')+(p.s?' · '+dAgo(p.a||dIso(dToday())):'');
   return `<div class="drow"><span class="dem">${p.e||'🛒'}</span><span class="dnm"><b>${esc(p.n)}${p.q>1?` <small>×${p.q}</small>`:''}</b><span>${dPill(p)} ${sub}</span></span><button type="button" class="dfin" data-fin="${esc(p.id)}">Finito</button></div>`}
 // parole da cercare negli ingredienti: quelle del catalogo, altrimenti la radice delle parole del nome
-function dRx(p){if(p.r)try{return new RegExp(p.r,'i')}catch{}
-  const w=p.n.toLowerCase().replace(/[^a-zà-ù ]/g,' ').split(/\s+/).filter(x=>x.length>3).map(x=>x.replace(/[aeiou]$/,''));return w.length?new RegExp(w.join('|'),'i'):null}
+function dRx(p){if(p.r)try{return new RegExp('\\b(?:'+p.r+')','i')}catch{}
+  const w=p.n.toLowerCase().replace(/[^a-zà-ù ]/g,' ').split(/\s+/).filter(x=>x.length>3).map(x=>x.replace(/[aeiou]$/,''));return w.length?new RegExp('\\b(?:'+w.join('|')+')','i'):null}
 // Ricette che usano i prodotti che scadono prima: più prodotti in scadenza usa, più sale
 function dRecipes(soon){const pool=[...(book||[]),...items.filter(i=>i.ingredients?.length)];if(!soon.length||!pool.length)return [];
   const S=soon.map(p=>({p,rx:dRx(p),w:Math.max(1,6-dLeft(p.x))})).filter(o=>o.rx);
@@ -2515,7 +2518,7 @@ function embedOf(i){
 
 /* ---------- Dati aggiornati automaticamente sul sito ---------- */
 // Nell'APK i dati (ricettario, stagioni) arrivano dal sito, che GitHub aggiorna da solo ogni mese; la copia interna serve offline
-const APP_VERSION=191; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
+const APP_VERSION=192; // aumentare a ogni modifica dell'app: l'APK installato confronta con version.json del sito
 const SITE='https://gnamina.it/'; // dal 7/11/2026 il sito ha il suo dominio; il vecchio indirizzo ismirill.github.io/aggregatore-ricette/ rimanda qui
 const inApp=!!window.Capacitor||(location.hostname==='localhost'&&location.protocol==='https:');
 async function fetchData(name){
@@ -3040,6 +3043,14 @@ function quotOf(r){ // piatto quotidiano corrispondente alla ricetta, se c'è
 }
 const plainT=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 // quanto un piatto "sta bene" nel menu di chi usa l'app: popolarità nazionale + vicinanza alla sua regione
+/* v192 — menu adattato alla dispensa: i prodotti non scaduti che scadono entro 14 giorni, dal più vicino */
+function panList(){try{return dItems().map(p=>({p,left:dLeft(p.x),rx:dRx(p)})).filter(o=>o.rx&&o.left>=0&&o.left<=14).sort((a,b)=>a.left-b.left)}catch{return []}}
+const panWhen=l=>l===0?'oggi':l===1?'domani':l+' giorni';
+function panUI(){const el=$('#bPanL');if(!el)return;const L=panList();el.hidden=!L.length;if(!L.length)return;
+  const seen=new Set(),u=L.filter(o=>{const k=o.p.n.toLowerCase();if(seen.has(k))return false;seen.add(k);return true});
+  $('#bPanN').textContent='In dispensa: '+u.slice(0,3).map(o=>`${o.p.n.toLowerCase()} (scade ${o.left<2?panWhen(o.left):'tra '+panWhen(o.left)})`).join(', ')+(u.length>3?` e altri ${u.length-3}`:'')}
+/* valore di un prodotto della dispensa usato nel menu: più è vicino alla scadenza, più conta */
+const panVal=l=>3+3*(1-l/14);
 function fitScore(x,o){
   if(x.r.pronto)return o.ready==='yes'?1:-0.8; // cibi pronti: graditi se richiesti, altrimenti solo quando servono
   const q=x.q;if(!q)return x.r.world?-3:-1.5;
@@ -3074,7 +3085,7 @@ function initBudget(){
     if(last){for(const [k,v] of Object.entries(last.f))if(f[k]&&f[k].type!=='radio'&&f[k].type!=='checkbox')f[k].value=v;
       f.lunch.checked=last.f.lunch;f.dinner.checked=last.f.dinner;f.easy.checked=!!last.f.easy;f.ahead.checked=!!last.f.ahead;f.querySelector(`[name=mode][value=${last.f.mode}]`).checked=true;
       f.querySelector(`[name=ready][value=${last.f.ready||'no'}]`).checked=true;
-      f.querySelector(`[name=breakfast][value=${last.f.breakfast||'no'}]`).checked=true;f.querySelector(`[name=bread][value=${last.f.bread||'dinner'}]`).checked=true;
+      f.querySelector(`[name=breakfast][value=${last.f.breakfast||'no'}]`).checked=true;f.querySelector(`[name=bread][value=${last.f.bread||'dinner'}]`).checked=true;f.querySelector(`[name=pantry][value=${last.f.pantry==='no'?'no':'yes'}]`).checked=true;
       $('#bDiet').querySelectorAll('input').forEach(x=>x.checked=last.diets.includes(x.value))}
     f.querySelectorAll('[name=mode]').forEach(x=>x.onchange=modeUI);
     const plan=load('budgetPlan',null);if(plan){budgetView(false);loadSeason().then(()=>showPlan(plan))}else budgetView(true,0);
@@ -3085,7 +3096,7 @@ function showStep(k){
   wStep=Math.max(0,Math.min(W_N-1,k));const f=$('#bForm');
   f.querySelectorAll('.step').forEach(st=>st.hidden=+st.dataset.s!==wStep);
   $('#wDots').innerHTML=Array.from({length:W_N},(_,i)=>`<i class="${i===wStep?'on':i<wStep?'done':''}"></i>`).join('');
-  $('#wStep').textContent=`Passo ${wStep+1} di ${W_N}`;
+  $('#wStep').textContent=`Passo ${wStep+1} di ${W_N}`;if(wStep===W_N-1)try{panUI()}catch{}
   $('#wTopBack').style.visibility=wStep?'visible':'hidden';$('#wNext').hidden=wStep===W_N-1;$('#wGo').hidden=wStep!==W_N-1;
   modeUI();
 }
@@ -3152,7 +3163,7 @@ function allowed(r,diets,avoid){
 function candidates(o){
   const pool=[...(o.pool!=='mine'?(book||[]):[]),...(o.pool!=='book'?items:[]),...(o.ready!=='no'?PRONTI:[])];
   const role={'Primi':'primo','Secondi':'secondo','Contorni':'contorno','Piatti unici':'unico'};
-  const out=[],seen=new Set();let noCost=0;
+  const out=[],seen=new Set();let noCost=0;const PAN=o.pantry?panList():[];
   for(const r of pool){
     const sweet=r.b?r.b.some(([k,g])=>k==='zucchero'&&g/baseS(r)>=15):/zucchero/i.test((r.ingredients||[]).join(' '));
     // anche le tue ricette seguono le stesse regole; tra i lievitati solo pizze, calzoni e torte salate fanno da piatto unico (non pane e focacce)
@@ -3168,7 +3179,8 @@ function candidates(o){
     if(o.cuisine!=='mondo'&&r.country&&r.country!=='Italia')continue; // piatti esteri (anche nel ricettario italiano, es. sashimi) solo con "anche dal mondo"
     const tm=timing(r);if(o.easy&&tm.d>1)continue;if(!o.ahead&&tm.w>=60)continue;
     seen.add(r.title.toLowerCase());
-    out.push({r,q,role:ro,t:tm.t,w:tm.w,d:tm.d,eur:pp.eur,kcal:pp.kcal,p:pp.p??pp.kcal*.15/4,c:pp.c??pp.kcal*.5/4,f:pp.f??pp.kcal*.35/9,prot:protein(r),season:r.pronto?0:seasonScore(r,o.month)});
+    out.push({r,q,role:ro,t:tm.t,w:tm.w,d:tm.d,eur:pp.eur,kcal:pp.kcal,p:pp.p??pp.kcal*.15/4,c:pp.c??pp.kcal*.5/4,f:pp.f??pp.kcal*.35/9,prot:protein(r),season:r.pronto?0:seasonScore(r,o.month),
+      pan:PAN.length?(t=>PAN.filter(z=>z.rx.test(t)).map(z=>({id:z.p.id||z.p.n,n:z.p.n.toLowerCase(),left:z.left})))((r.ingredients||[]).join(' ').toLowerCase()):[]});
   }
   return {list:out,noCost};
 }
@@ -3240,11 +3252,14 @@ function buildWeek(o,C,X){
   const prim=[...by('primo'),...by('unico')],sec=[...by('secondo'),...by('unico')],cont=by('contorno');
   if(!prim.length||!sec.length)return null;
   const slots=[];for(let d=0;d<7;d++){if(o.lunch)slots.push({d,m:'lunch'});if(o.dinner)slots.push({d,m:'dinner'})}
+  // con la dispensa i pasti si scelgono a partire da oggi, così i prodotti che scadono prima finiscono nei primi giorni
+  const ti=(new Date().getDay()+6)%7,off=d=>(d-ti+7)%7;if(o.pantry)slots.sort((a,b)=>off(a.d)-off(b.d));
   const bks=o.breakfast&&o.breakfast!=='no'?breakfasts(o):[],bkCost=bks.reduce((a,m)=>a+m.eur,0)*o.people;
   const perSlot=(o.budget-bkCost)/o.people/slots.length;
   let best=null;
   for(let it=0;it<250;it++){
     const used=new Set(),usedQ=new Set(),usedDay=new Map(),cnt={pesce:0,rossa:0,bianca:0,legumi:0,uova:0,formaggi:0,verdure:0};const plan=[];let cost=0,pronti=0;
+    const panUsed=new Set();let panSc=0;
     const maxPronti=o.ready==='yes'?6:3; // cibi pronti: al massimo 3 a settimana se "quando il tempo è poco", 6 se graditi
     for(const sl of slots){
       const lim=(sl.d>=5?o.tEnd:o.tWeek)||1e9;
@@ -3252,12 +3267,13 @@ function buildWeek(o,C,X){
       if(!mains.length)return null;
       const noPr=x=>!(x.r.pronto&&pronti>=maxPronti); // raggiunto il massimo di cibi pronti, si cucina (o verdura cruda)
       if(mains.some(noPr))mains=mains.filter(noPr);
+      const panB=x=>x.pan?.length?x.pan.reduce((a,z)=>a+(!panUsed.has(z.id)&&off(sl.d)<=z.left?panVal(z.left):0),0):0;
       const choose=(arr,role)=>{
         let pool=arr.filter(x=>!used.has(x.r.id));
         if(!pool.length&&role==='contorno')pool=arr.filter(x=>(sl.d-(usedDay.get(x.r.id)??-9))>=2); // un contorno può tornare dopo 2 giorni
-        const cand=pickRand(pool,14);if(!cand.length)return pickRand(arr,1)[0];
+        const cand=pickRand(pool,14);if(o.pantry)cand.push(...pickRand(pool.filter(x=>panB(x)>0),8));if(!cand.length)return pickRand(arr,1)[0];
         const target=KCAL[sl.m]*(role==='contorno'?.18:.62);
-        return cand.map(x=>{let sc=Math.abs(x.kcal-target)/target*3-x.season*.6+Math.max(0,x.eur-perSlot*(role==='contorno'?.25:.65))/perSlot*4-fitScore(x,o)*1.1+(x.q&&usedQ.has(x.q.n)?2.5:0)+(prev.has(x.r.id)?3.5:0);
+        return cand.map(x=>{let sc=Math.abs(x.kcal-target)/target*3-x.season*.6+Math.max(0,x.eur-perSlot*(role==='contorno'?.25:.65))/perSlot*4-fitScore(x,o)*1.1+(x.q&&usedQ.has(x.q.n)?2.5:0)+(prev.has(x.r.id)?3.5:0)-panB(x)*1.6;
           if(role!=='contorno'){if(['rossa','uova','formaggi'].includes(x.prot)&&cnt[x.prot]>=2)sc+=6;
             if(['pesce','legumi'].includes(x.prot)&&cnt[x.prot]<2)sc-=1.5;if(x.prot==='bianca'&&cnt.bianca>=3)sc+=3}
           if(x.r.pronto){if(pronti>=maxPronti)sc+=8;if(o.ready==='some'&&lim>=45)sc+=2} // pronti: pochi, e quando il tempo è poco solo nei pasti veloci
@@ -3267,8 +3283,9 @@ function buildWeek(o,C,X){
       const fit=cont.filter(x=>main.t+x.t*.35<=lim&&noPr(x)); // il contorno si prepara in gran parte mentre cuoce il piatto principale
       const side=fit.length?choose(fit,'contorno'):rawSide(o,X);if(side.r.id!=='raw'){used.add(side.r.id);usedDay.set(side.r.id,sl.d)}
       pronti+=(main.r.pronto?1:0)+(side.r.pronto?1:0);
+      for(const x of [main,side])for(const z of x.pan||[])if(!panUsed.has(z.id)&&off(sl.d)<=z.left){panUsed.add(z.id);panSc+=panVal(z.left)}
       const parts=[main,side].filter(Boolean),add=[X.fruit,...(breadAt(o,X,{...sl,dishes:parts})?[X.bread]:[])];
-      const meal={...sl,t:Math.round((main.t+side.t*.5)/5)*5,dishes:parts,eur:[...parts,...add].reduce((a,x)=>a+x.eur,0),kcal:[...parts,...add].reduce((a,x)=>a+x.kcal,0),
+      const meal={...sl,t:Math.round((main.t+side.t*.5)/5)*5,dishes:parts,panBy:o.pantry?parts.map(x=>(x.pan||[]).filter(z=>off(sl.d)<=z.left).map(z=>z.n)):null,eur:[...parts,...add].reduce((a,x)=>a+x.eur,0),kcal:[...parts,...add].reduce((a,x)=>a+x.kcal,0),
         p:[...parts,...add].reduce((a,x)=>a+x.p,0),c:[...parts,...add].reduce((a,x)=>a+x.c,0),f:[...parts,...add].reduce((a,x)=>a+x.f,0)};
       plan.push(meal);cost+=meal.eur*o.people;
     }
@@ -3277,7 +3294,7 @@ function buildWeek(o,C,X){
     const rules=Math.max(0,2-cnt.pesce)*(o.diets.some(d=>/Vege|pesce/.test(d))?0:1)+Math.max(0,2-cnt.legumi)+Math.max(0,cnt.rossa-2)+Math.max(0,cnt.uova-2)+Math.max(0,cnt.formaggi-2);
     const P=plan.reduce((a,m)=>a+m.p*4,0),Cb=plan.reduce((a,m)=>a+m.c*4,0),F=plan.reduce((a,m)=>a+m.f*9,0),T=P+Cb+F;
     const macro=Math.max(0,P/T-.2)+Math.max(0,.12-P/T)+Math.max(0,.45-Cb/T)+Math.max(0,F/T-.35);
-    const score=(cost>o.budget?50+(cost-o.budget)/o.budget*100:0)+kcalDev*10+rules*4+macro*20+(o.budget-cost)/o.budget*1.5;
+    const score=(cost>o.budget?50+(cost-o.budget)/o.budget*100:0)+kcalDev*10+rules*4+macro*20+(o.budget-cost)/o.budget*1.5-panSc*1.2;
     if(!best||score<best.score)best={score,plan,cost,cnt,macro:{p:P/T,c:Cb/T,f:F/T}};
   }
   return best;
@@ -3291,6 +3308,7 @@ function repair(best,o,C,X){
     const dishes=best.plan.flatMap(m=>m.dishes.map((x,i)=>({m,i,x}))).sort((a,b)=>b.x.eur-a.x.eur);
     let done=false;
     for(const w of dishes){
+      if(o.pantry&&w.x.pan?.length)continue;
       const alt=C.list.filter(y=>y.role===w.x.role&&!used.has(y.r.id)&&y.eur<w.x.eur*.92&&y.t<=(w.x.t||0)+5&&(y.prot===w.x.prot||w.x.role==='contorno'||!['pesce','legumi'].includes(w.x.prot)))
         .sort((a,b)=>Math.abs(a.kcal-w.x.kcal)/w.x.kcal+(a.eur-b.eur)/w.x.eur)[0];
       if(!alt)continue;
@@ -3307,16 +3325,19 @@ function buildMeal(o,C,X){
   const lim=o.tWeek||1e9,ok=x=>x.t<=lim;
   const prim=by('primo').filter(ok),sec=by('secondo').filter(ok),cont=by('contorno').filter(ok),uni=by('unico').filter(ok);
   let best=null;
+  // con la dispensa, spesso si pesca tra le ricette che usano i prodotti in scadenza
+  const pick1=a=>{const w=o.pantry&&Math.random()<.6?a.filter(x=>x.pan?.length):[];return pickRand(w.length?w:a,1)[0]};
   for(let it=0;it<600;it++){
     const full=Math.random()<.65&&prim.length&&sec.length;
-    const parts=(full?[pickRand(prim,1)[0],pickRand(sec,1)[0]]:[pickRand(uni.length?uni:prim,1)[0]]).concat(cont.length&&Math.random()<.7?[pickRand(cont,1)[0]]:[rawSide(o,X)]).filter(Boolean);
+    const parts=(full?[pick1(prim),pick1(sec)]:[pick1(uni.length?uni:prim)]).concat(cont.length&&Math.random()<.7?[pick1(cont)]:[rawSide(o,X)]).filter(Boolean);
     if(!parts.length)continue;
     const tt=parts.map(x=>x.t),mt=Math.max(...tt)+(tt.reduce((a,x)=>a+x,0)-Math.max(...tt))*.5; // le preparazioni in parte si sovrappongono
     if(mt>lim)continue;
     const all=[...parts,X.fruit,...(X.bread&&!full?[X.bread]:[])];
     const pp=all.reduce((a,x)=>a+x.eur,0),cost=pp*o.people,kcal=all.reduce((a,x)=>a+x.kcal,0);
     const nPr=parts.filter(x=>x.r.pronto).length,nPrev=parts.filter(x=>prev.has(x.r.id)).length; // cibi pronti: non tutto il pasto, e con "quando il tempo è poco" solo se il tempo è davvero poco
-    const score=(cost>o.budget?50+(cost-o.budget)/o.budget*100:0)+Math.abs(kcal-850)/850*8-parts.reduce((a,x)=>a+x.season,0)*.5-parts.reduce((a,x)=>a+fitScore(x,o),0)*1.1-(full?1.5:0)+(o.budget-cost)/o.budget*1.5+(nPr>=parts.length&&parts.length>1?3:0)+(o.ready==='some'&&lim>=45?nPr*3:0)+nPrev*4;
+    const score=(cost>o.budget?50+(cost-o.budget)/o.budget*100:0)+Math.abs(kcal-850)/850*8-parts.reduce((a,x)=>a+x.season,0)*.5-parts.reduce((a,x)=>a+fitScore(x,o),0)*1.1-(full?1.5:0)+(o.budget-cost)/o.budget*1.5+(nPr>=parts.length&&parts.length>1?3:0)+(o.ready==='some'&&lim>=45?nPr*3:0)+nPrev*4
+      -(m=>[...m.values()].reduce((a,l)=>a+panVal(l),0)*1.6)(new Map(parts.flatMap(x=>(x.pan||[]).map(z=>[z.id,z.left]))));
     if(!best||score<best.score)best={score,plan:[{d:0,m:'meal',t:Math.round(mt/5)*5,dishes:parts,eur:pp,kcal,p:all.reduce((a,x)=>a+x.p,0),c:all.reduce((a,x)=>a+x.c,0),f:all.reduce((a,x)=>a+x.f,0)}],cost,
       macro:(()=>{const P=all.reduce((a,x)=>a+x.p*4,0),Cb=all.reduce((a,x)=>a+x.c*4,0),F=all.reduce((a,x)=>a+x.f*9,0),T=P+Cb+F;return {p:P/T,c:Cb/T,f:F/T}})()};
   }
@@ -3325,12 +3346,12 @@ function buildMeal(o,C,X){
 
 $('#bForm').onsubmit=async e=>{
   e.preventDefault();const f=e.target;modeUI();
-  const o={cuisine:f.cuisine.value,tWeek:+f.tWeek.value,tEnd:+f.tEnd.value,easy:f.easy.checked,ahead:f.ahead.checked,mode:f.mode.value,budget:+f.budget.value,people:+f.people.value||1,lunch:f.lunch.checked,dinner:f.dinner.checked,month:+f.month.value,pool:f.pool.value,ready:f.ready.value,breakfast:f.mode.value==='week'?f.breakfast.value:'no',bread:f.bread.value,
+  const o={cuisine:f.cuisine.value,tWeek:+f.tWeek.value,tEnd:+f.tEnd.value,easy:f.easy.checked,ahead:f.ahead.checked,mode:f.mode.value,budget:+f.budget.value,people:+f.people.value||1,lunch:f.lunch.checked,dinner:f.dinner.checked,month:+f.month.value,pool:f.pool.value,ready:f.ready.value,breakfast:f.mode.value==='week'?f.breakfast.value:'no',bread:f.bread.value,pantry:!$('#bPanL').hidden&&f.pantry.value==='yes',
     diets:[...$('#bDiet').querySelectorAll('input:checked')].map(x=>x.value),avoid:f.avoid.value.toLowerCase().split(',').map(x=>x.trim()).filter(x=>x.length>2)};
   if(o.mode==='week'&&!o.lunch&&!o.dinner){toast('Scegli almeno pranzo o cena');showStep(2);return}
   if(!(o.budget>0)){showStep(1);toast('Indica il budget');return}
   budgetView(false);
-  save('budgetForm',{f:{cuisine:f.cuisine.value,tWeek:f.tWeek.value,tEnd:f.tEnd.value,easy:o.easy,ahead:o.ahead,mode:o.mode,budget:f.budget.value,people:f.people.value,lunch:o.lunch,dinner:o.dinner,month:f.month.value,pool:o.pool,ready:o.ready,breakfast:f.breakfast.value,bread:o.bread,avoid:f.avoid.value},diets:o.diets});
+  save('budgetForm',{f:{cuisine:f.cuisine.value,tWeek:f.tWeek.value,tEnd:f.tEnd.value,easy:o.easy,ahead:o.ahead,mode:o.mode,budget:f.budget.value,people:f.people.value,lunch:o.lunch,dinner:o.dinner,month:f.month.value,pool:o.pool,ready:o.ready,breakfast:f.breakfast.value,bread:o.bread,pantry:f.pantry.value,avoid:f.avoid.value},diets:o.diets});
   $('#bOut').innerHTML='<p class="meta">Preparo il menu…</p>';
   await Promise.all([loadBook(),loadPT(),loadSeason()]);
   o.region=userRegion();
@@ -3340,7 +3361,8 @@ $('#bForm').onsubmit=async e=>{
   const C=candidates(o),X=extras(o);
   const res=repair(o.mode==='week'?buildWeek(o,C,X):buildMeal(o,C,X),o,C,X);
   if(!res){$('#bOut').innerHTML='<div class="warn">Non ci sono abbastanza ricette compatibili con queste scelte. Prova ad aumentare il tempo per cucinare, a togliere qualche filtro o a usare anche il ricettario.</div><div class="row"><button class="btn" onclick="budgetView(true,2)">← Modifica scelte</button></div>';return}
-  const plan={o,res:{...res,plan:res.plan.map(m=>({...m,dishes:m.dishes.map(x=>({id:x.r.id,book:!!x.r.book,pronto:!!x.r.pronto,kind:x.r.kind||'',title:x.r.title,veg:x.r.veg||null,role:x.role,eur:x.eur,kcal:x.kcal,prot:x.prot,t:x.t,d:x.d}))}))},X,noCost:C.noCost,n:C.list.length,zone:PT.zone,period:PT.period};
+  const plan={o,res:{...res,plan:res.plan.map(({panBy,...m})=>({...m,dishes:m.dishes.map((x,i)=>({id:x.r.id,book:!!x.r.book,pronto:!!x.r.pronto,kind:x.r.kind||'',title:x.r.title,veg:x.r.veg||null,role:x.role,eur:x.eur,kcal:x.kcal,prot:x.prot,t:x.t,d:x.d,...(o.pantry?(a=>a.length?{pan:[...new Set(a)]}:{})(panBy?(panBy[i]||[]):(x.pan||[]).map(z=>z.n)):{})}))}))},X,noCost:C.noCost,n:C.list.length,zone:PT.zone,period:PT.period};
+  if(o.pantry)try{const u=new Set(plan.res.plan.flatMap(m=>m.dishes.flatMap(x=>x.pan||[])));plan.panMiss=[...new Set(panList().map(z=>z.p.n.toLowerCase()))].filter(n=>!u.has(n))}catch{}
   save('budgetPlan',plan);showPlan(plan);
 };
 /* Stampa del menu (v186): foglio A4 come la carta di un ristorante — cornice doppia, titoli in Cormorant, piatti centrati.
@@ -3389,7 +3411,7 @@ function showPlan(P){
   const days=week?GIORNI.map((g,d)=>({g,ms:res.plan.filter(m=>m.d===d).sort((a,b)=>ORD[a.m]-ORD[b.m])})):[{g:'Il tuo pasto',ms:res.plan}];
   const hasBk=res.plan.some(m=>m.m==='breakfast');
   const stale=PT?.period&&P.period&&PT.period!==P.period;
-  const sum=`${week?'Settimana':'Un pasto'} · ${euro(o.budget)} · ${o.people} ${o.people>1?'persone':'persona'}${o.diets.length?' · '+o.diets.join(', '):''}${o.cuisine==='mondo'?' · anche dal mondo':o.cuisine==='italiana'?' · anche regionali rari':''}${o.ready==='yes'?' · anche cibi pronti':o.ready==='some'?' · cibi pronti se il tempo è poco':''}${o.breakfast&&o.breakfast!=='no'?` · colazione ${o.breakfast==='mista'?'varia':o.breakfast}`:''}${o.bread==='no'?' · senza pane':o.bread==='all'?' · pane a ogni pasto':''}`;
+  const sum=`${week?'Settimana':'Un pasto'} · ${euro(o.budget)} · ${o.people} ${o.people>1?'persone':'persona'}${o.diets.length?' · '+o.diets.join(', '):''}${o.cuisine==='mondo'?' · anche dal mondo':o.cuisine==='italiana'?' · anche regionali rari':''}${o.ready==='yes'?' · anche cibi pronti':o.ready==='some'?' · cibi pronti se il tempo è poco':''}${o.breakfast&&o.breakfast!=='no'?` · colazione ${o.breakfast==='mista'?'varia':o.breakfast}`:''}${o.bread==='no'?' · senza pane':o.bread==='all'?' · pane a ogni pasto':''}${o.pantry?' · prima i cibi che scadono':''}`;
   const nPronti=res.plan.reduce((a,m)=>a+m.dishes.filter(x=>x.pronto).length,0);
   const short=`${o.people} ${o.people>1?'persone':'persona'} · ${euro(o.budget).replace(',00','')}`;
   const today=(new Date().getDay()+6)%7;if(MDAY==null||MDAY>6)MDAY=today;
@@ -3398,9 +3420,10 @@ function showPlan(P){
     ${over?(res.cost<=o.budget*1.04?`<div class="warn">Il menu supera di poco il budget (${euro(res.cost-o.budget)} in più): puoi rigenerarlo o sostituire un piatto.</div>`
       :`<div class="warn">Con ${euro(o.budget)} non si riesce a coprire tutto: il menu più economico che ho trovato costa circa <b>${euro(res.cost)}</b>. Prova ad alzare il budget o a ridurre i pasti.</div>`):''}
     <div class="shopRow"><details class="shopBox" id="shop"><summary>🛒 Lista della spesa <span>per ${o.people} ${o.people>1?'persone':'persona'}</span></summary><div id="shopList"></div></details><button class="btn pri" id="bVary">🔀 Varia menu</button></div>
+    ${P.panMiss?.length?`<p class="meta dpanN">🧺 Non sono entrati nel menu: ${esc(P.panMiss.join(', '))}</p>`:''}
     ${week?`<div class="gsel" role="tablist" aria-label="Giorno">${GIORNI.map((g,d)=>`<button type="button" role="tab" data-d="${d}" style="--c:var(--g${d});--t:var(--gt${d})" aria-selected="${d===MDAY}" aria-label="${g}">${g.slice(0,3)}</button>`).join('')}</div>`:''}
     ${days.map(({g,ms},d)=>`<div class="day" data-d="${d}"${week&&d!==MDAY?' hidden':''}><h3>${g}</h3>${ms.map(m=>`<div class="meal">${week?`<b>${MEAL[m.m]}</b>`:''}
-      ${m.dishes.map(x=>`<div class="dish" data-id="${esc(x.id)}" data-book="${x.book?1:''}"><span><span class="r">${ROLE[x.role]||(x.kind?x.kind[0].toUpperCase()+x.kind.slice(1):'Colazione')}${x.pronto?' · pronto':''}</span>${esc(dishTitle(x,m,X))}</span><small>⏱ ${x.t?x.t+'′':'pochi min'}</small></div>`).join('')}
+      ${m.dishes.map(x=>`<div class="dish" data-id="${esc(x.id)}" data-book="${x.book?1:''}"><span><span class="r">${ROLE[x.role]||(x.kind?x.kind[0].toUpperCase()+x.kind.slice(1):'Colazione')}${x.pronto?' · pronto':''}</span>${esc(dishTitle(x,m,X))}${x.pan?.length?`<em class="dpan">🧺 usa ${esc(x.pan.join(', '))}</em>`:''}</span><small>⏱ ${x.t?x.t+'′':'pochi min'}</small></div>`).join('')}
       ${m.m==='breakfast'?'':`<div class="dish" style="cursor:default"><span><span class="r">Frutta</span>${esc(cap1(X.fruits[(m.d*2+(m.m==='dinner'?1:0))%X.fruits.length]))}</span></div>`}
       ${breadAt(o,X,m)?`<div class="dish" style="cursor:default"><span>Pane</span></div>`:''}</div>`).join('')}</div>`).join('')}
     <details class="meta mDet"><summary>Dettagli: spesa, calorie ed equilibrio</summary>
